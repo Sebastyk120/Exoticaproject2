@@ -78,10 +78,20 @@ WSGI_APPLICATION = 'Exoticaproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+"""
+DATABASES = {
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+}
+
+"""
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'exotica',  # Nombre de tu base de datos
+        'USER': 'postgres',  # Nombre de usuario de tu base de datos
+        'PASSWORD': 'Sebastyk120',  # Contraseña del usuario de la base de datos
+        'HOST': 'localhost',  # Deja esto como 'localhost' si estás ejecutando PostgreSQL localmente
+        'PORT': '5433',  # Puerto de PostgreSQL (por defecto es 5432)
     }
 }
 

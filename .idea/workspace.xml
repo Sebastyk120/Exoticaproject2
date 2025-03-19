@@ -4,41 +4,27 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Exoticaproject/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Exoticaproject/asgi.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Exoticaproject/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Exoticaproject/wsgi.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/autenticacion/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/autenticacion/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/autenticacion/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/autenticacion/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/autenticacion/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/autenticacion/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/autenticacion/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/comercial/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/comercial/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/comercial/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/comercial/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/comercial/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/comercial/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/manage.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Exoticaproject.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Exoticaproject.iml" afterDir="false" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="inicial">
+      <change afterPath="$PROJECT_DIR$/Procfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/comercial/signals.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/importacion/resources.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/importacion/signals.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/nixpacks.toml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/railway.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/productos/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/productos/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,15 +34,28 @@
   <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
     <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Sebastyk120/Exoticaproject.git",
-    "accountId": "8c48352c-4f32-433e-b11c-6e71d900a554"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Sebastyk120&quot;
   }
-}]]></component>
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Sebastyk120/Exoticaproject.git&quot;,
+    &quot;accountId&quot;: &quot;8c48352c-4f32-433e-b11c-6e71d900a554&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
@@ -66,22 +65,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/Legion 5 Pro/Desktop/Exoticaproject",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="Exoticaproject" type="Python.DjangoServer" factoryName="Django server">
       <module name="Exoticaproject" />
@@ -127,6 +128,7 @@
       <workItem from="1742258387245" duration="48000" />
       <workItem from="1742258671075" duration="6979000" />
       <workItem from="1742299315765" duration="10140000" />
+      <workItem from="1742317875079" duration="17809000" />
     </task>
     <servers />
   </component>
@@ -143,5 +145,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="asd" />
+    <MESSAGE value="inicial" />
+    <option name="LAST_COMMIT_MESSAGE" value="inicial" />
   </component>
 </project>

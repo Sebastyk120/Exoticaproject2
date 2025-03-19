@@ -1,5 +1,7 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+
+from comercial.models import Cliente
 from importacion.models import Exportador
 
 
@@ -26,7 +28,7 @@ class Presentacion(models.Model):
         ordering = ['nombre']
 
 
-class ListaPrecios(models.Model):
+class ListaPreciosImportacion(models.Model):
     presentacion = models.ForeignKey(Presentacion, on_delete=models.CASCADE)
     precio_usd = models.DecimalField(validators=[MinValueValidator(0.1), MaxValueValidator(100)], max_digits=10, decimal_places=2, verbose_name='Precio USD')
     exportador = models.ForeignKey(Exportador, on_delete=models.CASCADE, verbose_name='Exportador')
@@ -40,6 +42,23 @@ class ListaPrecios(models.Model):
 
     def __str__(self):
         return f"{self.presentacion} - {self.precio_usd} - {self.fecha}"
+
+
+
+class ListaPreciosVentas(models.Model):
+    presentacion = models.ForeignKey(Presentacion, on_delete=models.CASCADE)
+    precio_euro = models.DecimalField(validators=[MinValueValidator(0.1), MaxValueValidator(100)], max_digits=10, decimal_places=2, verbose_name='Precio Euro')
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, verbose_name='Cliente')
+    fecha = models.DateField(auto_now=True, verbose_name='Fecha Ultima Actualización')
+
+    class Meta:
+        verbose_name = "Lista de Precios Cliente"
+        verbose_name_plural = "Listas de Precio Clientes"
+        ordering = ['cliente', 'presentacion']
+        unique_together = ('presentacion', 'cliente')
+
+    def __str__(self):
+        return f"{self.presentacion} - {self.precio_euro} - {self.fecha}"
 
 
 
