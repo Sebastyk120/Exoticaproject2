@@ -1,142 +1,307 @@
-from django.contrib import admin
-from simple_history.admin import SimpleHistoryAdmin
-from import_export.admin import ImportExportModelAdmin
-from .models import (
-    ProveedorNacional, Empaque, CompraNacional, VentaNacional,
-    ReporteCalidadExportador, ReporteCalidadProveedor,
-    TransferenciasProveedor, FacturacionExportadores, BalanceProveedor
-)
-from .resources import (
-    ProveedorNacionalResource, EmpaqueResource, CompraNacionalResource,
-    VentaNacionalResource, ReporteCalidadExportadorResource, ReporteCalidadProveedorResource,
-    TransferenciasProveedorResource, FacturacionExportadoresResource, BalanceProveedorResource
-)
-from comercial.templatetags.custom_filters import format_currency
-from unfold.admin import ModelAdmin
-from unfold.contrib.import_export.forms import ExportForm, ImportForm, SelectableFieldsExportForm
-from unfold.admin import TabularInline
-
-@admin.register(ProveedorNacional)
-class ProveedorNacionalAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
-    import_form_class = ImportForm
-    export_form_class = SelectableFieldsExportForm
-    list_display = ('nombre', 'telefono', 'email', 'asohofrucol', 'rte_fte', 'rte_ica')
-    search_fields = ('nombre', 'email')
-    search_help_text = "Buscar por: nombre, email."
-    list_filter = ('nombre',)
-    resource_class = ProveedorNacionalResource
-
-@admin.register(Empaque)
-class EmpaqueAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
-    import_form_class = ImportForm
-    export_form_class = SelectableFieldsExportForm
-    list_display = ('nombre', 'peso')
-    search_fields = ('nombre',)
-    search_help_text = "Buscar por: nombre."
-    list_filter = ('nombre',)
-    resource_class = EmpaqueResource
-
-class VentaNacionalInline(TabularInline):
-    model = VentaNacional
-    extra = 0
-    fields = ('exportador', 'fecha_llegada', 'cantidad_empaque_recibida', 'peso_bruto_recibido')
-    show_change_link = True
-    classes = ("collapse",)
-    verbose_name = "Venta nacional"
-    verbose_name_plural = "Ventas nacionales"
-
-@admin.register(CompraNacional)
-class CompraNacionalAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
-    import_form_class = ImportForm
-    export_form_class = SelectableFieldsExportForm
-    list_display = ('id', 'numero_guia', 'proveedor', 'fruta', 'peso_compra', 'fecha_compra', 'precio_compra_exp', 'precio_compra_nal', 'cantidad_empaque')
-    search_fields = ('proveedor__nombre', 'numero_guia', 'fruta__nombre')
-    search_help_text = "Buscar por: nombre del proveedor, número de guía y nombre de la fruta."
-    list_filter = ('origen_compra', 'fecha_compra', 'proveedor')
-    resource_class = CompraNacionalResource
-    inlines = [VentaNacionalInline]
-
-@admin.register(VentaNacional)
-class VentaNacionalAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
-    import_form_class = ImportForm
-    export_form_class = SelectableFieldsExportForm
-    list_display = ('pk', 'compra_nacional', 'exportador', 'fecha_llegada', 'fecha_vencimiento', 'cantidad_empaque_recibida', 'peso_bruto_recibido', 'peso_neto_recibido', 'diferencia_peso', 'diferencia_empaque', 'estado_venta')
-    search_fields = ('compra_nacional__numero_guia', 'exportador__nombre')
-    search_help_text = "Buscar por: número de guía de la compra y nombre del exportador."
-    list_filter = ('exportador',)
-    resource_class = VentaNacionalResource
-
-@admin.register(ReporteCalidadExportador)
-class ReporteCalidadExportadorAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
-    import_form_class = ImportForm
-    export_form_class = SelectableFieldsExportForm
-    list_display = ('pk', 'venta_nacional', 'remision_exp', 'fecha_reporte', 'kg_totales', 'kg_exportacion', 'porcentaje_exportacion', 'kg_nacional', 'porcentaje_nacional',  'kg_merma', 'porcentaje_merma', 'precio_venta_kg_exp', 'precio_venta_kg_nal', 'precio_total', 'factura', 'fecha_factura', 'vencimiento_factura', 'pagado', 'estado_reporte_exp')
-    search_fields = ('venta_nacional__compra_nacional__numero_guia',)
-    search_help_text = "Buscar por: número de guía de la compra nacional relacionada con la venta."
-    list_filter = ('fecha_reporte',)
-    resource_class = ReporteCalidadExportadorResource
-
-@admin.register(ReporteCalidadProveedor)
-class ReporteCalidadProveedorAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
-    import_form_class = ImportForm
-    export_form_class = SelectableFieldsExportForm
-    list_display = ('pk', 'rep_cal_exp', 'p_fecha_reporte', 'p_kg_totales', 'p_kg_exportacion', 'p_porcentaje_exportacion', 'p_kg_nacional', 'p_porcentaje_nacional', 'p_kg_merma', 'p_porcentaje_merma', 'p_total_facturar', 'asohofrucol', 'rte_fte', 'rte_ica', 'p_total_pagar', 'p_utilidad', 'p_porcentaje_utilidad', 'reporte_pago', 'estado_reporte_prov', 'completado')
-    search_fields = ('rep_cal_exp__venta_nacional__compra_nacional__numero_guia',)
-    search_help_text = "Buscar por: número de guía de la compra nacional (a través de rep_cal_exp)."
-    list_filter = ('p_fecha_reporte',)
-    resource_class = ReporteCalidadProveedorResource
-
-@admin.register(TransferenciasProveedor)
-class TransferenciasProveedorAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
-    import_form_class = ImportForm
-    export_form_class = SelectableFieldsExportForm
-    list_display = ('proveedor', 'referencia', 'fecha_transferencia', 'valor_transferencia_moneda', 'origen_transferencia')
-    search_fields = ('proveedor__nombre',)
-    search_help_text = "Buscar por: nombre del proveedor."
-    list_filter = ('origen_transferencia', 'fecha_transferencia')
-    resource_class = TransferenciasProveedorResource
-
-    def valor_transferencia_moneda(self, obj):
-        return format_currency(obj.valor_transferencia)
-
-    valor_transferencia_moneda.short_description = 'Valor Transferencia'
-
-@admin.register(FacturacionExportadores)
-class FacturacionExportadoresAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
-    import_form_class = ImportForm
-    export_form_class = SelectableFieldsExportForm
-    list_display = ('id', 'no_factura', 'fecha_factura', 'fruta', 'exportador', 'peso_kg', 'precio_kg_moneda', 'precio_total_moneda')
-    search_fields = ('no_factura', 'fruta__nombre', 'exportador__nombre')
-    search_help_text = "Buscar por: número de factura, nombre de la fruta y nombre del exportador."
-    list_filter = ('fecha_factura',)
-    resource_class = FacturacionExportadoresResource
-
-    def precio_total_moneda(self, obj):
-        return format_currency(obj.precio_total)
-
-    precio_total_moneda.short_description = 'Total Factura'
-
-    def precio_kg_moneda(self, obj):
-        return format_currency(obj.precio_kg)
-
-    precio_kg_moneda.short_description = 'Precio Kg'
-
-@admin.register(BalanceProveedor)
-class BalanceProveedorAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
-    import_form_class = ImportForm
-    export_form_class = SelectableFieldsExportForm
-    list_display = ('proveedor', 'saldo_disponible_moneda', 'ultima_actualizacion')
-    search_fields = ('proveedor__nombre',)
-    search_help_text = "Buscar por: nombre del proveedor."
-    list_filter = ('ultima_actualizacion',)
-    resource_class = BalanceProveedorResource
-    readonly_fields = ('proveedor', 'saldo_disponible', 'ultima_actualizacion')
-    
-    def saldo_disponible_moneda(self, obj):
-        return format_currency(obj.saldo_disponible)
-    
-    saldo_disponible_moneda.short_description = 'Saldo Disponible'
-    
-    def has_add_permission(self, request):
-        # Disable manual creation as balances are created by signals
-        return False
+UNFOLD = {
+    "SITE_TITLE": "Heavens Fruits",
+    "SITE_HEADER": "Heavens Fruits SAS",
+    "SITE_SUBHEADER": "Heavens Fruits SAS",
+    "SITE_URL": "/",
+    "SITE_ICON": {
+        "light": lambda request: static("img/favicon.png"),
+        "dark": lambda request: static("img/favicon.png"),
+    },
+    "SITE_LOGO": {
+        "light": lambda request: static("img/favicon.png"),
+        "dark": lambda request: static("img/favicon.png"),
+    },
+    "SITE_SYMBOL": "agriculture",
+    "SITE_FAVICONS": [
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "href": lambda request: static("img/favicon.ico"),
+        },
+    ],
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "SHOW_BACK_BUTTON": True,
+    # Desactivamos el control de login de Unfold para usar nuestro propio sistema
+    "LOGIN": {
+        "image": lambda request: static("img/login-bg.jpg"),
+        "redirect_after": reverse_lazy("admin:index"),
+    },
+    "BORDER_RADIUS": "6px",
+    "COLORS": {
+        "base": {
+            "50": "249 250 251",
+            "100": "243 244 246",
+            "200": "229 231 235",
+            "300": "209 213 219",
+            "400": "156 163 175",
+            "500": "107 114 128",
+            "600": "75 85 99",
+            "700": "55 65 81",
+            "800": "31 41 55",
+            "900": "17 24 39",
+            "950": "3 7 18",
+        },
+        "primary": {
+            "50": "250 245 255",
+            "100": "243 232 255",
+            "200": "233 213 255",
+            "300": "216 180 254",
+            "400": "192 132 252",
+            "500": "168 85 247",
+            "600": "147 51 234",
+            "700": "126 34 206",
+            "800": "107 33 168",
+            "900": "88 28 135",
+            "950": "59 7 100",
+        },
+        "font": {
+            "subtle-light": "var(--color-base-500)",
+            "subtle-dark": "var(--color-base-400)",
+            "default-light": "var(--color-base-600)",
+            "default-dark": "var(--color-base-300)",
+            "important-light": "var(--color-base-900)",
+            "important-dark": "var(--color-base-100)",
+        },
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+        "navigation": [
+            {
+                "title": _("Dashboard"),
+                "separator": True,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": _("Dashboard"),
+                        "icon": "dashboard",
+                        "link": reverse_lazy("admin:index"),
+                        "permission": lambda request: request.user.is_staff,
+                    },
+                ],
+            },
+            {
+                "title": _("Administración"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Usuarios"),
+                        "icon": "person",
+                        "link": reverse_lazy("admin:auth_user_changelist"),
+                    },
+                    {
+                        "title": _("Grupos"),
+                        "icon": "group",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                    },
+                    {
+                        "title": _("Logs del Sistema"),
+                        "icon": "history",
+                        "link": reverse_lazy("admin:admin_logentry_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                ],
+            },
+            {
+                "title": _("Inventarios"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Inventario"),
+                        "icon": "inventory_2",
+                        "link": reverse_lazy("admin:inventarios_inventario_changelist"),
+                    },
+                    {
+                        "title": _("Items"),
+                        "icon": "inventory",
+                        "link": reverse_lazy("admin:inventarios_item_changelist"),
+                    },
+                    {
+                        "title": _("Bodegas"),
+                        "icon": "warehouse",
+                        "link": reverse_lazy("admin:inventarios_bodega_changelist"),
+                    },
+                    {
+                        "title": _("Proveedores"),
+                        "icon": "local_shipping",
+                        "link": reverse_lazy("admin:inventarios_proveedor_changelist"),
+                    },
+                    {
+                        "title": _("Movimientos"),
+                        "icon": "sync_alt",
+                        "link": reverse_lazy("admin:inventarios_movimiento_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Comercial"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Pedidos"),
+                        "icon": "shopping_cart",
+                        "link": reverse_lazy("admin:comercial_pedido_changelist"),
+                    },
+                    {
+                        "title": _("Detalle Pedidos"),
+                        "icon": "list_alt",
+                        "link": reverse_lazy("admin:comercial_detallepedido_changelist"),
+                    },
+                    {
+                        "title": _("Clientes"),
+                        "icon": "people_alt",
+                        "link": reverse_lazy("admin:comercial_cliente_changelist"),
+                    },
+                    {
+                        "title": _("Exportadores"),
+                        "icon": "flight_takeoff",
+                        "link": reverse_lazy("admin:comercial_exportador_changelist"),
+                    },
+                    {
+                        "title": _("Referencias"),
+                        "icon": "label",
+                        "link": reverse_lazy("admin:comercial_referencias_changelist"),
+                    },
+                    {
+                        "title": _("Frutas"),
+                        "icon": "nutrition",
+                        "link": reverse_lazy("admin:comercial_fruta_changelist"),
+                    },
+                    {
+                        "title": _("Presentaciones"),
+                        "icon": "category",
+                        "link": reverse_lazy("admin:comercial_presentacion_changelist"),
+                    },
+                    {
+                        "title": _("Tipos de Caja"),
+                        "icon": "dataset",
+                        "link": reverse_lazy("admin:comercial_tipocaja_changelist"),
+                    },
+                    {
+                        "title": _("Contenedores"),
+                        "icon": "forest",
+                        "link": reverse_lazy("admin:comercial_contenedor_changelist"),
+                    },
+                    {
+                        "title": _("Aerolíneas"),
+                        "icon": "flight",
+                        "link": reverse_lazy("admin:comercial_aerolinea_changelist"),
+                    },
+                    {
+                        "title": _("Destinos IATA"),
+                        "icon": "location_on",
+                        "link": reverse_lazy("admin:comercial_iata_changelist"),
+                    },
+                    {
+                        "title": _("Agencias de Carga"),
+                        "icon": "local_shipping",
+                        "link": reverse_lazy("admin:comercial_agenciacarga_changelist"),
+                    },
+                    {
+                        "title": _("SubExportadoras"),
+                        "icon": "local_shipping",
+                        "link": reverse_lazy("admin:comercial_subexportadora_changelist"),
+                    },
+                    {
+                        "title": _("Intermediarios"),
+                        "icon": "person",
+                        "link": reverse_lazy("admin:comercial_intermediario_changelist"),
+                    },
+                    {
+                        "title": _("Presentacion Referencia"),
+                        "icon": "category",
+                        "link": reverse_lazy("admin:comercial_presentacionreferencia_changelist"),
+                    },
+                    {
+                        "title": _("Autorizacion Cancelacion"),
+                        "icon": "cancel",
+                        "link": reverse_lazy("admin:comercial_autorizacioncancelacion_changelist"),
+                    },
+                    {
+                        "title": _("Cliente Presentacion"),
+                        "icon": "people",
+                        "link": reverse_lazy("admin:comercial_clientepresentacion_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Nacionales"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Compras Nacionales"),
+                        "icon": "shopping_bag",
+                        "link": reverse_lazy("admin:nacionales_compranacional_changelist"),
+                    },
+                    {
+                        "title": _("Ventas Nacionales"),
+                        "icon": "sell",
+                        "link": reverse_lazy("admin:nacionales_ventanacional_changelist"),
+                    },
+                    {
+                        "title": _("Reporte Calidad Exportador"),
+                        "icon": "assessment",
+                        "link": reverse_lazy("admin:nacionales_reportecalidadexportador_changelist"),
+                    },
+                    {
+                        "title": _("Reporte Calidad Proveedor"),
+                        "icon": "source",
+                        "link": reverse_lazy("admin:nacionales_reportecalidadproveedor_changelist"),
+                    },
+                    {
+                        "title": _("Proveedores Nacionales"),
+                        "icon": "handshake",
+                        "link": reverse_lazy("admin:nacionales_proveedornacional_changelist"),
+                    },
+                    {
+                        "title": _("Empaques"),
+                        "icon": "inventory_2",
+                        "link": reverse_lazy("admin:nacionales_empaque_changelist"),
+                    },
+                    {
+                        "title": _("Transferencias"),
+                        "icon": "swap_horiz",
+                        "link": reverse_lazy("admin:nacionales_transferenciasproveedor_changelist"),
+                    },
+                    {
+                        "title": _("Facturación Exportadores"),
+                        "icon": "receipt_long",
+                        "link": reverse_lazy("admin:nacionales_facturacionexportadores_changelist"),
+                    },
+                    {
+                        "title": _("Balance Proveedor"),
+                        "icon": "account_balance",
+                        "link": reverse_lazy("admin:nacionales_balanceproveedor_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Cartera"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Cotización Etnico"),
+                        "icon": "attach_money",
+                        "link": reverse_lazy("admin:cartera_cotizacionetnico_changelist"),
+                    },
+                    {
+                        "title": _("Cotización Fieldex"),
+                        "icon": "monetization_on",
+                        "link": reverse_lazy("admin:cartera_cotizacionfieldex_changelist"),
+                    },
+                    {
+                        "title": _("Cotización Juan"),
+                        "icon": "paid",
+                        "link": reverse_lazy("admin:cartera_cotizacionjuan_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
+}

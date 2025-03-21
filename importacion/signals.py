@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from django.db.models import Sum
+from django.db.models import Sum, F, Value
+from django.db import transaction
 from decimal import Decimal
 
 from .models import (
@@ -58,11 +59,22 @@ _processing_exportador_payment = False
 _processing_aduana_payment = False
 _processing_carga_payment = False
 
+# Variables globales para rastrear saldos de transferencias
+_transferencias_saldos = {}
+
+def calcular_saldo_transferencia(transferencia):
+    """Calcula el saldo disponible para una transferencia específica"""
+    global _transferencias_saldos
+    
+    if transferencia.id in _transferencias_saldos:
+        return _transferencias_saldos[transferencia.id]
+    return 0
+
 # ---------- LÓGICA PARA EXPORTADOR ----------
 
 def reevaluar_pagos_exportador(exportador):
     """Resetea y reevalúa todos los pagos de un exportador"""
-    global _processing_exportador_payment
+    global _processing_exportador_payment, _transferencias_saldos
     
     # Evitar recursión
     if _processing_exportador_payment:
@@ -70,118 +82,174 @@ def reevaluar_pagos_exportador(exportador):
     
     _processing_exportador_payment = True
     try:
-        # Obtener todas las transferencias ordenadas cronológicamente
-        transferencias = TranferenciasExportador.objects.filter(
-            exportador=exportador
-        ).order_by('fecha_transferencia', 'id')
-        
-        # Calcular el total de transferencias 
-        total_transferencias = sum(t.valor_transferencia for t in transferencias)
-        
-        pedidos = Pedido.objects.filter(
-            exportador=exportador
-        ).order_by('fecha_entrega')
-        
-        # Marcar todos los pedidos como no pagados inicialmente
-        Pedido.objects.filter(exportador=exportador).update(pagado=False, valor_factura_eur=None)
-        
-        # Agrupar pedidos por fecha de entrega
-        pedidos_por_fecha = {}
-        for pedido in pedidos:
-            if pedido.fecha_entrega not in pedidos_por_fecha:
-                pedidos_por_fecha[pedido.fecha_entrega] = []
-            pedidos_por_fecha[pedido.fecha_entrega].append(pedido)
-        
-        saldo_disponible = Decimal('0.0')
-        idx_transferencia = 0  # Índice de la transferencia actual
-        
-        # Ordenar las fechas cronológicamente
-        fechas_ordenadas = sorted(pedidos_por_fecha.keys())
-        
-        # Procesar los pedidos día por día
-        for fecha in fechas_ordenadas:
-            pedidos_del_dia = pedidos_por_fecha[fecha]
+        # Usar transaction.atomic para asegurar que todas las operaciones se completen o ninguna
+        with transaction.atomic():
+            # Limpiar el diccionario de saldos
+            _transferencias_saldos = {}
             
-            for pedido in pedidos_del_dia:
-                # Usar el valor total de la factura menos el valor de la nota de crédito
-                monto_pagar = pedido.valor_total_factura_usd - pedido.valor_total_nc_usd
+            # Obtener todas las transferencias ordenadas cronológicamente en una sola consulta
+            transferencias = list(TranferenciasExportador.objects.filter(
+                exportador=exportador
+            ).order_by('fecha_transferencia', 'id'))
+            
+            # Marcar todos los pedidos como no pagados inicialmente y reiniciar montos pendientes en una sola consulta
+            Pedido.objects.filter(exportador=exportador).update(
+                pagado=False, 
+                valor_factura_eur=None, 
+                monto_pendiente=0,
+                estado_pedido="En Proceso"
+            )
+            
+            # Identificar y marcar como pagados los pedidos donde valor_total_factura_usd = valor_total_nc_usd
+            Pedido.objects.filter(
+                exportador=exportador,
+                valor_total_factura_usd__gt=0,
+                valor_total_factura_usd=F('valor_total_nc_usd')
+            ).update(
+                pagado=True,
+                monto_pendiente=0,
+                estado_pedido="Pagado"
+            )
+            
+            # Obtener todos los pedidos en una sola consulta, ordenados por fecha
+            pedidos = list(Pedido.objects.filter(
+                exportador=exportador
+            ).order_by('fecha_entrega'))
+            
+            # Filtrar los pedidos para excluir los que ya están marcados como pagados
+            pedidos = [pedido for pedido in pedidos if not pedido.pagado]
+            
+            # Calcular monto total original de cada pedido (para mostrar correctamente los montos pendientes)
+            for pedido in pedidos:
+                pedido.monto_original = pedido.valor_total_factura_usd - pedido.valor_total_nc_usd
+            
+            # Agrupar pedidos por fecha de entrega
+            pedidos_por_fecha = {}
+            for pedido in pedidos:
+                if pedido.fecha_entrega not in pedidos_por_fecha:
+                    pedidos_por_fecha[pedido.fecha_entrega] = []
+                pedidos_por_fecha[pedido.fecha_entrega].append(pedido)
+            
+            # Variables para rastrear las transferencias disponibles
+            total_disponible = sum(t.valor_transferencia for t in transferencias)
+            fondos_usados = Decimal('0.0')
+            
+            # Ordenar las fechas cronológicamente
+            fechas_ordenadas = sorted(pedidos_por_fecha.keys())
+            
+            # Listas para acumular pedidos a actualizar en lote
+            pedidos_pagados = []
+            pedidos_pendientes = []
+            
+            # Procesar todos los pedidos en orden cronológico
+            for fecha in fechas_ordenadas:
+                pedidos_del_dia = pedidos_por_fecha[fecha]
                 
-                if monto_pagar <= 0:
-                    continue  # Si no hay que pagar nada, continuar con el siguiente pedido
-                
-                # Variables para calcular la TRM ponderada
-                trm_ponderada = Decimal('0.0')
-                monto_pagado_total = Decimal('0.0')
-                
-                # Verificar si podemos pagar este pedido con las transferencias disponibles
-                monto_restante = monto_pagar
-                transferencias_usadas = []  # Lista de tuplas (transferencia, monto_usado)
-                
-                while monto_restante > 0 and idx_transferencia < len(transferencias):
-                    transferencia_actual = transferencias[idx_transferencia]
+                for pedido in pedidos_del_dia:
+                    # Usar el valor total de la factura menos el valor de la nota de crédito
+                    monto_pagar = pedido.monto_original
                     
-                    # Determinar cuánto podemos usar de esta transferencia
-                    if saldo_disponible == 0:
-                        # Si no hay saldo de transferencias anteriores, usamos esta transferencia
-                        monto_disponible = transferencia_actual.valor_transferencia
-                    else:
-                        # Si ya teníamos saldo de transferencias anteriores
-                        monto_disponible = saldo_disponible
-                        
-                    monto_usado = min(monto_restante, monto_disponible)
+                    if monto_pagar <= 0:
+                        continue  # Si no hay que pagar nada, continuar con el siguiente pedido
                     
-                    if monto_usado > 0:
-                        # Registrar cuánto se usó de esta transferencia
-                        transferencias_usadas.append((transferencia_actual, monto_usado))
+                    # Determinar cuánto podemos pagar con los fondos disponibles
+                    fondos_disponibles = total_disponible - fondos_usados
+                    monto_a_pagar = min(monto_pagar, fondos_disponibles)
+                    
+                    if monto_a_pagar > 0:
+                        # Rastrear los fondos utilizados
+                        fondos_usados += monto_a_pagar
                         
-                        # Actualizar montos
-                        monto_restante -= monto_usado
+                        # Calcular el monto restante por pagar
+                        monto_pendiente = monto_pagar - monto_a_pagar
                         
-                        # Actualizar el saldo disponible
-                        if saldo_disponible >= monto_usado:
-                            saldo_disponible -= monto_usado
+                        # Variables para calcular la TRM ponderada
+                        trm_ponderada = Decimal('0.0')
+                        transferencias_usadas = []
+                        
+                        # Determinar qué transferencias se usan para este pago
+                        saldo_temp = Decimal('0.0')
+                        monto_restante = monto_a_pagar
+                        
+                        for transferencia in transferencias:
+                            if monto_restante <= 0:
+                                break
+                                
+                            # Verificar si ya se usó completamente esta transferencia
+                            if transferencia.id in _transferencias_saldos:
+                                saldo_transferencia = _transferencias_saldos[transferencia.id]
+                            else:
+                                saldo_transferencia = transferencia.valor_transferencia
+                            
+                            if saldo_transferencia <= 0:
+                                continue
+                                
+                            monto_usado = min(monto_restante, saldo_transferencia)
+                            if monto_usado > 0:
+                                transferencias_usadas.append((transferencia, monto_usado))
+                                monto_restante -= monto_usado
+                                
+                                # Actualizar el saldo de esta transferencia
+                                _transferencias_saldos[transferencia.id] = saldo_transferencia - monto_usado
+                        
+                        # Calcular la TRM ponderada para este pago
+                        for transferencia, monto_usado in transferencias_usadas:
+                            if transferencia.trm:
+                                proporcion = monto_usado / monto_a_pagar
+                                trm_ponderada += transferencia.trm * proporcion
+                        
+                        # Actualizar el pedido
+                        if monto_pendiente == 0:
+                            # Completamente pagado
+                            pedido.pagado = True
+                            pedido.monto_pendiente = 0
+                            if trm_ponderada > 0:
+                                pedido.valor_factura_eur = monto_pagar * trm_ponderada
+                            pedido.estado_pedido = "Pagado"
+                            pedidos_pagados.append(pedido)
                         else:
-                            # Consumimos de la transferencia actual
-                            saldo_disponible = transferencia_actual.valor_transferencia - monto_usado
-                            idx_transferencia += 1
+                            # Parcialmente pagado
+                            pedido.pagado = False
+                            pedido.monto_pendiente = monto_pendiente
+                            if trm_ponderada > 0:
+                                pedido.valor_factura_eur = monto_a_pagar * trm_ponderada
+                            pedido.estado_pedido = "En Proceso"
+                            pedidos_pendientes.append(pedido)
                     else:
-                        # Pasar a la siguiente transferencia si esta no tiene fondos
-                        idx_transferencia += 1
-                        saldo_disponible = transferencia_actual.valor_transferencia
-                
-                # Después de procesar todas las transferencias para este pedido
-                if monto_restante == 0:
-                    # Calcular la TRM ponderada para este pedido
-                    for transferencia, monto_usado in transferencias_usadas:
-                        if transferencia.trm:
-                            # Calcular la proporción que esta transferencia cubre del total
-                            proporcion = monto_usado / monto_pagar
-                            # Acumular la TRM ponderada
-                            trm_ponderada += transferencia.trm * proporcion
-                            monto_pagado_total += monto_usado
-                    
-                    # Actualizar el pedido como pagado y con su valor en EUR calculado
-                    pedido.pagado = True
-                    if trm_ponderada > 0:
-                        pedido.valor_factura_eur = monto_pagar * trm_ponderada
-                    pedido.estado_pedido = "Pagado"
-                    pedido.save(update_fields=['pagado', 'valor_factura_eur', 'estado_pedido'])
-                else:
-                    # No se pudo pagar completamente, actualizar estado
-                    pedido.estado_pedido = "En Proceso"
-                    pedido.save(update_fields=['estado_pedido'])
-        
-        # Actualizar el balance del exportador
-        balance, created = BalanceExportador.objects.get_or_create(exportador=exportador)
-        
-        # Calcular saldo final sumando el saldo disponible de la última transferencia
-        # y cualquier transferencia restante
-        saldo_final = saldo_disponible
-        for i in range(idx_transferencia, len(transferencias)):
-            saldo_final += transferencias[i].valor_transferencia
+                        # No hay fondos disponibles para este pedido
+                        pedido.pagado = False
+                        pedido.monto_pendiente = monto_pagar
+                        pedido.estado_pedido = "En Proceso"
+                        pedidos_pendientes.append(pedido)
             
-        balance.saldo_disponible = saldo_final
-        balance.save()
+            # Realizar actualizaciones en lote
+            if pedidos_pagados:
+                Pedido.objects.bulk_update(
+                    pedidos_pagados,
+                    ['pagado', 'valor_factura_eur', 'estado_pedido', 'monto_pendiente']
+                )
+            
+            if pedidos_pendientes:
+                Pedido.objects.bulk_update(
+                    pedidos_pendientes,
+                    ['pagado', 'valor_factura_eur', 'estado_pedido', 'monto_pendiente']
+                )
+            
+            # Verificar si hay pedidos pendientes
+            hay_pedidos_pendientes = any(not pedido.pagado for pedido in pedidos)
+            
+            # Calcular saldo final para el balance
+            saldo_final = Decimal('0.0')
+            
+            # Solo mostrar saldo positivo si no hay pedidos pendientes
+            if not hay_pedidos_pendientes:
+                saldo_final = total_disponible - fondos_usados
+            
+            # Actualizar el balance del exportador
+            BalanceExportador.objects.update_or_create(
+                exportador=exportador,
+                defaults={'saldo_disponible': saldo_final}
+            )
     
     finally:
         _processing_exportador_payment = False
@@ -377,6 +445,26 @@ def verificar_pago_tras_crear_o_editar_pedido(sender, instance, created, **kwarg
 def actualizar_balance_tras_eliminar_pedido(sender, instance, **kwargs):
     reevaluar_pagos_exportador(instance.exportador)
 
+@receiver(post_save, sender=DetallePedido)
+def actualizar_pagos_exportador_tras_modificar_detalle(sender, instance, **kwargs):
+    """
+    Actualiza los pagos del exportador cuando se crea o modifica un DetallePedido.
+    """
+    global _processing_exportador_payment
+    if _processing_exportador_payment:
+        return
+        
+    if hasattr(instance, 'pedido') and instance.pedido and hasattr(instance.pedido, 'exportador'):
+        reevaluar_pagos_exportador(instance.pedido.exportador)
+
+@receiver(post_delete, sender=DetallePedido)
+def actualizar_pagos_exportador_tras_eliminar_detalle(sender, instance, **kwargs):
+    """
+    Actualiza los pagos del exportador cuando se elimina un DetallePedido.
+    """
+    if hasattr(instance, 'pedido') and instance.pedido and hasattr(instance.pedido, 'exportador'):
+        reevaluar_pagos_exportador(instance.pedido.exportador)
+
 # ---------- SEÑALES PARA AGENCIA DE ADUANA ----------
 
 @receiver(post_save, sender=TranferenciasAduana)
@@ -420,3 +508,4 @@ def verificar_pago_tras_crear_o_editar_gastos_carga(sender, instance, created, *
 @receiver(post_delete, sender=GastosCarga)
 def actualizar_balance_tras_eliminar_gastos_carga(sender, instance, **kwargs):
     reevaluar_pagos_carga(instance.agencia_carga)
+

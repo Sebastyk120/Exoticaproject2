@@ -16,7 +16,7 @@ class Cliente(models.Model):
     email = models.EmailField(verbose_name="Correo")
     email2 = models.EmailField(verbose_name="Correo 2", blank=True, null=True)
     telefono = models.CharField(max_length=20, null=True, blank=True)
-    dias_pago = models.IntegerField(max_length=2, verbose_name="Días de pago")
+    dias_pago = models.IntegerField(verbose_name="Días de pago", validators=[MinValueValidator(0)])
 
     def __str__(self):
         return self.nombre
@@ -78,7 +78,7 @@ class Venta(models.Model):
 class DetalleVenta(models.Model):
     venta = models.ForeignKey(Venta, on_delete=models.CASCADE, verbose_name="Venta")
     presentacion = models.ForeignKey(Presentacion, on_delete=models.CASCADE, verbose_name="Presentación")
-    kilos = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Kilos Netos", editable=False)
+    kilos = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Kilos Netos", editable=False, null=True, blank=True)
     cajas_envidadas = models.IntegerField(validators=[MinValueValidator(0)], verbose_name="Cajas Enviadas", null=True, blank=True, default=0)
     valor_x_caja_euro = models.DecimalField(validators=[MinValueValidator(0)], max_digits=10, decimal_places=2, verbose_name="Valor Caja Euro")
     valor_x_producto = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total Producto", null=True, blank=True, editable=False)
@@ -93,10 +93,7 @@ class DetalleVenta(models.Model):
     def clean(self):
         if self.presentacion and self.cajas_envidadas:
             self.kilos = self.presentacion.kilos * self.cajas_envidadas
-        
-        if self.cajas_envidadas and self.valor_x_caja_euro:
-            self.valor_x_producto = self.cajas_envidadas * self.valor_x_caja_euro
-        
+
         if self.no_cajas_abono:
             self.valor_abono_euro = self.no_cajas_abono * self.valor_x_caja_euro
         
@@ -137,7 +134,18 @@ class DetalleVenta(models.Model):
         )
     
     def save(self, *args, **kwargs):
-        # Primero guardar el detalle
+        # Calculate valor_x_producto from the editable fields
+        if self.cajas_envidadas and self.valor_x_caja_euro:
+            self.valor_x_producto = self.cajas_envidadas * self.valor_x_caja_euro
+        
+        # Calculate kilos from presentacion and cajas_envidadas
+        if self.presentacion and self.cajas_envidadas:
+            self.kilos = self.presentacion.kilos * self.cajas_envidadas
+            
+        # Calculate valor_abono_euro from no_cajas_abono and valor_x_caja_euro
+        if self.no_cajas_abono and self.valor_x_caja_euro:
+            self.valor_abono_euro = self.no_cajas_abono * self.valor_x_caja_euro
+            
         super().save(*args, **kwargs)
         # Luego actualizar la venta relacionada
         self.actualizar_totales_venta(self.venta_id)

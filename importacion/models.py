@@ -1,7 +1,10 @@
 from datetime import timedelta
+from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
-from django.db import models
+from django.db import models, transaction
+from django.db.models import Sum, DecimalField, IntegerField
+from django.db.models.functions import Coalesce
 from productos.models import Presentacion
 
 
@@ -56,7 +59,7 @@ class Pedido(models.Model):
     total_cajas_solicitadas = models.IntegerField(verbose_name="Cajas Solicitadas", null=True, blank=True, editable=False)
     total_cajas_recibidas = models.IntegerField(verbose_name="Cajas Recibidas", null=True, blank=True, editable=False)
     numero_factura = models.CharField(max_length=100, verbose_name="Número Factura", null=True, blank=True)
-    fecha_vencimiento = models.DateField(verbose_name="Vencimiento Factura", null=True, blank=True)
+    fecha_vencimiento = models.DateField(verbose_name="Vencimiento Factura", null=True, blank=True, editable=False)
     valor_total_factura_usd = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total Factura USD",
                                                   null=True, blank=True, editable=False, default=0)
     valor_total_nc_usd = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total NC USD", null=True, blank=True, default=0, editable=False)
@@ -65,6 +68,8 @@ class Pedido(models.Model):
     estado_pedido = models.CharField(verbose_name="Estado del Pedido", default="En Proceso", editable=False)
     pagado = models.BooleanField(verbose_name="Pagado", default=False, editable=False)
     observaciones = models.CharField(verbose_name="Observaciones", max_length=100, blank=True, null=True)
+    monto_pendiente = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto Pendiente USD", 
+                                         null=True, blank=True, editable=False, default=0)
     
     def save(self, *args, **kwargs):
         if self.fecha_entrega is not None:
@@ -89,7 +94,7 @@ class Pedido(models.Model):
 class DetallePedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, verbose_name="Pedido")
     presentacion = models.ForeignKey(Presentacion, on_delete=models.CASCADE, verbose_name="Presentación")
-    kilos = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Kilos Netos", editable=False)
+    kilos = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Kilos Netos", editable=False, blank=True, null=True)
     cajas_solicitadas = models.IntegerField(validators=[MinValueValidator(0)], verbose_name="Cajas Solicitadas", null=True,
                                          blank=True, default=0)
     cajas_recibidas = models.IntegerField(validators=[MinValueValidator(0)], verbose_name="Cajas Recibidas",
@@ -104,14 +109,41 @@ class DetallePedido(models.Model):
     valor_nc_usd = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor NC USD", default=0, editable=False)
 
     def clean(self):
-        if self.presentacion and self.cajas_recibidas:
-            self.kilos = self.presentacion.kilos * self.cajas_recibidas
-
-        if self.cajas_recibidas and self.valor_x_caja_usd:
-            self.valor_x_producto = self.cajas_recibidas * self.valor_x_caja_usd
+        # Importamos aquí también para asegurar que está disponible
+        from decimal import Decimal, InvalidOperation
         
-        if self.no_cajas_nc and self.valor_x_caja_usd:
-            self.valor_nc_usd = self.no_cajas_nc * self.valor_x_caja_usd
+        # Para kilos
+        if self.presentacion and self.cajas_recibidas is not None:
+            try:
+                kilos_presentacion = Decimal(str(self.presentacion.kilos))
+                cajas_decimal = Decimal(str(self.cajas_recibidas))
+                self.kilos = kilos_presentacion * cajas_decimal
+            except (ValueError, TypeError, InvalidOperation):
+                self.kilos = Decimal('0')
+        else:
+            self.kilos = Decimal('0')
+
+        # Para valor_x_producto
+        if self.cajas_recibidas is not None and self.valor_x_caja_usd is not None:
+            try:
+                cajas_decimal = Decimal(str(self.cajas_recibidas))
+                valor_caja_decimal = Decimal(str(self.valor_x_caja_usd))
+                self.valor_x_producto = cajas_decimal * valor_caja_decimal
+            except (ValueError, TypeError, InvalidOperation):
+                self.valor_x_producto = Decimal('0')
+        else:
+            self.valor_x_producto = Decimal('0')
+        
+        # Para valor_nc_usd
+        if self.no_cajas_nc is not None and self.no_cajas_nc != '' and self.valor_x_caja_usd is not None:
+            try:
+                no_cajas_decimal = Decimal(str(self.no_cajas_nc)) if self.no_cajas_nc else Decimal('0')
+                valor_caja_decimal = Decimal(str(self.valor_x_caja_usd))
+                self.valor_nc_usd = no_cajas_decimal * valor_caja_decimal
+            except (ValueError, TypeError, InvalidOperation):
+                self.valor_nc_usd = Decimal('0')
+        else:
+            self.valor_nc_usd = Decimal('0')
 
         super().clean()
         
@@ -119,46 +151,61 @@ class DetallePedido(models.Model):
     def actualizar_totales_pedido(pedido_id):
         """
         Actualiza los campos calculados del pedido relacionado usando consultas agregadas
+        y luego llama a reevaluar_pagos_exportador para actualizar el monto pendiente.
         """
-        from django.db.models import Sum
+        # Importación diferida aquí para evitar ciclo
+        from importacion.signals import reevaluar_pagos_exportador
+        from decimal import Decimal
+        from django.db.models.functions import Coalesce
         
-        # Obtener el pedido
-        pedido = Pedido.objects.get(pk=pedido_id)
-        
-        # Calcular totales usando agregación (más eficiente)
-        totales = DetallePedido.objects.filter(pedido_id=pedido_id).aggregate(
-            total_cajas_solicitadas=Sum('cajas_solicitadas') or 0,
-            total_cajas_recibidas=Sum('cajas_recibidas') or 0,
-            total_factura=Sum('valor_x_producto') or 0,
-            total_nc=Sum('valor_nc_usd') or 0
+        # Separar las consultas por tipo de campo para evitar mezcla de tipos
+        # Consulta para campos enteros
+        totales_enteros = DetallePedido.objects.filter(pedido_id=pedido_id).aggregate(
+            total_cajas_solicitadas=Coalesce(Sum('cajas_solicitadas', output_field=IntegerField()), 0),
+            total_cajas_recibidas=Coalesce(Sum('cajas_recibidas', output_field=IntegerField()), 0)
         )
         
-        # Asegurar que tenemos valores numéricos, no None
-        total_solicitadas = totales['total_cajas_solicitadas'] or 0
-        total_recibidas = totales['total_cajas_recibidas'] or 0
-        total_factura = totales['total_factura'] or 0
-        total_nc = totales['total_nc'] or 0
-        
-        # Actualizar el pedido sin llamar a signals (evitando recursión)
-        Pedido.objects.filter(pk=pedido_id).update(
-            total_cajas_solicitadas=total_solicitadas,
-            total_cajas_recibidas=total_recibidas,
-            valor_total_factura_usd=total_factura,
-            valor_total_nc_usd=total_nc
+        # Consulta para campos decimales
+        totales_decimales = DetallePedido.objects.filter(pedido_id=pedido_id).aggregate(
+            total_factura=Coalesce(Sum('valor_x_producto', output_field=DecimalField(max_digits=10, decimal_places=2)), Decimal('0')),
+            total_nc=Coalesce(Sum('valor_nc_usd', output_field=DecimalField(max_digits=10, decimal_places=2)), Decimal('0'))
         )
+        
+        # Usar update para evitar disparar señales innecesarias
+        with transaction.atomic():
+            Pedido.objects.filter(pk=pedido_id).update(
+                total_cajas_solicitadas=totales_enteros['total_cajas_solicitadas'],
+                total_cajas_recibidas=totales_enteros['total_cajas_recibidas'],
+                valor_total_factura_usd=totales_decimales['total_factura'],
+                valor_total_nc_usd=totales_decimales['total_nc']
+            )
+        
+        # Obtener el exportador y reevaluar los pagos
+        try:
+            pedido = Pedido.objects.select_related('exportador').get(pk=pedido_id)
+            # Llamar a reevaluar_pagos_exportador para actualizar el monto pendiente
+            reevaluar_pagos_exportador(pedido.exportador)
+        except Pedido.DoesNotExist:
+            pass
     
     def save(self, *args, **kwargs):
-        # Primero guardar el detalle
+        # Asegurarnos de que todos los cálculos se realizan antes de guardar
+        self.full_clean()  # Esto llamará a clean()
+        
+        # Guardar el objeto
         super().save(*args, **kwargs)
-        # Luego actualizar el pedido relacionado
-        self.actualizar_totales_pedido(self.pedido_id)
+        
+        # Actualizar totales del pedido relacionado
+        if self.pedido_id:
+            self.actualizar_totales_pedido(self.pedido_id)
     
     def delete(self, *args, **kwargs):
         pedido_id = self.pedido_id
         # Primero eliminar el detalle
         super().delete(*args, **kwargs)
         # Luego actualizar el pedido relacionado
-        self.actualizar_totales_pedido(pedido_id)
+        if pedido_id:
+            self.actualizar_totales_pedido(pedido_id)
 
     class Meta:
         verbose_name = "Detalle Pedido"
@@ -180,6 +227,21 @@ class TranferenciasExportador(models.Model):
         if self.valor_transferencia and self.valor_transferencia_eur:
             self.trm = self.valor_transferencia / self.valor_transferencia_eur
         super().clean()
+
+    @property
+    def saldo_disponible(self):
+        try:
+            balance = BalanceExportador.objects.get(exportador=self.exportador)
+            return balance.saldo_disponible
+        except BalanceExportador.DoesNotExist:
+            return 0
+    
+    @property
+    def saldo_transferencia(self):
+        """Returns the remaining balance for this specific transfer"""
+        # Importación diferida aquí para evitar ciclo
+        from importacion.signals import calcular_saldo_transferencia
+        return calcular_saldo_transferencia(self)
 
     class Meta:
         verbose_name = "Transferencia Exportador"

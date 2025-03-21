@@ -10,7 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
+import dj_database_url
+from dotenv import load_dotenv
 from pathlib import Path
+from django.templatetags.static import static
+from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
+from .unfold_config import UNFOLD
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,22 +33,34 @@ SECRET_KEY = 'django-insecure-gywh)zrdwb8ohd$l97a2mj_+u^pa6@hnsu$=)!ud(3l27%fe-y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
 
 # Application definition
 
 INSTALLED_APPS = [
+    'autenticacion.apps.AutenticacionConfig',
+    'unfold',
+    'unfold.contrib.filters',
+    'unfold.contrib.inlines',
+    'unfold.contrib.import_export',
+    'unfold.contrib.simple_history',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'autenticacion.apps.AutenticacionConfig',
+    'django.contrib.humanize',
+    'django_tables2',
+    'crispy_forms',
+    'crispy_bootstrap5',
+    'import_export',
+    'rest_framework',
+    'django_extensions',
+    'simple_history',
+    'widget_tweaks',
     'comercial.apps.ComercialConfig',
     'productos.apps.ProductosConfig',
-    'importacion.apps.ExportacionConfig'
+    'importacion.apps.ImportacionConfig'
 ]
 
 MIDDLEWARE = [
@@ -48,9 +68,12 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'Exoticaproject.urls'
@@ -58,8 +81,10 @@ ROOT_URLCONF = 'Exoticaproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [
+            os.path.join(BASE_DIR, 'autenticacion', 'templates'),
+            os.path.join(BASE_DIR, 'autenticacion', 'templates', 'registration'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -120,7 +145,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'es-es'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Madrid'
 
 USE_I18N = True
 
@@ -131,8 +156,36 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+LOGIN_URL = 'login'
+
+# Asegúrate de tener la configuración de media files también
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'heavens-server.up.railway.app']
+CSRF_TRUSTED_ORIGINS = ["https://*.up.railway.app"]
+CSRF_ALLOWED_ORIGINS = ["https://heavens-server.up.railway.app"]
+CORS_ORIGINS_WHITELIST = ["https://heavens-server.up.railway.app"]
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+
+# CONFIGURACIÓN MAIL:
+DEFAULT_FROM_EMAIL = "subgerencia@heavensfruit.com"
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.office365.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = DEFAULT_FROM_EMAIL
+EMAIL_HOST_PASSWORD = 'Isabella2024+'
+ADMIN_SITE_NAME = 'Administración L&M Exótica'
+

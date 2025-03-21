@@ -47,18 +47,37 @@ class ExportadorAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
 class DetallePedidoInline(TabularInline):
     model = DetallePedido
     extra = 0
-    fields = ('presentacion', 'cajas_solicitadas', 'cajas_recibidas', 'valor_x_caja_usd', 'valor_x_producto')
+    fields = ('presentacion', 'cajas_solicitadas', 'cajas_recibidas', 'valor_x_caja_usd', 'get_valor_x_producto', 'no_cajas_nc', 'get_valor_nc_usd')
+    readonly_fields = ('get_valor_x_producto', 'get_valor_nc_usd')
     show_change_link = True
     classes = ("collapse",)
     verbose_name = "Detalle pedido"
     verbose_name_plural = "Detalles pedidos"
+    
+    def get_valor_x_producto(self, obj):
+        if obj.valor_x_producto is not None:
+            return format_currency(obj.valor_x_producto)
+        return "-"
+    
+    def get_valor_nc_usd(self, obj):
+        if obj.valor_nc_usd is not None:
+            return format_currency(obj.valor_nc_usd)
+        return "-"
+    
+    get_valor_x_producto.short_description = "Valor Total Producto"
+    get_valor_nc_usd.short_description = "Valor Total NC USD"
 
 @admin.register(Pedido)
 class PedidoAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
-    list_display = ('id', 'exportador', 'fecha_entrega', 'semana', 'awb', 'total_cajas_solicitadas', 
-                    'total_cajas_recibidas', 'valor_total_factura_usd', 'pagado')
+    list_display = (
+        'id', 'exportador', 'fecha_entrega', 'semana', 'awb',
+        'total_cajas_solicitadas', 'total_cajas_recibidas',
+        'numero_factura', 'fecha_vencimiento', 'valor_total_factura_usd',
+        'valor_total_nc_usd', 'valor_factura_eur', 'numero_nc',
+        'estado_pedido', 'pagado', 'monto_pendiente', 'observaciones'
+    )
     search_fields = ('exportador__nombre', 'awb', 'numero_factura')
     search_help_text = "Buscar por: nombre del exportador, AWB, número de factura."
     list_filter = ('exportador', 'fecha_entrega', 'pagado')
@@ -75,6 +94,7 @@ class DetallePedidoAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin)
     search_help_text = "Buscar por: AWB del pedido, nombre de la fruta."
     list_filter = ('pedido__exportador', 'presentacion__fruta')
     resource_class = DetallePedidoResource
+    exclude = ['valor_x_producto']  # Exclude non-editable fields
 
 @admin.register(TranferenciasExportador)
 class TranferenciasExportadorAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):

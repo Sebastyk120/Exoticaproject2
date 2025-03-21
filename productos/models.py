@@ -1,9 +1,6 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-from comercial.models import Cliente
-from importacion.models import Exportador
-
 
 class Fruta(models.Model):
     nombre = models.CharField(max_length=20, unique=True)
@@ -25,13 +22,13 @@ class Presentacion(models.Model):
 
     class Meta:
         verbose_name = "Presentaciónes"
-        ordering = ['nombre']
+        ordering = ['fruta__nombre']
 
 
 class ListaPreciosImportacion(models.Model):
     presentacion = models.ForeignKey(Presentacion, on_delete=models.CASCADE)
     precio_usd = models.DecimalField(validators=[MinValueValidator(0.1), MaxValueValidator(100)], max_digits=10, decimal_places=2, verbose_name='Precio USD')
-    exportador = models.ForeignKey(Exportador, on_delete=models.CASCADE, verbose_name='Exportador')
+    exportador = models.ForeignKey('importacion.Exportador', on_delete=models.CASCADE, verbose_name='Exportador')
     fecha = models.DateField(auto_now=True, verbose_name='Fecha Ultima Actualización')
 
     class Meta:
@@ -48,7 +45,7 @@ class ListaPreciosImportacion(models.Model):
 class ListaPreciosVentas(models.Model):
     presentacion = models.ForeignKey(Presentacion, on_delete=models.CASCADE)
     precio_euro = models.DecimalField(validators=[MinValueValidator(0.1), MaxValueValidator(100)], max_digits=10, decimal_places=2, verbose_name='Precio Euro')
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, verbose_name='Cliente')
+    cliente = models.ForeignKey('comercial.Cliente', on_delete=models.CASCADE, verbose_name='Cliente')
     fecha = models.DateField(auto_now=True, verbose_name='Fecha Ultima Actualización')
 
     class Meta:
