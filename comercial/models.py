@@ -1,8 +1,10 @@
 import datetime
+from decimal import Decimal
+
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from importacion.models import Exportador
+from importacion.models import Exportador, Bodega
 from productos.models import Fruta, Presentacion
 
 
@@ -33,11 +35,12 @@ class Venta(models.Model):
     semana = models.CharField(verbose_name="Semana", null=True, blank=True, editable=False)
     total_cajas_pedido = models.IntegerField(verbose_name="Total Cajas", null=True, blank=True, editable=False)
     numero_factura = models.CharField(max_length=100, verbose_name="Número Factura", null=True, blank=True, editable=False)
-    iva = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="IVA 4%", validators=[MinValueValidator(0)])
+    iva = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="IVA 4%", validators=[MinValueValidator(0)], editable=False, default=0)
     subtotal_factura = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Subtotal Factura", editable=False, default=0)
     valor_total_factura_euro = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total Factura Euro", null=True, blank=True, editable=False, default=0)
     valor_total_abono_euro = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total Abono/Reclamacion Euro", null=True, blank=True, default=0, editable=False)
     numero_nc = models.CharField(max_length=100, verbose_name="Número NC/Reclamacion", null=True, blank=True)
+    monto_pendiente = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto Pendiente", null=True, blank=True, default=0, editable=False)
     pagado = models.BooleanField(verbose_name="Pagado", default=False, editable=False)
     observaciones = models.CharField(verbose_name="Observaciones", max_length=100, blank=True, null=True)
 
@@ -68,6 +71,27 @@ class Venta(models.Model):
             self.numero_factura = f'FACTURA {current_year}/{new_consecutive}'
         super(Venta, self).save(*args, **kwargs)
 
+    def reevaluar_pagos_cliente(self):
+        """
+        Actualiza el monto_pendiente considerando todas las transferencias y abonos
+        """
+        # Obtener la suma de todas las transferencias asociadas a esta venta
+        from django.db.models import Sum
+        from decimal import Decimal
+
+        # Si queremos considerar las transferencias, necesitamos tener una relación
+        # entre TransferenciasCliente y Venta, o alguna forma de asociarlas
+        # Aquí suponemos que existe algún método para obtener las transferencias asociadas
+        
+        # Por ahora, simplemente calculamos monto_pendiente como la diferencia entre
+        # el total de la factura y el total de abonos/reclamaciones
+        self.monto_pendiente = self.valor_total_factura_euro - self.valor_total_abono_euro
+        self.save(update_fields=['monto_pendiente'])
+        
+        # Verificar si se ha pagado completamente
+        self.pagado = (self.monto_pendiente <= 0)
+        self.save(update_fields=['pagado'])
+
     def __str__(self):
         return f"No - {self.pk} - {self.cliente} - {self.fecha_entrega}"
 
@@ -79,23 +103,53 @@ class DetalleVenta(models.Model):
     venta = models.ForeignKey(Venta, on_delete=models.CASCADE, verbose_name="Venta")
     presentacion = models.ForeignKey(Presentacion, on_delete=models.CASCADE, verbose_name="Presentación")
     kilos = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Kilos Netos", editable=False, null=True, blank=True)
-    cajas_envidadas = models.IntegerField(validators=[MinValueValidator(0)], verbose_name="Cajas Enviadas", null=True, blank=True, default=0)
+    cajas_enviadas = models.IntegerField(validators=[MinValueValidator(0)], verbose_name="Cajas Enviadas", null=True, blank=True, default=0)
     valor_x_caja_euro = models.DecimalField(validators=[MinValueValidator(0)], max_digits=10, decimal_places=2, verbose_name="Valor Caja Euro")
     valor_x_producto = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total Producto", null=True, blank=True, editable=False)
     no_cajas_abono = models.DecimalField(max_digits=10, decimal_places=3, verbose_name="No Cajas Abono/Reclamación", null=True, blank=True, default=0)
-    valor_abono_euro = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Abono/Reclamación Euro", null=True, blank=True, default=0)
+    valor_abono_euro = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Abono/Reclamación Euro", null=True, blank=True, default=0, editable=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.pk:
-            self._original_cajas = self.cajas_envidadas
+            self._original_cajas = self.cajas_enviadas
     
     def clean(self):
-        if self.presentacion and self.cajas_envidadas:
-            self.kilos = self.presentacion.kilos * self.cajas_envidadas
+        # Realizar cálculos básicos
+        if self.presentacion and self.cajas_enviadas:
+            self.kilos = self.presentacion.kilos * self.cajas_enviadas
 
-        if self.no_cajas_abono:
-            self.valor_abono_euro = self.no_cajas_abono * self.valor_x_caja_euro
+        # Check if no_cajas_abono is not None rather than truthy/falsy
+        if self.no_cajas_abono is not None and self.valor_x_caja_euro:
+            # Calculate the value
+            calculated_value = self.no_cajas_abono * self.valor_x_caja_euro * Decimal('1.04')
+            # Round to 2 decimal places to ensure it fits within the field constraints
+            self.valor_abono_euro = calculated_value.quantize(Decimal('0.01'))
+        else:
+            self.valor_abono_euro = Decimal('0')
+        
+        # Validar stock disponible
+        if self.presentacion and self.cajas_enviadas:
+            # Si es una actualización, obtenemos el objeto original para calcular la diferencia
+            cajas_anteriores = 0
+            if self.pk and hasattr(self, '_original_cajas'):
+                cajas_anteriores = self._original_cajas
+            
+            # Calcular cuántas cajas nuevas se van a usar
+            cajas_nuevas = self.cajas_enviadas - cajas_anteriores
+            
+            # Si hay un aumento en cajas, verificar stock disponible
+            if cajas_nuevas > 0:
+                try:
+                    bodega = Bodega.objects.get(presentacion=self.presentacion)
+                    if bodega.stock_actual < cajas_nuevas:
+                        raise ValidationError({
+                            'cajas_enviadas': f"Stock insuficiente. Solo hay {bodega.stock_actual} cajas disponibles de {self.presentacion}."
+                        })
+                except Bodega.DoesNotExist:
+                    raise ValidationError({
+                        'presentacion': f"No existe registro de stock para {self.presentacion}."
+                    })
         
         super().clean()
     
@@ -105,46 +159,59 @@ class DetalleVenta(models.Model):
         Actualiza los campos calculados de la venta relacionada usando consultas agregadas
         """
         from django.db.models import Sum
+        from django.db.models.functions import Coalesce
+        from decimal import Decimal
+        from django.db import transaction
         
-        # Obtener la venta
-        venta = Venta.objects.get(pk=venta_id)
-        
-        # Calcular totales usando agregación (más eficiente)
-        totales = DetalleVenta.objects.filter(venta_id=venta_id).aggregate(
-            total_producto=Sum('valor_x_producto') or 0,
-            total_abono=Sum('valor_abono_euro') or 0,
-            total_cajas=Sum('cajas_envidadas') or 0
-        )
-        
-        # Asegurar que tenemos valores numéricos, no None
-        subtotal = totales['total_producto'] or 0
-        total_abono = totales['total_abono'] or 0
-        total_cajas = totales['total_cajas'] or 0
-        
-        # Calcular IVA (4% del subtotal)
-        iva_amount = subtotal * 4 / 100
-        
-        # Actualizar la venta sin llamar a signals (evitando recursión)
-        Venta.objects.filter(pk=venta_id).update(
-            subtotal_factura=subtotal,
-            valor_total_abono_euro=total_abono,
-            iva=iva_amount,  # Actualizar el IVA también
-            valor_total_factura_euro=subtotal + iva_amount,
-            total_cajas_pedido=total_cajas
-        )
+        with transaction.atomic():
+            # Calcular totales usando agregación (más eficiente)
+            totales = DetalleVenta.objects.filter(venta_id=venta_id).aggregate(
+                total_producto=Coalesce(Sum('valor_x_producto'), Decimal('0')),
+                total_abono=Coalesce(Sum('valor_abono_euro'), Decimal('0')),
+                total_cajas=Coalesce(Sum('cajas_enviadas'), 0)
+            )
+            
+            # Asegurar que tenemos valores numéricos, no None
+            subtotal = totales['total_producto']
+            total_abono = totales['total_abono']
+            total_cajas = totales['total_cajas']
+            
+            # Calcular IVA (4% del subtotal)
+            iva_amount = subtotal * Decimal('0.04')
+            total_factura = subtotal + iva_amount
+            
+            # Actualizar la venta sin llamar a signals (evitando recursión)
+            Venta.objects.filter(pk=venta_id).update(
+                subtotal_factura=subtotal,
+                valor_total_abono_euro=total_abono,
+                iva=iva_amount,
+                valor_total_factura_euro=total_factura,
+                total_cajas_pedido=total_cajas
+            )
+            
+            # Ahora llamamos a reevaluar_pagos_cliente para actualizar el monto_pendiente
+            venta = Venta.objects.get(pk=venta_id)
+            venta.reevaluar_pagos_cliente()
     
     def save(self, *args, **kwargs):
         # Calculate valor_x_producto from the editable fields
-        if self.cajas_envidadas and self.valor_x_caja_euro:
-            self.valor_x_producto = self.cajas_envidadas * self.valor_x_caja_euro
+        if self.cajas_enviadas and self.valor_x_caja_euro:
+            self.valor_x_producto = self.cajas_enviadas * self.valor_x_caja_euro
         
-        # Calculate kilos from presentacion and cajas_envidadas
-        if self.presentacion and self.cajas_envidadas:
-            self.kilos = self.presentacion.kilos * self.cajas_envidadas
+        # Calculate kilos from presentacion and cajas_enviadas
+        if self.presentacion and self.cajas_enviadas:
+            self.kilos = self.presentacion.kilos * self.cajas_enviadas
             
         # Calculate valor_abono_euro from no_cajas_abono and valor_x_caja_euro
-        if self.no_cajas_abono and self.valor_x_caja_euro:
-            self.valor_abono_euro = self.no_cajas_abono * self.valor_x_caja_euro
+        if self.no_cajas_abono is not None and self.valor_x_caja_euro:
+            # Calculate the value
+            calculated_value = self.no_cajas_abono * self.valor_x_caja_euro * Decimal('1.04')
+            # Round to 2 decimal places to ensure it fits within the field constraints
+            self.valor_abono_euro = calculated_value.quantize(Decimal('0.01'))
+        else:
+            self.valor_abono_euro = Decimal('0')
+            
+        self.full_clean()  # Esto llamará a clean() para validar
             
         super().save(*args, **kwargs)
         # Luego actualizar la venta relacionada

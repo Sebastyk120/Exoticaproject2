@@ -15,7 +15,7 @@ from unfold.admin import TabularInline
 class ClienteAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
-    list_display = ('nombre', 'ciudad', 'cif', 'email', 'telefono', 'dias_pago')
+    list_display = ('nombre', 'Domicilio', 'ciudad', 'cif', 'email', 'email2', 'telefono', 'dias_pago')
     search_fields = ('nombre', 'email')
     search_help_text = "Buscar por: nombre, email."
     list_filter = ('ciudad',)
@@ -24,18 +24,22 @@ class ClienteAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
 class DetalleVentaInline(TabularInline):
     model = DetalleVenta
     extra = 0
-    fields = ('presentacion', 'cajas_envidadas', 'valor_x_caja_euro', 'valor_x_producto')
+    fields = ('presentacion', 'cajas_enviadas', 'valor_x_caja_euro', 'no_cajas_abono')
     show_change_link = True
     classes = ("collapse",)
     verbose_name = "Detalle venta"
     verbose_name_plural = "Detalles ventas"
 
+
+
 @admin.register(Venta)
 class VentaAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
-    list_display = ('id', 'cliente', 'fecha_entrega', 'fecha_vencimiento', 'semana', 'numero_factura', 
-                    'subtotal_factura', 'valor_total_factura_euro', 'pagado')
+    list_display = ('id', 'cliente', 'fecha_entrega', 'fecha_vencimiento', 'semana', 
+                   'total_cajas_pedido', 'numero_factura', 'iva', 'subtotal_factura', 
+                   'valor_total_factura_euro', 'valor_total_abono_euro', 'numero_nc', 'monto_pendiente',
+                   'pagado', 'observaciones')
     search_fields = ('cliente__nombre', 'numero_factura')
     search_help_text = "Buscar por: nombre del cliente, número de factura."
     list_filter = ('cliente', 'fecha_entrega', 'pagado')
@@ -46,7 +50,9 @@ class VentaAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
 class DetalleVentaAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
-    list_display = ('id', 'venta', 'presentacion', 'kilos', 'cajas_envidadas', 'valor_x_caja_euro', 'valor_x_producto')
+    list_display = ('id', 'venta', 'presentacion', 'kilos', 'cajas_enviadas', 
+                   'valor_x_caja_euro', 'valor_x_producto', 'no_cajas_abono', 
+                   'valor_abono_euro')
     search_fields = ('venta__numero_factura', 'presentacion__fruta__nombre')
     search_help_text = "Buscar por: número de factura, nombre de la fruta."
     list_filter = ('venta__cliente', 'presentacion__fruta')
@@ -56,7 +62,8 @@ class DetalleVentaAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
 class TranferenciasClienteAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
-    list_display = ('cliente', 'referencia', 'fecha_transferencia', 'valor_transferencia_moneda', 'concepto')
+    list_display = ('cliente', 'referencia', 'fecha_transferencia', 
+                   'valor_transferencia', 'concepto')
     search_fields = ('cliente__nombre', 'referencia')
     search_help_text = "Buscar por: nombre del cliente, referencia."
     list_filter = ('cliente', 'fecha_transferencia')
@@ -71,7 +78,7 @@ class TranferenciasClienteAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistor
 class BalanceClienteAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
-    list_display = ('cliente', 'saldo_disponible_moneda', 'ultima_actualizacion')
+    list_display = ('cliente', 'saldo_disponible', 'ultima_actualizacion')
     search_fields = ('cliente__nombre',)
     search_help_text = "Buscar por: nombre del cliente."
     list_filter = ('ultima_actualizacion',)

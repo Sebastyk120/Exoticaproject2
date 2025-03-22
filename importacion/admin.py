@@ -140,7 +140,8 @@ class BalanceExportadorAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAd
 class GastosAduanaAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
-    list_display = ('id', 'agencia_aduana', 'numero_factura', 'valor_gastos_aduana_moneda', 'pagado')
+    list_display = ('id', 'agencia_aduana', 'numero_factura', 'valor_gastos_aduana_moneda', 'pagado',
+                   'numero_nota_credito', 'valor_nota_credito', 'monto_pendiente', 'conceptos')
     search_fields = ('agencia_aduana__nombre', 'numero_factura')
     search_help_text = "Buscar por: nombre de la agencia, número de factura."
     list_filter = ('agencia_aduana', 'pagado')
@@ -191,7 +192,7 @@ class GastosCargaAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
     list_display = ('id', 'agencia_carga', 'numero_factura', 'valor_gastos_carga_moneda', 
-                    'valor_gastos_carga_eur_moneda', 'pagado')
+                    'valor_gastos_carga_eur_moneda', 'valor_nota_credito', 'numero_nota_credito', 'monto_pendiente','pagado', 'conceptos')
     search_fields = ('agencia_carga__nombre', 'numero_factura')
     search_help_text = "Buscar por: nombre de la agencia, número de factura."
     list_filter = ('agencia_carga', 'pagado')

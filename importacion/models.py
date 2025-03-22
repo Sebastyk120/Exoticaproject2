@@ -1,12 +1,9 @@
 from datetime import timedelta
-from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.db.models import Sum, DecimalField, IntegerField
-from django.db.models.functions import Coalesce
 from productos.models import Presentacion
-
 
 def validate_awb(value):
     if len(value) != 12:
@@ -150,6 +147,7 @@ class DetallePedido(models.Model):
     @staticmethod
     def actualizar_totales_pedido(pedido_id):
         """
+        
         Actualiza los campos calculados del pedido relacionado usando consultas agregadas
         y luego llama a reevaluar_pagos_exportador para actualizar el monto pendiente.
         """
@@ -263,11 +261,12 @@ class BalanceExportador(models.Model):
 class GastosAduana(models.Model):
     agencia_aduana = models.ForeignKey(AgenciaAduana, on_delete=models.CASCADE, verbose_name="Agencia Aduana")
     pedidos = models.ManyToManyField(Pedido, verbose_name="Pedidos")
-    numero_factura = models.CharField(max_length=100, verbose_name="Número Factura", editable=False)
+    numero_factura = models.CharField(max_length=100, verbose_name="Número Factura")
     valor_gastos_aduana = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Gastos Aduana Eur", validators=[MinValueValidator(0.0)])
     pagado = models.BooleanField(verbose_name="Pagado", default=False, editable=False)
-    numero_nota_credito = models.CharField(max_length=100, verbose_name="Abono/Reclamación", null=True, blank=True)
-    valor_nota_credito = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Nota Crédito", null=True, blank=True)
+    numero_nota_credito = models.CharField(max_length=100, verbose_name="# Abono/Reclamación", null=True, blank=True)
+    valor_nota_credito = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Abono/Reclamación", null=True, blank=True)
+    monto_pendiente = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto Pendiente EUR", null=True, blank=True, editable=False, default=0)
     conceptos = models.CharField(max_length=255, verbose_name="Conceptos", null=True, blank=True)
 
     class Meta:
@@ -302,11 +301,12 @@ class GastosCarga(models.Model):
     agencia_carga = models.ForeignKey(AgenciaCarga, on_delete=models.CASCADE, verbose_name="Agencia Carga")
     pedidos = models.ManyToManyField(Pedido, verbose_name="Pedidos")
     numero_factura = models.CharField(max_length=100, verbose_name="Número Factura", editable=False)
-    valor_gastos_carga = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Gastos Carga", validators=[MinValueValidator(0.0)])
-    valor_gastos_carga_eur = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Gastos Carga EUR", validators=[MinValueValidator(0.0)])
+    valor_gastos_carga = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Gastos Carga USD", validators=[MinValueValidator(0.0)])
+    valor_gastos_carga_eur = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Gastos Carga EUR", validators=[MinValueValidator(0.0)], editable=False, null=True, blank=True)
     pagado = models.BooleanField(verbose_name="Pagado", default=False, editable=False)
-    valor_nota_credito = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Nota Crédito EUR", null=True, blank=True)
+    valor_nota_credito = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Nota Crédito USD", null=True, blank=True)
     numero_nota_credito = models.CharField(max_length=100, verbose_name="Abono/Reclamación", null=True, blank=True)
+    monto_pendiente = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto Pendiente USD", null=True, blank=True, editable=False, default=0)
     conceptos = models.CharField(max_length=255, verbose_name="Conceptos", null=True, blank=True)
 
     class Meta:
@@ -348,7 +348,7 @@ class BalanceGastosCarga(models.Model):
 
 class Bodega(models.Model):
     presentacion = models.ForeignKey(Presentacion, on_delete=models.CASCADE, verbose_name="Presentación")
-    stock_actual = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Stock Actual (Cajas)", default=0)
+    stock_actual = models.IntegerField(verbose_name="Stock Actual (Cajas)", default=0)
     ultima_actualizacion = models.DateTimeField(auto_now=True, verbose_name="Última Actualización")
     
     def __str__(self):
