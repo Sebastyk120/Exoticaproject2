@@ -21,6 +21,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # Incluir las URLs de la aplicación importacion
+    path('importacion/', include('importacion.urls')),
     # Añade aquí otras rutas de tus aplicaciones
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

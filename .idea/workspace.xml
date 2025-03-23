@@ -4,26 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="2">
-      <change afterPath="$PROJECT_DIR$/comercial/migrations/0004_alter_venta_iva.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/comercial/migrations/0005_rename_cajas_envidadas_detalleventa_cajas_enviadas.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/comercial/migrations/0006_venta_monto_pendiente.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/comercial/migrations/0007_alter_detalleventa_valor_abono_euro.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0005_alter_pedido_fecha_vencimiento_and_more.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0006_alter_pedido_valor_total_factura_usd.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0007_gastosaduana_monto_pendiente_and_more.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0008_gastoscarga_monto_pendiente_and_more.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0009_alter_gastoscarga_valor_gastos_carga_eur.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0010_alter_gastoscarga_valor_gastos_carga_eur.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0011_alter_gastoscarga_valor_nota_credito.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0012_alter_bodega_stock_actual.py" afterDir="false" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Finalizacion de logicas.">
+      <change afterPath="$PROJECT_DIR$/importacion/migrations/0013_alter_gastosaduana_numero_factura.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/importacion/migrations/0014_alter_gastosaduana_conceptos.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/importacion/urls.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/importacion/views_aduana.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/signals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exoticaproject/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/importacion/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/signals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,6 +26,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="HTML File" />
         <option value="Python Script" />
       </list>
     </option>
@@ -64,25 +55,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Django Server.Exoticaproject.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Legion 5 Pro/Desktop/Exoticaproject/autenticacion/templates&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Django Server.Exoticaproject.executor": "Run",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/Legion 5 Pro/Desktop/Exoticaproject/autenticacion/templates",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Legion 5 Pro\Desktop\Exoticaproject\autenticacion\templates" />
@@ -147,7 +139,8 @@
       <workItem from="1742557831932" duration="8296000" />
       <workItem from="1742596992382" duration="26000" />
       <workItem from="1742597854784" duration="9370000" />
-      <workItem from="1742611778133" duration="2223000" />
+      <workItem from="1742611778133" duration="3647000" />
+      <workItem from="1742689029390" duration="7677000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -165,7 +158,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742520905575</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Finalizacion de logicas.">
+      <option name="closed" value="true" />
+      <created>1742615097417</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1742615097417</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -187,6 +188,7 @@
     <MESSAGE value="inicial" />
     <MESSAGE value="Modelado Completo." />
     <MESSAGE value="2" />
-    <option name="LAST_COMMIT_MESSAGE" value="2" />
+    <MESSAGE value="Finalizacion de logicas." />
+    <option name="LAST_COMMIT_MESSAGE" value="Finalizacion de logicas." />
   </component>
 </project>

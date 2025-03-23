@@ -261,13 +261,13 @@ class BalanceExportador(models.Model):
 class GastosAduana(models.Model):
     agencia_aduana = models.ForeignKey(AgenciaAduana, on_delete=models.CASCADE, verbose_name="Agencia Aduana")
     pedidos = models.ManyToManyField(Pedido, verbose_name="Pedidos")
-    numero_factura = models.CharField(max_length=100, verbose_name="Número Factura")
+    numero_factura = models.CharField(max_length=100, verbose_name="Número Factura", unique=True)
     valor_gastos_aduana = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Gastos Aduana Eur", validators=[MinValueValidator(0.0)])
     pagado = models.BooleanField(verbose_name="Pagado", default=False, editable=False)
     numero_nota_credito = models.CharField(max_length=100, verbose_name="# Abono/Reclamación", null=True, blank=True)
     valor_nota_credito = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Abono/Reclamación", null=True, blank=True)
     monto_pendiente = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto Pendiente EUR", null=True, blank=True, editable=False, default=0)
-    conceptos = models.CharField(max_length=255, verbose_name="Conceptos", null=True, blank=True)
+    conceptos = models.CharField(max_length=1000, verbose_name="Conceptos", null=True, blank=True)
 
     class Meta:
         verbose_name = "Gastos Aduana"
