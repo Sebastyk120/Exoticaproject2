@@ -1,0 +1,5 @@
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="pdf_file" accept="application/pdf">
+    <button type="submit">Subir factura</button>
+</form>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exotica - Gestión de Frutas</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/frutas.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gestión de Frutas</h1>
+            <button id="add-fruta-btn" class="btn-primary">Nueva Fruta</button>
+        </header>
+
+        <main>
+            <div class="fruits-table">
+                {% if frutas %}
+                    <table>
+                        <tbody>
+                            {% for fruta in frutas|dictsort:"nombre"|slice:":25" %}
+                                {% if forloop.counter0|divisibleby:2 %}
+                                    <tr>
+                                {% endif %}
+                                <td class="fruit-cell">
+                                    <div class="fruit-title">{{ fruta.nombre }}</div>
+                                </td>
+                                {% if forloop.counter|divisibleby:2 or forloop.last %}
+                                    </tr>
+                                    {% if forloop.last and not forloop.counter|divisibleby:2 %}
+                                        <td></td></tr>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="empty-state">
+                        <p>No hay frutas disponibles. ¡Agrega algunas!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para crear una nueva fruta -->
+    <div id="create-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Agregar Nueva Fruta</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form action="{% url 'create_fruta' %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="nombre">Nombre de la Fruta</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal functionality
+        const createModal = document.getElementById('create-modal');
+        const addBtn = document.getElementById('add-fruta-btn');
+        
+        // Show the create modal
+        addBtn.addEventListener('click', () => {
+            createModal.style.display = 'flex';
+        });
+        
+        // Close button
+        document.querySelector('.close').addEventListener('click', () => {
+            createModal.style.display = 'none';
+        });
+        
+        // Close modal if clicked outside
+        window.addEventListener('click', (event) => {
+            if (event.target === createModal) {
+                createModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -5,4 +5,4 @@ class ImportacionConfig(AppConfig):
     name = 'importacion'
     
     def ready(self):
-        import importacion.signals
+        import importacion.signals  # Register signals when the app is ready

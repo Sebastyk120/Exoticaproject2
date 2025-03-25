@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exotica - Gestión de Presentaciones</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/presentaciones.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gestión de Presentaciones</h1>
+            <button id="add-presentacion-btn" class="btn-primary">
+                <i class="fas fa-plus"></i> Nueva Presentación
+            </button>
+        </header>
+
+        <main>
+            {% if presentaciones %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Fruta</th>
+                            <th>Kilos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for presentacion in presentaciones %}
+                        <tr>
+                            <td>{{ presentacion.id }}</td>
+                            <td>{{ presentacion.fruta.nombre }}</td>
+                            <td>{{ presentacion.kilos }} Kg</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>No hay presentaciones disponibles. ¡Agrega algunas!</p>
+                <button id="empty-add-btn" class="btn-primary">
+                    <i class="fas fa-plus"></i> Agregar Presentación
+                </button>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+
+    <!-- Modal para crear una nueva presentación -->
+    <div id="create-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus-circle"></i> Agregar Nueva Presentación</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form action="{% url 'create_presentacion' %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="fruta">Fruta</label>
+                    <select id="fruta" name="fruta" required>
+                        <option value="" disabled selected>Selecciona una fruta</option>
+                        {% for fruta in frutas %}
+                        <option value="{{ fruta.id }}">{{ fruta.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="kilos">Kilos</label>
+                    <input type="number" id="kilos" name="kilos" min="0.1" max="15.1" step="0.1" required>
+                    <small>Valor entre 0.1 y 15.1 kilos</small>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Referencias a elementos del DOM
+            const addBtn = document.getElementById('add-presentacion-btn');
+            const emptyAddBtn = document.getElementById('empty-add-btn');
+            const createModal = document.getElementById('create-modal');
+            const closeBtns = document.querySelectorAll('.close');
+
+            // Función para abrir el modal de creación
+            function openCreateModal() {
+                createModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Función para cerrar modales
+            function closeModal(modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+
+            // Event listeners
+            addBtn.addEventListener('click', openCreateModal);
+            
+            if (emptyAddBtn) {
+                emptyAddBtn.addEventListener('click', openCreateModal);
+            }
+
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    closeModal(this.closest('.modal'));
+                });
+            });
+
+            // Cerrar modal al hacer clic fuera del contenido
+            window.addEventListener('click', function(event) {
+                if (event.target === createModal) {
+                    closeModal(createModal);
+                }
+            });
+
+            // Evitar cierre del modal al hacer clic en su contenido
+            document.querySelectorAll('.modal-content').forEach(content => {
+                content.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

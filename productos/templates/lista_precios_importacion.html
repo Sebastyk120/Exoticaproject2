@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Precios de Importación</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/lista_precios_importacion.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header>
+            <h1>Lista de Precios de Importación</h1>
+            <button class="btn btn-primary" id="openCreateModal">
+                <i class="fas fa-plus"></i> Nuevo Precio
+            </button>
+        </header>
+
+        <!-- Alerts Section -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="fas fa-exclamation-circle"></i>
+                    {% endif %}
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Filters Section -->
+        <div class="filters">
+            <form method="get" action="{% url 'lista_precios_importacion' %}">
+                <div class="filter-row">
+                    <div class="filter-item">
+                        <label for="fruta"><i class="fas fa-apple-alt"></i> Fruta:</label>
+                        <select name="fruta" id="fruta">
+                            <option value="">Todas las frutas</option>
+                            {% for fruta in frutas %}
+                                <option value="{{ fruta.id }}" {% if request.GET.fruta == fruta.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ fruta.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="exportador"><i class="fas fa-building"></i> Exportador:</label>
+                        <select name="exportador" id="exportador">
+                            <option value="">Todos los exportadores</option>
+                            {% for exportador in exportadores %}
+                                <option value="{{ exportador.id }}" {% if request.GET.exportador == exportador.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ exportador.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="fecha_desde"><i class="fas fa-calendar-alt"></i> Fecha desde:</label>
+                        <input type="date" name="fecha_desde" id="fecha_desde" value="{{ request.GET.fecha_desde|default:'' }}">
+                    </div>
+                    <div class="filter-item">
+                        <label for="fecha_hasta"><i class="fas fa-calendar-alt"></i> Fecha hasta:</label>
+                        <input type="date" name="fecha_hasta" id="fecha_hasta" value="{{ request.GET.fecha_hasta|default:'' }}">
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-item search-box">
+                        <label for="search"><i class="fas fa-search"></i> Buscar:</label>
+                        <input type="text" name="search" id="search" placeholder="Buscar por fruta, kilos o exportador..." value="{{ request.GET.search|default:'' }}">
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                    <a href="{% url 'lista_precios_importacion' %}" class="btn btn-secondary">
+                        <i class="fas fa-undo"></i> Limpiar filtros
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Section -->
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-apple-alt"></i> Fruta</th>
+                    <th><i class="fas fa-box"></i> Presentación (kg)</th>
+                    <th><i class="fas fa-dollar-sign"></i> Precio USD</th>
+                    <th><i class="fas fa-building"></i> Exportador</th>
+                    <th><i class="fas fa-calendar-day"></i> Fecha Actualización</th>
+                    <th><i class="fas fa-cog"></i> Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for precio in precios %}
+                <tr data-id="{{ precio.id }}" data-presentacion="{{ precio.presentacion.id }}" data-precio="{{ precio.get_precio_usd }}" data-exportador="{{ precio.exportador.id }}">
+                    <td>{{ precio.presentacion.fruta.nombre }}</td>
+                    <td>{{ precio.presentacion.kilos }} kg</td>
+                    <td>${{ precio.get_precio_usd }}</td>
+                    <td>{{ precio.exportador.nombre }}</td>
+                    <td>{{ precio.fecha|date:"d/m/Y" }}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-sm btn-primary edit-btn" data-id="{{ precio.id }}">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 20px;">No hay precios registrados que coincidan con los criterios de búsqueda.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination if needed -->
+        {% if precios.has_other_pages %}
+        <div class="pagination">
+            {% if precios.has_previous %}
+                <a href="?{{ request.GET.urlencode }}&page={{ precios.previous_page_number }}">Anterior</a>
+            {% endif %}
+            
+            {% for i in precios.paginator.page_range %}
+                {% if precios.number == i %}
+                    <span class="active">{{ i }}</span>
+                {% else %}
+                    <a href="?{{ request.GET.urlencode }}&page={{ i }}">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if precios.has_next %}
+                <a href="?{{ request.GET.urlencode }}&page={{ precios.next_page_number }}">Siguiente</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Create Modal -->
+        <div class="modal" id="createModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Agregar Nuevo Precio</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <form id="createForm" method="post" action="{% url 'crear_precio_importacion' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="create_presentacion">Presentación:</label>
+                        <select name="presentacion" id="create_presentacion" required>
+                            <option value="">Seleccione una presentación</option>
+                            {% for presentacion in presentaciones %}
+                                <option value="{{ presentacion.id }}">{{ presentacion.fruta.nombre }} - {{ presentacion.kilos }} kg</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="create_precio_usd">Precio USD:</label>
+                        <input type="number" name="precio_usd" id="create_precio_usd" step="0.01" min="0.1" max="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="create_exportador">Exportador:</label>
+                        <select name="exportador" id="create_exportador" required>
+                            <option value="">Seleccione un exportador</option>
+                            {% for exportador in exportadores %}
+                                <option value="{{ exportador.id }}">{{ exportador.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary close-modal-btn">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div class="modal" id="editModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Editar Precio</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <form id="editForm" method="post" action="{% url 'editar_precio_importacion' 0 %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="precio_id" id="edit_precio_id">
+                    <div class="form-group">
+                        <label for="edit_presentacion">Presentación:</label>
+                        <select name="presentacion" id="edit_presentacion" required>
+                            <option value="">Seleccione una presentación</option>
+                            {% for presentacion in presentaciones %}
+                                <option value="{{ presentacion.id }}">{{ presentacion.fruta.nombre }} - {{ presentacion.kilos }} kg</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_precio_usd">Precio USD:</label>
+                        <input type="number" name="precio_usd" id="edit_precio_usd" step="0.01" min="0.1" max="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_exportador">Exportador:</label>
+                        <select name="exportador" id="edit_exportador" required>
+                            <option value="">Seleccione un exportador</option>
+                            {% for exportador in exportadores %}
+                                <option value="{{ exportador.id }}">{{ exportador.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary close-modal-btn">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Actualizar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Modal functionality
+            const createModal = document.getElementById('createModal');
+            const editModal = document.getElementById('editModal');
+            const openCreateModalBtn = document.getElementById('openCreateModal');
+            const closeModalBtns = document.querySelectorAll('.close-modal, .close-modal-btn');
+            const editBtns = document.querySelectorAll('.edit-btn');
+
+            // Open create modal
+            openCreateModalBtn.addEventListener('click', function() {
+                // Reset the form fields
+                const createForm = document.getElementById('createForm');
+                createForm.reset();
+
+                // Show the modal
+                createModal.classList.add('show');
+            });
+
+            // Close any modal
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    createModal.classList.remove('show');
+                    editModal.classList.remove('show');
+                });
+            });
+
+            // Open edit modal and populate with data
+            editBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const id = row.getAttribute('data-id');
+                    const presentacion = row.getAttribute('data-presentacion');
+                    const precio = row.getAttribute('data-precio');
+                    const exportador = row.getAttribute('data-exportador');
+
+                    document.getElementById('edit_precio_id').value = id;
+                    document.getElementById('edit_presentacion').value = presentacion;
+                    document.getElementById('edit_precio_usd').value = precio;
+                    document.getElementById('edit_exportador').value = exportador;
+
+                    // Update form action URL
+                    const form = document.getElementById('editForm');
+                    form.action = form.action.replace(/\/\d+\/$/, `/${id}/`);
+
+                    editModal.classList.add('show');
+                });
+            });
+
+            // Close modals when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === createModal) {
+                    createModal.classList.remove('show');
+                }
+                if (event.target === editModal) {
+                    editModal.classList.remove('show');
+                }
+            });
+
+            // Automatically hide alerts after 5 seconds
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    alert.style.transition = 'opacity 0.5s';
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 500);
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -101,7 +101,7 @@ class DetallePedido(models.Model):
                                            verbose_name="Valor Caja USD")
     valor_x_producto = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total Producto", null=True,
                                            blank=True, editable=False)
-    no_cajas_nc = models.DecimalField(max_digits=10, decimal_places=3, verbose_name="No Cajas NC", null=True,
+    no_cajas_nc = models.DecimalField(max_digits=10, decimal_places=1, verbose_name="No Cajas NC", null=True,
                                       blank=True, default=0)
     valor_nc_usd = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor NC USD", default=0, editable=False)
 
@@ -300,14 +300,14 @@ class BalanceGastosAduana(models.Model):
 class GastosCarga(models.Model):
     agencia_carga = models.ForeignKey(AgenciaCarga, on_delete=models.CASCADE, verbose_name="Agencia Carga")
     pedidos = models.ManyToManyField(Pedido, verbose_name="Pedidos")
-    numero_factura = models.CharField(max_length=100, verbose_name="Número Factura", editable=False)
+    numero_factura = models.CharField(max_length=100, verbose_name="Número Factura", editable=False, unique=True)
     valor_gastos_carga = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Gastos Carga USD", validators=[MinValueValidator(0.0)])
     valor_gastos_carga_eur = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Gastos Carga EUR", validators=[MinValueValidator(0.0)], editable=False, null=True, blank=True)
     pagado = models.BooleanField(verbose_name="Pagado", default=False, editable=False)
     valor_nota_credito = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Nota Crédito USD", null=True, blank=True)
     numero_nota_credito = models.CharField(max_length=100, verbose_name="Abono/Reclamación", null=True, blank=True)
     monto_pendiente = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto Pendiente USD", null=True, blank=True, editable=False, default=0)
-    conceptos = models.CharField(max_length=255, verbose_name="Conceptos", null=True, blank=True)
+    conceptos = models.CharField(max_length=500, verbose_name="Conceptos", null=True, blank=True)
 
     class Meta:
         verbose_name = "Gastos Carga"

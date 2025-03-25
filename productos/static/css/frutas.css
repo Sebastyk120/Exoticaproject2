@@ -1,0 +1,233 @@
+:root {
+    --primary-color: #4f46e5;
+    --secondary-color: #06b6d4;
+    --background-color: #f0f9ff;
+    --card-color: #ffffff;
+    --text-color: #1a1a1a; /* Cambiado a un tono más oscuro */
+    --border-radius: 12px;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.4;
+    padding: 20px;
+    font-size: 14px; /* Tamaño base de fuente reducido */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+}
+
+h1 {
+    font-weight: 700;
+    font-size: 1.875rem;
+    color: var(--text-color);
+}
+
+button {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 10px 16px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(to right, #4f46e5, #06b6d4);
+    color: white;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(to right, #4338ca, #0891b2);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3);
+}
+
+/* Estilos de la tabla */
+.fruits-table {
+    width: 100%;
+    background-color: var(--card-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+td {
+    padding: 15px;
+    vertical-align: middle;
+    width: 50%;
+}
+
+.fruit-cell {
+    transition: background-color 0.2s ease;
+}
+
+.fruit-cell:hover {
+    background-color: rgba(79, 70, 229, 0.05);
+}
+
+.fruit-title {
+    font-size: 18px; /* Reducido de 24px */
+    font-weight: 500;
+    text-align: center;
+    color: #1a1a1a; /* Color sólido en lugar del gradiente */
+    padding: 10px;
+    letter-spacing: -0.25px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px;
+    background-color: var(--card-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: var(--card-color);
+    border-radius: var(--border-radius);
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.modal-header h2 {
+    font-weight: 600;
+    font-size: 16px; /* Reducido de 20px */
+    color: var(--text-color);
+}
+
+.close {
+    font-size: 24px;
+    cursor: pointer;
+    color: #8e8e93;
+    transition: color 0.2s ease;
+}
+
+close:hover {
+    color: var(--danger-color);
+}
+
+form {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #c7c7cc;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    color: var(--text-color);
+    transition: border-color 0.2s ease;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .fruit-title {
+        font-size: 16px; /* Reducido de 20px */
+    }
+}
+
+@media (max-width: 480px) {
+    td {
+        display: block;
+        width: 100%;
+    }
+    
+    .modal-content {
+        width: 90%;
+    }
+}

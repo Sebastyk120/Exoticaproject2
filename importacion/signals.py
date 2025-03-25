@@ -625,4 +625,17 @@ def verificar_pago_tras_crear_o_editar_gastos_carga(sender, instance, created, *
 @receiver(post_delete, sender=GastosCarga)
 def actualizar_balance_tras_eliminar_gastos_carga(sender, instance, **kwargs):
     reevaluar_pagos_carga(instance.agencia_carga)
+# Signals to automatically update balances on transferencia changes
+
+@receiver(post_save, sender=TranferenciasExportador)
+def update_exportador_balance(sender, instance, **kwargs):
+    """Update exporter balance when a transfer is saved or updated"""
+    reevaluar_pagos_exportador(instance.exportador)
+
+@receiver(post_delete, sender=TranferenciasExportador)
+def delete_exportador_balance(sender, instance, **kwargs):
+    """Update exporter balance when a transfer is deleted"""
+    reevaluar_pagos_exportador(instance.exportador)
+
+# Similar handlers could be added for Aduana and Carga transfers
 

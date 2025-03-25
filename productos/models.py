@@ -22,6 +22,7 @@ class Presentacion(models.Model):
 
     class Meta:
         verbose_name = "Presentaciónes"
+        unique_together = ('fruta', 'kilos')
         ordering = ['fruta__nombre']
 
 
@@ -40,6 +41,8 @@ class ListaPreciosImportacion(models.Model):
     def __str__(self):
         return f"{self.presentacion} - {self.precio_usd} - {self.fecha}"
 
+    def get_precio_usd(self):
+        return f"{self.precio_usd:.2f}"
 
 
 class ListaPreciosVentas(models.Model):
@@ -56,6 +59,9 @@ class ListaPreciosVentas(models.Model):
 
     def __str__(self):
         return f"{self.presentacion} - {self.precio_euro} - {self.fecha}"
+    
+    def get_precio_euro(self):
+        return f"{self.precio_euro:.2f}"
 
 
 

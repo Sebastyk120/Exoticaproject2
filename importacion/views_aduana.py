@@ -73,7 +73,7 @@ def process_pdf(request):
                 pedidos = Pedido.objects.filter(awb=formatted_pedido)
                 
                 if not pedidos.exists():
-                    return render(request, 'aduana/upload_pdf.html', {
+                    return render(request, 'aduana/upload_pdf_aduana.html', {
                         'form': form,
                         'error': f'No se encontraron pedidos con AWB: {formatted_pedido}'
                     })
@@ -81,7 +81,7 @@ def process_pdf(request):
                 pedidos_count = pedidos.count()
                 
             except Exception as e:
-                return render(request, 'aduana/upload_pdf.html', {
+                return render(request, 'aduana/upload_pdf_aduana.html', {
                     'form': form,
                     'error': f'Error al buscar pedidos: {str(e)}'
                 })
@@ -102,13 +102,13 @@ def process_pdf(request):
                     gastos.pedidos.add(pedido)
                 
             except Exception as e:
-                return render(request, 'aduana/upload_pdf.html', {
+                return render(request, 'aduana/upload_pdf_aduana.html', {
                     'form': form,
                     'error': f'Error al guardar GastosAduana: {str(e)}'
                 })
 
-            return HttpResponseRedirect('/success/')
+            return HttpResponseRedirect('/aduana_pdf/')
     else:
         form = PDFUploadForm()
 
-    return render(request, 'aduana/upload_pdf.html', {'form': form})
+    return render(request, 'aduana/upload_pdf_aduana.html', {'form': form})

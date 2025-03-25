@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if pedido %}Editar Pedido #{{ pedido.id }}{% else %}Nuevo Pedido{% endif %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/pedidos/pedidos.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>{% if pedido %}Pedido #{{ pedido.id }}{% else %}Nuevo Pedido{% endif %}</h1>
+            <nav class="breadcrumb">
+                <a href="{% url 'home' %}">Inicio</a> &gt;
+                <a href="{% url 'importacion:lista_pedidos' %}">Pedidos</a> &gt;
+                <span>{% if pedido %}Pedido #{{ pedido.id }}{% else %}Nuevo Pedido{% endif %}</span>
+            </nav>
+        </header>
+
+        <!-- Añadir contenedor para notificaciones -->
+        <div id="notifications-container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="notification {% if message.tags %}{{ message.tags }}{% endif %}">
+                        <span class="notification-message">{{ message }}</span>
+                        <button type="button" class="close-notification">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="main-content">
+            <!-- Order Information -->
+            <section class="order-info">
+                <h2>Información del Pedido</h2>
+                <form id="order-form" method="post" action="{% if pedido %}{% url 'importacion:guardar_pedido' pedido.id %}{% else %}{% url 'importacion:guardar_pedido' %}{% endif %}">
+                    {% csrf_token %}
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="exportador">Exportador:</label>
+                            <select id="exportador" name="exportador" required>
+                                <option value="">Seleccionar Exportador</option>
+                                {% for exportador in exportadores %}
+                                    <option value="{{ exportador.id }}" {% if pedido and pedido.exportador.id == exportador.id %}selected{% endif %}>
+                                        {{ exportador.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="fecha_entrega">Fecha de Entrega:</label>
+                            <input type="date" id="fecha_entrega" name="fecha_entrega" value="{{ pedido.fecha_entrega|date:'Y-m-d' }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="awb">AWB:</label>
+                            <input type="text" id="awb" name="awb" value="{{ pedido.awb|default:'' }}" maxlength="12">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="numero_factura">Número Factura:</label>
+                            <input type="text" id="numero_factura" name="numero_factura" value="{{ pedido.numero_factura|default:'' }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="numero_nc">Número NC:</label>
+                            <input type="text" id="numero_nc" name="numero_nc" value="{{ pedido.numero_nc|default:'' }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="observaciones">Observaciones:</label>
+                            <textarea id="observaciones" name="observaciones">{{ pedido.observaciones|default:'' }}</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="calculated-fields">
+                        {% if pedido %}
+                            <div class="calc-field">
+                                <span class="label">Semana:</span>
+                                <span class="value">{{ pedido.semana }}</span>
+                            </div>
+                            <div class="calc-field">
+                                <span class="label">Total Cajas Solicitadas:</span>
+                                <span class="value">{{ pedido.total_cajas_solicitadas|default:0 }}</span>
+                            </div>
+                            <div class="calc-field">
+                                <span class="label">Total Cajas Recibidas:</span>
+                                <span class="value">{{ pedido.total_cajas_recibidas|default:0 }}</span>
+                            </div>
+                            <div class="calc-field">
+                                <span class="label">Valor Total Factura USD:</span>
+                                <span class="value">{{ pedido.valor_total_factura_usd|default:0|floatformat:2 }}</span>
+                            </div>
+                            <div class="calc-field">
+                                <span class="label">Valor Total NC USD:</span>
+                                <span class="value">{{ pedido.valor_total_nc_usd|default:0|floatformat:2 }}</span>
+                            </div>
+                            <div class="calc-field">
+                                <span class="label">Estado del Pedido:</span>
+                                <span class="value">{{ pedido.estado_pedido }}</span>
+                            </div>
+                            <div class="calc-field">
+                                <span class="label">Pagado:</span>
+                                <span class="value">{{ pedido.pagado|yesno:"Sí,No" }}</span>
+                            </div>
+                            <div class="calc-field">
+                                <span class="label">Monto Pendiente USD:</span>
+                                <span class="value">{{ pedido.monto_pendiente|default:0|floatformat:2 }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Guardar Pedido</button>
+                    </div>
+                </form>
+            </section>
+            
+            <!-- Order Details -->
+            {% if pedido %}
+                <section class="order-details">
+                    <div class="section-header">
+                        <h2>Detalles del Pedido</h2>
+                        <div class="action-buttons">
+                            <button id="add-detail-btn" class="btn btn-add"><i class="fas fa-plus"></i> Agregar Detalle</button>
+                            <button id="save-all-details-btn" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Todos</button>
+                        </div>
+                    </div>
+                    
+                    <div id="details-container">
+                        <!-- Batch Details Form -->
+                        <form id="batch-details-form" method="post" action="{% url 'importacion:guardar_detalles_batch' pedido.id %}">
+                            {% csrf_token %}
+                            
+                            <div id="new-details-container">
+                                <!-- Aquí se añadirán dinámicamente los nuevos detalles -->
+                            </div>
+                            
+                            <table id="details-table" class="details-table">
+                                <thead>
+                                    <tr>
+                                        <th>Presentación</th>
+                                        <th>Cajas Solicitadas</th>
+                                        <th>Cajas Recibidas</th>
+                                        <th>Valor Caja USD</th>
+                                        <th>No Cajas NC</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for detalle in detalles %}
+                                    <tr class="detail-row" data-id="{{ detalle.id }}">
+                                        <td>
+                                            <select name="detalle_{{ detalle.id }}_presentacion" required>
+                                                {% for presentacion in presentaciones %}
+                                                    <option value="{{ presentacion.id }}" {% if detalle.presentacion and detalle.presentacion.id == presentacion.id %}selected{% endif %}>
+                                                        {{ presentacion.fruta.nombre }} - {{ presentacion.kilos }} Kg
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="number" name="detalle_{{ detalle.id }}_cajas_solicitadas" 
+                                                   value="{{ detalle.cajas_solicitadas|default:'0' }}" min="0">
+                                        </td>
+                                        <td>
+                                            <input type="number" name="detalle_{{ detalle.id }}_cajas_recibidas" 
+                                                   value="{{ detalle.cajas_recibidas|default:'0' }}" min="0">
+                                        </td>
+                                        <td>
+                                            <input type="number" name="detalle_{{ detalle.id }}_valor_x_caja_usd" 
+                                                   value="{{ detalle.valor_x_caja_usd_str|default:detalle.valor_x_caja_usd|default:'0.00' }}" min="0" step="0.01">
+                                        </td>
+                                        <td>
+                                            <input type="number" name="detalle_{{ detalle.id }}_no_cajas_nc" 
+                                                   value="{{ detalle.no_cajas_nc_str|default:detalle.no_cajas_nc|default:'0.0' }}" min="0" step="0.1">
+                                        </td>
+                                        <td class="actions-cell">
+                                            <button type="button" class="btn-icon btn-delete" onclick="removeDetailRow(this)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            
+                            <div class="empty-state" {% if detalles %}style="display:none"{% endif %}>
+                                <p>No hay detalles para este pedido. Haga clic en "Agregar Detalle" para añadir uno.</p>
+                            </div>
+                        </form>
+                        
+                        <!-- Template for new detail row -->
+                        <template id="new-detail-row-template">
+                            <tr class="detail-row new-detail">
+                                <td>
+                                    <select name="new_INDEX_presentacion" required>
+                                        <option value="">Seleccionar Presentación</option>
+                                        {% for presentacion in presentaciones %}
+                                            <option value="{{ presentacion.id }}">
+                                                {{ presentacion.fruta.nombre }} - {{ presentacion.kilos }} Kg
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" name="new_INDEX_cajas_solicitadas" value="0" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" name="new_INDEX_cajas_recibidas" value="0" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" name="new_INDEX_valor_x_caja_usd" value="0" min="0" step="0.01">
+                                </td>
+                                <td>
+                                    <input type="number" name="new_INDEX_no_cajas_nc" value="0" min="0" step="0.1">
+                                </td>
+                                <td class="actions-cell">
+                                    <button type="button" class="btn-icon btn-delete" onclick="removeDetailRow(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                    </div>
+                </section>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let newDetailCounter = 0;
+        const exportadorId = {% if pedido.exportador %}{{ pedido.exportador.id }}{% else %}null{% endif %};
+        
+        function toggleDetail(header) {
+            const card = header.closest('.detail-card');
+            const content = card.querySelector('.detail-content');
+            const icon = header.querySelector('.toggle-icon');
+            
+            if (content.style.maxHeight && content.style.maxHeight !== "none") {
+                content.style.maxHeight = null;
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+                header.classList.remove('active');
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+                header.classList.add('active');
+            }
+        }
+        
+        function showNewDetailForm() {
+            // Añadir una nueva fila al inicio de la tabla
+            addNewDetailRow();
+            
+            // Ocultar mensaje de estado vacío
+            document.querySelector('.empty-state').style.display = 'none';
+            
+            // Mostrar la tabla si está oculta
+            document.getElementById('details-table').style.display = 'table';
+        }
+        
+        function hideNewDetailForm() {
+            document.getElementById('new-detail-form').style.display = 'none';
+        }
+        
+        function addNewDetailRow() {
+            // Crear nueva fila a partir de la plantilla
+            const template = document.getElementById('new-detail-row-template');
+            const newRow = document.importNode(template.content, true);
+            
+            // Actualizar índices en los campos
+            newRow.querySelectorAll('[name*="INDEX"]').forEach(field => {
+                field.name = field.name.replace('INDEX', newDetailCounter);
+            });
+            
+            // Añadir la fila al inicio de la tabla
+            const tableBody = document.querySelector('#details-table tbody');
+            tableBody.insertBefore(newRow, tableBody.firstChild);
+            
+            newDetailCounter++;
+        }
+        
+        function removeDetailRow(button) {
+            const row = button.closest('.detail-row');
+            const detailId = row.dataset.id;
+            
+            if (detailId) {
+                // Si es un detalle existente, agregar un campo oculto para marcarlo como eliminado
+                const form = document.getElementById('batch-details-form');
+                const deleteField = document.createElement('input');
+                deleteField.type = 'hidden';
+                deleteField.name = 'delete_detail_ids';
+                deleteField.value = detailId;
+                form.appendChild(deleteField);
+            }
+            
+            // Eliminar la fila
+            row.remove();
+            
+            // Mostrar mensaje de estado vacío si no hay filas
+            if (document.querySelectorAll('#details-table tbody tr').length === 0) {
+                document.querySelector('.empty-state').style.display = 'block';
+                document.getElementById('details-table').style.display = 'none';
+            }
+        }
+        
+        // Función para cargar precios automáticamente
+        function cargarPrecioPresentacion(selectElement) {
+            const presentacionId = selectElement.value;
+            const row = selectElement.closest('.detail-row');
+            const valorCajaInput = row.querySelector('[name$="_valor_x_caja_usd"]');
+            
+            if (!presentacionId || !exportadorId) return;
+            
+            // Hacer la petición AJAX para obtener el precio
+            fetch(`/importacion/obtener-precio-presentacion/${presentacionId}/${exportadorId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.precio) {
+                        valorCajaInput.value = data.precio;
+                    }
+                })
+                .catch(error => console.error('Error al cargar el precio:', error));
+        }
+        
+        // Función para mostrar notificación
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const notificacion = document.createElement('div');
+            notificacion.className = `notification ${tipo}`;
+            notificacion.innerHTML = `
+                <span class="notification-message">${mensaje}</span>
+                <button type="button" class="close-notification">&times;</button>
+            `;
+            
+            const container = document.getElementById('notifications-container');
+            container.appendChild(notificacion);
+            
+            // Auto-cerrar después de 5 segundos
+            setTimeout(() => {
+                notificacion.classList.add('fade-out');
+                setTimeout(() => notificacion.remove(), 500);
+            }, 5000);
+            
+            // Configurar botón de cerrar
+            notificacion.querySelector('.close-notification').addEventListener('click', function() {
+                notificacion.remove();
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Evento para agregar detalle
+            const addDetailBtn = document.getElementById('add-detail-btn');
+            if (addDetailBtn) {
+                addDetailBtn.addEventListener('click', showNewDetailForm);
+            }
+            
+            // Evento para guardar todos los detalles
+            const saveAllBtn = document.getElementById('save-all-details-btn');
+            if (saveAllBtn) {
+                saveAllBtn.addEventListener('click', function() {
+                    document.getElementById('batch-details-form').submit();
+                });
+            }
+            
+            // Mostrar/ocultar tabla según si hay elementos
+            const detailsTable = document.getElementById('details-table');
+            const emptyState = document.querySelector('.empty-state');
+            
+            if (detailsTable && emptyState) {
+                if (document.querySelectorAll('#details-table tbody tr').length === 0) {
+                    emptyState.style.display = 'block';
+                    detailsTable.style.display = 'none';
+                }
+            }
+            
+            // Añadir evento para detectar cambios en selects de presentación
+            document.addEventListener('change', function(e) {
+                if (e.target.tagName === 'SELECT' && (e.target.name.includes('presentacion'))) {
+                    cargarPrecioPresentacion(e.target);
+                }
+            });
+            
+            // Añadir eventos a botones de cerrar notificaciones existentes
+            document.querySelectorAll('.close-notification').forEach(button => {
+                button.addEventListener('click', function() {
+                    this.closest('.notification').remove();
+                });
+            });
+            
+            // Añadir evento al formulario principal para mostrar notificación de éxito
+            const orderForm = document.getElementById('order-form');
+            if (orderForm) {
+                orderForm.addEventListener('submit', function() {
+                    // Aquí no mostramos la notificación aún, porque la página se recargará
+                    // El backend enviará un mensaje que se mostrará en la recarga
+                    localStorage.setItem('mostrarNotificacion', 'Pedido guardado correctamente');
+                });
+            }
+            
+            // Comprobar si hay notificación pendiente (para cuando la página se recarga)
+            const notificacionPendiente = localStorage.getItem('mostrarNotificacion');
+            if (notificacionPendiente) {
+                mostrarNotificacion(notificacionPendiente);
+                localStorage.removeItem('mostrarNotificacion');
+            }
+        });
+    </script>
+</body>
+</html>

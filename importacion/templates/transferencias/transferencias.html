@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Transferencias</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="/static/css/transferencias/transferencias.css">
+</head>
+<body>
+    <!-- Floating Feedback Toast -->
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong class="me-auto" id="toastTitle">Notificación</strong>
+                <small id="toastTime">Ahora</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                Operación completada con éxito.
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid content-wrapper">
+        <div class="row mb-4 align-items-center">
+            <div class="col">
+                <h1 class="page-title"><i class="bi bi-cash-coin me-2"></i>Gestión de Transferencias</h1>
+            </div>
+            <div class="col-auto d-none d-md-block">
+                <button class="btn btn-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasHelp">
+                    <i class="bi bi-question-circle me-1"></i> Ayuda
+                </button>
+            </div>
+        </div>
+
+        <!-- Balance Cards -->
+        <div class="row mb-4 balance-cards">
+            <div class="col-md-4 col-sm-6 mb-3">
+                <div class="card balance-card" data-bs-toggle="modal" data-bs-target="#modalBalanceExportador">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-1 text-muted">Balance Exportadores</h6>
+                                <h3 class="card-title mb-0">${{ total_balance_exportadores|default:"0.00"|floatformat:2 }}</h3>
+                                <p class="text-muted mb-0">Saldo disponible total</p>
+                            </div>
+                            <div class="icon-box bg-primary">
+                                <i class="bi bi-truck"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6 mb-3">
+                <div class="card balance-card" data-bs-toggle="modal" data-bs-target="#modalBalanceAduana">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-1 text-muted">Balance Aduanas</h6>
+                                <h3 class="card-title mb-0">${{ total_balance_aduanas|default:"0.00"|floatformat:2 }}</h3>
+                                <p class="text-muted mb-0">Saldo disponible total</p>
+                            </div>
+                            <div class="icon-box bg-warning">
+                                <i class="bi bi-building"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6 mb-3">
+                <div class="card balance-card" data-bs-toggle="modal" data-bs-target="#modalBalanceCarga">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-1 text-muted">Balance Agencias de Carga</h6>
+                                <h3 class="card-title mb-0">${{ total_balance_cargas|default:"0.00"|floatformat:2 }}</h3>
+                                <p class="text-muted mb-0">Saldo disponible total</p>
+                            </div>
+                            <div class="icon-box bg-info">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation with Pills style -->
+        <ul class="nav nav-pills mb-4 custom-tabs" id="transferenciasTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="exportador-tab" data-bs-toggle="tab" data-bs-target="#exportador" type="button" role="tab" aria-controls="exportador" aria-selected="true">
+                    <i class="bi bi-truck"></i> Exportadores
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="aduana-tab" data-bs-toggle="tab" data-bs-target="#aduana" type="button" role="tab" aria-controls="aduana" aria-selected="false">
+                    <i class="bi bi-building"></i> Aduanas
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="carga-tab" data-bs-toggle="tab" data-bs-target="#carga" type="button" role="tab" aria-controls="carga" aria-selected="false">
+                    <i class="bi bi-box-seam"></i> Agencias de Carga
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content with enhanced styling -->
+        <div class="tab-content" id="transferenciasTabContent">
+            <!-- Exportador Tab -->
+            <div class="tab-pane fade {% if active_tab == 'exportador' %}show active{% endif %}" id="exportador" role="tabpanel" aria-labelledby="exportador-tab">
+                <div class="card content-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-truck me-2"></i>Transferencias a Exportadores
+                        </h5>
+                        <div class="actions">
+                            <button type="button" class="btn btn-primary btn-with-icon" data-bs-toggle="modal" data-bs-target="#modalCrearExportador">
+                                <i class="bi bi-plus-circle"></i> Nueva Transferencia
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-filters d-flex flex-wrap justify-content-between mb-3">
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="input-group search-box">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" id="searchExportador" placeholder="Buscar...">
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-funnel"></i> Filtrar
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li><a class="dropdown-item" href="#" data-filter="all">Todas</a></li>
+                                    <li><a class="dropdown-item" href="#" data-filter="month">Último mes</a></li>
+                                    <li><a class="dropdown-item" href="#" data-filter="week">Última semana</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive table-container">
+                            <table class="table table-striped table-hover data-table" id="tablaExportador">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th>Exportador</th>
+                                        <th>Referencia</th>
+                                        <th>Fecha</th>
+                                        <th class="text-end">Valor USD</th>
+                                        <th class="text-end">Valor EUR</th>
+                                        <th class="text-end">TRM</th>
+                                        <th>Concepto</th>
+                                        <th class="text-end">Saldo</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transferencia in transferencias_exportador %}
+                                    <tr>
+                                        <td class="text-center id-column">{{ transferencia.id }}</td>
+                                        <td>{{ transferencia.exportador.nombre }}</td>
+                                        <td>
+                                            <span class="badge bg-light text-dark">{{ transferencia.referencia }}</span>
+                                        </td>
+                                        <td>{{ transferencia.fecha_transferencia|date:"d/m/Y" }}</td>
+                                        <td class="text-end">
+                                            <span class="currency-value">${{ transferencia.valor_transferencia|floatformat:2 }}</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="currency-value">€{{ transferencia.valor_transferencia_eur|floatformat:2 }}</span>
+                                        </td>
+                                        <td class="text-end">{{ transferencia.trm|floatformat:2 }}</td>
+                                        <td>
+                                            <span class="truncate-text" data-bs-toggle="tooltip" title="{{ transferencia.concepto }}">
+                                                {{ transferencia.concepto|truncatechars:20 }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="currency-value fw-bold">${{ transferencia.saldo_transferencia|floatformat:2 }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="action-buttons">
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEditarExportador{{ transferencia.id }}" data-bs-toggle="tooltip" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarExportador{{ transferencia.id }}" data-bs-toggle="tooltip" title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="4" class="text-end">Total:</th>
+                                        <th class="text-end">$0.00</th>
+                                        <th class="text-end">€0.00</th>
+                                        <th></th>
+                                        <th></th>
+                                        <th class="text-end">$0.00</th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        
+                        {% if active_tab == 'exportador' and is_paginated %}
+                        <div class="pagination-container mt-4">
+                            <nav aria-label="Navegación de transferencias">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=exportador&page=1" aria-label="Primera">
+                                                <span aria-hidden="true">&laquo;&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=exportador&page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Primera">
+                                                <span aria-hidden="true">&laquo;&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Anterior">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">
+                                            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=exportador&page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=exportador&page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                                                <span aria-hidden="true">&raquo;&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Siguiente">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Última">
+                                                <span aria-hidden="true">&raquo;&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Aduana Tab -->
+            <div class="tab-pane fade {% if active_tab == 'aduana' %}show active{% endif %}" id="aduana" role="tabpanel" aria-labelledby="aduana-tab">
+                <div class="card content-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-building me-2"></i>Transferencias a Agencias de Aduana
+                        </h5>
+                        <div class="actions">
+                            <button type="button" class="btn btn-primary btn-with-icon" data-bs-toggle="modal" data-bs-target="#modalCrearAduana">
+                                <i class="bi bi-plus-circle"></i> Nueva Transferencia
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-filters d-flex flex-wrap justify-content-between mb-3">
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="input-group search-box">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" id="searchAduana" placeholder="Buscar...">
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-funnel"></i> Filtrar
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                                    <li><a class="dropdown-item" href="#" data-filter="all">Todas</a></li>
+                                    <li><a class="dropdown-item" href="#" data-filter="month">Último mes</a></li>
+                                    <li><a class="dropdown-item" href="#" data-filter="week">Última semana</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive table-container">
+                            <table class="table table-striped table-hover data-table" id="tablaAduana">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th>Agencia Aduana</th>
+                                        <th>Referencia</th>
+                                        <th>Fecha</th>
+                                        <th class="text-end">Valor USD</th>
+                                        <th>Concepto</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transferencia in transferencias_aduana %}
+                                    <tr>
+                                        <td class="text-center id-column">{{ transferencia.id }}</td>
+                                        <td>{{ transferencia.agencia_aduana.nombre }}</td>
+                                        <td>
+                                            <span class="badge bg-light text-dark">{{ transferencia.referencia }}</span>
+                                        </td>
+                                        <td>{{ transferencia.fecha_transferencia|date:"d/m/Y" }}</td>
+                                        <td class="text-end">
+                                            <span class="currency-value">${{ transferencia.valor_transferencia|floatformat:2 }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="truncate-text" data-bs-toggle="tooltip" title="{{ transferencia.concepto }}">
+                                                {{ transferencia.concepto|truncatechars:20 }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="action-buttons">
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEditarAduana{{ transferencia.id }}" data-bs-toggle="tooltip" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarAduana{{ transferencia.id }}" data-bs-toggle="tooltip" title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="4" class="text-end">Total:</th>
+                                        <th class="text-end">$0.00</th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        
+                        <!-- ... similar pagination for aduana tab ... -->
+                        <div class="pagination-container mt-4">
+                            <nav aria-label="Navegación de transferencias">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=aduana&page=1" aria-label="Primera">
+                                                <span aria-hidden="true">&laquo;&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=aduana&page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Primera">
+                                                <span aria-hidden="true">&laquo;&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Anterior">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">
+                                            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=aduana&page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=aduana&page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                                                <span aria-hidden="true">&raquo;&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Siguiente">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Última">
+                                                <span aria-hidden="true">&raquo;&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carga Tab -->
+            <div class="tab-pane fade {% if active_tab == 'carga' %}show active{% endif %}" id="carga" role="tabpanel" aria-labelledby="carga-tab">
+                <div class="card content-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-box-seam me-2"></i>Transferencias a Agencias de Carga
+                        </h5>
+                        <div class="actions">
+                            <button type="button" class="btn btn-primary btn-with-icon" data-bs-toggle="modal" data-bs-target="#modalCrearCarga">
+                                <i class="bi bi-plus-circle"></i> Nueva Transferencia
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-filters d-flex flex-wrap justify-content-between mb-3">
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="input-group search-box">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" id="searchCarga" placeholder="Buscar...">
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-funnel"></i> Filtrar
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
+                                    <li><a class="dropdown-item" href="#" data-filter="all">Todas</a></li>
+                                    <li><a class="dropdown-item" href="#" data-filter="month">Último mes</a></li>
+                                    <li><a class="dropdown-item" href="#" data-filter="week">Última semana</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive table-container">
+                            <table class="table table-striped table-hover data-table" id="tablaCarga">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th>Agencia Carga</th>
+                                        <th>Referencia</th>
+                                        <th>Fecha</th>
+                                        <th class="text-end">Valor USD</th>
+                                        <th class="text-end">Valor EUR</th>
+                                        <th class="text-end">TRM</th>
+                                        <th>Concepto</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transferencia in transferencias_carga %}
+                                    <tr>
+                                        <td class="text-center id-column">{{ transferencia.id }}</td>
+                                        <td>{{ transferencia.agencia_carga.nombre }}</td>
+                                        <td>
+                                            <span class="badge bg-light text-dark">{{ transferencia.referencia }}</span>
+                                        </td>
+                                        <td>{{ transferencia.fecha_transferencia|date:"d/m/Y" }}</td>
+                                        <td class="text-end">
+                                            <span class="currency-value">${{ transferencia.valor_transferencia|floatformat:2 }}</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="currency-value">€{{ transferencia.valor_transferencia_eur|floatformat:2 }}</span>
+                                        </td>
+                                        <td class="text-end">{{ transferencia.trm|floatformat:2 }}</td>
+                                        <td>
+                                            <span class="truncate-text" data-bs-toggle="tooltip" title="{{ transferencia.concepto }}">
+                                                {{ transferencia.concepto|truncatechars:20 }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="action-buttons">
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEditarCarga{{ transferencia.id }}" data-bs-toggle="tooltip" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarCarga{{ transferencia.id }}" data-bs-toggle="tooltip" title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="4" class="text-end">Total:</th>
+                                        <th class="text-end">$0.00</th>
+                                        <th class="text-end">€0.00</th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        
+                        <!-- ... similar pagination for carga tab ... -->
+                        <div class="pagination-container mt-4">
+                            <nav aria-label="Navegación de transferencias">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=carga&page=1" aria-label="Primera">
+                                                <span aria-hidden="true">&laquo;&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=carga&page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Primera">
+                                                <span aria-hidden="true">&laquo;&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Anterior">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">
+                                            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=carga&page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=carga&page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                                                <span aria-hidden="true">&raquo;&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Siguiente">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Última">
+                                                <span aria-hidden="true">&raquo;&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Offcanvas -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasHelp" aria-labelledby="offcanvasHelpLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasHelpLabel"><i class="bi bi-question-circle me-2"></i>Ayuda</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="help-section">
+                <h6>Gestión de Transferencias</h6>
+                <p>Este módulo le permite administrar todas las transferencias realizadas a exportadores, agencias de aduana y agencias de carga.</p>
+                <hr>
+                <h6>Cómo usar este módulo</h6>
+                <ul>
+                    <li><strong>Crear transferencia:</strong> Haga clic en el botón "Nueva Transferencia" en la sección correspondiente.</li>
+                    <li><strong>Editar transferencia:</strong> Haga clic en el botón con ícono de lápiz en la fila de la transferencia.</li>
+                    <li><strong>Eliminar transferencia:</strong> Haga clic en el botón con ícono de papelera en la fila de la transferencia.</li>
+                    <li><strong>Filtrar:</strong> Use el menú desplegable de filtros para ver transferencias específicas.</li>
+                    <li><strong>Buscar:</strong> Use el campo de búsqueda para encontrar transferencias específicas.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    
+    <!-- Exportador Create Modal -->
+    <div class="modal fade" id="modalCrearExportador" tabindex="-1" aria-labelledby="modalCrearExportadorLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'importacion:crear_transferencia_exportador' %}" method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalCrearExportadorLabel">
+                            <i class="bi bi-truck me-2"></i>Nueva Transferencia a Exportador
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="exportador" class="form-label">Exportador <span class="text-danger">*</span></label>
+                            <select class="form-select" id="exportador" name="exportador" required>
+                                <option value="">Seleccionar Exportador</option>
+                                {% for exportador in exportadores %}
+                                <option value="{{ exportador.id }}">{{ exportador.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Por favor seleccione un exportador.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="referencia" class="form-label">Referencia <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="referencia" name="referencia" required>
+                            <div class="invalid-feedback">Este campo es obligatorio.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_transferencia" class="form-label">Fecha de Transferencia <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="fecha_transferencia" name="fecha_transferencia" required>
+                            <div class="invalid-feedback">Por favor ingrese una fecha válida.</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="valor_transferencia" class="form-label">Valor USD <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia" name="valor_transferencia" required>
+                                    <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="valor_transferencia_eur" class="form-label">Valor EUR <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia_eur" name="valor_transferencia_eur" required>
+                                    <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
+                                </div>
+                                <div class="form-text trm-calculation"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="concepto" class="form-label">Concepto</label>
+                            <textarea class="form-control" id="concepto" name="concepto" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aduana Create Modal -->
+    <div class="modal fade" id="modalCrearAduana" tabindex="-1" aria-labelledby="modalCrearAduanaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'importacion:crear_transferencia_aduana' %}" method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalCrearAduanaLabel">
+                            <i class="bi bi-building me-2"></i>Nueva Transferencia a Agencia de Aduana
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="agencia_aduana" class="form-label">Agencia de Aduana <span class="text-danger">*</span></label>
+                            <select class="form-select" id="agencia_aduana" name="agencia_aduana" required>
+                                <option value="">Seleccionar Agencia de Aduana</option>
+                                {% for agencia in agencias_aduana %}
+                                <option value="{{ agencia.id }}">{{ agencia.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Por favor seleccione una agencia de aduana.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="referencia" class="form-label">Referencia <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="referencia" name="referencia" required>
+                            <div class="invalid-feedback">Este campo es obligatorio.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_transferencia" class="form-label">Fecha de Transferencia <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="fecha_transferencia" name="fecha_transferencia" required>
+                            <div class="invalid-feedback">Por favor ingrese una fecha válida.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="valor_transferencia" class="form-label">Valor de Transferencia (USD) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia" name="valor_transferencia" required>
+                                <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="concepto" class="form-label">Concepto</label>
+                            <textarea class="form-control" id="concepto" name="concepto" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carga Create Modal -->
+    <div class="modal fade" id="modalCrearCarga" tabindex="-1" aria-labelledby="modalCrearCargaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'importacion:crear_transferencia_carga' %}" method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalCrearCargaLabel">
+                            <i class="bi bi-box-seam me-2"></i>Nueva Transferencia a Agencia de Carga
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="agencia_carga" class="form-label">Agencia de Carga <span class="text-danger">*</span></label>
+                            <select class="form-select" id="agencia_carga" name="agencia_carga" required>
+                                <option value="">Seleccionar Agencia de Carga</option>
+                                {% for agencia in agencias_carga %}
+                                <option value="{{ agencia.id }}">{{ agencia.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Por favor seleccione una agencia de carga.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="referencia" class="form-label">Referencia <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="referencia" name="referencia" required>
+                            <div class="invalid-feedback">Este campo es obligatorio.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_transferencia" class="form-label">Fecha de Transferencia <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="fecha_transferencia" name="fecha_transferencia" required>
+                            <div class="invalid-feedback">Por favor ingrese una fecha válida.</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="valor_transferencia" class="form-label">Valor USD <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia" name="valor_transferencia" required>
+                                    <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="valor_transferencia_eur" class="form-label">Valor EUR <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia_eur" name="valor_transferencia_eur" required>
+                                    <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
+                                </div>
+                                <div class="form-text trm-calculation"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="concepto" class="form-label">Concepto</label>
+                            <textarea class="form-control" id="concepto" name="concepto" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit and Delete Modals for Exportador -->
+    {% for transferencia in transferencias_exportador %}
+    <!-- Edit Modal -->
+    <div class="modal fade" id="modalEditarExportador{{ transferencia.id }}" tabindex="-1" aria-labelledby="modalEditarExportadorLabel{{ transferencia.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'importacion:editar_transferencia_exportador' transferencia.id %}" method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalEditarExportadorLabel{{ transferencia.id }}">
+                            <i class="bi bi-truck me-2"></i>Editar Transferencia a Exportador
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="exportador{{ transferencia.id }}" class="form-label">Exportador <span class="text-danger">*</span></label>
+                            <select class="form-select" id="exportador{{ transferencia.id }}" name="exportador" required>
+                                {% for exportador in exportadores %}
+                                <option value="{{ exportador.id }}" {% if exportador.id == transferencia.exportador.id %}selected{% endif %}>{{ exportador.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Por favor seleccione un exportador.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="referencia{{ transferencia.id }}" class="form-label">Referencia <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="referencia{{ transferencia.id }}" name="referencia" value="{{ transferencia.referencia }}" required>
+                            <div class="invalid-feedback">Este campo es obligatorio.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_transferencia{{ transferencia.id }}" class="form-label">Fecha de Transferencia <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="fecha_transferencia{{ transferencia.id }}" name="fecha_transferencia" value="{{ transferencia.fecha_transferencia|date:'Y-m-d' }}" required>
+                            <div class="invalid-feedback">Por favor ingrese una fecha válida.</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="valor_transferencia{{ transferencia.id }}" class="form-label">Valor USD <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia{{ transferencia.id }}" name="valor_transferencia" value="{{ transferencia.valor_transferencia|stringformat:'g' }}" required>
+                                    <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="valor_transferencia_eur{{ transferencia.id }}" class="form-label">Valor EUR <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia_eur{{ transferencia.id }}" name="valor_transferencia_eur" value="{{ transferencia.valor_transferencia_eur|stringformat:'g' }}" required>
+                                    <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
+                                </div>
+                                <div class="form-text trm-calculation"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="concepto{{ transferencia.id }}" class="form-label">Concepto</label>
+                            <textarea class="form-control" id="concepto{{ transferencia.id }}" name="concepto" rows="3">{{ transferencia.concepto }}</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            Actualizar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Modal -->
+    <div class="modal fade" id="modalEliminarExportador{{ transferencia.id }}" tabindex="-1" aria-labelledby="modalEliminarExportadorLabel{{ transferencia.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'importacion:eliminar_transferencia_exportador' transferencia.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalEliminarExportadorLabel{{ transferencia.id }}">
+                            <i class="bi bi-trash me-2"></i>Confirmar Eliminación
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Está seguro que desea eliminar la transferencia <strong>{{ transferencia.referencia }}</strong> al exportador <strong>{{ transferencia.exportador.nombre }}</strong>?</p>
+                        <p class="text-danger">Esta acción no se puede deshacer.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Edit and Delete Modals for Aduana -->
+    {% for transferencia in transferencias_aduana %}
+    <!-- Edit Modal -->
+    <div class="modal fade" id="modalEditarAduana{{ transferencia.id }}" tabindex="-1" aria-labelledby="modalEditarAduanaLabel{{ transferencia.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'importacion:editar_transferencia_aduana' transferencia.id %}" method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalEditarAduanaLabel{{ transferencia.id }}">
+                            <i class="bi bi-building me-2"></i>Editar Transferencia a Agencia de Aduana
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="agencia_aduana{{ transferencia.id }}" class="form-label">Agencia de Aduana <span class="text-danger">*</span></label>
+                            <select class="form-select" id="agencia_aduana{{ transferencia.id }}" name="agencia_aduana" required>
+                                {% for agencia in agencias_aduana %}
+                                <option value="{{ agencia.id }}" {% if agencia.id == transferencia.agencia_aduana.id %}selected{% endif %}>{{ agencia.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Por favor seleccione una agencia de aduana.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="referencia{{ transferencia.id }}" class="form-label">Referencia <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="referencia{{ transferencia.id }}" name="referencia" value="{{ transferencia.referencia }}" required>
+                            <div class="invalid-feedback">Este campo es obligatorio.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_transferencia{{ transferencia.id }}" class="form-label">Fecha de Transferencia <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="fecha_transferencia{{ transferencia.id }}" name="fecha_transferencia" value="{{ transferencia.fecha_transferencia|date:'Y-m-d' }}" required>
+                            <div class="invalid-feedback">Por favor ingrese una fecha válida.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="valor_transferencia{{ transferencia.id }}" class="form-label">Valor de Transferencia (USD) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia{{ transferencia.id }}" name="valor_transferencia" value="{{ transferencia.valor_transferencia|stringformat:'g' }}" required>
+                                <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="concepto{{ transferencia.id }}" class="form-label">Concepto</label>
+                            <textarea class="form-control" id="concepto{{ transferencia.id }}" name="concepto" rows="3">{{ transferencia.concepto }}</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            Actualizar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Modal -->
+    <div class="modal fade" id="modalEliminarAduana{{ transferencia.id }}" tabindex="-1" aria-labelledby="modalEliminarAduanaLabel{{ transferencia.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'importacion:eliminar_transferencia_aduana' transferencia.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalEliminarAduanaLabel{{ transferencia.id }}">
+                            <i class="bi bi-trash me-2"></i>Confirmar Eliminación
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Está seguro que desea eliminar la transferencia <strong>{{ transferencia.referencia }}</strong> a la agencia de aduana <strong>{{ transferencia.agencia_aduana.nombre }}</strong>?</p>
+                        <p class="text-danger">Esta acción no se puede deshacer.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Edit and Delete Modals for Carga -->
+    {% for transferencia in transferencias_carga %}
+    <!-- Edit Modal -->
+    <div class="modal fade" id="modalEditarCarga{{ transferencia.id }}" tabindex="-1" aria-labelledby="modalEditarCargaLabel{{ transferencia.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'importacion:editar_transferencia_carga' transferencia.id %}" method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalEditarCargaLabel{{ transferencia.id }}">
+                            <i class="bi bi-box-seam me-2"></i>Editar Transferencia a Agencia de Carga
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="agencia_carga{{ transferencia.id }}" class="form-label">Agencia de Carga <span class="text-danger">*</span></label>
+                            <select class="form-select" id="agencia_carga{{ transferencia.id }}" name="agencia_carga" required>
+                                {% for agencia in agencias_carga %}
+                                <option value="{{ agencia.id }}" {% if agencia.id == transferencia.agencia_carga.id %}selected{% endif %}>{{ agencia.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Por favor seleccione una agencia de carga.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="referencia{{ transferencia.id }}" class="form-label">Referencia <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="referencia{{ transferencia.id }}" name="referencia" value="{{ transferencia.referencia }}" required>
+                            <div class="invalid-feedback">Este campo es obligatorio.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_transferencia{{ transferencia.id }}" class="form-label">Fecha de Transferencia <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="fecha_transferencia{{ transferencia.id }}" name="fecha_transferencia" value="{{ transferencia.fecha_transferencia|date:'Y-m-d' }}" required>
+                            <div class="invalid-feedback">Por favor ingrese una fecha válida.</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="valor_transferencia{{ transferencia.id }}" class="form-label">Valor USD <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia{{ transferencia.id }}" name="valor_transferencia" value="{{ transferencia.valor_transferencia|stringformat:'g' }}" required>
+                                    <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="valor_transferencia_eur{{ transferencia.id }}" class="form-label">Valor EUR <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia_eur{{ transferencia.id }}" name="valor_transferencia_eur" value="{{ transferencia.valor_transferencia_eur|stringformat:'g' }}" required>
+                                    <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
+                                </div>
+                                <div class="form-text trm-calculation"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="concepto{{ transferencia.id }}" class="form-label">Concepto</label>
+                            <textarea class="form-control" id="concepto{{ transferencia.id }}" name="concepto" rows="3">{{ transferencia.concepto }}</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            Actualizar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Modal -->
+    <div class="modal fade" id="modalEliminarCarga{{ transferencia.id }}" tabindex="-1" aria-labelledby="modalEliminarCargaLabel{{ transferencia.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'importacion:eliminar_transferencia_carga' transferencia.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalEliminarCargaLabel{{ transferencia.id }}">
+                            <i class="bi bi-trash me-2"></i>Confirmar Eliminación
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Está seguro que desea eliminar la transferencia <strong>{{ transferencia.referencia }}</strong> a la agencia de carga <strong>{{ transferencia.agencia_carga.nombre }}</strong>?</p>
+                        <p class="text-danger">Esta acción no se puede deshacer.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Exportador Balance Modal -->
+    <div class="modal fade" id="modalBalanceExportador" tabindex="-1" aria-labelledby="modalBalanceExportadorLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalBalanceExportadorLabel">
+                        <i class="bi bi-truck me-2"></i>Balance de Exportadores
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Exportador</th>
+                                    <th class="text-end">Saldo Disponible USD</th>
+                                    <th class="text-center">Última Actualización</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for balance in balances_exportador %}
+                                <tr>
+                                    <td>{{ balance.exportador.nombre }}</td>
+                                    <td class="text-end">${{ balance.saldo_disponible|floatformat:2 }}</td>
+                                    <td class="text-center">{{ balance.ultima_actualizacion|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No hay balances registrados</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th class="text-end">Total:</th>
+                                    <th class="text-end">${{ total_balance_exportadores|default:"0.00"|floatformat:2 }}</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aduana Balance Modal -->
+    <div class="modal fade" id="modalBalanceAduana" tabindex="-1" aria-labelledby="modalBalanceAduanaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalBalanceAduanaLabel">
+                        <i class="bi bi-building me-2"></i>Balance de Agencias de Aduana
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Agencia Aduana</th>
+                                    <th class="text-end">Saldo Disponible USD</th>
+                                    <th class="text-center">Última Actualización</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for balance in balances_aduana %}
+                                <tr>
+                                    <td>{{ balance.agencia_aduana.nombre }}</td>
+                                    <td class="text-end">${{ balance.saldo_disponible|floatformat:2 }}</td>
+                                    <td class="text-center">{{ balance.ultima_actualizacion|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No hay balances registrados</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th class="text-end">Total:</th>
+                                    <th class="text-end">${{ total_balance_aduanas|default:"0.00"|floatformat:2 }}</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carga Balance Modal -->
+    <div class="modal fade" id="modalBalanceCarga" tabindex="-1" aria-labelledby="modalBalanceCargaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalBalanceCargaLabel">
+                        <i class="bi bi-box-seam me-2"></i>Balance de Agencias de Carga
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Agencia Carga</th>
+                                    <th class="text-end">Saldo Disponible USD</th>
+                                    <th class="text-center">Última Actualización</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for balance in balances_carga %}
+                                <tr>
+                                    <td>{{ balance.agencia_carga.nombre }}</td>
+                                    <td class="text-end">${{ balance.saldo_disponible|floatformat:2 }}</td>
+                                    <td class="text-center">{{ balance.ultima_actualizacion|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No hay balances registrados</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th class="text-end">Total:</th>
+                                    <th class="text-end">${{ total_balance_cargas|default:"0.00"|floatformat:2 }}</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Set the active tab based on the URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTab = urlParams.get('tab');
+            
+            if (activeTab) {
+                $(`#${activeTab}-tab`).tab('show');
+            }
+            
+            // Update tab parameter when changing tabs (server-side reload)
+            $('.nav-pills button').on('click', function (e) {
+                const targetId = $(this).attr('id').replace('-tab', '');
+                window.location.href = `?tab=${targetId}`;
+                e.preventDefault(); // Prevent the default tab switching behavior
+            });
+            
+            // Initialize DataTables
+            function initDataTable(tableId, columnsConfig) {
+                return $(`#${tableId}`).DataTable({
+                    paging: false, // Disable DataTables pagination (using Django's)
+                    searching: true,
+                    ordering: true,
+                    info: true,
+                    responsive: true,
+                    language: {
+                        search: "_INPUT_",
+                        searchPlaceholder: "Buscar...",
+                        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                        infoEmpty: "Mostrando 0 a 0 de 0 registros",
+                        infoFiltered: "(filtrado de _MAX_ registros totales)",
+                        zeroRecords: "No se encontraron registros coincidentes",
+                        emptyTable: "No hay datos disponibles en la tabla"
+                    },
+                    columnDefs: columnsConfig,
+                    // Calculate totals for footer
+                    footerCallback: function(row, data, start, end, display) {
+                        const api = this.api();
+                        
+                        // Calculate total for USD column
+                        if (columnsConfig.find(col => col.targets.includes(4))) {
+                            const usdTotal = api
+                                .column(4, { page: 'current' })
+                                .data()
+                                .reduce((a, b) => {
+                                    const value = parseFloat(b.replace(/[^\d.-]/g, ''));
+                                    return a + (isNaN(value) ? 0 : value);
+                                }, 0);
+                            
+                            $(api.column(4).footer()).html('$' + usdTotal.toFixed(2));
+                        }
+                        
+                        // Calculate total for EUR column if it exists
+                        if (columnsConfig.find(col => col.targets.includes(5))) {
+                            const eurTotal = api
+                                .column(5, { page: 'current' })
+                                .data()
+                                .reduce((a, b) => {
+                                    const value = parseFloat(b.replace(/[^\d.-]/g, ''));
+                                    return a + (isNaN(value) ? 0 : value);
+                                }, 0);
+                            
+                            $(api.column(5).footer()).html('€' + eurTotal.toFixed(2));
+                        }
+                        
+                        // Calculate total for Saldo column if it exists
+                        const saldoColIndex = tableId === 'tablaExportador' ? 8 : -1;
+                        if (saldoColIndex > 0) {
+                            const saldoTotal = api
+                                .column(saldoColIndex, { page: 'current' })
+                                .data()
+                                .reduce((a, b) => {
+                                    const value = parseFloat(b.replace(/[^\d.-]/g, ''));
+                                    return a + (isNaN(value) ? 0 : value);
+                                }, 0);
+                            
+                            $(api.column(saldoColIndex).footer()).html('$' + saldoTotal.toFixed(2));
+                        }
+                    }
+                });
+            }
+            
+            // Initialize DataTables for each tab with specific column configurations
+            const tablaExportador = initDataTable('tablaExportador', [
+                { targets: [0, 9], orderable: false },
+                { targets: [4, 5, 6, 8], className: 'text-end' }
+            ]);
+            
+            const tablaAduana = initDataTable('tablaAduana', [
+                { targets: [0, 6], orderable: false },
+                { targets: [4], className: 'text-end' }
+            ]);
+            
+            const tablaCarga = initDataTable('tablaCarga', [
+                { targets: [0, 8], orderable: false },
+                { targets: [4, 5, 6], className: 'text-end' }
+            ]);
+            
+            // Connect search boxes to DataTables
+            $('#searchExportador').on('keyup', function() {
+                tablaExportador.search(this.value).draw();
+            });
+            
+            $('#searchAduana').on('keyup', function() {
+                tablaAduana.search(this.value).draw();
+            });
+            
+            $('#searchCarga').on('keyup', function() {
+                tablaCarga.search(this.value).draw();
+            });
+            
+            // Filter functionality
+            $('.dropdown-item[data-filter]').click(function(e) {
+                e.preventDefault();
+                const filter = $(this).data('filter');
+                const table = $(this).closest('.tab-pane').find('table').DataTable();
+                
+                // Clear any existing search
+                table.search('').columns().search('').draw();
+                
+                if (filter === 'month') {
+                    // Filter for last month
+                    const today = new Date();
+                    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+                    const dateStr = formatDate(lastMonth);
+                    
+                    // Apply the search to the date column (assumes date is in column 3)
+                    table.column(3).search(dateStr, true, false, true).draw();
+                } else if (filter === 'week') {
+                    // Filter for last week
+                    const today = new Date();
+                    const lastWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
+                    const dateStr = formatDate(lastWeek);
+                    
+                    // Apply the search to the date column
+                    table.column(3).search(dateStr, true, false, true).draw();
+                } else {
+                    // Reset filters
+                    table.search('').columns().search('').draw();
+                }
+                
+                // Update dropdown button text
+                $(this).closest('.dropdown').find('.dropdown-toggle').html(
+                    '<i class="bi bi-funnel"></i> ' + $(this).text()
+                );
+            });
+            
+            function formatDate(date) {
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            }
+            
+            // Auto-close alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+            
+            // Form validation
+            (function () {
+                'use strict'
+                
+                // Fetch all forms we want to apply validation to
+                const forms = document.querySelectorAll('.needs-validation');
+                
+                // Loop over them and prevent submission on invalid
+                Array.from(forms).forEach(form => {
+                    form.addEventListener('submit', event => {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        } else {
+                            // Show loading spinner
+                            const submitBtn = form.querySelector('button[type="submit"]');
+                            const spinner = submitBtn.querySelector('.spinner-border');
+                            submitBtn.disabled = true;
+                            spinner.classList.remove('d-none');
+                        }
+                        
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            })();
+            
+            // Calculate TRM in real-time 
+            $('.modal').on('input', '[name="valor_transferencia"], [name="valor_transferencia_eur"]', function() {
+                const modal = $(this).closest('.modal');
+                const valorUSD = parseFloat(modal.find('[name="valor_transferencia"]').val()) || 0;
+                const valorEUR = parseFloat(modal.find('[name="valor_transferencia_eur"]').val()) || 0;
+                
+                if (valorEUR > 0 && valorUSD > 0) {
+                    const trm = (valorUSD / valorEUR).toFixed(4);
+                    modal.find('.trm-calculation').html(
+                        `TRM calculada: <strong>${trm}</strong>`
+                    );
+                } else {
+                    modal.find('.trm-calculation').html('');
+                }
+            });
+            
+            // Show toast function
+            window.showToast = function(title, message, type = 'success') {
+                const toast = $('#liveToast');
+                const toastTitle = $('#toastTitle');
+                const toastMessage = $('#toastMessage');
+                const toastTime = $('#toastTime');
+                
+                // Set content
+                toastTitle.text(title);
+                toastMessage.text(message);
+                toastTime.text('Ahora');
+                
+                // Set style based on type
+                toast.removeClass('bg-success bg-danger bg-warning bg-info');
+                switch(type) {
+                    case 'success':
+                        toast.addClass('bg-success text-white');
+                        break;
+                    case 'error':
+                        toast.addClass('bg-danger text-white');
+                        break;
+                    case 'warning':
+                        toast.addClass('bg-warning');
+                        break;
+                    case 'info':
+                        toast.addClass('bg-info');
+                        break;
+                }
+                
+                // Show the toast
+                const toastInstance = new bootstrap.Toast(toast);
+                toastInstance.show();
+            }
+            
+            // Detect Django messages and show as toast
+            {% if messages %}
+                {% for message in messages %}
+                    setTimeout(() => {
+                        showToast(
+                            '{{ message.tags|title }}', 
+                            '{{ message }}',
+                            '{{ message.tags }}'
+                        );
+                    }, 500);
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+</body>
+</html>

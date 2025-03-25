@@ -1,240 +1,27 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página No Encontrada - Heaven's Fruits</title>
+    <title>404 - Página no encontrada</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/404.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 20px;
-        }
-
-        .error-container {
-            text-align: center;
-            max-width: 600px;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .logo-container {
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .logo {
-            width: 120px;
-            height: 120px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            position: relative;
-            animation: float 3s ease-in-out infinite;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-15px);
-            }
-        }
-
-        .logo i {
-            font-size: 60px;
-            color: #667eea;
-        }
-
-        .fruits {
-            position: absolute;
-            font-size: 24px;
-            opacity: 0.2;
-            animation: spin 20s linear infinite;
-        }
-
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .error-title {
-            font-size: 48px;
-            color: #667eea;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .error-subtitle {
-            font-size: 24px;
-            color: #764ba2;
-            margin-bottom: 30px;
-            font-weight: 500;
-        }
-
-        .error-message {
-            font-size: 18px;
-            color: #4a5568;
-            margin-bottom: 40px;
-            line-height: 1.6;
-        }
-
-        .home-button {
-            display: inline-block;
-            padding: 15px 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        .home-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        /* Frutas decorativas */
-        .fruit-decoration {
-            position: absolute;
-            font-size: 20px;
-            opacity: 0.1;
-            z-index: 0;
-            color: #667eea;
-        }
-
-        .fruit-1 { top: 10%; left: 10%; animation: float 4s ease-in-out infinite; }
-        .fruit-2 { top: 20%; right: 15%; animation: float 3.5s ease-in-out infinite 0.5s; }
-        .fruit-3 { bottom: 15%; left: 15%; animation: float 4.5s ease-in-out infinite 1s; }
-        .fruit-4 { bottom: 20%; right: 10%; animation: float 4s ease-in-out infinite 1.5s; }
-
-        /* Decorative background circles */
-        .background-circle {
-            position: absolute;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            opacity: 0.05;
-        }
-
-        .circle-1 {
-            width: 200px;
-            height: 200px;
-            top: -100px;
-            right: -100px;
-        }
-
-        .circle-2 {
-            width: 150px;
-            height: 150px;
-            bottom: -75px;
-            left: -75px;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 480px) {
-            .error-container {
-                padding: 20px;
-            }
-
-            .error-title {
-                font-size: 36px;
-            }
-
-            .error-subtitle {
-                font-size: 20px;
-            }
-
-            .error-message {
-                font-size: 16px;
-            }
-
-            .logo {
-                width: 100px;
-                height: 100px;
-            }
-
-            .logo i {
-                font-size: 50px;
-            }
-        }
-    </style>
 </head>
 <body>
-    <div class="error-container">
-        <!-- Círculos decorativos -->
-        <div class="background-circle circle-1"></div>
-        <div class="background-circle circle-2"></div>
-
-        <!-- Frutas decorativas -->
-        <div class="fruit-decoration fruit-1"><i class="fas fa-lemon"></i></div>
-        <div class="fruit-decoration fruit-2"><i class="fas fa-apple-alt"></i></div>
-        <div class="fruit-decoration fruit-3"><i class="fas fa-apple-alt"></i></div>
-        <div class="fruit-decoration fruit-4"><i class="fas fa-lemon"></i></div>
-
-        <div class="logo-container">
-            <div class="logo">
-                <i class="fas fa-lemon"></i>
+    <div class="container">
+        <div class="error-card">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
             </div>
+            <h1>404</h1>
+            <h2>Página no encontrada</h2>
+            <p>Lo sentimos, la página que estás buscando no existe o ha sido movida.</p>
+            <a href="{% url 'home' %}" class="btn-home">
+                <i class="fas fa-home"></i> Volver al inicio
+            </a>
         </div>
-        
-        <h1 class="error-title">Heaven's Fruits Connect</h1>
-        <h2 class="error-subtitle">Error 404</h2>
-        <p class="error-message">¡Ups! Parece que esta página se ha extraviado en nuestro cultivo.
-            <br>No te preocupes, siempre puedes volver a casa.</p>
-        <a href="{% url 'home' %}" class="home-button">
-            <i class="fas fa-home"></i> Volver al inicio
-        </a>
     </div>
-
-    <script>
-        // Función para crear frutas flotantes aleatorias
-        function createFloatingFruits() {
-            const fruits = ['🍋', '🍊', '🍎', '🍐'];
-            const container = document.querySelector('.error-container');
-            const numFruits = 20;
-
-            for (let i = 0; i < numFruits; i++) {
-                const fruit = document.createElement('span');
-                fruit.className = 'fruits';
-                fruit.textContent = fruits[Math.floor(Math.random() * fruits.length)];
-                fruit.style.left = Math.random() * 100 + '%';
-                fruit.style.top = Math.random() * 100 + '%';
-                container.appendChild(fruit);
-            }
-        }
-
-        // Llamar a la función cuando se carga la página
-        window.addEventListener('load', createFloatingFruits);
-    </script>
 </body>
 </html>
