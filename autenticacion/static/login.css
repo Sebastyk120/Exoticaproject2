@@ -1,0 +1,418 @@
+/* iOS/Apple-inspired Login Form for L&M Exotic Fruit */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #42b883 0%, #3eb8c4 100%);
+    --secondary-color: #f2f2f7;
+    --text-color: #333;
+    --error-color: #ff3b30;
+    --highlight-color: #42b883;
+    --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --input-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --error-red: #ff3b30;
+    --success-green: #34c759;
+    --button-success: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: var(--secondary-color);
+    overflow-x: hidden;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    border-radius: 20px;
+    padding: 40px 30px;
+    box-shadow: var(--card-shadow);
+    transform: translateY(0);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: float 6s ease-in-out infinite;
+}
+
+.login-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+}
+
+.brand {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.brand h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 12px;
+    background: var(--primary-gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.logo-container img {
+    max-width: 170px;
+    height: auto;
+}
+
+h2 {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 26px;
+    transition: transform 0.3s ease;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    background-color: #f9f9fc;
+    box-shadow: var(--input-shadow);
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    box-shadow: 0 0 0 2px var(--highlight-color);
+    transform: translateY(-2px);
+}
+
+.input-group.error input {
+    border-color: var(--error-red);
+    animation: shake 0.5s ease-in-out;
+}
+
+.error-text {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    font-size: 12px;
+    color: var(--error-red);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.input-group.error .error-text {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.password-group {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #8e8e93;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    transition: all 0.2s ease;
+}
+
+.toggle-password:hover {
+    color: var(--highlight-color);
+}
+
+.toggle-password:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.input-group label {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: #8e8e93;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    background-color: transparent;
+    padding: 0 4px;
+    z-index: 2; /* Asegura que el label esté siempre por encima */
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: var(--highlight-color);
+    background-color: white;
+    z-index: 2;
+}
+
+.input-group input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px #f9f9fc inset;
+}
+
+.login-btn {
+    position: relative;
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    background: var(--primary-gradient);
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(66, 184, 131, 0.3);
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(66, 184, 131, 0.35);
+}
+
+.login-btn:active {
+    transform: translateY(1px);
+}
+
+.login-btn .btn-text {
+    position: relative;
+    z-index: 2;
+    transition: all 0.5s ease;
+}
+
+.login-btn .loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.login-btn:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: skewX(-30deg);
+    transition: all 0.5s ease;
+    z-index: 1;
+}
+
+.login-btn.loading {
+    animation: buttonPulse 2s infinite;
+    background: var(--button-success);
+    box-shadow: 0 4px 15px rgba(52, 199, 89, 0.4);
+}
+
+.login-btn.loading .btn-text {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.login-btn.loading .loader {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    animation: spin 1s linear infinite;
+}
+
+.login-btn.loading:before {
+    left: 100%;
+}
+
+.login-btn.success {
+    background: var(--success-green);
+}
+
+.login-btn.success .loader {
+    opacity: 0;
+}
+
+.login-btn.success:after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 24px;
+    animation: scaleIn 0.5s ease;
+}
+
+.error-message {
+    color: var(--error-color);
+    text-align: center;
+    margin: 15px 0;
+    font-size: 14px;
+    animation: shake 0.5s ease-in-out;
+}
+
+.links {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.links a {
+    color: var(--highlight-color);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.links a:hover {
+    text-decoration: underline;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@keyframes buttonPulse {
+    0% { box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3); }
+    50% { box-shadow: 0 4px 20px rgba(52, 199, 89, 0.6); }
+    100% { box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3); }
+}
+
+@keyframes scaleIn {
+    0% { transform: translate(-50%, -50%) scale(0); }
+    80% { transform: translate(-50%, -50%) scale(1.2); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Make the form adaptive to different screen sizes */
+@media (max-width: 576px) {
+    .login-card {
+        padding: 30px 20px;
+        max-width: 100%;
+        border-radius: 16px;
+    }
+    
+    .brand h1 {
+        font-size: 24px;
+    }
+    
+    h2 {
+        font-size: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .input-group input {
+        padding: 14px;
+    }
+
+    .input-group {
+        margin-bottom: 30px;
+    }
+
+    .input-group label {
+        font-size: 14px;
+    }
+
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label {
+        top: 0;
+        transform: translateY(-50%);
+        font-size: 11px;
+    }
+}
+
+/* Fix para iOS cuando el teclado está desplegado */
+@supports (-webkit-touch-callout: none) {
+    .input-group {
+        padding-top: 8px; /* Añade espacio extra arriba para el label */
+    }
+
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label {
+        background-color: white;
+        padding: 0 4px;
+        top: 0;
+        transform: translateY(-50%);
+        box-shadow: 0 0 0 2px white; /* Añade un "halo" blanco alrededor del label */
+        border-radius: 2px;
+        z-index: 3; /* Asegura que esté por encima del borde verde */
+    }
+
+    /* Ajuste adicional para el modo de enfoque */
+    .input-group input:focus {
+        padding-top: 20px; /* Aumenta el padding superior cuando está enfocado */
+        padding-bottom: 12px; /* Reduce el padding inferior para mantener la altura total */
+    }
+}
+
+/* Fix for floating label on iOS */
+@supports (-webkit-touch-callout: none) {
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label {
+        background-color: white;
+        padding: 0 4px;
+        top: 0;
+        transform: translateY(-50%);
+    }
+}
+
+/* Add a subtle placeholder to ensure label animation works properly */
+.input-group input::placeholder {
+    color: transparent;
+}

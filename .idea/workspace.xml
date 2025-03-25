@@ -4,53 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Automatizacion de PDF Aduana.">
-      <change afterPath="$PROJECT_DIR$/autenticacion/static/css/login.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/autenticacion/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/comercial/migrations/0008_alter_detalleventa_no_cajas_abono.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/comercial/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0016_alter_gastoscarga_conceptos_and_more.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0017_alter_detallepedido_no_cajas_nc.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/static/css/pedidos/pedidos.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/static/css/transferencias/transferencias.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/templates/carga/upload_pdf_carga.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/templates/pedidos/pedidos.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/templates/transferencias/transferencias.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/views_carga.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/views_pedidos.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/views_transferencias.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/migrations/0002_alter_presentacion_unique_together.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/static/css/frutas.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/static/css/lista_precios_ventas.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/static/css/presentaciones.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/templates/frutas.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/templates/lista_precios_importacion.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/templates/lista_precios_ventas.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/templates/presentaciones.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Exoticaproject/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/404.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/404.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/backup.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/backup.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/login2.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/registration/password_reset_complete.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/registration/password_reset_complete.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/registration/password_reset_confirm.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/registration/password_reset_confirm.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/registration/password_reset_done.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/registration/password_reset_done.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/registration/password_reset_email.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/registration/password_reset_email.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/registration/password_reset_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/registration/password_reset_form.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/registration/password_reset_subject.txt" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/registration/password_reset_subject.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/signup.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/signup.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf_aduana.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/views_aduana.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_aduana.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/productos/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/productos/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/productos/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/productos/views.py" afterDir="false" />
-    </list>
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Nuevas vistas" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -187,7 +141,7 @@
       <workItem from="1742733491802" duration="2481000" />
       <workItem from="1742760663264" duration="10347000" />
       <workItem from="1742777373673" duration="5213000" />
-      <workItem from="1742823901986" duration="21876000" />
+      <workItem from="1742823901986" duration="22637000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -221,7 +175,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742703721501</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Nuevas vistas">
+      <option name="closed" value="true" />
+      <created>1742877733395</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1742877733395</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -245,6 +207,7 @@
     <MESSAGE value="2" />
     <MESSAGE value="Finalizacion de logicas." />
     <MESSAGE value="Automatizacion de PDF Aduana." />
-    <option name="LAST_COMMIT_MESSAGE" value="Automatizacion de PDF Aduana." />
+    <MESSAGE value="Nuevas vistas" />
+    <option name="LAST_COMMIT_MESSAGE" value="Nuevas vistas" />
   </component>
 </project>

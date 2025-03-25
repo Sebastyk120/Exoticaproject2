@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Pedidos</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Añadir jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/pedidos/lista_pedidos.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Lista de Pedidos</h1>
+            <nav class="breadcrumb">
+                <a href="{% url 'home' %}">Inicio</a> &gt;
+                <span>Pedidos</span>
+            </nav>
+        </header>
+
+        <div class="main-content">
+            <div class="actions-bar">
+                <div class="search-bar">
+                    <form method="get" action="{% url 'importacion:lista_pedidos' %}">
+                        <input type="text" name="q" placeholder="Buscar por AWB, exportador..." value="{{ request.GET.q|default:'' }}">
+                        <button type="submit" class="btn btn-search"><i class="fas fa-search"></i></button>
+                    </form>
+                </div>
+                <div class="filter-options">
+                    <select name="estado" id="estado-filter">
+                        <option value="">Todos los estados</option>
+                        <option value="En Proceso">En Proceso</option>
+                        <option value="Completado">Completado</option>
+                    </select>
+                    <button id="reset-filters" class="btn btn-secondary">Reiniciar filtros</button>
+                </div>
+                <a href="{% url 'importacion:nuevo_pedido' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nuevo Pedido
+                </a>
+            </div>
+
+            <!-- Toggle Column Visibility -->
+            <div class="table-config">
+                <button id="toggle-columns" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-cog"></i> Configurar columnas
+                </button>
+                <div id="column-selector" class="column-selector" style="display: none;">
+                    <div class="column-selector-content">
+                        <h4>Mostrar/Ocultar Columnas</h4>
+                        <div class="checkbox-list">
+                            <!-- Columnas principales siempre visibles -->
+                            <label><input type="checkbox" data-column="id" checked disabled> ID</label>
+                            <label><input type="checkbox" data-column="exportador" checked disabled> Exportador</label>
+                            <label><input type="checkbox" data-column="fecha_entrega" checked> Fecha Entrega</label>
+                            <label><input type="checkbox" data-column="fecha_vencimiento" checked> Fecha Vencimiento</label>
+                            <label><input type="checkbox" data-column="semana" checked> Semana</label>
+                            <label><input type="checkbox" data-column="awb" checked> AWB</label>
+                            <label><input type="checkbox" data-column="cajas" checked> Cajas</label>
+                            <label><input type="checkbox" data-column="factura_usd" checked> Total USD</label>
+                            <label><input type="checkbox" data-column="factura_eur"> Total EUR</label>
+                            <label><input type="checkbox" data-column="nc_usd"> NC USD</label>
+                            <label><input type="checkbox" data-column="numero_factura"> Nº Factura</label>
+                            <label><input type="checkbox" data-column="numero_nc"> Nº NC</label>
+                            <label><input type="checkbox" data-column="observaciones"> Observaciones</label>
+                            <label><input type="checkbox" data-column="monto_pendiente" checked> Monto Pendiente</label>
+                            <label><input type="checkbox" data-column="estado" checked> Estado</label>
+                            <label><input type="checkbox" data-column="pagado" checked> Pagado</label>
+                            <!-- Acciones siempre visibles -->
+                            <label><input type="checkbox" data-column="acciones" checked disabled> Acciones</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <section class="pedidos-list">
+                <div class="table-responsive">
+                    <table id="pedidos-table">
+                        <thead>
+                            <tr>
+                                <th class="column-id">ID</th>
+                                <th class="column-exportador">Exportador</th>
+                                <th class="column-fecha_entrega">Fecha Entrega</th>
+                                <th class="column-fecha_vencimiento">Fecha Vencimiento</th>
+                                <th class="column-semana">Semana</th>
+                                <th class="column-awb">AWB</th>
+                                <th class="column-cajas">Cajas Recibidas</th>
+                                <th class="column-factura_usd">Total USD</th>
+                                <th class="column-factura_eur">Total EUR</th>
+                                <th class="column-nc_usd">NC USD</th>
+                                <th class="column-numero_factura">Nº Factura</th>
+                                <th class="column-numero_nc">Nº NC</th>
+                                <th class="column-observaciones">Observaciones</th>
+                                <th class="column-monto_pendiente">Monto Pendiente</th>
+                                <th class="column-estado">Estado</th>
+                                <th class="column-pagado">Pagado</th>
+                                <th class="column-acciones">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pedido in pedidos %}
+                            <tr>
+                                <td class="column-id">#{{ pedido.id }}</td>
+                                <td class="column-exportador">{{ pedido.exportador.nombre }}</td>
+                                <td class="column-fecha_entrega">{{ pedido.fecha_entrega|date:"d/m/Y" }}</td>
+                                <td class="column-fecha_vencimiento">{{ pedido.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</td>
+                                <td class="column-semana">{{ pedido.semana|default:"-" }}</td>
+                                <td class="column-awb">{{ pedido.awb|default:"-" }}</td>
+                                <td class="column-cajas">{{ pedido.total_cajas_recibidas|default:0 }}/{{ pedido.total_cajas_solicitadas|default:0 }}</td>
+                                <td class="column-factura_usd">${{ pedido.valor_total_factura_usd|default:0|floatformat:2 }}</td>
+                                <td class="column-factura_eur">€{{ pedido.valor_factura_eur|default:0|floatformat:2 }}</td>
+                                <td class="column-nc_usd">${{ pedido.valor_total_nc_usd|default:0|floatformat:2 }}</td>
+                                <td class="column-numero_factura">{{ pedido.numero_factura|default:"-" }}</td>
+                                <td class="column-numero_nc">{{ pedido.numero_nc|default:"-" }}</td>
+                                <td class="column-observaciones">
+                                    {% if pedido.observaciones %}
+                                    <span class="tooltip" data-tooltip="{{ pedido.observaciones }}">
+                                        {{ pedido.observaciones|truncatechars:15 }}
+                                    </span>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td class="column-monto_pendiente">${{ pedido.monto_pendiente|default:0|floatformat:2 }}</td>
+                                <td class="column-estado">
+                                    <span class="status-badge status-{{ pedido.estado_pedido|slugify }}">
+                                        {{ pedido.estado_pedido }}
+                                    </span>
+                                </td>
+                                <td class="column-pagado">
+                                    {% if pedido.pagado %}
+                                    <i class="fas fa-check text-success"></i>
+                                    {% else %}
+                                    <i class="fas fa-times text-danger"></i>
+                                    {% endif %}
+                                </td>
+                                <td class="column-acciones actions">
+                                    <a href="{% url 'importacion:detalle_pedido' pedido.id %}" class="btn btn-icon" title="Ver/Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-icon btn-invoice" title="Ver Factura" 
+                                            {% if not pedido.numero_factura %}disabled{% endif %}>
+                                        <i class="fas fa-file-invoice"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-icon btn-details" title="Ver Detalles"
+                                            data-pedido-id="{{ pedido.id }}">
+                                        <i class="fas fa-boxes"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="17" class="empty-message">
+                                    <div>
+                                        <i class="fas fa-box-open"></i>
+                                        <p>No hay pedidos para mostrar</p>
+                                        <a href="{% url 'importacion:nuevo_pedido' %}" class="btn btn-primary">Crear Pedido</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if is_paginated %}
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">&laquo; Primera</a>
+                            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">Anterior</a>
+                        {% endif %}
+
+                        <span class="current">
+                            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                        </span>
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">Siguiente</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">Última &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+
+    <!-- Modal para mostrar detalles del pedido -->
+    <div id="detalles-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-info-circle"></i> Detalles del Pedido #<span id="modal-pedido-id"></span></h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="pedido-info">
+                    <div class="info-header">
+                        <div class="info-row">
+                            <div class="info-item">
+                                <label>Exportador:</label>
+                                <span id="modal-exportador"></span>
+                            </div>
+                            <div class="info-item">
+                                <label>Fecha Entrega:</label>
+                                <span id="modal-fecha-entrega"></span>
+                            </div>
+                            <div class="info-item">
+                                <label>AWB:</label>
+                                <span id="modal-awb"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="details-title">Productos en este pedido</h3>
+                    <div id="detalles-container" class="detalles-container">
+                        <!-- Aquí se cargarán los detalles dinámicamente -->
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Cargando detalles...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-summary">
+                    <div class="summary-item">
+                        <label>Total Cajas:</label>
+                        <span id="modal-total-cajas"></span>
+                    </div>
+                    <div class="summary-item">
+                        <label>Total USD:</label>
+                        <span id="modal-total-usd"></span>
+                    </div>
+                </div>
+                <button class="btn btn-primary close-modal-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Estado de filtro
+            const estadoFilter = document.getElementById('estado-filter');
+            estadoFilter.addEventListener('change', function() {
+                applyFilters();
+            });
+
+            // Botón para reiniciar filtros
+            const resetButton = document.getElementById('reset-filters');
+            resetButton.addEventListener('click', function() {
+                estadoFilter.value = '';
+                
+                // Eliminar parámetros de búsqueda
+                const url = new URL(window.location.href);
+                url.search = '';
+                window.location.href = url.toString();
+            });
+
+            // Aplicar filtros
+            function applyFilters() {
+                const url = new URL(window.location.href);
+                const estado = estadoFilter.value;
+                
+                // Mantener parámetro de búsqueda si existe
+                const searchQuery = new URLSearchParams(window.location.search).get('q');
+                if (searchQuery) {
+                    url.searchParams.set('q', searchQuery);
+                }
+
+                if (estado) {
+                    url.searchParams.set('estado', estado);
+                } else {
+                    url.searchParams.delete('estado');
+                }
+
+                window.location.href = url.toString();
+            }
+
+            // Si hay un filtro activo, seleccionarlo en el dropdown
+            const urlParams = new URLSearchParams(window.location.search);
+            const estadoParam = urlParams.get('estado');
+            if (estadoParam) {
+                estadoFilter.value = estadoParam;
+            }
+
+            // Funcionalidad para mostrar/ocultar columnas
+            const toggleColumnsBtn = document.getElementById('toggle-columns');
+            const columnSelector = document.getElementById('column-selector');
+            
+            toggleColumnsBtn.addEventListener('click', function() {
+                columnSelector.style.display = columnSelector.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Cerrar el selector de columnas si se hace clic fuera de él
+            document.addEventListener('click', function(event) {
+                if (!columnSelector.contains(event.target) && event.target !== toggleColumnsBtn) {
+                    columnSelector.style.display = 'none';
+                }
+            });
+
+            // Manejo de las preferencias de columnas
+            const columnCheckboxes = document.querySelectorAll('.checkbox-list input[type="checkbox"]');
+            
+            // Carga de preferencias guardadas
+            loadColumnPreferences();
+            
+            // Configurar eventos de cambio en los checkboxes
+            columnCheckboxes.forEach(checkbox => {
+                if (!checkbox.disabled) {
+                    checkbox.addEventListener('change', function() {
+                        const columnName = this.getAttribute('data-column');
+                        const isChecked = this.checked;
+                        
+                        // Mostrar u ocultar columna
+                        toggleColumnVisibility(columnName, isChecked);
+                        
+                        // Guardar preferencias
+                        saveColumnPreferences();
+                    });
+                }
+            });
+
+            function toggleColumnVisibility(columnName, isVisible) {
+                const columns = document.querySelectorAll(`.column-${columnName}`);
+                columns.forEach(col => {
+                    col.style.display = isVisible ? '' : 'none';
+                });
+            }
+
+            function saveColumnPreferences() {
+                const preferences = {};
+                columnCheckboxes.forEach(checkbox => {
+                    if (!checkbox.disabled) {
+                        preferences[checkbox.getAttribute('data-column')] = checkbox.checked;
+                    }
+                });
+                localStorage.setItem('pedidosColumnPreferences', JSON.stringify(preferences));
+            }
+
+            function loadColumnPreferences() {
+                const savedPreferences = localStorage.getItem('pedidosColumnPreferences');
+                if (savedPreferences) {
+                    const preferences = JSON.parse(savedPreferences);
+                    
+                    columnCheckboxes.forEach(checkbox => {
+                        const columnName = checkbox.getAttribute('data-column');
+                        if (!checkbox.disabled && columnName in preferences) {
+                            checkbox.checked = preferences[columnName];
+                            toggleColumnVisibility(columnName, preferences[columnName]);
+                        }
+                    });
+                } else {
+                    // Configuración inicial - ocultar algunas columnas por defecto
+                    const defaultHiddenColumns = ['factura_eur', 'nc_usd', 'numero_factura', 'numero_nc', 'observaciones'];
+                    defaultHiddenColumns.forEach(column => {
+                        const checkbox = document.querySelector(`input[data-column="${column}"]`);
+                        if (checkbox && !checkbox.disabled) {
+                            checkbox.checked = false;
+                            toggleColumnVisibility(column, false);
+                        }
+                    });
+                }
+            }
+
+            // Funcionalidad para el modal de detalles
+            const modal = document.getElementById('detalles-modal');
+            const closeButtons = document.querySelectorAll('.close-modal, .close-modal-btn');
+            const detailButtons = document.querySelectorAll('.btn-details');
+            
+            // Abrir modal y cargar detalles
+            detailButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const pedidoId = this.getAttribute('data-pedido-id');
+                    openModal(pedidoId);
+                });
+            });
+            
+            // Cerrar modal
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    closeModal();
+                });
+            });
+            
+            // Cerrar modal si se hace click fuera del contenido
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            function openModal(pedidoId) {
+                // Mostrar el modal
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden'; // Prevenir scroll
+                
+                // Establecer el ID del pedido en el título
+                document.getElementById('modal-pedido-id').textContent = pedidoId;
+                
+                // Mostrar spinner de carga
+                const detallesContainer = document.getElementById('detalles-container');
+                detallesContainer.innerHTML = `
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Cargando detalles...</p>
+                    </div>
+                `;
+                
+                // Hacer petición AJAX para obtener los detalles reales
+                fetch(`/importacion/pedidos/${pedidoId}/detalles-json/`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al cargar los detalles');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Actualizar información básica
+                        document.getElementById('modal-exportador').textContent = data.pedido.exportador;
+                        document.getElementById('modal-fecha-entrega').textContent = data.pedido.fecha_entrega;
+                        document.getElementById('modal-awb').textContent = data.pedido.awb;
+                        document.getElementById('modal-total-cajas').textContent = data.pedido.total_cajas;
+                        document.getElementById('modal-total-usd').textContent = data.pedido.total_usd;
+                        
+                        // Generar HTML para los detalles
+                        let detallesHTML = '';
+                        
+                        if (data.detalles.length > 0) {
+                            detallesHTML = `
+                                <div class="detalle-cards">
+                                    ${data.detalles.map(detalle => `
+                                        <div class="detalle-card">
+                                            <div class="card-header">
+                                                <h4>${detalle.producto}</h4>
+                                                <span class="presentacion">${detalle.presentacion}</span>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="metric">
+                                                    <i class="fas fa-weight"></i>
+                                                    <span>${detalle.kilos} kg</span>
+                                                </div>
+                                                <div class="metric">
+                                                    <i class="fas fa-box"></i>
+                                                    <span>${detalle.cajas_recibidas}/${detalle.cajas_solicitadas} cajas</span>
+                                                </div>
+                                                <div class="metric">
+                                                    <i class="fas fa-dollar-sign"></i>
+                                                    <span>${detalle.valor_caja}/caja</span>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer">
+                                                <div class="total">
+                                                    <label>Total:</label> 
+                                                    <span>${detalle.valor_total}</span>
+                                                </div>
+                                                <div class="nc ${parseFloat(detalle.valor_nc.replace('$', '')) > 0 ? 'has-nc' : ''}">
+                                                    <label>NC (${detalle.cajas_nc}):</label> 
+                                                    <span>${detalle.valor_nc}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `;
+                        } else {
+                            detallesHTML = `
+                                <div class="empty-details">
+                                    <i class="fas fa-box-open"></i>
+                                    <p>No hay detalles para mostrar</p>
+                                </div>
+                            `;
+                        }
+                        
+                        detallesContainer.innerHTML = detallesHTML;
+                    })
+                    .catch(error => {
+                        detallesContainer.innerHTML = `
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Error al cargar los detalles: ${error.message}</p>
+                            </div>
+                        `;
+                    });
+            }
+            
+            function closeModal() {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Restaurar scroll
+            }
+            
+            // Helper para el selector contains (para buscar texto en elementos)
+            jQuery.expr[':'].contains = function(a, i, m) {
+                return jQuery(a).text().toUpperCase()
+                    .indexOf(m[3].toUpperCase()) >= 0;
+            };
+        });
+    </script>
+
+    <style>
+        /* Estilos para el modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            max-width: 1200px; /* Aumentado de 900px a 1200px */
+            width: 95%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: modalFadeIn 0.3s;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+            opacity: 0.8;
+            transition: var(--transition);
+        }
+        
+        .close-modal:hover {
+            opacity: 1;
+        }
+        
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .info-header {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .info-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .info-item {
+            flex: 1;
+            min-width: 180px;
+        }
+        
+        .info-item label {
+            font-weight: 600;
+            color: var(--secondary-color);
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .details-title {
+            margin: 20px 0 15px;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 8px;
+            display: inline-block;
+        }
+        
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            color: var(--secondary-color);
+        }
+        
+        .loading-spinner i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        .detalle-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .detalle-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .detalle-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .card-header h4 {
+            margin: 0 0 5px;
+            font-size: 1.1rem;
+        }
+        
+        .presentacion {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .card-body {
+            padding: 15px;
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+        }
+        
+        .metric {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .metric i {
+            color: var(--primary-color);
+            width: 20px;
+            text-align: center;
+        }
+        
+        .card-footer {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .total, .nc {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .total {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .nc {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+        }
+        
+        .has-nc {
+            color: var(--danger-color);
+        }
+        
+        .empty-details {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--secondary-color);
+            text-align: center;
+        }
+        
+        .empty-details i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+        
+        .modal-summary {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .summary-item label {
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                max-width: 100%;
+            }
+            
+            .detalle-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .modal-footer {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .modal-summary {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>
