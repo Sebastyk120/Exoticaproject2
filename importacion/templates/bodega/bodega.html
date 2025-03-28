@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario de Bodega</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/bodega/bodega.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Inventario de Bodega</h1>
+        </header>
+
+        {% if bodegas %}
+            <div class="inventory-grid">
+                {% for bodega in bodegas %}
+                    <div class="inventory-card">
+                        <div class="card-header">
+                            <h2 class="presentation-name">{{ bodega.presentacion }}</h2>
+                            <span class="stock-badge">{{ bodega.stock_actual }} cajas</span>
+                        </div>
+                        <div class="card-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Stock Actual:</span>
+                                <span class="detail-value">{{ bodega.stock_actual }} cajas</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Última Actualización:</span>
+                                <span class="detail-value">{{ bodega.ultima_actualizacion|date:"d/m/Y H:i" }}</span>
+                            </div>
+                            {% if bodega.presentacion.kilos %}
+                                <div class="detail-row">
+                                    <span class="detail-label">Kilos por Caja:</span>
+                                    <span class="detail-value">{{ bodega.presentacion.kilos }} kg</span>
+                                </div>
+                            {% endif %}
+                            {% if bodega.presentacion.fruta %}
+                                <div class="detail-row">
+                                    <span class="detail-label">Fruta:</span>
+                                    <span class="detail-value">{{ bodega.presentacion.fruta }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>No hay elementos en el inventario de bodega.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

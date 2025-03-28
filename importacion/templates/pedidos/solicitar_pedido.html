@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitud de Pedido #{{ pedido.id }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/pedidos/solicitar_pedido.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <img src="{% static 'img/login.png' %}" alt="Logo" class="company-logo">
+                </div>
+                <div class="header-info">
+                    <h1><i class="fas fa-shopping-cart"></i> Solicitud de Pedido</h1>
+                    <p class="order-number">Pedido #{{ pedido.id }}</p>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section class="order-info">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label><i class="fas fa-user"></i> Exportador:</label>
+                        <span>{{ pedido.exportador.nombre }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fas fa-calendar-alt"></i> Fecha de Entrega Pedido:</label>
+                        <span>{{ pedido.fecha_entrega|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fas fa-boxes"></i> Total Cajas:</label>
+                        <span>{{ pedido.total_cajas_solicitadas }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fas fa-calendar-week"></i> Semana:</label>
+                        <span>{{ pedido.semana }}</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="order-details">
+                <h2><i class="fas fa-list"></i> Detalles del Pedido</h2>
+                <table class="details-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-box"></i> Presentación</th>
+                            <th><i class="fas fa-calculator"></i> Cajas Solicitadas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detalle in detalles %}
+                        <tr>
+                            <td>{{ detalle.presentacion }}</td>
+                            <td class="text-center">{{ detalle.cajas_solicitadas }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="footer">
+                <div class="footer-content">
+                    <div class="date-section">
+                        <p><i class="fas fa-clock"></i> Fecha De Solicitud: {% now "d/m/Y" %}</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="print-controls">
+        <button onclick="generatePDF()" class="print-button">
+            <i class="fas fa-file-pdf"></i> Generar PDF
+        </button>
+    </div>
+
+    <script>
+        function generatePDF() {
+            const element = document.querySelector('.container');
+            const opt = {
+                margin: [0.3, 0.3, 0.3, 0.3], // [top, right, bottom, left] in inches
+                filename: 'pedido_{{ pedido.id }}.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    scrollY: 0
+                },
+                jsPDF: { 
+                    unit: 'in', 
+                    format: 'a4', 
+                    orientation: 'portrait',
+                    compress: true,
+                    hotfixes: ["px_scaling"]
+                }
+            };
+
+            // Add pdf-generation class before generating PDF
+            document.body.classList.add('pdf-generation');
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Remove pdf-generation class after PDF is generated
+                document.body.classList.remove('pdf-generation');
+            });
+        }
+    </script>
+</body>
+</html>

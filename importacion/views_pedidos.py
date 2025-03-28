@@ -7,7 +7,6 @@ from django.utils.dateparse import parse_date
 from decimal import Decimal
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
 from .models import Pedido, DetallePedido, Exportador
 from productos.models import Presentacion, ListaPreciosImportacion
 
@@ -312,3 +311,13 @@ def obtener_precio_presentacion(request, presentacion_id, exportador_id):
             'success': False,
             'message': f'Error al obtener el precio: {str(e)}'
         }, status=500)
+
+def solicitar_pedido(request, pedido_id):
+    """View to display the order request form"""
+    pedido = get_object_or_404(Pedido, pk=pedido_id)
+    detalles = DetallePedido.objects.filter(pedido=pedido).select_related('presentacion', 'presentacion__fruta')
+    
+    return render(request, 'pedidos/solicitar_pedido.html', {
+        'pedido': pedido,
+        'detalles': detalles,
+    })

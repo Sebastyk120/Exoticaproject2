@@ -1,19 +1,21 @@
 from io import BytesIO
-
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseRedirect, JsonResponse
 from django import forms
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 from pdfminer.high_level import extract_text
 import re
+from .models import GastosAduana, AgenciaAduana, Pedido
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
 
 
 class PDFUploadForm(forms.Form):
     pdf_file = forms.FileField(label='Selecciona un archivo PDF')
 
 
+@login_required
 def process_pdf(request):
     if request.method == 'POST':
         form = PDFUploadForm(request.POST, request.FILES)
@@ -31,6 +33,13 @@ def process_pdf(request):
             # Extract numero_factura using regex
             numero_factura_match = re.search(r'(\d{2}-FV-\d{6})', text)
             numero_factura = numero_factura_match.group(1) if numero_factura_match else None
+
+            # Verificar si ya existe un gasto con el mismo número de factura
+            if numero_factura and GastosAduana.objects.filter(numero_factura=numero_factura).exists():
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Ya existe un gasto con el número de factura: {numero_factura}'
+                })
 
             # Extraer el número de pedido (mismo regex que antes)
             pedidos_match = re.search(r'AV\d+\/(\d+)\/\d+', text)
@@ -63,31 +72,28 @@ def process_pdf(request):
                 conceptos_text = None
 
             # Get or create AgenciaAduana instance
-            from .models import AgenciaAduana
             agencia, created = AgenciaAduana.objects.get_or_create(nombre=agencia_aduana_name)
 
             # Get Pedido instances using the AWB field
-            from .models import Pedido
             try:
                 # Buscar los pedidos usando el campo awb (pueden ser varios)
                 pedidos = Pedido.objects.filter(awb=formatted_pedido)
                 
                 if not pedidos.exists():
-                    return render(request, 'aduana/upload_pdf_aduana.html', {
-                        'form': form,
+                    return JsonResponse({
+                        'success': False,
                         'error': f'No se encontraron pedidos con AWB: {formatted_pedido}'
                     })
                     
                 pedidos_count = pedidos.count()
                 
             except Exception as e:
-                return render(request, 'aduana/upload_pdf_aduana.html', {
-                    'form': form,
+                return JsonResponse({
+                    'success': False,
                     'error': f'Error al buscar pedidos: {str(e)}'
                 })
 
             # Create GastosAduana instance
-            from .models import GastosAduana
             try:
                 gastos = GastosAduana(
                     agencia_aduana=agencia,
@@ -101,14 +107,68 @@ def process_pdf(request):
                 for pedido in pedidos:
                     gastos.pedidos.add(pedido)
                 
+                return JsonResponse({
+                    'success': True,
+                    'message': 'PDF procesado correctamente'
+                })
+                
             except Exception as e:
-                return render(request, 'aduana/upload_pdf_aduana.html', {
-                    'form': form,
+                return JsonResponse({
+                    'success': False,
                     'error': f'Error al guardar GastosAduana: {str(e)}'
                 })
-
-            return HttpResponseRedirect('/aduana_pdf/')
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Formulario inválido'
+            })
     else:
         form = PDFUploadForm()
 
-    return render(request, 'aduana/upload_pdf_aduana.html', {'form': form})
+    # Get all gastos for the table
+    gastos = GastosAduana.objects.all().order_by('-id')
+    return render(request, 'aduana/upload_pdf_aduana.html', {
+        'form': form,
+        'gastos': gastos
+    })
+
+
+@login_required
+@require_http_methods(["GET"])
+def get_gasto(request, gasto_id):
+    gasto = get_object_or_404(GastosAduana, id=gasto_id)
+    data = {
+        'id': gasto.id,
+        'numero_factura': gasto.numero_factura,
+        'agencia_aduana': gasto.agencia_aduana.nombre,
+        'valor_gastos_aduana': str(gasto.valor_gastos_aduana),
+        'conceptos': gasto.conceptos,
+        'pagado': gasto.pagado,
+        'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()]
+    }
+    return JsonResponse(data)
+
+
+@login_required
+@require_http_methods(["POST"])
+def update_gasto(request, gasto_id):
+    gasto = get_object_or_404(GastosAduana, id=gasto_id)
+    try:
+        gasto.numero_factura = request.POST.get('numero_factura')
+        gasto.valor_gastos_aduana = Decimal(request.POST.get('valor_gastos_aduana'))
+        gasto.conceptos = request.POST.get('conceptos')
+        gasto.save()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_gasto(request, gasto_id):
+    gasto = get_object_or_404(GastosAduana, id=gasto_id)
+    try:
+        gasto.delete()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

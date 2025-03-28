@@ -197,17 +197,7 @@
                                     </tr>
                                     {% endfor %}
                                 </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th colspan="4" class="text-end">Total:</th>
-                                        <th class="text-end">$0.00</th>
-                                        <th class="text-end">€0.00</th>
-                                        <th></th>
-                                        <th></th>
-                                        <th class="text-end">$0.00</th>
-                                        <th></th>
-                                    </tr>
-                                </tfoot>
+                                <!-- Eliminado el tfoot que contenía los totales -->
                             </table>
                         </div>
                         
@@ -352,14 +342,7 @@
                                     </tr>
                                     {% endfor %}
                                 </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th colspan="4" class="text-end">Total:</th>
-                                        <th class="text-end">$0.00</th>
-                                        <th></th>
-                                        <th></th>
-                                    </tr>
-                                </tfoot>
+                                <!-- Eliminado el tfoot que contenía los totales -->
                             </table>
                         </div>
                         
@@ -509,16 +492,7 @@
                                     </tr>
                                     {% endfor %}
                                 </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th colspan="4" class="text-end">Total:</th>
-                                        <th class="text-end">$0.00</th>
-                                        <th class="text-end">€0.00</th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                    </tr>
-                                </tfoot>
+                                <!-- Eliminado el tfoot que contenía los totales -->
                             </table>
                         </div>
                         
@@ -1281,51 +1255,8 @@
                         zeroRecords: "No se encontraron registros coincidentes",
                         emptyTable: "No hay datos disponibles en la tabla"
                     },
-                    columnDefs: columnsConfig,
-                    // Calculate totals for footer
-                    footerCallback: function(row, data, start, end, display) {
-                        const api = this.api();
-                        
-                        // Calculate total for USD column
-                        if (columnsConfig.find(col => col.targets.includes(4))) {
-                            const usdTotal = api
-                                .column(4, { page: 'current' })
-                                .data()
-                                .reduce((a, b) => {
-                                    const value = parseFloat(b.replace(/[^\d.-]/g, ''));
-                                    return a + (isNaN(value) ? 0 : value);
-                                }, 0);
-                            
-                            $(api.column(4).footer()).html('$' + usdTotal.toFixed(2));
-                        }
-                        
-                        // Calculate total for EUR column if it exists
-                        if (columnsConfig.find(col => col.targets.includes(5))) {
-                            const eurTotal = api
-                                .column(5, { page: 'current' })
-                                .data()
-                                .reduce((a, b) => {
-                                    const value = parseFloat(b.replace(/[^\d.-]/g, ''));
-                                    return a + (isNaN(value) ? 0 : value);
-                                }, 0);
-                            
-                            $(api.column(5).footer()).html('€' + eurTotal.toFixed(2));
-                        }
-                        
-                        // Calculate total for Saldo column if it exists
-                        const saldoColIndex = tableId === 'tablaExportador' ? 8 : -1;
-                        if (saldoColIndex > 0) {
-                            const saldoTotal = api
-                                .column(saldoColIndex, { page: 'current' })
-                                .data()
-                                .reduce((a, b) => {
-                                    const value = parseFloat(b.replace(/[^\d.-]/g, ''));
-                                    return a + (isNaN(value) ? 0 : value);
-                                }, 0);
-                            
-                            $(api.column(saldoColIndex).footer()).html('$' + saldoTotal.toFixed(2));
-                        }
-                    }
+                    columnDefs: columnsConfig
+                    // Se ha eliminado la función footerCallback que calculaba los totales
                 });
             }
             

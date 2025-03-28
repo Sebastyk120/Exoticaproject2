@@ -34,7 +34,19 @@
         <div class="main-content">
             <!-- Order Information -->
             <section class="order-info">
-                <h2>Información del Pedido</h2>
+                <div class="section-header">
+                    <h2>Información del Pedido</h2>
+                    <div class="action-buttons">
+                        <button type="submit" form="order-form" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar Pedido
+                        </button>
+                        {% if pedido %}
+                            <button id="send-request-btn" class="btn btn-success">
+                                <i class="fas fa-paper-plane"></i> Enviar solicitud
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
                 <form id="order-form" method="post" action="{% if pedido %}{% url 'importacion:guardar_pedido' pedido.id %}{% else %}{% url 'importacion:guardar_pedido' %}{% endif %}">
                     {% csrf_token %}
                     <div class="form-grid">
@@ -111,10 +123,6 @@
                                 <span class="value">{{ pedido.monto_pendiente|default:0|floatformat:2 }}</span>
                             </div>
                         {% endif %}
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Guardar Pedido</button>
                     </div>
                 </form>
             </section>
@@ -393,21 +401,63 @@
                 });
             });
             
-            // Añadir evento al formulario principal para mostrar notificación de éxito
-            const orderForm = document.getElementById('order-form');
-            if (orderForm) {
-                orderForm.addEventListener('submit', function() {
-                    // Aquí no mostramos la notificación aún, porque la página se recargará
-                    // El backend enviará un mensaje que se mostrará en la recarga
-                    localStorage.setItem('mostrarNotificacion', 'Pedido guardado correctamente');
+            // Agregar evento al botón de enviar solicitud
+            const sendRequestBtn = document.getElementById('send-request-btn');
+            if (sendRequestBtn) {
+                console.log('Botón encontrado, agregando evento...');
+                sendRequestBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    console.log('Evento click disparado');
+                    
+                    // Mostrar notificación de guardado
+                    mostrarNotificacion('Guardando cambios antes de enviar solicitud...', 'info');
+                    
+                    try {
+                        // Guardar el pedido
+                        const orderForm = document.getElementById('order-form');
+                        if (orderForm) {
+                            console.log('Guardando pedido...');
+                            const orderFormData = new FormData(orderForm);
+                            const orderResponse = await fetch(orderForm.action, {
+                                method: 'POST',
+                                body: orderFormData,
+                                headers: {
+                                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                                }
+                            });
+                            console.log('Pedido guardado:', orderResponse.ok);
+                        }
+                        
+                        // Guardar los detalles
+                        const detailsForm = document.getElementById('batch-details-form');
+                        if (detailsForm) {
+                            console.log('Guardando detalles...');
+                            const detailsFormData = new FormData(detailsForm);
+                            const detailsResponse = await fetch(detailsForm.action, {
+                                method: 'POST',
+                                body: detailsFormData,
+                                headers: {
+                                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                                }
+                            });
+                            console.log('Detalles guardados:', detailsResponse.ok);
+                        }
+                        
+                        // Mostrar notificación de éxito
+                        mostrarNotificacion('Cambios guardados correctamente', 'success');
+                        
+                        // Redirigir después de guardar
+                        setTimeout(() => {
+                            window.location.href = "{% url 'importacion:solicitar_pedido' pedido.id %}";
+                        }, 1500);
+                        
+                    } catch (error) {
+                        console.error('Error al guardar los cambios:', error);
+                        mostrarNotificacion('Error al guardar los cambios. Por favor, intente nuevamente.', 'error');
+                    }
                 });
-            }
-            
-            // Comprobar si hay notificación pendiente (para cuando la página se recarga)
-            const notificacionPendiente = localStorage.getItem('mostrarNotificacion');
-            if (notificacionPendiente) {
-                mostrarNotificacion(notificacionPendiente);
-                localStorage.removeItem('mostrarNotificacion');
+            } else {
+                console.log('Botón no encontrado');
             }
         });
     </script>

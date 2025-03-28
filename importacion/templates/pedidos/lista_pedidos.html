@@ -57,7 +57,7 @@
                             <label><input type="checkbox" data-column="fecha_vencimiento" checked> Fecha Vencimiento</label>
                             <label><input type="checkbox" data-column="semana" checked> Semana</label>
                             <label><input type="checkbox" data-column="awb" checked> AWB</label>
-                            <label><input type="checkbox" data-column="cajas" checked> Cajas</label>
+                            <label><input type="checkbox" data-column="cajas" checked> Cajas Recibidas</label>
                             <label><input type="checkbox" data-column="factura_usd" checked> Total USD</label>
                             <label><input type="checkbox" data-column="factura_eur"> Total EUR</label>
                             <label><input type="checkbox" data-column="nc_usd"> NC USD</label>
@@ -139,10 +139,9 @@
                                     <a href="{% url 'importacion:detalle_pedido' pedido.id %}" class="btn btn-icon" title="Ver/Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button" class="btn btn-icon btn-invoice" title="Ver Factura" 
-                                            {% if not pedido.numero_factura %}disabled{% endif %}>
-                                        <i class="fas fa-file-invoice"></i>
-                                    </button>
+                                    <a href="{% url 'importacion:solicitar_pedido' pedido.id %}" class="btn btn-icon" title="Solicitar Pedido" target="_blank">
+                                        <i class="fas fa-file-alt"></i>
+                                    </a>
                                     <button type="button" class="btn btn-icon btn-details" title="Ver Detalles"
                                             data-pedido-id="{{ pedido.id }}">
                                         <i class="fas fa-boxes"></i>

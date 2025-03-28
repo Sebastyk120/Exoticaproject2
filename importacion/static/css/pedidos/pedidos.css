@@ -140,10 +140,7 @@ textarea {
 }
 
 .form-actions {
-    margin-top: 20px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
+    display: none;
 }
 
 .btn {
@@ -163,6 +160,22 @@ textarea {
 
 .btn-primary:hover {
     background-color: #3c5a84;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    color: white;
+    text-decoration: none;
 }
 
 .btn-save {
@@ -213,6 +226,18 @@ textarea {
 .section-header .action-buttons {
     display: flex;
     gap: 10px;
+}
+
+.section-header .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+.section-header .btn i {
+    font-size: 14px;
 }
 
 /* Order Details Styles */

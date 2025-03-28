@@ -1,13 +1,16 @@
 from io import BytesIO
 
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseRedirect, JsonResponse
 from django import forms
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 from pdfminer.high_level import extract_text
 import re
 import logging
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
+from .models import GastosCarga, AgenciaCarga, Pedido
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -16,6 +19,7 @@ class PDFUploadForm(forms.Form):
     pdf_file = forms.FileField(label='Selecciona un archivo PDF')
 
 
+@login_required
 def process_pdf(request):
     if request.method == 'POST':
         form = PDFUploadForm(request.POST, request.FILES)
@@ -99,11 +103,9 @@ def process_pdf(request):
             conceptos_text = "\n".join(conceptos)[:500]
 
             # Get or create AgenciaCarga instance
-            from .models import AgenciaCarga
             agencia, created = AgenciaCarga.objects.get_or_create(nombre=agencia_carga_name)
 
             # Get Pedido instances using the AWB field
-            from .models import Pedido
             try:
                 # We'll collect all the pedidos that match our list of AWBs
                 matching_pedidos = []
@@ -115,19 +117,18 @@ def process_pdf(request):
                         matching_pedidos.extend(pedidos)
                 
                 if not matching_pedidos:
-                    return render(request, 'carga/upload_pdf_carga.html', {
-                        'form': form,
+                    return JsonResponse({
+                        'success': False,
                         'error': f'No se encontraron pedidos con los AWBs proporcionados'
                     })
                     
             except Exception as e:
-                return render(request, 'carga/upload_pdf_carga.html', {
-                    'form': form,
+                return JsonResponse({
+                    'success': False,
                     'error': f'Error al buscar pedidos: {str(e)}'
                 })
 
             # Create GastosCarga instance
-            from .models import GastosCarga
             try:
                 gastos = GastosCarga(
                     agencia_carga=agencia,
@@ -141,14 +142,80 @@ def process_pdf(request):
                 for pedido in matching_pedidos:
                     gastos.pedidos.add(pedido)
                 
+                return JsonResponse({
+                    'success': True,
+                    'message': 'PDF procesado correctamente'
+                })
+                
             except Exception as e:
-                return render(request, 'carga/upload_pdf_carga.html', {
-                    'form': form,
+                return JsonResponse({
+                    'success': False,
                     'error': f'Error al guardar GastosCarga: {str(e)}'
                 })
-
-            return HttpResponseRedirect('/carga_pdf/')
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Formulario inválido'
+            })
     else:
         form = PDFUploadForm()
 
-    return render(request, 'carga/upload_pdf_carga.html', {'form': form})
+    # Get all gastos for the table
+    gastos = GastosCarga.objects.all().order_by('-id')
+    return render(request, 'carga/upload_pdf_carga.html', {
+        'form': form,
+        'gastos': gastos
+    })
+
+
+@login_required
+@require_http_methods(["GET"])
+def get_gasto(request, gasto_id):
+    try:
+        logger.info(f"Intentando obtener gasto con ID: {gasto_id}")
+        gasto = get_object_or_404(GastosCarga, id=gasto_id)
+        logger.info(f"Gasto encontrado: {gasto}")
+        
+        data = {
+            'id': gasto.id,
+            'numero_factura': gasto.numero_factura,
+            'agencia_carga': gasto.agencia_carga.nombre,
+            'valor_gastos_carga': str(gasto.valor_gastos_carga),
+            'valor_gastos_carga_eur': str(gasto.valor_gastos_carga_eur) if gasto.valor_gastos_carga_eur else None,
+            'conceptos': gasto.conceptos,
+            'pagado': gasto.pagado,
+            'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()]
+        }
+        logger.info(f"Datos preparados para respuesta: {data}")
+        return JsonResponse(data)
+    except Exception as e:
+        logger.error(f"Error al obtener gasto: {str(e)}", exc_info=True)
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def update_gasto(request, gasto_id):
+    gasto = get_object_or_404(GastosCarga, id=gasto_id)
+    try:
+        gasto.numero_factura = request.POST.get('numero_factura')
+        gasto.valor_gastos_carga = Decimal(request.POST.get('valor_gastos_carga'))
+        valor_eur = request.POST.get('valor_gastos_carga_eur')
+        if valor_eur:
+            gasto.valor_gastos_carga_eur = Decimal(valor_eur)
+        gasto.conceptos = request.POST.get('conceptos')
+        gasto.save()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_gasto(request, gasto_id):
+    gasto = get_object_or_404(GastosCarga, id=gasto_id)
+    try:
+        gasto.delete()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
