@@ -14,6 +14,7 @@ urlpatterns = [
     
     # Bodega URL
     path('bodega/', views.bodega_view, name='bodega'),
+    path('bodega/json/', views.bodega_json, name='bodega_json'),
     
     # Gastos Aduana CRUD URLs
     path('aduana/gasto/<int:gasto_id>/', views_aduana.get_gasto, name='get_gasto'),

@@ -88,8 +88,8 @@
                             <td>{{ detalle.presentacion.kilos }} kg</td>
                             <td>{{ detalle.kilos|floatformat:2 }}</td>
                             <td>{{ detalle.cajas_enviadas }}</td>
-                            <td>{{ detalle.valor_x_caja_euro|floatformat:2 }}</td>
-                            <td>{{ detalle.valor_x_producto|floatformat:2 }}</td>
+                            <td>{{ detalle.valor_x_caja_euro|floatformat:2 }} €</td>
+                            <td>{{ detalle.valor_x_producto|floatformat:2 }} €</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -115,15 +115,15 @@
                     <div class="summary-table">
                         <div class="summary-row">
                             <div class="summary-label">Base Imponible:</div>
-                            <div class="summary-value">€{{ venta.subtotal_factura|floatformat:2 }}</div>
+                            <div class="summary-value">{{ venta.subtotal_factura|floatformat:2 }} €</div>
                         </div>
                         <div class="summary-row">
                             <div class="summary-label">IVA (4%):</div>
-                            <div class="summary-value">€{{ venta.iva|floatformat:2 }}</div>
+                            <div class="summary-value">{{ venta.iva|floatformat:2 }} €</div>
                         </div>
                         <div class="summary-row total">
                             <div class="summary-label">TOTAL FACTURA:</div>
-                            <div class="summary-value">€{{ venta.valor_total_factura_euro|floatformat:2 }}</div>
+                            <div class="summary-value">{{ venta.valor_total_factura_euro|floatformat:2 }} €</div>
                         </div>
                     </div>
                 </div>
@@ -152,11 +152,21 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Configuración para PDF
             const pdfOptions = {
-                margin: 0, 
+                margin: [5, 5, 5, 5],
                 filename: 'Factura_{{ venta.id }}_{{ venta.cliente.nombre|slugify }}.pdf',
                 image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 3, useCORS: true },
-                jsPDF: { unit: 'mm', format: [215.9, 355.6], orientation: 'portrait' } 
+                html2canvas: { 
+                    scale: 3,
+                    useCORS: true,
+                    logging: false,
+                    letterRendering: true
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait',
+                    compress: true
+                }
             };
 
             // Función para generar PDF

@@ -102,7 +102,7 @@
                 <tr data-id="{{ precio.id }}" data-presentacion="{{ precio.presentacion.id }}" data-precio="{{ precio.get_precio_euro }}" data-cliente="{{ precio.cliente.id }}">
                     <td>{{ precio.presentacion.fruta.nombre }}</td>
                     <td>{{ precio.presentacion.kilos }} kg</td>
-                    <td>€{{ precio.get_precio_euro }}</td>
+                    <td>{{ precio.get_precio_euro }} €</td>
                     <td>{{ precio.cliente.nombre }}</td>
                     <td>{{ precio.fecha|date:"d/m/Y" }}</td>
                     <td class="action-buttons">

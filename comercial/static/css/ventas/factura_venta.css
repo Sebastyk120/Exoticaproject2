@@ -24,12 +24,12 @@ body {
     color: var(--text-color);
     background-color: #f0f2f5;
     line-height: 1.4;
-    font-size: 13px; /* Increased from 12px */
+    font-size: 13px;
 }
 
 .container {
     max-width: 210mm; /* A4 width */
-    margin: 10px auto; /* Reduced from 15px */
+    margin: 5px auto; /* Reduced from 15px */
     background-color: var(--background-white);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -37,7 +37,7 @@ body {
 /* Controls section - not included in PDF */
 .controls {
     background-color: var(--primary-color);
-    padding: 10px; /* Reduced from 12px */
+    padding: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -48,18 +48,18 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-radius: 4px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
     border: none;
     text-decoration: none;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .btn i {
-    margin-right: 6px;
+    margin-right: 5px;
 }
 
 .btn-primary {
@@ -91,7 +91,7 @@ body {
 
 /* Invoice container - this is what will be in the PDF */
 .invoice-container {
-    padding: 15px 20px; /* Reduced top padding from 20px to 15px */
+    padding: 10px 15px;
     background-color: white;
 }
 
@@ -99,9 +99,9 @@ body {
 .invoice-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 12px; /* Reduced from 15px */
+    margin-bottom: 8px;
     border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 10px; /* Reduced from 12px */
+    padding-bottom: 8px;
 }
 
 .company-info {
@@ -111,9 +111,9 @@ body {
 }
 
 .logo {
-    margin-right: 15px;
-    height: 120px;
-    width: 120px;
+    margin-right: 12px;
+    height: 100px;
+    width: 100px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -129,25 +129,25 @@ body {
 .company-details {
     flex: 1 1 auto;
     width: 75%;
-    padding-right: 10px;
+    padding-right: 8px;
 }
 
 .company-title {
     color: var(--primary-color);
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 900;
-    margin-top: 5px;
+    margin-top: 3px;
     text-align: left;
     text-transform: uppercase;
     border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 6px;
+    padding-bottom: 4px;
     width: 100%;
     line-height: 1.2;
 }
 
 .company-details p {
     color: var(--text-light);
-    margin-bottom: 2px; /* Reduced from 3px */
+    margin-bottom: 1px;
     font-size: 12px;
 }
 
@@ -158,37 +158,37 @@ body {
 
 .invoice-info h2 {
     color: var(--primary-color);
-    margin-bottom: 8px; /* Reduced from 10px */
-    font-size: 22px; /* Increased from 20px */
+    margin-bottom: 6px;
+    font-size: 24px;
 }
 
 .invoice-number {
-    font-size: 18px; /* Increased from 16px */
+    font-size: 20px;
     font-weight: 700;
-    margin-bottom: 8px; /* Reduced from 10px */
+    margin-bottom: 6px;
 }
 
 .invoice-date p {
-    margin-bottom: 3px;
+    margin-bottom: 2px;
     color: var(--text-light);
     font-size: 12px;
 }
 
 /* Client information section */
 .invoice-client {
-    margin-bottom: 15px; /* Reduced from 20px */
+    margin-bottom: 10px;
     background-color: var(--background-light);
-    padding: 12px; /* Reduced from 15px */
+    padding: 8px;
     border-radius: 4px;
     page-break-inside: avoid;
 }
 
 .invoice-client h3 {
     color: var(--primary-color);
-    font-size: 16px; /* Increased from 14px */
-    margin-bottom: 8px; /* Reduced from 10px */
+    font-size: 16px;
+    margin-bottom: 6px;
     border-bottom: 1px solid var(--border-color);
-    padding-bottom: 5px; /* Reduced from 6px */
+    padding-bottom: 4px;
 }
 
 .client-info {
@@ -198,27 +198,27 @@ body {
 
 .client-info p {
     flex: 0 0 50%;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     font-size: 12px;
 }
 
 /* Items table */
 .invoice-items {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     page-break-inside: avoid;
 }
 
 .invoice-items h3,
 .invoice-credit-note h3 {
     color: var(--primary-color);
-    font-size: 16px; /* Increased from 14px */
-    margin-bottom: 8px; /* Reduced from 10px */
+    font-size: 16px;
+    margin-bottom: 6px;
 }
 
 .items-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     border: 1px solid var(--border-color);
 }
 
@@ -226,15 +226,15 @@ body {
     background-color: var(--primary-color);
     color: white;
     text-align: left;
-    padding: 8px;
-    font-weight: 600; /* Increased from 500 */
-    font-size: 12px; /* Increased from 11px */
+    padding: 6px;
+    font-weight: 600;
+    font-size: 12px;
 }
 
 .items-table td {
-    padding: 6px 8px;
+    padding: 4px 6px;
     border-bottom: 1px solid var(--border-color);
-    font-size: 12px; /* Increased from 11px */
+    font-size: 12px;
 }
 
 .items-table tbody tr:nth-child(even) {
@@ -253,7 +253,7 @@ body {
 
 .invoice-credit-note h3 {
     color: var(--primary-color);
-    font-size: 16px; 
+    font-size: 16px;
     margin-bottom: 8px;
 }
 
@@ -267,40 +267,41 @@ body .invoice-container:has(.invoice-info h2:contains("FACTURA RECTIFICATIVA")) 
 .invoice-summary-and-footer {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     page-break-inside: avoid;
-    gap: 20px;
+    gap: 15px;
 }
 
 .bank-and-terms {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    font-size: 12px;
+    gap: 10px;
+    font-size: 11px;
 }
 
 .payment-info, .terms {
     background-color: var(--background-light);
-    padding: 12px;
+    padding: 8px;
     border-radius: 4px;
 }
 
 .payment-info h3, .terms h3 {
     color: var(--primary-color);
     font-size: 15px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     border-bottom: 1px solid var(--border-color);
-    padding-bottom: 4px;
+    padding-bottom: 3px;
 }
 
 .payment-info p, .terms p {
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     color: var(--text-light);
+    font-size: 12px;
 }
 
 .invoice-summary {
-    width: 320px;
+    width: 280px;
     page-break-inside: avoid;
 }
 
@@ -311,7 +312,7 @@ body .invoice-container:has(.invoice-info h2:contains("FACTURA RECTIFICATIVA")) 
 .summary-row {
     display: flex;
     justify-content: space-between;
-    padding: 5px 0;
+    padding: 3px 0;
     border-bottom: 1px solid var(--border-color);
     font-size: 13px;
 }
@@ -325,23 +326,23 @@ body .invoice-container:has(.invoice-info h2:contains("FACTURA RECTIFICATIVA")) 
 
 /* Notes section */
 .invoice-notes {
-    margin-bottom: 15px; /* Reduced from 20px */
+    margin-bottom: 10px;
     background-color: var(--background-light);
-    padding: 12px; /* Reduced from 15px */
+    padding: 8px;
     border-radius: 4px;
     page-break-inside: avoid;
 }
 
 .invoice-notes h3 {
     color: var(--primary-color);
-    font-size: 16px; /* Increased from 14px */
-    margin-bottom: 8px; /* Reduced from 10px */
+    font-size: 16px;
+    margin-bottom: 6px;
 }
 
 .notes-content {
     font-style: italic;
     color: var(--text-light);
-    font-size: 12px; /* Increased from 11px */
+    font-size: 12px;
 }
 
 /* Footer section */
@@ -356,26 +357,26 @@ body .invoice-container:has(.invoice-info h2:contains("FACTURA RECTIFICATIVA")) 
 
 .invoice-footer h3 {
     color: var(--primary-color);
-    font-size: 15px; /* Increased from 13px */
-    margin-bottom: 8px; /* Reduced from 10px */
+    font-size: 16px;
+    margin-bottom: 8px;
 }
 
 .invoice-footer p {
-    font-size: 12px; /* Increased from 11px */
+    font-size: 13px;
     color: var(--text-light);
-    margin-bottom: 2px; /* Reduced from 3px */
+    margin-bottom: 2px;
 }
 
 /* Signature and thank you */
 .invoice-signature {
     text-align: center;
-    margin-top: 15px; /* Reduced from 20px */
-    margin-bottom: 10px; /* Reduced from 15px */
+    margin-top: 10px;
+    margin-bottom: 8px;
     page-break-inside: avoid;
 }
 
 .thank-you {
-    font-size: 16px; /* Increased from 15px */
+    font-size: 16px;
     color: var(--logo-color);
     font-weight: 500;
 }

@@ -21,4 +21,5 @@ urlpatterns = [
     path('obtener-precio-presentacion/<int:presentacion_id>/<int:cliente_id>/', views_ventas.obtener_precio_presentacion, name='obtener_precio_presentacion'),
     path('ventas/<int:venta_id>/generar-factura/', views_ventas.generar_factura, name='generar_factura'),
     path('ventas/<int:venta_id>/generar-rectificativa/', views_ventas.generar_rectificativa, name='generar_rectificativa'),
+    path('validar-stock/<int:presentacion_id>/<int:cajas_enviadas>/', views_ventas.validar_stock, name='validar_stock'),
 ]

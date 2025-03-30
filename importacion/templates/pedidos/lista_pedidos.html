@@ -39,13 +39,6 @@
                         <i class="fas fa-sync-alt"></i> Reiniciar filtros
                     </button>
                 </div>
-                <a href="{% url 'importacion:nuevo_pedido' %}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Nuevo Pedido
-                </a>
-            </div>
-
-            <!-- Toggle Column Visibility -->
-            <div class="table-config">
                 <button id="toggle-columns" class="btn btn-secondary btn-sm">
                     <i class="fas fa-columns"></i> Configurar columnas
                 </button>
@@ -75,6 +68,9 @@
                         </div>
                     </div>
                 </div>
+                <a href="{% url 'importacion:nuevo_pedido' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nuevo Pedido
+                </a>
             </div>
 
             <section class="pedidos-list">
@@ -293,8 +289,15 @@
             const toggleColumnsBtn = document.getElementById('toggle-columns');
             const columnSelector = document.getElementById('column-selector');
             
-            toggleColumnsBtn.addEventListener('click', function() {
+            toggleColumnsBtn.addEventListener('click', function(event) {
+                event.stopPropagation();
                 columnSelector.style.display = columnSelector.style.display === 'none' ? 'block' : 'none';
+                
+                // Posicionar el selector correctamente
+                if (columnSelector.style.display === 'block') {
+                    columnSelector.style.top = (toggleColumnsBtn.offsetTop + toggleColumnsBtn.offsetHeight) + 'px';
+                    columnSelector.style.right = '0';
+                }
             });
 
             // Cerrar el selector de columnas si se hace clic fuera de él
@@ -331,6 +334,15 @@
                 columns.forEach(col => {
                     col.style.display = isVisible ? '' : 'none';
                 });
+                
+                // Special case for empty table - update the colspan
+                const emptyRow = document.querySelector('.empty-message');
+                if (emptyRow) {
+                    // Count the visible columns in the header
+                    const visibleColumnCount = Array.from(document.querySelectorAll('th'))
+                        .filter(th => th.style.display !== 'none').length;
+                    emptyRow.setAttribute('colspan', visibleColumnCount);
+                }
             }
 
             function saveColumnPreferences() {
@@ -365,6 +377,14 @@
                             toggleColumnVisibility(column, false);
                         }
                     });
+                }
+                
+                // Ensure empty message has correct colspan after loading preferences
+                const emptyRow = document.querySelector('.empty-message');
+                if (emptyRow) {
+                    const visibleColumnCount = Array.from(document.querySelectorAll('th'))
+                        .filter(th => th.style.display !== 'none').length;
+                    emptyRow.setAttribute('colspan', visibleColumnCount);
                 }
             }
 

@@ -37,6 +37,15 @@ def format_number(value):
         return formatted_value
     except (ValueError, TypeError):
         return value
+    
+@register.filter
+def format_integer(value):
+    """Format a number as an integer with thousands separators."""
+    try:
+        formatted_value = '{:,}'.format(int(value)).replace(',', '.')
+        return formatted_value
+    except (ValueError, TypeError):
+        return value
 
 @register.filter
 def format_percentage_color_exportacion(value):

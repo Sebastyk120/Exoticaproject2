@@ -9,6 +9,8 @@ from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Venta, DetalleVenta, Cliente, BalanceCliente
 from productos.models import Presentacion, ListaPreciosVentas
+from django.core.exceptions import ValidationError
+from importacion.models import Bodega
 
 def lista_ventas(request):
     """View to list all sales with search and filter functionality"""
@@ -177,8 +179,15 @@ def guardar_detalles_batch(request, venta_id):
             detalle.no_cajas_abono = Decimal(request.POST.get(f'detalle_{detail_id}_no_cajas_abono') or 0)
             
             detalle.save()
+        except ValidationError as e:
+            # Manejar errores de validación específicos
+            for field, errors in e.message_dict.items():
+                for error in errors:
+                    messages.error(request, f'Error en detalle #{detail_id}: {error}')
+            return redirect('comercial:detalle_venta', venta_id=venta.id)
         except (DetalleVenta.DoesNotExist, ValueError, TypeError, decimal.InvalidOperation) as e:
             messages.error(request, f'Error al actualizar detalle #{detail_id}: {str(e)}')
+            return redirect('comercial:detalle_venta', venta_id=venta.id)
     
     # Procesar nuevos detalles
     new_pattern = r'new_(\d+)_(\w+)'
@@ -206,8 +215,15 @@ def guardar_detalles_batch(request, venta_id):
             detalle.no_cajas_abono = Decimal(request.POST.get(f'new_{index}_no_cajas_abono') or 0)
             
             detalle.save()
+        except ValidationError as e:
+            # Manejar errores de validación específicos
+            for field, errors in e.message_dict.items():
+                for error in errors:
+                    messages.error(request, f'Error en nuevo detalle: {error}')
+            return redirect('comercial:detalle_venta', venta_id=venta.id)
         except (ValueError, TypeError, decimal.InvalidOperation) as e:
             messages.error(request, f'Error al crear nuevo detalle: {str(e)}')
+            return redirect('comercial:detalle_venta', venta_id=venta.id)
     
     messages.success(request, 'Detalles de la venta guardados correctamente')
     return redirect('comercial:detalle_venta', venta_id=venta.id)
@@ -352,3 +368,49 @@ def generar_rectificativa(request, venta_id):
         'venta': venta,
         'detalles': detalles,
     })
+
+def validar_stock(request, presentacion_id, cajas_enviadas):
+    """API endpoint para validar el stock disponible"""
+    try:
+        presentacion_id = int(presentacion_id)
+        cajas_enviadas = int(cajas_enviadas)
+    except ValueError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Valores inválidos'
+        }, status=400)
+    
+    try:
+        # Obtener la presentación
+        presentacion = Presentacion.objects.get(id=presentacion_id)
+        
+        # Obtener el stock disponible
+        bodega = Bodega.objects.get(presentacion=presentacion)
+        stock_disponible = bodega.stock_actual
+        
+        if stock_disponible < cajas_enviadas:
+            return JsonResponse({
+                'success': False,
+                'message': f'Stock insuficiente. Solo hay {stock_disponible} cajas disponibles de {presentacion.fruta.nombre} - {presentacion.kilos} Kg'
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Stock suficiente'
+        })
+        
+    except Presentacion.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'La presentación especificada no existe'
+        }, status=404)
+    except Bodega.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': f'No existe registro de stock para {presentacion.fruta.nombre} - {presentacion.kilos} Kg'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error al validar stock: {str(e)}'
+        }, status=500)

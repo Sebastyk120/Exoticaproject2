@@ -1,7 +1,12 @@
+{% load static %}
+{% load humanize %}
+{% load custom_filters %}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitud de Pedido #{{ pedido.id }}</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,43 +16,56 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <div class="header-content">
-                <div class="logo">
-                    <img src="{% static 'img/login.png' %}" alt="Logo" class="company-logo">
+        <div class="controls">
+            <a href="{% url 'importacion:lista_pedidos' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <button id="downloadPdf" class="btn btn-primary">
+                <i class="fas fa-file-pdf"></i> Descargar PDF
+            </button>
+        </div>
+
+        <div id="order" class="invoice-container">
+            <div class="invoice-header">
+                <div class="company-info">
+                    <div class="logo">
+                        <!-- Logo oficial -->
+                        <img src="{% static 'img/login.png' %}" alt="L&M Exotic Fruit">
+                    </div>
+                    <div class="company-details">
+                        <h1 class="company-title">Luz Mery Melo Mejia</h1>
+                        <p>Calle Juan de la cierva # 23</p>
+                        <p>08210 Barbera del valles, España</p>
+                        <p>Tel: +34 633 49 42 28</p>
+                        <p>Email: luzme2273@hotmail.com</p>
+                        <p>CIF: 26062884C</p>
+                    </div>
                 </div>
-                <div class="header-info">
-                    <h1><i class="fas fa-shopping-cart"></i> Solicitud de Pedido</h1>
-                    <p class="order-number">Pedido #{{ pedido.id }}</p>
+                
+                <div class="invoice-info">
+                    <h2>SOLICITUD DE PEDIDO</h2>
+                    <div class="invoice-number">Nº: {{ pedido.id }}</div>
+                    <div class="invoice-date">
+                        <p><strong>Fecha Emisión:</strong> {% now "d/m/Y" %}</p>
+                        <p><strong>Fecha Entrega:</strong> {{ pedido.fecha_entrega|date:"d/m/Y" }}</p>
+                        <p><strong>Semana:</strong> {{ pedido.semana }}</p>
+                    </div>
                 </div>
             </div>
-        </header>
 
-        <main>
-            <section class="order-info">
-                <div class="info-grid">
-                    <div class="info-item">
-                        <label><i class="fas fa-user"></i> Exportador:</label>
-                        <span>{{ pedido.exportador.nombre }}</span>
-                    </div>
-                    <div class="info-item">
-                        <label><i class="fas fa-calendar-alt"></i> Fecha de Entrega Pedido:</label>
-                        <span>{{ pedido.fecha_entrega|date:"d/m/Y" }}</span>
-                    </div>
-                    <div class="info-item">
-                        <label><i class="fas fa-boxes"></i> Total Cajas:</label>
-                        <span>{{ pedido.total_cajas_solicitadas }}</span>
-                    </div>
-                    <div class="info-item">
-                        <label><i class="fas fa-calendar-week"></i> Semana:</label>
-                        <span>{{ pedido.semana }}</span>
-                    </div>
+            <div class="invoice-client">
+                <h3>DATOS DEL EXPORTADOR</h3>
+                <div class="client-info">
+                    <p><strong>Exportador:</strong> {{ pedido.exportador.nombre }}</p>
+                    <p><strong>Ciudad:</strong> Bogotá, Colombia</p>
+                    <p><strong>Teléfono:</strong> {{ pedido.exportador.telefono|default:"-" }}</p>
+                    <p><strong>Email:</strong> {{ pedido.exportador.email|default:"-" }}</p>
                 </div>
-            </section>
+            </div>
 
-            <section class="order-details">
-                <h2><i class="fas fa-list"></i> Detalles del Pedido</h2>
-                <table class="details-table">
+            <div class="invoice-items">
+                <h3>DETALLE DE PRODUCTOS SOLICITADOS</h3>
+                <table class="items-table">
                     <thead>
                         <tr>
                             <th><i class="fas fa-box"></i> Presentación</th>
@@ -58,59 +76,100 @@
                         {% for detalle in detalles %}
                         <tr>
                             <td>{{ detalle.presentacion }}</td>
-                            <td class="text-center">{{ detalle.cajas_solicitadas }}</td>
+                            <td class="text-center">{{ detalle.cajas_solicitadas|format_integer }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <td><strong>TOTALES</strong></td>
+                            <td class="text-center"><strong>{{ pedido.total_cajas_solicitadas|format_integer }}</strong></td>
+                        </tr>
+                    </tfoot>
                 </table>
-            </section>
+            </div>
 
-            <section class="footer">
-                <div class="footer-content">
-                    <div class="date-section">
-                        <p><i class="fas fa-clock"></i> Fecha De Solicitud: {% now "d/m/Y" %}</p>
+            <div class="invoice-summary-and-footer">
+                <div class="bank-and-terms">
+                    <div class="terms">
+                        <h3>INSTRUCCIONES DE ENVÍO</h3>
+                        <p>Por favor, preparar el envío para la fecha indicada.</p>
+                        <p>Asegurar que el producto cumpla con todas las normativas de exportación.</p>
+                        <p>Notificar cualquier problema de disponibilidad con anticipación.</p>
                     </div>
                 </div>
-            </section>
-        </main>
-    </div>
+                
+                <div class="invoice-summary">
+                    <div class="summary-table">
+                        <div class="summary-row">
+                            <div class="summary-label">Total Cajas:</div>
+                            <div class="summary-value">{{ pedido.total_cajas_solicitadas|format_integer }}</div>
+                        </div>
+                        <div class="summary-row total">
+                            <div class="summary-label">SEMANA:</div>
+                            <div class="summary-value">{{ pedido.semana }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <div class="print-controls">
-        <button onclick="generatePDF()" class="print-button">
-            <i class="fas fa-file-pdf"></i> Generar PDF
-        </button>
+            {% if pedido.observaciones %}
+            <div class="invoice-notes">
+                <h3>OBSERVACIONES</h3>
+                <div class="notes-content">
+                    <p>{{ pedido.observaciones }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="footer">
+                <div class="footer-content">
+                    <div class="date-section">
+                        <p><i class="fas fa-calendar-check"></i> Fecha De Solicitud: {% now "d/m/Y" %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="invoice-signature">
+                <div class="thank-you">
+                    <p>¡Gracias por su colaboración!</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        function generatePDF() {
-            const element = document.querySelector('.container');
-            const opt = {
-                margin: [0.3, 0.3, 0.3, 0.3], // [top, right, bottom, left] in inches
-                filename: 'pedido_{{ pedido.id }}.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    scrollY: 0
-                },
-                jsPDF: { 
-                    unit: 'in', 
-                    format: 'a4', 
-                    orientation: 'portrait',
-                    compress: true,
-                    hotfixes: ["px_scaling"]
-                }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuración para PDF
+            const pdfOptions = {
+                margin: 0,
+                filename: 'Pedido_{{ pedido.id }}_{{ pedido.exportador.nombre|slugify }}.pdf',
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 3, useCORS: true },
+                jsPDF: { unit: 'mm', format: [215.9, 355.6], orientation: 'portrait' } 
             };
 
-            // Add pdf-generation class before generating PDF
-            document.body.classList.add('pdf-generation');
-            
-            html2pdf().set(opt).from(element).save().then(() => {
-                // Remove pdf-generation class after PDF is generated
-                document.body.classList.remove('pdf-generation');
+            // Función para generar PDF
+            document.getElementById('downloadPdf').addEventListener('click', function() {
+                // Mostrar mensaje de descarga
+                const button = this;
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
+                button.disabled = true;
+
+                // Obtener el elemento que contiene el pedido
+                const element = document.getElementById('order');
+                
+                // Generar PDF
+                html2pdf().set(pdfOptions).from(element).save().then(() => {
+                    // Restaurar el botón después de la descarga
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 1500);
+                });
             });
-        }
+        });
     </script>
 </body>
 </html>

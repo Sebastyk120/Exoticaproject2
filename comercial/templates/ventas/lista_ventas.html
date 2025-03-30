@@ -68,6 +68,9 @@
                         </div>
                     </div>
                 </div>
+                <button id="show-bodega" class="btn btn-secondary">
+                    <i class="fas fa-warehouse"></i> Ver Bodega
+                </button>
                 <a href="{% url 'comercial:nueva_venta' %}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Nueva Venta
                 </a>
@@ -104,9 +107,9 @@
                                 <td class="column-fecha_vencimiento">{{ venta.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</td>
                                 <td class="column-semana">{{ venta.semana|default:"-" }}</td>
                                 <td class="column-cajas">{{ venta.total_cajas_pedido|default:0 }}</td>
-                                <td class="column-total_factura">€{{ venta.valor_total_factura_euro|default:0|floatformat:2 }}</td>
-                                <td class="column-iva">€{{ venta.iva|default:0|floatformat:2 }}</td>
-                                <td class="column-total_abono">€{{ venta.valor_total_abono_euro|default:0|floatformat:2 }}</td>
+                                <td class="column-total_factura">{{ venta.valor_total_factura_euro|default:0|floatformat:2 }} €</td>
+                                <td class="column-iva">{{ venta.iva|default:0|floatformat:2 }} €</td>
+                                <td class="column-total_abono">{{ venta.valor_total_abono_euro|default:0|floatformat:2 }} €</td>
                                 <td class="column-numero_factura">{{ venta.numero_factura|default:"-" }}</td>
                                 <td class="column-numero_nc">{{ venta.numero_nc|default:"-" }}</td>
                                 <td class="column-observaciones">
@@ -118,7 +121,7 @@
                                     -
                                     {% endif %}
                                 </td>
-                                <td class="column-monto_pendiente">€{{ venta.monto_pendiente|default:0|floatformat:2 }}</td>
+                                <td class="column-monto_pendiente">{{ venta.monto_pendiente|default:0|floatformat:2 }} €</td>
                                 <td class="column-pagado">
                                     <span class="status-badge status-{% if venta.pagado %}pagado{% else %}pendiente{% endif %}">
                                         {{ venta.pagado|yesno:"Pagado,Pendiente" }}
@@ -224,6 +227,27 @@
                         <span id="modal-total-euros"></span>
                     </div>
                 </div>
+                <button class="btn btn-primary close-modal-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mostrar contenido de bodega -->
+    <div id="bodega-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-warehouse"></i> Inventario de Bodega</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="bodega-container" class="inventory-grid">
+                    <div class="loading-spinner">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                        <p>Cargando inventario...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
                 <button class="btn btn-primary close-modal-btn">Cerrar</button>
             </div>
         </div>
@@ -485,6 +509,88 @@
                 return jQuery(a).text().toUpperCase()
                     .indexOf(m[3].toUpperCase()) >= 0;
             };
+
+            // Funcionalidad para el modal de bodega
+            const bodegaModal = document.getElementById('bodega-modal');
+            const showBodegaBtn = document.getElementById('show-bodega');
+            
+            showBodegaBtn.addEventListener('click', function() {
+                openBodegaModal();
+            });
+            
+            function openBodegaModal() {
+                bodegaModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                
+                const bodegaContainer = document.getElementById('bodega-container');
+                bodegaContainer.innerHTML = `
+                    <div class="loading-spinner">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                        <p>Cargando inventario...</p>
+                    </div>
+                `;
+                
+                // Hacer petición AJAX para obtener los datos de bodega
+                fetch('/importacion/bodega/json/')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al cargar el inventario');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        let bodegaHTML = '';
+                        
+                        if (data.bodegas && data.bodegas.length > 0) {
+                            bodegaHTML = `
+                                <div class="inventory-grid">
+                                    ${data.bodegas.map(bodega => `
+                                        <div class="inventory-card simple-card">
+                                            <div class="card-content">
+                                                <h3>${bodega.presentacion.nombre}</h3>
+                                                <p>Stock: ${bodega.stock_actual} cajas</p>
+                                                <p>Última Actualización: ${bodega.ultima_actualizacion || 'No disponible'}</p>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `;
+                        } else {
+                            bodegaHTML = `
+                                <div class="empty-state">
+                                    <p>No hay elementos en el inventario de bodega.</p>
+                                </div>
+                            `;
+                        }
+                        
+                        bodegaContainer.innerHTML = bodegaHTML;
+                    })
+                    .catch(error => {
+                        bodegaContainer.innerHTML = `
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Error al cargar el inventario: ${error.message}</p>
+                            </div>
+                        `;
+                    });
+            }
+            
+            // Agregar el modal de bodega a los eventos de cierre
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    closeModal();
+                    bodegaModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                });
+            });
+            
+            // Cerrar modal de bodega si se hace click fuera
+            window.addEventListener('click', function(event) {
+                if (event.target === bodegaModal) {
+                    bodegaModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
         });
     </script>
 </body>

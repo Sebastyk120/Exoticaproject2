@@ -44,9 +44,9 @@
                             <i class="fas fa-save"></i> Guardar Venta
                         </button>
                         {% if venta %}
-                            <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn btn-success">
+                            <button type="button" id="generar-factura-btn" class="btn btn-success">
                                 <i class="fas fa-file-invoice"></i> Generar Factura
-                            </a>
+                            </button>
                         {% endif %}
                     </div>
                 </div>
@@ -238,23 +238,23 @@
                     <div class="fiscal-info">
                         <div class="fiscal-row">
                             <span class="fiscal-label">Subtotal:</span>
-                            <span class="fiscal-value">€ {{ venta.subtotal_factura|default:0|floatformat:2 }}</span>
+                            <span class="fiscal-value">{{ venta.subtotal_factura|default:0|floatformat:2 }} €</span>
                         </div>
                         <div class="fiscal-row">
                             <span class="fiscal-label">IVA (4%):</span>
-                            <span class="fiscal-value">€ {{ venta.iva|default:0|floatformat:2 }}</span>
+                            <span class="fiscal-value">{{ venta.iva|default:0|floatformat:2 }} €</span>
                         </div>
                         <div class="fiscal-row">
                             <span class="fiscal-label">Total Factura:</span>
-                            <span class="fiscal-value total-value">€ {{ venta.valor_total_factura_euro|default:0|floatformat:2 }}</span>
+                            <span class="fiscal-value total-value">{{ venta.valor_total_factura_euro|default:0|floatformat:2 }} €</span>
                         </div>
                         <div class="fiscal-row">
                             <span class="fiscal-label">Total Abono:</span>
-                            <span class="fiscal-value">€ {{ venta.valor_total_abono_euro|default:0|floatformat:2 }}</span>
+                            <span class="fiscal-value">{{ venta.valor_total_abono_euro|default:0|floatformat:2 }} €</span>
                         </div>
                         <div class="fiscal-row">
                             <span class="fiscal-label">Pendiente:</span>
-                            <span class="fiscal-value">€ {{ venta.monto_pendiente|default:0|floatformat:2 }}</span>
+                            <span class="fiscal-value">{{ venta.monto_pendiente|default:0|floatformat:2 }} €</span>
                         </div>
                     </div>
                     {% endif %}
@@ -340,30 +340,171 @@
         }
         
         // Función para mostrar notificación
-        function mostrarNotificacion(mensaje, tipo = 'success') {
-            const notificacion = document.createElement('div');
-            notificacion.className = `notification ${tipo}`;
-            notificacion.innerHTML = `
-                <span class="notification-message">${mensaje}</span>
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('notifications-container');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <span class="notification-message">${message}</span>
                 <button type="button" class="close-notification">&times;</button>
             `;
             
-            const container = document.getElementById('notifications-container');
-            container.appendChild(notificacion);
+            container.appendChild(notification);
             
             // Auto-cerrar después de 5 segundos
             setTimeout(() => {
-                notificacion.classList.add('fade-out');
-                setTimeout(() => notificacion.remove(), 500);
+                notification.classList.add('fade-out');
+                setTimeout(() => notification.remove(), 500);
             }, 5000);
             
             // Configurar botón de cerrar
-            notificacion.querySelector('.close-notification').addEventListener('click', function() {
-                notificacion.remove();
+            notification.querySelector('.close-notification').addEventListener('click', () => {
+                notification.remove();
             });
         }
-        
+
+        // Actualizar el manejo de formularios para usar las notificaciones
+        document.getElementById('sale-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Mostrar notificación de validación
+            showNotification('Validando datos...', 'info');
+            
+            try {
+                const isValid = await validarTodosLosStocks();
+                
+                if (!isValid) {
+                    showNotification('Por favor, corrija los errores antes de guardar', 'error');
+                    return;
+                }
+                
+                // Si todo está válido, enviar el formulario
+                this.submit();
+            } catch (error) {
+                console.error('Error durante la validación:', error);
+                showNotification('Error durante la validación. Por favor, intente nuevamente.', 'error');
+            }
+        });
+
+        // Función para guardar la venta y sus detalles
+        async function guardarVentaYDetalles() {
+            try {
+                // Mostrar notificación de validación
+                showNotification('Validando datos...', 'info');
+                
+                // Validar todos los datos antes de proceder
+                const isValid = await validarTodosLosStocks();
+                
+                if (!isValid) {
+                    showNotification('Por favor, corrija los errores antes de guardar', 'error');
+                    return;
+                }
+                
+                // Mostrar notificación de guardado
+                showNotification('Guardando cambios...', 'info');
+                
+                // Guardar la venta principal
+                const saleForm = document.getElementById('sale-form');
+                const saleFormData = new FormData(saleForm);
+                
+                const saleResponse = await fetch(saleForm.action, {
+                    method: 'POST',
+                    body: saleFormData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+                
+                if (!saleResponse.ok) {
+                    throw new Error('Error al guardar la venta');
+                }
+                
+                // Guardar los detalles
+                const detailsForm = document.getElementById('batch-details-form');
+                const detailsFormData = new FormData(detailsForm);
+                
+                const detailsResponse = await fetch(detailsForm.action, {
+                    method: 'POST',
+                    body: detailsFormData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+                
+                if (!detailsResponse.ok) {
+                    throw new Error('Error al guardar los detalles');
+                }
+                
+                // Mostrar notificación de éxito
+                showNotification('Cambios guardados correctamente', 'success');
+                
+                // Esperar 2 segundos antes de redirigir
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Redirigir a la página de generación de factura
+                const ventaId = {{ venta.id }};
+                window.location.href = `/comercial/ventas/${ventaId}/generar-factura/`;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error al guardar los cambios: ' + error.message, 'error');
+            }
+        }
+
+        // Función para guardar solo los detalles
+        async function guardarSoloDetalles() {
+            try {
+                // Mostrar notificación de validación
+                showNotification('Validando datos...', 'info');
+                
+                // Validar todos los datos antes de proceder
+                const isValid = await validarTodosLosStocks();
+                
+                if (!isValid) {
+                    showNotification('Por favor, corrija los errores antes de guardar', 'error');
+                    return;
+                }
+                
+                // Mostrar notificación de guardado
+                showNotification('Guardando detalles...', 'info');
+                
+                // Guardar los detalles
+                const detailsForm = document.getElementById('batch-details-form');
+                const detailsFormData = new FormData(detailsForm);
+                
+                const detailsResponse = await fetch(detailsForm.action, {
+                    method: 'POST',
+                    body: detailsFormData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+                
+                if (!detailsResponse.ok) {
+                    throw new Error('Error al guardar los detalles');
+                }
+                
+                // Mostrar notificación de éxito
+                showNotification('Detalles guardados correctamente', 'success');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error al guardar los detalles: ' + error.message, 'error');
+            }
+        }
+
+        // Mostrar notificaciones existentes al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
+            // Mostrar notificaciones existentes
+            const notifications = document.querySelectorAll('.notification');
+            notifications.forEach(notification => {
+                const message = notification.querySelector('.notification-message').textContent;
+                const type = notification.classList.contains('error') ? 'error' : 
+                            notification.classList.contains('warning') ? 'warning' : 
+                            notification.classList.contains('info') ? 'info' : 'success';
+                showNotification(message, type);
+            });
+
             // Evento para agregar detalle
             const addDetailBtn = document.getElementById('add-detail-btn');
             if (addDetailBtn) {
@@ -373,8 +514,9 @@
             // Evento para guardar todos los detalles
             const saveAllBtn = document.getElementById('save-all-details-btn');
             if (saveAllBtn) {
-                saveAllBtn.addEventListener('click', function() {
-                    document.getElementById('batch-details-form').submit();
+                saveAllBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    await guardarSoloDetalles();
                 });
             }
             
@@ -404,39 +546,183 @@
             });
         });
 
-        // Función para mostrar notificación
-        function showNotification(message, type = 'success') {
-            const container = document.getElementById('notifications-container');
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <span class="notification-message">${message}</span>
-                <button type="button" class="close-notification">&times;</button>
-            `;
+        // Función para validar stock y mostrar error
+        async function validarStock(presentacionId, cajasEnviadas, inputElement) {
+            if (!presentacionId || !cajasEnviadas) return true;
             
-            container.appendChild(notification);
-            
-            // Auto-cerrar después de 5 segundos
-            setTimeout(() => {
-                notification.classList.add('fade-out');
-                setTimeout(() => notification.remove(), 500);
-            }, 5000);
-            
-            // Configurar botón de cerrar
-            notification.querySelector('.close-notification').addEventListener('click', () => {
-                notification.remove();
-            });
+            try {
+                const response = await fetch(`/comercial/validar-stock/${presentacionId}/${cajasEnviadas}/`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    // Mostrar error en el campo
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'field-error';
+                    errorDiv.textContent = data.message;
+                    
+                    // Remover error anterior si existe
+                    const existingError = inputElement.parentElement.querySelector('.field-error');
+                    if (existingError) {
+                        existingError.remove();
+                    }
+                    
+                    // Agregar el nuevo error
+                    inputElement.parentElement.appendChild(errorDiv);
+                    inputElement.classList.add('error');
+                    
+                    return false;
+                } else {
+                    // Remover error si existe
+                    const existingError = inputElement.parentElement.querySelector('.field-error');
+                    if (existingError) {
+                        existingError.remove();
+                    }
+                    inputElement.classList.remove('error');
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error al validar stock:', error);
+                return false;
+            }
         }
 
-        // Actualizar el manejo de formularios para usar las notificaciones
-        document.getElementById('sale-form').addEventListener('submit', function(e) {
+        // Función para validar que No Cajas Abono no sea mayor que Cajas Enviadas
+        function validarCajasAbono(row) {
+            const cajasEnviadasInput = row.querySelector('input[name$="_cajas_enviadas"]');
+            const noCajasAbonoInput = row.querySelector('input[name$="_no_cajas_abono"]');
+            
+            if (!cajasEnviadasInput || !noCajasAbonoInput) return true;
+            
+            const cajasEnviadas = parseFloat(cajasEnviadasInput.value) || 0;
+            const noCajasAbono = parseFloat(noCajasAbonoInput.value) || 0;
+            
+            if (noCajasAbono > cajasEnviadas) {
+                // Mostrar error en el campo
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'field-error';
+                errorDiv.textContent = `No puede haber más cajas de abono (${noCajasAbono}) que cajas enviadas (${cajasEnviadas})`;
+                
+                // Remover error anterior si existe
+                const existingError = noCajasAbonoInput.parentElement.querySelector('.field-error');
+                if (existingError) {
+                    existingError.remove();
+                }
+                
+                // Agregar el nuevo error
+                noCajasAbonoInput.parentElement.appendChild(errorDiv);
+                noCajasAbonoInput.classList.add('error');
+                
+                return false;
+            } else {
+                // Remover error si existe
+                const existingError = noCajasAbonoInput.parentElement.querySelector('.field-error');
+                if (existingError) {
+                    existingError.remove();
+                }
+                noCajasAbonoInput.classList.remove('error');
+                return true;
+            }
+        }
+
+        // Función para validar todos los campos de cajas enviadas y abono
+        async function validarTodosLosStocks() {
+            const rows = document.querySelectorAll('.detail-row');
+            let isValid = true;
+            
+            for (const row of rows) {
+                const presentacionSelect = row.querySelector('select[name$="_presentacion"]');
+                const cajasInput = row.querySelector('input[name$="_cajas_enviadas"]');
+                
+                if (presentacionSelect && cajasInput) {
+                    const isValidStock = await validarStock(
+                        presentacionSelect.value,
+                        parseInt(cajasInput.value) || 0,
+                        cajasInput
+                    );
+                    if (!isValidStock) isValid = false;
+                }
+                
+                // Validar cajas de abono
+                if (!validarCajasAbono(row)) {
+                    isValid = false;
+                }
+            }
+            
+            return isValid;
+        }
+
+        // Modificar el evento de cambio de cajas enviadas
+        document.addEventListener('input', function(e) {
+            if (e.target.name && e.target.name.endsWith('_cajas_enviadas')) {
+                const row = e.target.closest('.detail-row');
+                const presentacionSelect = row.querySelector('select[name$="_presentacion"]');
+                
+                if (presentacionSelect && presentacionSelect.value) {
+                    validarStock(
+                        presentacionSelect.value,
+                        parseInt(e.target.value) || 0,
+                        e.target
+                    );
+                }
+                
+                // Validar cajas de abono cuando cambian las cajas enviadas
+                validarCajasAbono(row);
+            }
+            
+            // Validar cajas de abono cuando cambian
+            if (e.target.name && e.target.name.endsWith('_no_cajas_abono')) {
+                const row = e.target.closest('.detail-row');
+                validarCajasAbono(row);
+            }
+        });
+
+        // Modificar el evento de envío del formulario de detalles
+        document.getElementById('batch-details-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Mostrar notificación de guardado
-            showNotification('Guardando venta...', 'info');
+            // Mostrar notificación de validación
+            showNotification('Validando datos...', 'info');
             
-            // Enviar el formulario
-            this.submit();
+            try {
+                const isValid = await validarTodosLosStocks();
+                
+                if (!isValid) {
+                    showNotification('Por favor, corrija los errores antes de guardar', 'error');
+                    return;
+                }
+                
+                // Si todo está válido, enviar el formulario
+                this.submit();
+            } catch (error) {
+                console.error('Error durante la validación:', error);
+                showNotification('Error durante la validación. Por favor, intente nuevamente.', 'error');
+            }
+        });
+
+        // Agregar estilos CSS para los errores
+        const style = document.createElement('style');
+        style.textContent = `
+            .field-error {
+                color: #dc3545;
+                font-size: 0.875rem;
+                margin-top: 0.25rem;
+                display: block;
+            }
+            
+            input.error {
+                border-color: #dc3545;
+            }
+            
+            input.error:focus {
+                box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Agregar evento al botón de generar factura
+        document.getElementById('generar-factura-btn').addEventListener('click', async function(e) {
+            e.preventDefault();
+            await guardarVentaYDetalles();
         });
     </script>
 </body>
