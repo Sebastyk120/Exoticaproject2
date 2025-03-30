@@ -4,7 +4,7 @@ from .models import Cliente, Venta, DetalleVenta, TranferenciasCliente, BalanceC
 class ClienteResource(resources.ModelResource):
     class Meta:
         model = Cliente
-        fields = ('id', 'nombre', 'Domicilio', 'ciudad', 'cif', 'email', 'email2', 'telefono', 'dias_pago')
+        fields = ('id', 'nombre', 'domicilio', 'ciudad', 'cif', 'email', 'email2', 'telefono', 'dias_pago')
 
 class VentaResource(resources.ModelResource):
     class Meta:

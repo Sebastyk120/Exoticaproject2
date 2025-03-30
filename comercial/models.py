@@ -1,6 +1,5 @@
 import datetime
 from decimal import Decimal
-
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -12,7 +11,7 @@ from productos.models import Fruta, Presentacion
 
 class Cliente(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
-    Domicilio = models.CharField(max_length=255, verbose_name="Domicilio:")
+    domicilio = models.CharField(max_length=255, verbose_name="Domicilio:")
     ciudad = models.CharField(max_length=100, verbose_name="Ciudad", null=True, blank=True)
     cif = models.CharField(max_length=20, verbose_name="Código  CIF", null=True, blank=True)
     email = models.EmailField(verbose_name="Correo")
@@ -61,14 +60,14 @@ class Venta(models.Model):
             self.fecha_vencimiento = self.fecha_entrega + datetime.timedelta(days=self.cliente.dias_pago)
         if not self.numero_factura:
             current_year = datetime.datetime.now().year
-            last_venta = Venta.objects.filter(numero_factura__startswith=f'FACTURA {current_year}/').order_by(
+            last_venta = Venta.objects.filter(numero_factura__startswith=f'{current_year}/').order_by(
                 'id').last()
             if last_venta:
                 last_consecutive = int(last_venta.numero_factura.split('/')[-1])
                 new_consecutive = last_consecutive + 1
             else:
                 new_consecutive = 1101
-            self.numero_factura = f'FACTURA {current_year}/{new_consecutive}'
+            self.numero_factura = f'{current_year}/{new_consecutive}'
         super(Venta, self).save(*args, **kwargs)
 
     def reevaluar_pagos_cliente(self):
@@ -79,12 +78,6 @@ class Venta(models.Model):
         from django.db.models import Sum
         from decimal import Decimal
 
-        # Si queremos considerar las transferencias, necesitamos tener una relación
-        # entre TransferenciasCliente y Venta, o alguna forma de asociarlas
-        # Aquí suponemos que existe algún método para obtener las transferencias asociadas
-        
-        # Por ahora, simplemente calculamos monto_pendiente como la diferencia entre
-        # el total de la factura y el total de abonos/reclamaciones
         self.monto_pendiente = self.valor_total_factura_euro - self.valor_total_abono_euro
         self.save(update_fields=['monto_pendiente'])
         

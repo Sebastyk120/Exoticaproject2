@@ -1,6 +1,6 @@
 :root {
-    --primary-color: #3b82f6;
-    --primary-dark: #2563eb;
+    --primary-color: #1a56db;
+    --primary-dark: #1e429f;
     --primary-light: #93c5fd;
     --secondary-color: #64748b;
     --success-color: #10b981;
@@ -32,7 +32,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1800px;
     margin: 0 auto;
     background-color: white;
     border-radius: 8px;
@@ -127,7 +127,7 @@ input, select, textarea {
 input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.25);
 }
 
 textarea {
@@ -198,18 +198,9 @@ textarea {
 }
 
 .btn-success:hover {
-    background-color: #218838;
+    background-color: #0d9488;
     color: white;
     text-decoration: none;
-}
-
-.btn-save {
-    background-color: var(--success-color);
-    color: white;
-}
-
-.btn-save:hover {
-    background-color: #218838;
 }
 
 .btn-cancel {
@@ -230,7 +221,7 @@ textarea {
 }
 
 .btn-add:hover {
-    background-color: #218838;
+    background-color: #0d9488;
 }
 
 .section-header {
@@ -262,114 +253,6 @@ textarea {
 
 .section-header .btn i {
     font-size: 14px;
-}
-
-/* Order Details Styles */
-.detail-card {
-    margin-bottom: 15px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    overflow: hidden;
-}
-
-.detail-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15px; /* Padding reducido para diseño más compacto */
-    background-color: #f8f9fa;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-detail-header:hover, .detail-header.active {
-    background-color: #e9ecef;
-}
-
-.detail-header .product-info {
-    flex: 1;
-}
-
-.detail-header .product-name {
-    font-weight: 600;
-}
-
-.detail-header .boxes-info {
-    text-align: center;
-    margin: 0 15px;
-    white-space: nowrap;
-}
-
-.detail-header .boxes-info .label {
-    font-size: 14px;
-    color: var(--secondary-color);
-}
-
-.detail-header .boxes-info .value {
-    font-weight: 600;
-}
-
-.detail-header .price-info {
-    margin-right: 15px;
-    text-align: right;
-    white-space: nowrap;
-}
-
-.detail-header .price-info .value {
-    font-weight: 600;
-    color: var(--success-color);
-}
-
-.toggle-icon {
-    transition: transform 0.3s ease;
-    margin-left: 10px;
-}
-
-.detail-header.active .toggle-icon {
-    transform: rotate(180deg);
-}
-
-.detail-content {
-    padding: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-}
-
-.detail-content form {
-    padding: 20px;
-    border-top: 1px solid var(--border-color);
-}
-
-.readonly input {
-    background-color: #f8f9fa;
-    cursor: not-allowed;
-}
-
-.new-detail .detail-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.btn-close {
-    background: none;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    color: var(--secondary-color);
-}
-
-.btn-close:hover {
-    color: var(--danger-color);
-}
-
-.empty-state {
-    padding: 40px;
-    text-align: center;
-    color: var(--secondary-color);
-    background-color: #f8f9fa;
-    border-radius: var(--border-radius);
 }
 
 /* Tabla de detalles */
@@ -503,4 +386,68 @@ detail-header:hover, .detail-header.active {
         opacity: 1;
         transform: translateX(0);
     }
+}
+
+/* Estado vacío */
+.empty-state {
+    padding: 40px;
+    text-align: center;
+    color: var(--secondary-color);
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+}
+
+.empty-state p {
+    margin-bottom: 20px;
+}
+
+/* Información fiscal y totales */
+.fiscal-info {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-top: 20px;
+}
+
+.fiscal-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+}
+
+.fiscal-label {
+    font-weight: 500;
+    margin-right: 20px;
+    width: 120px;
+    text-align: right;
+}
+
+.fiscal-value {
+    font-weight: 600;
+    width: 120px;
+    text-align: right;
+}
+
+.total-value {
+    font-size: 1.1em;
+    color: var(--primary-color);
+}
+
+/* Estado de pago */
+.payment-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.payment-status.paid {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.payment-status.pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
 }

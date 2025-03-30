@@ -1,0 +1,467 @@
+/* Estilos para la factura */
+:root {
+    --primary-color: #0b486b; /* Deep blue */
+    --secondary-color: #3b8686; /* Teal */
+    --accent-color: #79bd9a; /* Light teal */
+    --text-color: #333;
+    --text-light: #666;
+    --border-color: #ddd;
+    --background-light: #f9f9f9;
+    --background-white: #fff;
+    --success-color: #3b8686;
+    --warning-color: #e67e22;
+    --logo-color: #ea1f78; /* Logo magenta color */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-color);
+    background-color: #f0f2f5;
+    line-height: 1.4;
+    font-size: 13px; /* Increased from 12px */
+}
+
+.container {
+    max-width: 210mm; /* A4 width */
+    margin: 10px auto; /* Reduced from 15px */
+    background-color: var(--background-white);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Controls section - not included in PDF */
+.controls {
+    background-color: var(--primary-color);
+    padding: 10px; /* Reduced from 12px */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 4px 4px 0 0;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.btn i {
+    margin-right: 6px;
+}
+
+.btn-primary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #000;
+}
+
+.btn-secondary {
+    background-color: #333;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #000;
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: #d35400;
+}
+
+/* Invoice container - this is what will be in the PDF */
+.invoice-container {
+    padding: 15px 20px; /* Reduced top padding from 20px to 15px */
+    background-color: white;
+}
+
+/* Invoice header with company info and invoice details */
+.invoice-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px; /* Reduced from 15px */
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px; /* Reduced from 12px */
+}
+
+.company-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    margin-right: 15px;
+    height: 120px;
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.logo img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.company-details {
+    flex: 1 1 auto;
+    width: 75%;
+    padding-right: 10px;
+}
+
+.company-title {
+    color: var(--primary-color);
+    font-size: 20px;
+    font-weight: 900;
+    margin-top: 5px;
+    text-align: left;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 6px;
+    width: 100%;
+    line-height: 1.2;
+}
+
+.company-details p {
+    color: var(--text-light);
+    margin-bottom: 2px; /* Reduced from 3px */
+    font-size: 12px;
+}
+
+.invoice-info {
+    text-align: right;
+    flex: 0.7;
+}
+
+.invoice-info h2 {
+    color: var(--primary-color);
+    margin-bottom: 8px; /* Reduced from 10px */
+    font-size: 22px; /* Increased from 20px */
+}
+
+.invoice-number {
+    font-size: 18px; /* Increased from 16px */
+    font-weight: 700;
+    margin-bottom: 8px; /* Reduced from 10px */
+}
+
+.invoice-date p {
+    margin-bottom: 3px;
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+/* Client information section */
+.invoice-client {
+    margin-bottom: 15px; /* Reduced from 20px */
+    background-color: var(--background-light);
+    padding: 12px; /* Reduced from 15px */
+    border-radius: 4px;
+    page-break-inside: avoid;
+}
+
+.invoice-client h3 {
+    color: var(--primary-color);
+    font-size: 16px; /* Increased from 14px */
+    margin-bottom: 8px; /* Reduced from 10px */
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 5px; /* Reduced from 6px */
+}
+
+.client-info {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.client-info p {
+    flex: 0 0 50%;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+/* Items table */
+.invoice-items {
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+}
+
+.invoice-items h3,
+.invoice-credit-note h3 {
+    color: var(--primary-color);
+    font-size: 16px; /* Increased from 14px */
+    margin-bottom: 8px; /* Reduced from 10px */
+}
+
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.items-table th {
+    background-color: var(--primary-color);
+    color: white;
+    text-align: left;
+    padding: 8px;
+    font-weight: 600; /* Increased from 500 */
+    font-size: 12px; /* Increased from 11px */
+}
+
+.items-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 12px; /* Increased from 11px */
+}
+
+.items-table tbody tr:nth-child(even) {
+    background-color: var(--background-light);
+}
+
+/* Credit note section */
+.invoice-credit-note {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #ffecb3;
+    border-radius: 4px;
+    border-left: 4px solid var(--warning-color);
+    page-break-inside: avoid;
+}
+
+.invoice-credit-note h3 {
+    color: var(--primary-color);
+    font-size: 16px; 
+    margin-bottom: 8px;
+}
+
+/* Esto asegura que las facturas rectificativas tengan un aspecto diferente */
+body .invoice-container:has(.invoice-info h2:contains("FACTURA RECTIFICATIVA")) {
+    background-color: #fff9e6;
+    border: 1px solid var(--warning-color);
+}
+
+/* Invoice summary section */
+.invoice-summary-and-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    page-break-inside: avoid;
+    gap: 20px;
+}
+
+.bank-and-terms {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 12px;
+}
+
+.payment-info, .terms {
+    background-color: var(--background-light);
+    padding: 12px;
+    border-radius: 4px;
+}
+
+.payment-info h3, .terms h3 {
+    color: var(--primary-color);
+    font-size: 15px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 4px;
+}
+
+.payment-info p, .terms p {
+    margin-bottom: 4px;
+    color: var(--text-light);
+}
+
+.invoice-summary {
+    width: 320px;
+    page-break-inside: avoid;
+}
+
+.summary-table {
+    width: 100%;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 13px;
+}
+
+.summary-row.total {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* Notes section */
+.invoice-notes {
+    margin-bottom: 15px; /* Reduced from 20px */
+    background-color: var(--background-light);
+    padding: 12px; /* Reduced from 15px */
+    border-radius: 4px;
+    page-break-inside: avoid;
+}
+
+.invoice-notes h3 {
+    color: var(--primary-color);
+    font-size: 16px; /* Increased from 14px */
+    margin-bottom: 8px; /* Reduced from 10px */
+}
+
+.notes-content {
+    font-style: italic;
+    color: var(--text-light);
+    font-size: 12px; /* Increased from 11px */
+}
+
+/* Footer section */
+.invoice-footer {
+    display: flex;
+    gap: 15px; /* Reduced from 20px */
+    margin-bottom: 15px; /* Reduced from 20px */
+    padding-top: 12px; /* Reduced from 15px */
+    border-top: 1px solid var(--border-color);
+    page-break-inside: avoid;
+}
+
+.invoice-footer h3 {
+    color: var(--primary-color);
+    font-size: 15px; /* Increased from 13px */
+    margin-bottom: 8px; /* Reduced from 10px */
+}
+
+.invoice-footer p {
+    font-size: 12px; /* Increased from 11px */
+    color: var(--text-light);
+    margin-bottom: 2px; /* Reduced from 3px */
+}
+
+/* Signature and thank you */
+.invoice-signature {
+    text-align: center;
+    margin-top: 15px; /* Reduced from 20px */
+    margin-bottom: 10px; /* Reduced from 15px */
+    page-break-inside: avoid;
+}
+
+.thank-you {
+    font-size: 16px; /* Increased from 15px */
+    color: var(--logo-color);
+    font-weight: 500;
+}
+
+/* Page break controls */
+@media print {
+    .invoice-header, 
+    .invoice-client, 
+    .invoice-items, 
+    .invoice-credit-note, 
+    .invoice-summary, 
+    .invoice-notes, 
+    .invoice-footer,
+    .invoice-signature {
+        page-break-inside: avoid;
+    }
+    
+    .items-table {
+        page-break-inside: auto;
+    }
+    
+    .items-table tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+    
+    .invoice-items h3,
+    .invoice-credit-note h3,
+    .invoice-notes h3 {
+        page-break-after: avoid;
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .invoice-container {
+        padding: 15px;
+    }
+    
+    .invoice-header {
+        flex-direction: column;
+    }
+    
+    .invoice-info {
+        text-align: left;
+        margin-top: 15px;
+    }
+    
+    .client-info p {
+        flex: 0 0 100%;
+    }
+    
+    .invoice-footer {
+        flex-direction: column;
+    }
+    
+    .invoice-summary-and-footer {
+        flex-direction: column;
+    }
+    
+    .bank-and-terms {
+        margin-bottom: 15px;
+    }
+    
+    .invoice-summary {
+        width: 100%;
+    }
+    
+    .summary-table {
+        width: 100%;
+    }
+}
+
+/* Print styles */
+@media print {
+    body {
+        background-color: white;
+    }
+    
+    .container {
+        box-shadow: none;
+        margin: 0;
+        max-width: 100%;
+    }
+    
+    .controls {
+        display: none;
+    }
+}

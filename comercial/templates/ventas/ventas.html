@@ -1,24 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>{% if pedido %}Editar Pedido #{{ pedido.id }}{% else %}Nuevo Pedido{% endif %}</title>
+    <title>{% if venta %}Editar Venta #{{ venta.id }}{% else %}Nueva Venta{% endif %}</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/pedidos/pedidos.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ventas/ventas.css' %}">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>
-                <i class="fas fa-box"></i>
-                {% if pedido %}Pedido #{{ pedido.id }}{% else %}Nuevo Pedido{% endif %}
+                <i class="fas fa-shopping-cart"></i>
+                {% if venta %}Venta #{{ venta.id }}{% else %}Nueva Venta{% endif %}
             </h1>
             <nav class="breadcrumb">
                 <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a> &gt;
-                <a href="{% url 'importacion:lista_pedidos' %}"><i class="fas fa-boxes"></i> Pedidos</a> &gt;
-                <span>{% if pedido %}Pedido #{{ pedido.id }}{% else %}Nuevo Pedido{% endif %}</span>
+                <a href="{% url 'comercial:lista_ventas' %}"><i class="fas fa-shopping-cart"></i> Ventas</a> &gt;
+                <span>{% if venta %}Venta #{{ venta.id }}{% else %}Nueva Venta{% endif %}</span>
             </nav>
         </header>
 
@@ -35,31 +35,31 @@
         </div>
 
         <div class="main-content">
-            <!-- Order Information -->
+            <!-- Sale Information -->
             <section class="order-info">
                 <div class="section-header">
-                    <h2><i class="fas fa-info-circle"></i> Información del Pedido</h2>
+                    <h2><i class="fas fa-info-circle"></i> Información de la Venta</h2>
                     <div class="action-buttons">
-                        <button type="submit" form="order-form" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Guardar Pedido
+                        <button type="submit" form="sale-form" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar Venta
                         </button>
-                        {% if pedido %}
-                            <button id="send-request-btn" class="btn btn-success">
-                                <i class="fas fa-paper-plane"></i> Enviar solicitud
-                            </button>
+                        {% if venta %}
+                            <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn btn-success">
+                                <i class="fas fa-file-invoice"></i> Generar Factura
+                            </a>
                         {% endif %}
                     </div>
                 </div>
-                <form id="order-form" method="post" action="{% if pedido %}{% url 'importacion:guardar_pedido' pedido.id %}{% else %}{% url 'importacion:guardar_pedido' %}{% endif %}">
+                <form id="sale-form" method="post" action="{% if venta %}{% url 'comercial:guardar_venta' venta.id %}{% else %}{% url 'comercial:guardar_venta' %}{% endif %}">
                     {% csrf_token %}
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="exportador">Exportador:</label>
-                            <select id="exportador" name="exportador" required>
-                                <option value="">Seleccionar Exportador</option>
-                                {% for exportador in exportadores %}
-                                    <option value="{{ exportador.id }}" {% if pedido and pedido.exportador.id == exportador.id %}selected{% endif %}>
-                                        {{ exportador.nombre }}
+                            <label for="cliente">Cliente:</label>
+                            <select id="cliente" name="cliente" required>
+                                <option value="">Seleccionar Cliente</option>
+                                {% for cliente in clientes %}
+                                    <option value="{{ cliente.id }}" {% if venta and venta.cliente.id == cliente.id %}selected{% endif %}>
+                                        {{ cliente.nombre }}
                                     </option>
                                 {% endfor %}
                             </select>
@@ -67,74 +67,74 @@
                         
                         <div class="form-group">
                             <label for="fecha_entrega">Fecha de Entrega:</label>
-                            <input type="date" id="fecha_entrega" name="fecha_entrega" value="{{ pedido.fecha_entrega|date:'Y-m-d' }}" required>
+                            <input type="date" id="fecha_entrega" name="fecha_entrega" value="{{ venta.fecha_entrega|date:'Y-m-d' }}" required>
                         </div>
                         
                         <div class="form-group">
-                            <label for="awb">AWB:</label>
-                            <input type="text" id="awb" name="awb" value="{{ pedido.awb|default:'' }}" maxlength="12">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="numero_factura">Número Factura:</label>
-                            <input type="text" id="numero_factura" name="numero_factura" value="{{ pedido.numero_factura|default:'' }}">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="numero_nc">Número NC:</label>
-                            <input type="text" id="numero_nc" name="numero_nc" value="{{ pedido.numero_nc|default:'' }}">
+                            <label for="numero_nc">Número NC/Reclamación:</label>
+                            <input type="text" id="numero_nc" name="numero_nc" value="{{ venta.numero_nc|default:'' }}">
                         </div>
                         
                         <div class="form-group">
                             <label for="observaciones">Observaciones:</label>
-                            <textarea id="observaciones" name="observaciones">{{ pedido.observaciones|default:'' }}</textarea>
+                            <textarea id="observaciones" name="observaciones">{{ venta.observaciones|default:'' }}</textarea>
                         </div>
                     </div>
                     
                     <div class="calculated-fields">
-                        {% if pedido %}
+                        {% if venta %}
                             <div class="calc-field">
                                 <span class="label">Semana:</span>
-                                <span class="value">{{ pedido.semana }}</span>
+                                <span class="value">{{ venta.semana }}</span>
                             </div>
                             <div class="calc-field">
-                                <span class="label">Total Cajas Solicitadas:</span>
-                                <span class="value">{{ pedido.total_cajas_solicitadas|default:0 }}</span>
+                                <span class="label">Fecha Vencimiento:</span>
+                                <span class="value">{{ venta.fecha_vencimiento|date:"d/m/Y" }}</span>
                             </div>
                             <div class="calc-field">
-                                <span class="label">Total Cajas Recibidas:</span>
-                                <span class="value">{{ pedido.total_cajas_recibidas|default:0 }}</span>
+                                <span class="label">Número Factura:</span>
+                                <span class="value">{{ venta.numero_factura|default:"Pendiente" }}</span>
                             </div>
                             <div class="calc-field">
-                                <span class="label">Valor Total Factura USD:</span>
-                                <span class="value">{{ pedido.valor_total_factura_usd|default:0|floatformat:2 }}</span>
+                                <span class="label">Total Cajas:</span>
+                                <span class="value">{{ venta.total_cajas_pedido|default:0 }}</span>
                             </div>
                             <div class="calc-field">
-                                <span class="label">Valor Total NC USD:</span>
-                                <span class="value">{{ pedido.valor_total_nc_usd|default:0|floatformat:2 }}</span>
+                                <span class="label">Subtotal Factura €:</span>
+                                <span class="value">{{ venta.subtotal_factura|default:0|floatformat:2 }}</span>
                             </div>
                             <div class="calc-field">
-                                <span class="label">Estado del Pedido:</span>
-                                <span class="value">{{ pedido.estado_pedido }}</span>
+                                <span class="label">IVA 4% €:</span>
+                                <span class="value">{{ venta.iva|default:0|floatformat:2 }}</span>
+                            </div>
+                            <div class="calc-field">
+                                <span class="label">Total Factura €:</span>
+                                <span class="value">{{ venta.valor_total_factura_euro|default:0|floatformat:2 }}</span>
+                            </div>
+                            <div class="calc-field">
+                                <span class="label">Total Abono €:</span>
+                                <span class="value">{{ venta.valor_total_abono_euro|default:0|floatformat:2 }}</span>
+                            </div>
+                            <div class="calc-field">
+                                <span class="label">Monto Pendiente €:</span>
+                                <span class="value">{{ venta.monto_pendiente|default:0|floatformat:2 }}</span>
                             </div>
                             <div class="calc-field">
                                 <span class="label">Pagado:</span>
-                                <span class="value">{{ pedido.pagado|yesno:"Sí,No" }}</span>
-                            </div>
-                            <div class="calc-field">
-                                <span class="label">Monto Pendiente USD:</span>
-                                <span class="value">{{ pedido.monto_pendiente|default:0|floatformat:2 }}</span>
+                                <span class="value payment-status {% if venta.pagado %}paid{% else %}pending{% endif %}">
+                                    {{ venta.pagado|yesno:"Sí,No" }}
+                                </span>
                             </div>
                         {% endif %}
                     </div>
                 </form>
             </section>
             
-            <!-- Order Details -->
-            {% if pedido %}
+            <!-- Sale Details -->
+            {% if venta %}
                 <section class="order-details">
                     <div class="section-header">
-                        <h2><i class="fas fa-list"></i> Detalles del Pedido</h2>
+                        <h2><i class="fas fa-list"></i> Detalles de la Venta</h2>
                         <div class="action-buttons">
                             <button id="add-detail-btn" class="btn btn-success">
                                 <i class="fas fa-plus"></i> Agregar Detalle
@@ -147,7 +147,7 @@
                     
                     <div id="details-container">
                         <!-- Batch Details Form -->
-                        <form id="batch-details-form" method="post" action="{% url 'importacion:guardar_detalles_batch' pedido.id %}">
+                        <form id="batch-details-form" method="post" action="{% url 'comercial:guardar_detalles_batch' venta.id %}">
                             {% csrf_token %}
                             
                             <div id="new-details-container">
@@ -158,10 +158,9 @@
                                 <thead>
                                     <tr>
                                         <th>Presentación</th>
-                                        <th>Cajas Solicitadas</th>
-                                        <th>Cajas Recibidas</th>
-                                        <th>Valor Caja USD</th>
-                                        <th>No Cajas NC</th>
+                                        <th>Cajas Enviadas</th>
+                                        <th>Valor Caja €</th>
+                                        <th>No Cajas Abono</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
@@ -178,20 +177,16 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <input type="number" name="detalle_{{ detalle.id }}_cajas_solicitadas" 
-                                                   value="{{ detalle.cajas_solicitadas|default:'0' }}" min="0">
+                                            <input type="number" name="detalle_{{ detalle.id }}_cajas_enviadas" 
+                                                   value="{{ detalle.cajas_enviadas|default:'0' }}" min="0">
                                         </td>
                                         <td>
-                                            <input type="number" name="detalle_{{ detalle.id }}_cajas_recibidas" 
-                                                   value="{{ detalle.cajas_recibidas|default:'0' }}" min="0">
+                                            <input type="number" name="detalle_{{ detalle.id }}_valor_x_caja_euro" 
+                                                   value="{{ detalle.valor_x_caja_euro_str|default:detalle.valor_x_caja_euro|default:'0.00' }}" min="0" step="0.01">
                                         </td>
                                         <td>
-                                            <input type="number" name="detalle_{{ detalle.id }}_valor_x_caja_usd" 
-                                                   value="{{ detalle.valor_x_caja_usd_str|default:detalle.valor_x_caja_usd|default:'0.00' }}" min="0" step="0.01">
-                                        </td>
-                                        <td>
-                                            <input type="number" name="detalle_{{ detalle.id }}_no_cajas_nc" 
-                                                   value="{{ detalle.no_cajas_nc_str|default:detalle.no_cajas_nc|default:'0.0' }}" min="0" step="0.1">
+                                            <input type="number" name="detalle_{{ detalle.id }}_no_cajas_abono" 
+                                                   value="{{ detalle.no_cajas_abono_str|default:detalle.no_cajas_abono|default:'0.0' }}" min="0" step="0.1">
                                         </td>
                                         <td class="actions-cell">
                                             <button type="button" class="btn-icon btn-delete" onclick="removeDetailRow(this)">
@@ -204,7 +199,7 @@
                             </table>
                             
                             <div class="empty-state" {% if detalles %}style="display:none"{% endif %}>
-                                <p>No hay detalles para este pedido. Haga clic en "Agregar Detalle" para añadir uno.</p>
+                                <p>No hay detalles para esta venta. Haga clic en "Agregar Detalle" para añadir uno.</p>
                             </div>
                         </form>
                         
@@ -222,16 +217,13 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <input type="number" name="new_INDEX_cajas_solicitadas" value="0" min="0">
+                                    <input type="number" name="new_INDEX_cajas_enviadas" value="0" min="0">
                                 </td>
                                 <td>
-                                    <input type="number" name="new_INDEX_cajas_recibidas" value="0" min="0">
+                                    <input type="number" name="new_INDEX_valor_x_caja_euro" value="0" min="0" step="0.01">
                                 </td>
                                 <td>
-                                    <input type="number" name="new_INDEX_valor_x_caja_usd" value="0" min="0" step="0.01">
-                                </td>
-                                <td>
-                                    <input type="number" name="new_INDEX_no_cajas_nc" value="0" min="0" step="0.1">
+                                    <input type="number" name="new_INDEX_no_cajas_abono" value="0" min="0" step="0.1">
                                 </td>
                                 <td class="actions-cell">
                                     <button type="button" class="btn-icon btn-delete" onclick="removeDetailRow(this)">
@@ -241,6 +233,31 @@
                             </tr>
                         </template>
                     </div>
+                    
+                    {% if venta %}
+                    <div class="fiscal-info">
+                        <div class="fiscal-row">
+                            <span class="fiscal-label">Subtotal:</span>
+                            <span class="fiscal-value">€ {{ venta.subtotal_factura|default:0|floatformat:2 }}</span>
+                        </div>
+                        <div class="fiscal-row">
+                            <span class="fiscal-label">IVA (4%):</span>
+                            <span class="fiscal-value">€ {{ venta.iva|default:0|floatformat:2 }}</span>
+                        </div>
+                        <div class="fiscal-row">
+                            <span class="fiscal-label">Total Factura:</span>
+                            <span class="fiscal-value total-value">€ {{ venta.valor_total_factura_euro|default:0|floatformat:2 }}</span>
+                        </div>
+                        <div class="fiscal-row">
+                            <span class="fiscal-label">Total Abono:</span>
+                            <span class="fiscal-value">€ {{ venta.valor_total_abono_euro|default:0|floatformat:2 }}</span>
+                        </div>
+                        <div class="fiscal-row">
+                            <span class="fiscal-label">Pendiente:</span>
+                            <span class="fiscal-value">€ {{ venta.monto_pendiente|default:0|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
                 </section>
             {% endif %}
         </div>
@@ -249,25 +266,7 @@
     <script>
         // Variables globales
         let newDetailCounter = 0;
-        const exportadorId = {% if pedido.exportador %}{{ pedido.exportador.id }}{% else %}null{% endif %};
-        
-        function toggleDetail(header) {
-            const card = header.closest('.detail-card');
-            const content = card.querySelector('.detail-content');
-            const icon = header.querySelector('.toggle-icon');
-            
-            if (content.style.maxHeight && content.style.maxHeight !== "none") {
-                content.style.maxHeight = null;
-                icon.classList.remove('fa-chevron-up');
-                icon.classList.add('fa-chevron-down');
-                header.classList.remove('active');
-            } else {
-                content.style.maxHeight = content.scrollHeight + "px";
-                icon.classList.remove('fa-chevron-down');
-                icon.classList.add('fa-chevron-up');
-                header.classList.add('active');
-            }
-        }
+        const clienteId = {% if venta.cliente %}{{ venta.cliente.id }}{% else %}null{% endif %};
         
         function showNewDetailForm() {
             // Añadir una nueva fila al inicio de la tabla
@@ -278,10 +277,6 @@
             
             // Mostrar la tabla si está oculta
             document.getElementById('details-table').style.display = 'table';
-        }
-        
-        function hideNewDetailForm() {
-            document.getElementById('new-detail-form').style.display = 'none';
         }
         
         function addNewDetailRow() {
@@ -329,12 +324,12 @@
         function cargarPrecioPresentacion(selectElement) {
             const presentacionId = selectElement.value;
             const row = selectElement.closest('.detail-row');
-            const valorCajaInput = row.querySelector('[name$="_valor_x_caja_usd"]');
+            const valorCajaInput = row.querySelector('[name$="_valor_x_caja_euro"]');
             
-            if (!presentacionId || !exportadorId) return;
+            if (!presentacionId || !clienteId) return;
             
             // Hacer la petición AJAX para obtener el precio
-            fetch(`/importacion/obtener-precio-presentacion/${presentacionId}/${exportadorId}/`)
+            fetch(`/comercial/obtener-precio-presentacion/${presentacionId}/${clienteId}/`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.precio) {
@@ -407,72 +402,9 @@
                     this.closest('.notification').remove();
                 });
             });
-            
-            // Agregar evento al botón de enviar solicitud
-            const sendRequestBtn = document.getElementById('send-request-btn');
-            if (sendRequestBtn) {
-                console.log('Botón encontrado, agregando evento...');
-                sendRequestBtn.addEventListener('click', async function(e) {
-                    e.preventDefault();
-                    console.log('Evento click disparado');
-                    
-                    // Mostrar notificación de guardado
-                    mostrarNotificacion('Guardando cambios antes de enviar solicitud...', 'info');
-                    
-                    try {
-                        // Guardar el pedido
-                        const orderForm = document.getElementById('order-form');
-                        if (orderForm) {
-                            console.log('Guardando pedido...');
-                            const orderFormData = new FormData(orderForm);
-                            const orderResponse = await fetch(orderForm.action, {
-                                method: 'POST',
-                                body: orderFormData,
-                                headers: {
-                                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                                }
-                            });
-                            console.log('Pedido guardado:', orderResponse.ok);
-                        }
-                        
-                        // Guardar los detalles
-                        const detailsForm = document.getElementById('batch-details-form');
-                        if (detailsForm) {
-                            console.log('Guardando detalles...');
-                            const detailsFormData = new FormData(detailsForm);
-                            const detailsResponse = await fetch(detailsForm.action, {
-                                method: 'POST',
-                                body: detailsFormData,
-                                headers: {
-                                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                                }
-                            });
-                            console.log('Detalles guardados:', detailsResponse.ok);
-                        }
-                        
-                        // Mostrar notificación de éxito
-                        mostrarNotificacion('Cambios guardados correctamente', 'success');
-                        
-                        // Redirigir después de guardar
-                        setTimeout(() => {
-                            {% if pedido %}
-                                window.location.href = "{% url 'importacion:solicitar_pedido' pedido.id %}";
-                            {% else %}
-                                window.location.reload();
-                            {% endif %}
-                        }, 1500);
-                        
-                    } catch (error) {
-                        console.error('Error al guardar los cambios:', error);
-                        mostrarNotificacion('Error al guardar los cambios. Por favor, intente nuevamente.', 'error');
-                    }
-                });
-            } else {
-                console.log('Botón no encontrado');
-            }
         });
 
-        // Agregar al script existente
+        // Función para mostrar notificación
         function showNotification(message, type = 'success') {
             const container = document.getElementById('notifications-container');
             const notification = document.createElement('div');
@@ -497,11 +429,11 @@
         }
 
         // Actualizar el manejo de formularios para usar las notificaciones
-        document.getElementById('order-form').addEventListener('submit', function(e) {
+        document.getElementById('sale-form').addEventListener('submit', function(e) {
             e.preventDefault();
             
             // Mostrar notificación de guardado
-            showNotification('Guardando pedido...', 'info');
+            showNotification('Guardando venta...', 'info');
             
             // Enviar el formulario
             this.submit();

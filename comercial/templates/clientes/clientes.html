@@ -1,0 +1,345 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Clientes</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'css/clientes/clientes.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h2 class="page-title">Gestión de Clientes</h2>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModal">
+                        <i class="bi bi-plus-lg me-1"></i>Nuevo Cliente
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Alerts container for Django messages -->
+        <div id="alerts-container">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control search-box" id="searchClient" placeholder="Buscar clientes...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover" id="clientsTable">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Ciudad</th>
+                                <th>Domicilio</th>
+                                <th>Email</th>
+                                <th>Email 2</th>
+                                <th>Teléfono</th>
+                                <th>CIF</th>
+                                <th>Días Pago</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cliente in clientes %}
+                            <tr>
+                                <td>{{ cliente.nombre }}</td>
+                                <td>{{ cliente.ciudad }}</td>
+                                <td>{{ cliente.domicilio }}</td>
+                                <td>{{ cliente.email }}</td>
+                                <td>{{ cliente.email2 }}</td>
+                                <td>{{ cliente.telefono }}</td>
+                                <td>{{ cliente.cif }}</td>
+                                <td>{{ cliente.dias_pago }}</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editClient({{ cliente.id }})" title="Editar cliente">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Cliente -->
+    <div class="modal fade" id="addClientModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Nuevo Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addClientForm" method="POST" action="{% url 'comercial:add_client' %}">
+                        {% csrf_token %}
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="nombre" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ciudad</label>
+                                <input type="text" class="form-control" name="ciudad">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">Domicilio <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="domicilio" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" class="form-control" name="email" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email 2</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" class="form-control" name="email2">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label">Teléfono</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                    <input type="tel" class="form-control" name="telefono">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">CIF</label>
+                                <input type="text" class="form-control" name="cif">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Días de Pago <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="dias_pago" required min="0">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>Cancelar
+                    </button>
+                    <button type="submit" form="addClientForm" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>Agregar Cliente
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Cliente -->
+    <div class="modal fade" id="editClientModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Editar Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editClientForm" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="client_id" id="edit_client_id">
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="nombre" id="edit_nombre" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ciudad</label>
+                                <input type="text" class="form-control" name="ciudad" id="edit_ciudad">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">Domicilio <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="domicilio" id="edit_domicilio" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" class="form-control" name="email" id="edit_email" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email 2</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" class="form-control" name="email2" id="edit_email2">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label">Teléfono</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                    <input type="tel" class="form-control" name="telefono" id="edit_telefono">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">CIF</label>
+                                <input type="text" class="form-control" name="cif" id="edit_cif">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Días de Pago <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="dias_pago" id="edit_dias_pago" required min="0">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>Cancelar
+                    </button>
+                    <button type="submit" form="editClientForm" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Funcionalidad de búsqueda
+        document.getElementById('searchClient').addEventListener('keyup', function() {
+            const searchText = this.value.toLowerCase();
+            const table = document.getElementById('clientsTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const cells = row.getElementsByTagName('td');
+                let found = false;
+
+                for (let j = 0; j < cells.length; j++) {
+                    const cellText = cells[j].textContent.toLowerCase();
+                    if (cellText.includes(searchText)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                row.style.display = found ? '' : 'none';
+            }
+        });
+
+        // Funcionalidad de edición
+        function editClient(clientId) {
+            fetch(`/comercial/get_client/${clientId}/`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al obtener los datos del cliente');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('edit_client_id').value = data.id;
+                    document.getElementById('edit_nombre').value = data.nombre;
+                    document.getElementById('edit_ciudad').value = data.ciudad || '';
+                    document.getElementById('edit_email').value = data.email;
+                    document.getElementById('edit_email2').value = data.email2 || '';
+                    document.getElementById('edit_telefono').value = data.telefono || '';
+                    document.getElementById('edit_dias_pago').value = data.dias_pago;
+                    document.getElementById('edit_domicilio').value = data.domicilio;
+                    document.getElementById('edit_cif').value = data.cif || '';
+
+                    // Actualizar la acción del formulario
+                    document.getElementById('editClientForm').action = `/comercial/edit_client/${clientId}/`;
+
+                    // Mostrar el modal
+                    const editModal = new bootstrap.Modal(document.getElementById('editClientModal'));
+                    editModal.show();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    
+                    // Crear alerta de error
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-danger alert-dismissible fade show mb-3';
+                    alertDiv.innerHTML = `
+                        Error al cargar los datos del cliente. Por favor, intente nuevamente.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.getElementById('alerts-container').appendChild(alertDiv);
+                    
+                    // Auto-eliminar después de 5 segundos
+                    setTimeout(() => {
+                        alertDiv.classList.remove('show');
+                        setTimeout(() => alertDiv.remove(), 150);
+                    }, 5000);
+                });
+        }
+
+        // Manejo de mensajes
+        function createAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show mb-3`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.getElementById('alerts-container').appendChild(alertDiv);
+            
+            // Auto-eliminar después de 5 segundos
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+                setTimeout(() => alertDiv.remove(), 150);
+            }, 5000);
+        }
+
+        // Manejo de mensajes de Django
+        {% if messages %}
+        document.addEventListener('DOMContentLoaded', function() {
+            // Los mensajes ya están insertados en el HTML en el contenedor alerts-container
+        });
+        {% endif %}
+    </script>
+</body>
+</html>

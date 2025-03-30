@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura Rectificativa #{{ venta.numero_nc }} - {{ venta.cliente.nombre }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/ventas/factura_venta.css' %}">
+    <!-- html2pdf library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a Factura Original
+            </a>
+            <button id="downloadPdf" class="btn btn-primary">
+                <i class="fas fa-file-pdf"></i> Descargar PDF
+            </button>
+        </div>
+
+        <div id="invoice" class="invoice-container">
+            <div class="invoice-header">
+                <div class="company-info">
+                    <div class="logo">
+                        <!-- Logo oficial -->
+                        <img src="{% static 'img/logo-oficial.jpg' %}" alt="L&M Exotic Fruit">
+                    </div>
+                    <div class="company-details">
+                        <h1 class="company-title">Luz Mery Melo Mejia</h1>
+                        <p>Calle Juan de la cierva # 23</p>
+                        <p>08210 Barbera del valles, España</p>
+                        <p>Tel: +34 633 49 42 28</p>
+                        <p>Email: luzme2273@hotmail.com</p>
+                        <p>CIF: 26062884C</p>
+                    </div>
+                </div>
+                
+                <div class="invoice-info">
+                    <h2>FACTURA RECTIFICATIVA</h2>
+                    <div class="invoice-number">Nº: {{ venta.numero_nc }}</div>
+                    <div class="invoice-date">
+                        <p><strong>Fecha Emisión:</strong> {% now "d/m/Y" %}</p>
+                        <p><strong>Referencia a Factura:</strong> {% if venta.numero_factura %}{{ venta.numero_factura }}{% else %}{{ venta.id }}{% endif %}</p>
+                        <p><strong>Semana:</strong> {{ venta.semana|default:"-" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="invoice-client">
+                <h3>DATOS DEL CLIENTE</h3>
+                <div class="client-info">
+                    <p><strong>Cliente:</strong> {{ venta.cliente.nombre }}</p>
+                    <p><strong>NIF/CIF:</strong> {{ venta.cliente.cif|default:"-" }}</p>
+                    <p><strong>Dirección:</strong> {{ venta.cliente.domicilio|default:"-" }}</p>
+                    <p><strong>Ciudad:</strong> {{ venta.cliente.ciudad|default:"-" }}, {{ venta.cliente.pais|default:"-" }}</p>
+                    <p><strong>Teléfono:</strong> {{ venta.cliente.telefono|default:"-" }}</p>
+                    <p><strong>Email:</strong> {{ venta.cliente.email|default:"-" }}</p>
+                </div>
+            </div>
+
+            <div class="invoice-credit-note">
+                <h3>DETALLE DE ABONO</h3>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Presentación</th>
+                            <th>Cajas Abono</th>
+                            <th>Precio/Caja (€)</th>
+                            <th>Base Imponible (€)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detalle in detalles %}
+                        {% if detalle.no_cajas_abono and detalle.no_cajas_abono > 0 %}
+                        <tr>
+                            <td>{{ detalle.presentacion.fruta.nombre }}</td>
+                            <td>{{ detalle.presentacion.kilos }} kg</td>
+                            <td>{{ detalle.no_cajas_abono|floatformat:1 }}</td>
+                            <td>{{ detalle.valor_x_caja_euro|floatformat:2 }}</td>
+                            <td>{{ detalle.base_imponible|floatformat:2 }}</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="invoice-summary-and-footer">
+                <div class="bank-and-terms">
+                    <div class="terms">
+                        <h3>MOTIVO DE RECTIFICACIÓN</h3>
+                        <p>Referencia a factura original Nº: {% if venta.numero_factura %}{{ venta.numero_factura }}{% else %}{{ venta.id }}{% endif %}</p>
+                    </div>
+                </div>
+
+                <div class="invoice-summary">
+                    <div class="summary-table">
+                        <div class="summary-row">
+                            <div class="summary-label">Base Imponible:</div>
+                            <div class="summary-value">€{{ venta.total_base_imponible|floatformat:2 }}</div>
+                        </div>
+                        <div class="summary-row">
+                            <div class="summary-label">IVA (4%):</div>
+                            <div class="summary-value">€{{ venta.iva_abono|floatformat:2 }}</div>
+                        </div>
+                        <div class="summary-row total">
+                            <div class="summary-label">TOTAL:</div>
+                            <div class="summary-value">€{{ venta.valor_total_abono_euro_con_iva|floatformat:2 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="invoice-notes">
+                <h3>OBSERVACIONES</h3>
+                <div class="notes-content">
+                    {% if venta.observaciones_abono %}
+                    <p>{{ venta.observaciones_abono }}</p>
+                    {% else %}
+                    <p>Esta factura rectificativa anula parcialmente los conceptos indicados de la factura original.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="invoice-signature">
+                <div class="thank-you">
+                    <p>¡Gracias por su confianza!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuración para PDF
+            const pdfOptions = {
+                margin: 0, 
+                filename: 'Factura_Rectificativa_{{ venta.numero_nc }}_{{ venta.cliente.nombre|slugify }}.pdf',
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 3, useCORS: true },
+                jsPDF: { unit: 'mm', format: [215.9, 355.6], orientation: 'portrait' } 
+            };
+
+            // Función para generar PDF
+            document.getElementById('downloadPdf').addEventListener('click', function() {
+                // Mostrar mensaje de descarga
+                const button = this;
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
+                button.disabled = true;
+
+                // Obtener el elemento que contiene la factura
+                const element = document.getElementById('invoice');
+                
+                // Generar PDF
+                html2pdf().set(pdfOptions).from(element).save().then(() => {
+                    // Restaurar el botón después de la descarga
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 1500);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

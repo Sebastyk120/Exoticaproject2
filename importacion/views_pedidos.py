@@ -34,7 +34,7 @@ def lista_pedidos(request):
     queryset = queryset.order_by('-id')
     
     # Implementar paginación
-    paginator = Paginator(queryset, 20)  # Mostrar 20 pedidos por página
+    paginator = Paginator(queryset, 10)  # Mostrar 10 pedidos por página
     page = request.GET.get('page')
     
     try:
@@ -220,7 +220,13 @@ def guardar_detalles_batch(request, pedido_id):
 
 def nuevo_pedido(request):
     """View to create a new order"""
-    return detalle_pedido(request)
+    context = {
+        'pedido': None,
+        'detalles': [],
+        'exportadores': Exportador.objects.all(),
+        'presentaciones': Presentacion.objects.all().select_related('fruta'),
+    }
+    return render(request, 'pedidos/pedidos.html', context)
 
 def obtener_detalles_pedido(request, pedido_id):
     """Vista para obtener los detalles de un pedido en formato JSON para el modal"""

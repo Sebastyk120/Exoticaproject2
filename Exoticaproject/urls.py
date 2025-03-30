@@ -19,6 +19,7 @@ urlpatterns = [
     path('autenticacion/', include('autenticacion.urls')),
     path('importacion/', include('importacion.urls')),
     path('productos/', include('productos.urls')),
+    path('comercial/', include('comercial.urls', namespace='comercial')),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
