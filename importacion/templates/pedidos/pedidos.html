@@ -156,6 +156,7 @@
                                         <th>Cajas Recibidas</th>
                                         <th>Valor Caja USD</th>
                                         <th>No Cajas NC</th>
+                                        <th>NC Manual USD</th>
                                         <th>Total USD</th>
                                         <th>Total EUR</th>
                                         <th>Acciones</th>
@@ -188,6 +189,11 @@
                                         <td class="nc-field-container">
                                             <input type="number" name="detalle_{{ detalle.id }}_no_cajas_nc"
                                                    value="{{ detalle.no_cajas_nc_str|default:detalle.no_cajas_nc|default:'0.0' }}" min="0" step="0.1" class="no-cajas-nc">
+                                            <div class="error-message"></div>
+                                        </td>
+                                        <td class="nc-manual-field-container">
+                                            <input type="number" name="detalle_{{ detalle.id }}_valor_nc_usd_manual"
+                                                   value="{{ detalle.valor_nc_usd_manual_str|default:detalle.valor_nc_usd_manual|default:'0.00' }}" min="0" step="0.01" class="valor-nc-manual">
                                             <div class="error-message"></div>
                                         </td>
                                         <td>
@@ -258,6 +264,10 @@
                 </td>
                 <td class="nc-field-container">
                     <input type="number" name="new_INDEX_no_cajas_nc" value="0" min="0" step="0.1" class="no-cajas-nc">
+                    <div class="error-message"></div>
+                </td>
+                <td class="nc-manual-field-container">
+                    <input type="number" name="new_INDEX_valor_nc_usd_manual" value="0" min="0" step="0.01" class="valor-nc-manual">
                     <div class="error-message"></div>
                 </td>
                 <td>
@@ -376,8 +386,9 @@
             const numeroNC = document.getElementById('numero_nc');
             const numeroNCError = document.getElementById('numero_nc_error');
             let hasNCCajas = false;
+            let hasNCManual = false;
 
-            // Check all NC fields
+            // Check all NC fields (cajas NC)
             document.querySelectorAll('.no-cajas-nc').forEach(function(input) {
                 // Make sure we handle "0", "0.0", "0.00" etc. as zero
                 const cajaNC = parseFloat(input.value) || 0;
@@ -401,10 +412,24 @@
                     }
                 }
             });
+            
+            // Check all NC manual fields
+            document.querySelectorAll('.valor-nc-manual').forEach(function(input) {
+                const ncManualValue = parseFloat(input.value) || 0;
+                if (ncManualValue > 0.001) {
+                    hasNCManual = true;
+                    
+                    // Validate against product value
+                    const row = input.closest('tr');
+                    if (!validateNCManual(input, row)) {
+                        isValid = false;
+                    }
+                }
+            });
 
-            // Validate Numero NC if any NC cajas exist
-            if (hasNCCajas && !numeroNC.value.trim()) {
-                numeroNCError.textContent = 'Número NC es requerido cuando hay cajas NC';
+            // Validate Numero NC if any NC (boxes or manual) exist
+            if ((hasNCCajas || hasNCManual) && !numeroNC.value.trim()) {
+                numeroNCError.textContent = 'Número NC es requerido cuando hay notas de crédito';
                 numeroNCError.style.display = 'block';
                 numeroNC.classList.add('error-field');
                 isValid = false;
@@ -420,6 +445,8 @@
             // Add listeners to NC fields to validate on change
             const ncField = element.querySelector('.no-cajas-nc');
             const cajasRecibidasField = element.querySelector('.cajas-recibidas');
+            const ncManualField = element.querySelector('.valor-nc-manual');
+            const valorCajaField = element.querySelector('.valor-caja-usd');
 
             if (ncField && cajasRecibidasField) {
                 // Usar 'input' en vez de 'change' para validación inmediata
@@ -434,50 +461,98 @@
 
                 cajasRecibidasField.addEventListener('input', function() {
                     validateNCField(ncField, this);
+                    updateProductValue(this.closest('tr'));
                 });
 
                 cajasRecibidasField.addEventListener('change', function() {
                     validateNCField(ncField, this);
+                    updateProductValue(this.closest('tr'));
+                });
+            }
+            
+            // Add listeners for valor_nc_usd_manual validation
+            if (ncManualField && valorCajaField) {
+                ncManualField.addEventListener('input', function() {
+                    validateNCManual(this, this.closest('tr'));
+                });
+                
+                ncManualField.addEventListener('change', function() {
+                    validateNCManual(this, this.closest('tr'));
+                });
+                
+                // Update product value when valor_caja changes
+                valorCajaField.addEventListener('input', function() {
+                    updateProductValue(this.closest('tr'));
+                });
+                
+                valorCajaField.addEventListener('change', function() {
+                    updateProductValue(this.closest('tr'));
                 });
             }
         }
-
-        function validateNCField(ncField, cajasRecibidasField) {
-            const cajaNC = parseFloat(ncField.value) || 0;
-            const cajasRecibidas = parseInt(cajasRecibidasField.value) || 0;
-            const errorDiv = ncField.nextElementSibling;
-
-            // Check NC field value doesn't exceed received boxes
-            if (cajaNC > cajasRecibidas) {
-                errorDiv.textContent = 'NC no puede ser mayor que cajas recibidas';
+        
+        // Function to update the product value display
+        function updateProductValue(row) {
+            const cajasRecibidas = parseFloat(row.querySelector('.cajas-recibidas').value) || 0;
+            const valorCaja = parseFloat(row.querySelector('.valor-caja-usd').value) || 0;
+            const valorProducto = cajasRecibidas * valorCaja;
+            
+            // Update the displayed value
+            row.querySelector('.valor-x-producto').textContent = `$ ${valorProducto.toFixed(2)}`;
+            
+            // Validate NC manual field since product value might have changed
+            const ncManualField = row.querySelector('.valor-nc-manual');
+            if (ncManualField) {
+                validateNCManual(ncManualField, row);
+            }
+        }
+        
+        // Function to validate NC manual field
+        function validateNCManual(ncManualField, row) {
+            const ncManualValue = parseFloat(ncManualField.value) || 0;
+            const errorDiv = ncManualField.nextElementSibling;
+            
+            // Get current product value (calculated from cajas_recibidas * valor_caja_usd)
+            const cajasRecibidas = parseFloat(row.querySelector('.cajas-recibidas').value) || 0;
+            const valorCaja = parseFloat(row.querySelector('.valor-caja-usd').value) || 0;
+            const valorProducto = cajasRecibidas * valorCaja;
+            
+            // Calculate valor_nc_usd (NC value from boxes)
+            const noCajasNC = parseFloat(row.querySelector('.no-cajas-nc').value) || 0;
+            const valorNCUSD = noCajasNC * valorCaja;
+            
+            // The maximum allowed for manual NC is (product value - box NC value)
+            const maxAllowedManualNC = valorProducto - valorNCUSD;
+            
+            if (ncManualValue > maxAllowedManualNC) {
+                errorDiv.textContent = 'NC manual no puede exceder valor restante después de NC por cajas';
                 errorDiv.style.display = 'block';
-                ncField.classList.add('error-field');
+                ncManualField.classList.add('error-field');
+                return false;
             } else {
                 errorDiv.style.display = 'none';
-                ncField.classList.remove('error-field');
+                ncManualField.classList.remove('error-field');
+                return true;
             }
-
-            // Check if there's any NC value to require Numero NC
-            updateNumeroNCRequirement();
         }
 
         function updateNumeroNCRequirement() {
-            let hasNCCajas = false;
+            let hasNC = false;
             const numeroNC = document.getElementById('numero_nc');
             const numeroNCError = document.getElementById('numero_nc_error');
 
-            // Check if any NC cajas exist
-            document.querySelectorAll('.no-cajas-nc').forEach(function(input) {
+            // Check if any NC boxes or manual NC values exist
+            document.querySelectorAll('.no-cajas-nc, .valor-nc-manual').forEach(function(input) {
                 // Make sure we handle "0", "0.0", "0.00" etc. as zero
-                const cajaNC = parseFloat(input.value) || 0;
-                if (cajaNC > 0.001) {
-                    hasNCCajas = true;
+                const value = parseFloat(input.value) || 0;
+                if (value > 0.001) {
+                    hasNC = true;
                 }
             });
 
             // Set requirement for Numero NC
-            if (hasNCCajas && !numeroNC.value.trim()) {
-                numeroNCError.textContent = 'Número NC es requerido cuando hay cajas NC';
+            if (hasNC && !numeroNC.value.trim()) {
+                numeroNCError.textContent = 'Número NC es requerido cuando hay notas de crédito';
                 numeroNCError.style.display = 'block';
                 numeroNC.classList.add('error-field');
             } else {
@@ -505,6 +580,9 @@
             document.querySelectorAll('#details-table .detail-row').forEach(function(row) {
                 addValidationListeners(row);
                 addPriceLoaderListener(row); // Añadir listeners para cargar precios
+                
+                // Initial calculation of product values
+                updateProductValue(row);
             });
 
             // Add listener to numero_nc field

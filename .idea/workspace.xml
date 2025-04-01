@@ -4,18 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Punto de control funcional.">
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0019_alter_detallepedido_valor_nc_usd.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0020_detallepedido_es_valor_nc_manual.py" afterDir="false" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Punto de control funcional 2. OK">
+      <change afterPath="$PROJECT_DIR$/importacion/migrations/0022_detallepedido_valor_nc_usd_manual.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/importacion/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/signals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/static/css/pedidos/pedidos.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/pedidos/pedidos.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf_aduana.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf_aduana.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/templates/carga/upload_pdf_carga.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/carga/upload_pdf_carga.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/importacion/templates/pedidos/pedidos.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/pedidos/pedidos.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/views_aduana.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_aduana.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/views_carga.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_carga.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/importacion/views_pedidos.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_pedidos.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -173,7 +166,7 @@
       <workItem from="1743434778193" duration="1681000" />
       <workItem from="1743437678094" duration="7427000" />
       <workItem from="1743458979448" duration="624000" />
-      <workItem from="1743464597658" duration="10075000" />
+      <workItem from="1743464597658" duration="12100000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -247,7 +240,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743471347093</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Punto de control funcional 2. OK">
+      <option name="closed" value="true" />
+      <created>1743478229982</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1743478229982</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -276,6 +277,7 @@
     <MESSAGE value="finalizacion de generar_factura" />
     <MESSAGE value="Actualizaciones." />
     <MESSAGE value="Punto de control funcional." />
-    <option name="LAST_COMMIT_MESSAGE" value="Punto de control funcional." />
+    <MESSAGE value="Punto de control funcional 2. OK" />
+    <option name="LAST_COMMIT_MESSAGE" value="Punto de control funcional 2. OK" />
   </component>
 </project>

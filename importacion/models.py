@@ -118,6 +118,7 @@ class DetallePedido(models.Model):
                                       blank=True, default=0)
     valor_nc_usd = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor NC USD", default=0,
                                        editable=False)
+    valor_nc_usd_manual = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor NC USD Manual", default=0)
 
     def clean(self):
         # Importamos aquí también para asegurar que está disponible
@@ -155,13 +156,26 @@ class DetallePedido(models.Model):
                 self.valor_nc_usd = Decimal('0')
         else:
             self.valor_nc_usd = Decimal('0')
+            
+        # Validar valor_nc_usd_manual
+        if self.valor_nc_usd_manual is not None:
+            try:
+                self.valor_nc_usd_manual = Decimal(str(self.valor_nc_usd_manual)).quantize(Decimal('0.00'))
+                
+                # Validar que no sea mayor que valor_x_producto
+                if self.valor_nc_usd_manual > self.valor_x_producto:
+                    from django.core.exceptions import ValidationError
+                    raise ValidationError('El valor NC manual no puede ser mayor que el valor total del producto')
+            except (ValueError, TypeError, InvalidOperation):
+                self.valor_nc_usd_manual = Decimal('0')
+        else:
+            self.valor_nc_usd_manual = Decimal('0')
 
         super().clean()
 
     @staticmethod
     def actualizar_totales_pedido(pedido_id):
         """
-
         Actualiza los campos calculados del pedido relacionado usando consultas agregadas
         y luego llama a reevaluar_pagos_exportador para actualizar el monto pendiente.
         """
@@ -169,6 +183,7 @@ class DetallePedido(models.Model):
         from importacion.signals import reevaluar_pagos_exportador
         from decimal import Decimal
         from django.db.models.functions import Coalesce
+        from django.db.models import Sum, F, ExpressionWrapper, DecimalField
 
         # Separar las consultas por tipo de campo para evitar mezcla de tipos
         # Consulta para campos enteros
@@ -177,12 +192,14 @@ class DetallePedido(models.Model):
             total_cajas_recibidas=Coalesce(Sum('cajas_recibidas', output_field=IntegerField()), 0)
         )
 
-        # Consulta para campos decimales
+        # Consulta para campos decimales, sumando valor_nc_usd y valor_nc_usd_manual
         totales_decimales = DetallePedido.objects.filter(pedido_id=pedido_id).aggregate(
             total_factura=Coalesce(Sum('valor_x_producto', output_field=DecimalField(max_digits=10, decimal_places=2)),
                                    Decimal('0')),
-            total_nc=Coalesce(Sum('valor_nc_usd', output_field=DecimalField(max_digits=10, decimal_places=2)),
-                              Decimal('0'))
+            total_nc=Coalesce(Sum(
+                ExpressionWrapper(F('valor_nc_usd') + F('valor_nc_usd_manual'), 
+                                output_field=DecimalField(max_digits=10, decimal_places=2))
+            ), Decimal('0'))
         )
 
         # Usar update para evitar disparar señales innecesarias
@@ -207,8 +224,8 @@ class DetallePedido(models.Model):
                 detalles = DetallePedido.objects.filter(pedido=pedido)
 
                 for detalle in detalles:
-                    # Calcular el valor neto del detalle
-                    valor_neto_detalle = detalle.valor_x_producto - detalle.valor_nc_usd
+                    # Calcular el valor neto del detalle (incluyendo valor_nc_usd_manual)
+                    valor_neto_detalle = detalle.valor_x_producto - detalle.valor_nc_usd - detalle.valor_nc_usd_manual
 
                     # Evitar división por cero
                     if valor_neto_factura > Decimal('0') and valor_neto_detalle > Decimal('0'):

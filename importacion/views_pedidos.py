@@ -75,6 +75,12 @@ def detalle_pedido(request, pedido_id=None):
                 detalle.no_cajas_nc_str = '{:.1f}'.format(detalle.no_cajas_nc)
             else:
                 detalle.no_cajas_nc_str = '0.0'
+                
+            # Formatear valor_nc_usd_manual para mostrar correctamente en el formulario
+            if detalle.valor_nc_usd_manual is not None:
+                detalle.valor_nc_usd_manual_str = '{:.2f}'.format(detalle.valor_nc_usd_manual)
+            else:
+                detalle.valor_nc_usd_manual_str = '0.00'
     else:
         pedido = None
         detalles = []
@@ -164,11 +170,11 @@ def guardar_detalles_batch(request, pedido_id):
 
     # Verificar en detalles existentes
     for key in request.POST.keys():
-        if '_no_cajas_nc' in key:
+        if '_no_cajas_nc' in key or '_valor_nc_usd_manual' in key:
             try:
                 # Convertir a decimal para una comparación precisa
-                nc_value = Decimal(request.POST.get(key, '0').strip() or '0')
-                if nc_value > Decimal('0'):
+                valor = Decimal(request.POST.get(key, '0').strip() or '0')
+                if valor > Decimal('0'):
                     tiene_detalles_nc = True
                     break
             except (ValueError, decimal.InvalidOperation):
@@ -176,7 +182,7 @@ def guardar_detalles_batch(request, pedido_id):
                 continue
 
     if tiene_detalles_nc and not numero_nc_pedido:
-        messages.error(request, 'El campo Número NC del pedido no puede estar vacío si hay cajas NC en algún detalle')
+        messages.error(request, 'El campo Número NC del pedido no puede estar vacío si hay NC en algún detalle')
         return redirect('importacion:detalle_pedido', pedido_id=pedido.id)
 
     # Actualizar datos del pedido primero para tener el exportador actual
@@ -215,7 +221,8 @@ def guardar_detalles_batch(request, pedido_id):
             # Obtener valores para validación
             cajas_recibidas = int(request.POST.get(f'detalle_{detail_id}_cajas_recibidas') or 0)
             no_cajas_nc = Decimal(request.POST.get(f'detalle_{detail_id}_no_cajas_nc') or 0)
-
+            valor_nc_usd_manual = Decimal(request.POST.get(f'detalle_{detail_id}_valor_nc_usd_manual') or 0)
+            
             # Validar que no_cajas_nc no sea mayor que cajas_recibidas
             if no_cajas_nc > cajas_recibidas:
                 messages.error(request,
@@ -228,6 +235,7 @@ def guardar_detalles_batch(request, pedido_id):
             detalle.cajas_recibidas = cajas_recibidas
             detalle.valor_x_caja_usd = Decimal(request.POST.get(f'detalle_{detail_id}_valor_x_caja_usd') or 0)
             detalle.no_cajas_nc = no_cajas_nc
+            detalle.valor_nc_usd_manual = valor_nc_usd_manual
 
             # Guardar el detalle para disparar las señales
             detalle.full_clean()  # Asegurar que se llame a clean()
@@ -257,6 +265,7 @@ def guardar_detalles_batch(request, pedido_id):
             # Validar cajas NC vs cajas recibidas
             cajas_recibidas = int(request.POST.get(f'new_{index}_cajas_recibidas') or 0)
             no_cajas_nc = Decimal(request.POST.get(f'new_{index}_no_cajas_nc') or 0)
+            valor_nc_usd_manual = Decimal(request.POST.get(f'new_{index}_valor_nc_usd_manual') or 0)
 
             if no_cajas_nc > cajas_recibidas:
                 messages.error(request,
@@ -270,6 +279,7 @@ def guardar_detalles_batch(request, pedido_id):
             detalle.cajas_recibidas = cajas_recibidas
             detalle.valor_x_caja_usd = Decimal(request.POST.get(f'new_{index}_valor_x_caja_usd') or 0)
             detalle.no_cajas_nc = no_cajas_nc
+            detalle.valor_nc_usd_manual = valor_nc_usd_manual
 
             # Guardar el detalle para disparar las señales
             detalle.full_clean()  # Asegurar que se llame a clean()
