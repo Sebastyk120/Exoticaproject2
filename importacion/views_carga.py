@@ -190,7 +190,9 @@ def get_gasto(request, gasto_id):
             'agencia_carga': gasto.agencia_carga.nombre,
             'valor_gastos_carga': str(gasto.valor_gastos_carga),
             'valor_gastos_carga_eur': str(gasto.valor_gastos_carga_eur) if gasto.valor_gastos_carga_eur else None,
-            'conceptos': gasto.conceptos,
+            'numero_nota_credito': gasto.numero_nota_credito,
+            'valor_nota_credito': str(gasto.valor_nota_credito) if gasto.valor_nota_credito else None,
+            'monto_pendiente': str(gasto.monto_pendiente) if gasto.monto_pendiente else None,
             'pagado': gasto.pagado,
             'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()]
         }
@@ -208,10 +210,23 @@ def update_gasto(request, gasto_id):
     try:
         gasto.numero_factura = request.POST.get('numero_factura')
         gasto.valor_gastos_carga = Decimal(request.POST.get('valor_gastos_carga'))
-        valor_eur = request.POST.get('valor_gastos_carga_eur')
-        if valor_eur:
-            gasto.valor_gastos_carga_eur = Decimal(valor_eur)
-        gasto.conceptos = request.POST.get('conceptos')
+        
+        # Procesar los campos de nota de crédito
+        numero_nota_credito = request.POST.get('numero_nota_credito')
+        if numero_nota_credito:
+            gasto.numero_nota_credito = numero_nota_credito
+        else:
+            gasto.numero_nota_credito = None
+            
+        valor_nota_credito = request.POST.get('valor_nota_credito')
+        if valor_nota_credito and valor_nota_credito.strip():
+            gasto.valor_nota_credito = Decimal(valor_nota_credito)
+            # Calcular monto pendiente
+            gasto.monto_pendiente = gasto.valor_gastos_carga - Decimal(valor_nota_credito)
+        else:
+            gasto.valor_nota_credito = None
+            gasto.monto_pendiente = gasto.valor_gastos_carga
+            
         gasto.save()
         return JsonResponse({'success': True})
     except Exception as e:

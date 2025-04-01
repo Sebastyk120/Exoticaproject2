@@ -146,7 +146,9 @@ def get_gasto(request, gasto_id):
         'numero_factura': gasto.numero_factura,
         'agencia_aduana': gasto.agencia_aduana.nombre,
         'valor_gastos_aduana': str(gasto.valor_gastos_aduana),
-        'conceptos': gasto.conceptos,
+        'numero_nota_credito': gasto.numero_nota_credito,
+        'valor_nota_credito': str(gasto.valor_nota_credito) if gasto.valor_nota_credito else "",
+        'monto_pendiente': str(gasto.monto_pendiente) if gasto.monto_pendiente else "",
         'pagado': gasto.pagado,
         'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()]
     }
@@ -160,7 +162,14 @@ def update_gasto(request, gasto_id):
     try:
         gasto.numero_factura = request.POST.get('numero_factura')
         gasto.valor_gastos_aduana = Decimal(request.POST.get('valor_gastos_aduana'))
-        gasto.conceptos = request.POST.get('conceptos')
+        gasto.numero_nota_credito = request.POST.get('numero_nota_credito')
+        
+        valor_nota_credito = request.POST.get('valor_nota_credito')
+        if valor_nota_credito and valor_nota_credito.strip():
+            gasto.valor_nota_credito = Decimal(valor_nota_credito)
+        else:
+            gasto.valor_nota_credito = None
+            
         gasto.save()
         return JsonResponse({'success': True})
     except Exception as e:

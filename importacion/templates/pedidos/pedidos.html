@@ -174,19 +174,19 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <input type="number" name="detalle_{{ detalle.id }}_cajas_solicitadas" 
+                                            <input type="number" name="detalle_{{ detalle.id }}_cajas_solicitadas"
                                                    value="{{ detalle.cajas_solicitadas|default:'0' }}" min="0">
                                         </td>
                                         <td>
-                                            <input type="number" name="detalle_{{ detalle.id }}_cajas_recibidas" 
+                                            <input type="number" name="detalle_{{ detalle.id }}_cajas_recibidas"
                                                    value="{{ detalle.cajas_recibidas|default:'0' }}" min="0" class="cajas-recibidas">
                                         </td>
                                         <td>
-                                            <input type="number" name="detalle_{{ detalle.id }}_valor_x_caja_usd" 
+                                            <input type="number" name="detalle_{{ detalle.id }}_valor_x_caja_usd"
                                                    value="{{ detalle.valor_x_caja_usd_str|default:detalle.valor_x_caja_usd|default:'0.00' }}" min="0" step="0.01" class="valor-caja-usd">
                                         </td>
                                         <td class="nc-field-container">
-                                            <input type="number" name="detalle_{{ detalle.id }}_no_cajas_nc" 
+                                            <input type="number" name="detalle_{{ detalle.id }}_no_cajas_nc"
                                                    value="{{ detalle.no_cajas_nc_str|default:detalle.no_cajas_nc|default:'0.0' }}" min="0" step="0.1" class="no-cajas-nc">
                                             <div class="error-message"></div>
                                         </td>
@@ -211,14 +211,14 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
-                            
+
                             <div class="empty-state" {% if detalles %}style="display:none"{% endif %}>
                                 <p>No hay detalles para este pedido. Haga clic en "Agregar Detalle" para añadir uno.</p>
                             </div>
                         </div>
                     </section>
                 {% endif %}
-                
+
                 <!-- Unified Save Button -->
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary btn-lg" id="save-all-btn">
@@ -233,7 +233,7 @@
         // Variables globales
         let newDetailCounter = 0;
         const exportadorId = {% if pedido.exportador %}{{ pedido.exportador.id }}{% else %}null{% endif %};
-        
+
         // Template for new detail row
         const newDetailRowTemplate = `
             <tr class="detail-row new-detail">
@@ -273,48 +273,48 @@
                 </td>
             </tr>
         `;
-        
+
         function addNewDetailRow() {
             // Crear nueva fila a partir de la plantilla
             let newRow = newDetailRowTemplate.replace(/INDEX/g, newDetailCounter);
-            
+
             // Añadir la fila al inicio de la tabla
             const tableBody = document.querySelector('#details-table tbody');
             tableBody.insertAdjacentHTML('afterbegin', newRow);
-            
+
             // Add event listeners to the new row
             const newRowElement = tableBody.firstElementChild;
             addValidationListeners(newRowElement);
             addPriceLoaderListener(newRowElement); // Añadir el listener para cargar precios
-            
+
             newDetailCounter++;
-            
+
             // Show the table if it's hidden
             document.querySelector('.empty-state').style.display = 'none';
             document.getElementById('details-table').style.display = 'table';
         }
-        
+
         // Función para cargar el precio de una presentación
         function loadPresentationPrice(presentacionSelect) {
             const exportadorSelect = document.getElementById('exportador');
             const exportadorId = exportadorSelect.value;
             const presentacionId = presentacionSelect.value;
-            
+
             if (!presentacionId || !exportadorId) {
                 return; // Si no hay una presentación o exportador seleccionado, no hacer nada
             }
-            
+
             // Encontrar el campo de valor_x_caja_usd en la misma fila
             const row = presentacionSelect.closest('tr');
             const valorCajaField = row.querySelector('.valor-caja-usd') || row.querySelector('[name$="_valor_x_caja_usd"]');
-            
+
             if (!valorCajaField) {
                 return; // Si no se encuentra el campo, no hacer nada
             }
-            
+
             // Mostrar indicador de carga
             valorCajaField.placeholder = "Cargando...";
-            
+
             // Hacer la solicitud AJAX para obtener el precio
             fetch(`/importacion/api/precio/${presentacionId}/${exportadorId}/`)
                 .then(response => response.json())
@@ -335,22 +335,22 @@
                     valorCajaField.value = "";
                 });
         }
-        
+
         // Función para añadir listener de carga de precios
         function addPriceLoaderListener(element) {
             const presentacionSelect = element.querySelector('.presentacion-select') || element.querySelector('[name$="_presentacion"]');
-            
+
             if (presentacionSelect) {
                 presentacionSelect.addEventListener('change', function() {
                     loadPresentationPrice(this);
                 });
             }
         }
-        
+
         function removeDetailRow(button) {
             const row = button.closest('.detail-row');
             const detailId = row.dataset.id;
-            
+
             if (detailId) {
                 // Si es un detalle existente, agregar un campo oculto para marcarlo como eliminado
                 const form = document.getElementById('unified-form');
@@ -360,23 +360,23 @@
                 deleteField.value = detailId;
                 form.appendChild(deleteField);
             }
-            
+
             // Eliminar la fila
             row.remove();
-            
+
             // Mostrar mensaje de estado vacío si no hay filas
             if (document.querySelectorAll('#details-table tbody tr').length === 0) {
                 document.querySelector('.empty-state').style.display = 'block';
                 document.getElementById('details-table').style.display = 'none';
             }
         }
-        
+
         function validateNCFields() {
             let isValid = true;
             const numeroNC = document.getElementById('numero_nc');
             const numeroNCError = document.getElementById('numero_nc_error');
             let hasNCCajas = false;
-            
+
             // Check all NC fields
             document.querySelectorAll('.no-cajas-nc').forEach(function(input) {
                 // Make sure we handle "0", "0.0", "0.00" etc. as zero
@@ -384,12 +384,12 @@
                 // Use a small epsilon value to handle floating point precision issues
                 if (cajaNC > 0.001) {
                     hasNCCajas = true;
-                    
+
                     // Validate that NC boxes are not greater than received boxes
                     const row = input.closest('tr');
                     const cajasRecibidas = parseInt(row.querySelector('.cajas-recibidas').value) || 0;
                     const errorDiv = input.nextElementSibling;
-                    
+
                     if (cajaNC > cajasRecibidas) {
                         errorDiv.textContent = 'NC no puede ser mayor que cajas recibidas';
                         errorDiv.style.display = 'block';
@@ -401,7 +401,7 @@
                     }
                 }
             });
-            
+
             // Validate Numero NC if any NC cajas exist
             if (hasNCCajas && !numeroNC.value.trim()) {
                 numeroNCError.textContent = 'Número NC es requerido cuando hay cajas NC';
@@ -412,41 +412,41 @@
                 numeroNCError.style.display = 'none';
                 numeroNC.classList.remove('error-field');
             }
-            
+
             return isValid;
         }
-        
+
         function addValidationListeners(element) {
             // Add listeners to NC fields to validate on change
             const ncField = element.querySelector('.no-cajas-nc');
             const cajasRecibidasField = element.querySelector('.cajas-recibidas');
-            
+
             if (ncField && cajasRecibidasField) {
                 // Usar 'input' en vez de 'change' para validación inmediata
                 ncField.addEventListener('input', function() {
                     validateNCField(this, cajasRecibidasField);
                 });
-                
+
                 // También mantener el evento 'change' para navegadores antiguos
                 ncField.addEventListener('change', function() {
                     validateNCField(this, cajasRecibidasField);
                 });
-                
+
                 cajasRecibidasField.addEventListener('input', function() {
                     validateNCField(ncField, this);
                 });
-                
+
                 cajasRecibidasField.addEventListener('change', function() {
                     validateNCField(ncField, this);
                 });
             }
         }
-        
+
         function validateNCField(ncField, cajasRecibidasField) {
             const cajaNC = parseFloat(ncField.value) || 0;
             const cajasRecibidas = parseInt(cajasRecibidasField.value) || 0;
             const errorDiv = ncField.nextElementSibling;
-            
+
             // Check NC field value doesn't exceed received boxes
             if (cajaNC > cajasRecibidas) {
                 errorDiv.textContent = 'NC no puede ser mayor que cajas recibidas';
@@ -456,16 +456,16 @@
                 errorDiv.style.display = 'none';
                 ncField.classList.remove('error-field');
             }
-            
+
             // Check if there's any NC value to require Numero NC
             updateNumeroNCRequirement();
         }
-        
+
         function updateNumeroNCRequirement() {
             let hasNCCajas = false;
             const numeroNC = document.getElementById('numero_nc');
             const numeroNCError = document.getElementById('numero_nc_error');
-            
+
             // Check if any NC cajas exist
             document.querySelectorAll('.no-cajas-nc').forEach(function(input) {
                 // Make sure we handle "0", "0.0", "0.00" etc. as zero
@@ -474,7 +474,7 @@
                     hasNCCajas = true;
                 }
             });
-            
+
             // Set requirement for Numero NC
             if (hasNCCajas && !numeroNC.value.trim()) {
                 numeroNCError.textContent = 'Número NC es requerido cuando hay cajas NC';
@@ -485,14 +485,14 @@
                 numeroNC.classList.remove('error-field');
             }
         }
-        
+
         document.addEventListener('DOMContentLoaded', function() {
             // Add event to add detail button
             const addDetailBtn = document.getElementById('add-detail-btn');
             if (addDetailBtn) {
                 addDetailBtn.addEventListener('click', addNewDetailRow);
             }
-            
+
             // Add submit handler to validate before submitting
             document.getElementById('unified-form').addEventListener('submit', function(e) {
                 if (!validateNCFields()) {
@@ -500,16 +500,16 @@
                     showNotification('Por favor, corrija los errores en el formulario.', 'error');
                 }
             });
-            
+
             // Add validation listeners to existing rows
             document.querySelectorAll('#details-table .detail-row').forEach(function(row) {
                 addValidationListeners(row);
                 addPriceLoaderListener(row); // Añadir listeners para cargar precios
             });
-            
+
             // Add listener to numero_nc field
             document.getElementById('numero_nc').addEventListener('input', updateNumeroNCRequirement);
-            
+
             // Add change listener to exportador for updating all presentation prices if needed
             const exportadorSelect = document.getElementById('exportador');
             exportadorSelect.addEventListener('change', function() {
@@ -519,13 +519,13 @@
                     }
                 });
             });
-            
+
             // Initialize estado empty
             if (document.querySelectorAll('#details-table tbody tr').length === 0) {
                 document.querySelector('.empty-state').style.display = 'block';
                 document.getElementById('details-table').style.display = 'none';
             }
-            
+
             // Add event listeners to close notification buttons
             document.querySelectorAll('.close-notification').forEach(function(button) {
                 button.addEventListener('click', function() {

@@ -52,6 +52,9 @@
                         <th>Número Factura</th>
                         <th>Agencia Aduana</th>
                         <th>Valor (EUR)</th>
+                        <th>Número Nota Crédito</th>
+                        <th>Valor Nota Crédito</th>
+                        <th>Monto Pendiente</th>
                         <th>Estado</th>
                         <th>Fecha</th>
                         <th>Acciones</th>
@@ -63,6 +66,9 @@
                         <td>{{ gasto.numero_factura }}</td>
                         <td>{{ gasto.agencia_aduana.nombre }}</td>
                         <td>{{ gasto.valor_gastos_aduana|format_currency_eur }}</td>
+                        <td>{{ gasto.numero_nota_credito|default:"-" }}</td>
+                        <td>{{ gasto.valor_nota_credito|format_currency_eur|default:"-" }}</td>
+                        <td>{{ gasto.monto_pendiente|format_currency_eur|default:"-" }}</td>
                         <td>
                             <span class="status-badge {% if gasto.pagado %}status-paid{% else %}status-unpaid{% endif %}">
                                 {% if gasto.pagado %}Pagado{% else %}Pendiente{% endif %}
@@ -85,7 +91,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center">No hay gastos registrados</td>
+                        <td colspan="9" class="text-center">No hay gastos registrados</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -131,8 +137,12 @@
                             <input type="number" name="valor_gastos_aduana" class="form-control" step="0.01" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Conceptos</label>
-                            <textarea name="conceptos" class="form-control" rows="3"></textarea>
+                            <label class="form-label">Número Nota Crédito</label>
+                            <input type="text" name="numero_nota_credito" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Valor Nota Crédito (EUR)</label>
+                            <input type="number" name="valor_nota_credito" class="form-control" step="0.01">
                         </div>
                     </form>
                 </div>
@@ -259,30 +269,62 @@
 
     // Modal functions
     function viewGasto(id) {
-        currentGastoId = id;
         fetch(`/importacion/aduana/gasto/${id}/`)
             .then(response => response.json())
             .then(data => {
                 const modalBody = document.getElementById('viewModalBody');
+                
+                // Format the currency values
+                const valorGastosFormatted = new Intl.NumberFormat('es-ES', { 
+                    style: 'currency', 
+                    currency: 'EUR' 
+                }).format(parseFloat(data.valor_gastos_aduana));
+                
+                let valorNotaCreditoFormatted = '-';
+                if (data.valor_nota_credito && data.valor_nota_credito !== '') {
+                    valorNotaCreditoFormatted = new Intl.NumberFormat('es-ES', { 
+                        style: 'currency', 
+                        currency: 'EUR' 
+                    }).format(parseFloat(data.valor_nota_credito));
+                }
+                
+                let montoPendienteFormatted = '-';
+                if (data.monto_pendiente && data.monto_pendiente !== '') {
+                    montoPendienteFormatted = new Intl.NumberFormat('es-ES', { 
+                        style: 'currency', 
+                        currency: 'EUR' 
+                    }).format(parseFloat(data.monto_pendiente));
+                }
+                
+                const pedidosHTML = data.pedidos.map(pedido => `<li>${pedido}</li>`).join('');
+                
                 modalBody.innerHTML = `
-                    <div class="gasto-details">
-                        <p><strong>Número Factura:</strong> ${data.numero_factura}</p>
-                        <p><strong>Agencia Aduana:</strong> ${data.agencia_aduana}</p>
-                        <p><strong>Valor:</strong> ${data.valor_gastos_aduana} EUR</p>
-                        <p><strong>Estado:</strong> ${data.pagado ? 'Pagado' : 'Pendiente'}</p>
-                        <p><strong>Conceptos:</strong> ${data.conceptos || 'N/A'}</p>
-                        <p><strong>Pedidos Asociados:</strong></p>
-                        <ul>
-                            ${data.pedidos.map(pedido => {
-                                const pedidoId = pedido.split(' - ')[0]; // Asumiendo que el ID está al inicio
-                                return `<li><a href="/importacion/pedidos/${pedidoId}/" class="pedido-link">${pedido}</a></li>`;
-                            }).join('')}
-                        </ul>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Número Factura:</strong> ${data.numero_factura}</p>
+                            <p><strong>Agencia Aduana:</strong> ${data.agencia_aduana}</p>
+                            <p><strong>Valor Gastos Aduana:</strong> ${valorGastosFormatted}</p>
+                            <p><strong>Estado:</strong> <span class="status-badge ${data.pagado ? 'status-paid' : 'status-unpaid'}">${data.pagado ? 'Pagado' : 'Pendiente'}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Número Nota Crédito:</strong> ${data.numero_nota_credito || '-'}</p>
+                            <p><strong>Valor Nota Crédito:</strong> ${valorNotaCreditoFormatted}</p>
+                            <p><strong>Monto Pendiente:</strong> ${montoPendienteFormatted}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6>Pedidos Asociados:</h6>
+                            <ul class="pedidos-list">
+                                ${pedidosHTML || '<li>No hay pedidos asociados</li>'}
+                            </ul>
+                        </div>
                     </div>
                 `;
+                
                 new bootstrap.Modal(document.getElementById('viewModal')).show();
             })
-            .catch(error => showAlert('Error al cargar los detalles', 'danger'));
+            .catch(error => showAlert('Error al cargar los datos', 'danger'));
     }
 
     function editGasto(id) {
@@ -293,7 +335,8 @@
                 const form = document.getElementById('editForm');
                 form.numero_factura.value = data.numero_factura;
                 form.valor_gastos_aduana.value = data.valor_gastos_aduana;
-                form.conceptos.value = data.conceptos || '';
+                form.numero_nota_credito.value = data.numero_nota_credito || '';
+                form.valor_nota_credito.value = data.valor_nota_credito || '';
                 new bootstrap.Modal(document.getElementById('editModal')).show();
             })
             .catch(error => showAlert('Error al cargar los datos', 'danger'));

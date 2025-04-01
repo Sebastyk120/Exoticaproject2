@@ -53,6 +53,9 @@
                         <th>Agencia Carga</th>
                         <th>Valor (USD)</th>
                         <th>Valor (EUR)</th>
+                        <th>Número Nota Crédito</th>
+                        <th>Valor Nota Crédito</th>
+                        <th>Monto Pendiente</th>
                         <th>Estado</th>
                         <th>Fecha</th>
                         <th>Acciones</th>
@@ -65,6 +68,9 @@
                         <td>{{ gasto.agencia_carga.nombre }}</td>
                         <td>{{ gasto.valor_gastos_carga|format_currency }}</td>
                         <td>{{ gasto.valor_gastos_carga_eur|format_currency_eur }}</td>
+                        <td>{{ gasto.numero_nota_credito|default:"-" }}</td>
+                        <td>{{ gasto.valor_nota_credito|format_currency|default:"-" }}</td>
+                        <td>{{ gasto.monto_pendiente|format_currency|default:"-" }}</td>
                         <td>
                             <span class="status-badge {% if gasto.pagado %}status-paid{% else %}status-unpaid{% endif %}">
                                 {% if gasto.pagado %}Pagado{% else %}Pendiente{% endif %}
@@ -87,7 +93,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center">No hay gastos registrados</td>
+                        <td colspan="10" class="text-center">No hay gastos registrados</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -104,7 +110,24 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="viewModalBody">
-                    <!-- Content will be loaded dynamically -->
+                    <div class="view-details">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Número Factura:</strong> <span id="viewNumeroFactura"></span></p>
+                                <p><strong>Agencia Carga:</strong> <span id="viewAgenciaCarga"></span></p>
+                                <p><strong>Valor (USD):</strong> <span id="viewValorUSD"></span></p>
+                                <p><strong>Valor (EUR):</strong> <span id="viewValorEUR"></span></p>
+                                <p><strong>Estado:</strong> <span id="viewEstado"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Número Nota Crédito:</strong> <span id="viewNumeroNotaCredito"></span></p>
+                                <p><strong>Valor Nota Crédito:</strong> <span id="viewValorNotaCredito"></span></p>
+                                <p><strong>Monto Pendiente:</strong> <span id="viewMontoPendiente"></span></p>
+                                <p><strong>Pedidos:</strong></p>
+                                <ul id="viewPedidos" class="list-unstyled"></ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -133,12 +156,12 @@
                             <input type="number" name="valor_gastos_carga" class="form-control" step="0.01" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Valor (EUR)</label>
-                            <input type="number" name="valor_gastos_carga_eur" class="form-control" step="0.01">
+                            <label class="form-label">Número Nota Crédito</label>
+                            <input type="text" name="numero_nota_credito" class="form-control">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Conceptos</label>
-                            <textarea name="conceptos" class="form-control" rows="3"></textarea>
+                            <label class="form-label">Valor Nota Crédito (USD)</label>
+                            <input type="number" name="valor_nota_credito" class="form-control" step="0.01">
                         </div>
                     </form>
                 </div>
@@ -284,23 +307,29 @@
             })
             .then(data => {
                 const modalBody = document.getElementById('viewModalBody');
-                modalBody.innerHTML = `
-                    <div class="gasto-details">
-                        <p><strong>Número Factura:</strong> ${data.numero_factura}</p>
-                        <p><strong>Agencia Carga:</strong> ${data.agencia_carga}</p>
-                        <p><strong>Valor (USD):</strong> ${data.valor_gastos_carga}</p>
-                        <p><strong>Valor (EUR):</strong> ${data.valor_gastos_carga_eur || '-'}</p>
-                        <p><strong>Estado:</strong> ${data.pagado ? 'Pagado' : 'Pendiente'}</p>
-                        <p><strong>Conceptos:</strong> ${data.conceptos || 'N/A'}</p>
-                        <p><strong>Pedidos Asociados:</strong></p>
-                        <ul>
-                            ${data.pedidos.map(pedido => {
-                                const pedidoId = pedido.split(' - ')[0];
-                                return `<li><a href="/importacion/pedidos/${pedidoId}/" class="pedido-link">${pedido}</a></li>`;
-                            }).join('')}
-                        </ul>
-                    </div>
-                `;
+                const viewNumeroFactura = document.getElementById('viewNumeroFactura');
+                const viewAgenciaCarga = document.getElementById('viewAgenciaCarga');
+                const viewValorUSD = document.getElementById('viewValorUSD');
+                const viewValorEUR = document.getElementById('viewValorEUR');
+                const viewEstado = document.getElementById('viewEstado');
+                const viewNumeroNotaCredito = document.getElementById('viewNumeroNotaCredito');
+                const viewValorNotaCredito = document.getElementById('viewValorNotaCredito');
+                const viewMontoPendiente = document.getElementById('viewMontoPendiente');
+                const viewPedidos = document.getElementById('viewPedidos');
+
+                viewNumeroFactura.textContent = data.numero_factura;
+                viewAgenciaCarga.textContent = data.agencia_carga;
+                viewValorUSD.textContent = data.valor_gastos_carga;
+                viewValorEUR.textContent = data.valor_gastos_carga_eur || '-';
+                viewEstado.textContent = data.pagado ? 'Pagado' : 'Pendiente';
+                viewNumeroNotaCredito.textContent = data.numero_nota_credito || '-';
+                viewValorNotaCredito.textContent = data.valor_nota_credito || '-';
+                viewMontoPendiente.textContent = data.monto_pendiente || '-';
+                viewPedidos.innerHTML = data.pedidos.map(pedido => {
+                    const pedidoId = pedido.split(' - ')[0];
+                    return `<li><a href="/importacion/pedidos/${pedidoId}/" class="pedido-link">${pedido}</a></li>`;
+                }).join('');
+
                 viewModal.show();
             })
             .catch(error => {
@@ -321,8 +350,8 @@
                 const form = document.getElementById('editForm');
                 form.numero_factura.value = data.numero_factura;
                 form.valor_gastos_carga.value = data.valor_gastos_carga;
-                form.valor_gastos_carga_eur.value = data.valor_gastos_carga_eur || '';
-                form.conceptos.value = data.conceptos || '';
+                form.numero_nota_credito.value = data.numero_nota_credito || '';
+                form.valor_nota_credito.value = data.valor_nota_credito || '';
                 editModal.show();
             })
             .catch(error => {
