@@ -201,67 +201,57 @@ def reevaluar_pagos_exportador(exportador):
                         # Calcular el promedio de TRM para las transferencias usadas
                         for transferencia, monto_usado in transferencias_usadas:
                             if transferencia.trm:
-                                trm_suma += transferencia.trm
+                                trm_suma += transferencia.trm * (monto_usado / monto_a_pagar)
                                 transferencias_count += 1
                         
-                        # Calcular el promedio de TRM
-                        trm_promedio = Decimal('0.0')
-                        if transferencias_count > 0:
-                            trm_promedio = trm_suma / transferencias_count
+                        # Si no hay transferencias con TRM registrada, usar un valor predeterminado o dejarlo en None
+                        trm_ponderada = None
+                        if transferencias_count > 0 and trm_suma > 0:
+                            trm_ponderada = trm_suma
+                            
+                            # Calcular el valor en EUR utilizando la TRM ponderada
+                            valor_factura_eur = (monto_a_pagar / trm_ponderada).quantize(Decimal('0.01'))
+                        else:
+                            valor_factura_eur = None
                         
-                        # Actualizar el pedido
-                        if monto_pendiente == 0:
-                            # Completamente pagado
+                        # Actualizar el estado del pedido según si está totalmente pagado o parcialmente pagado
+                        if monto_pendiente <= 0:
+                            # Pedido totalmente pagado
                             pedido.pagado = True
-                            pedido.monto_pendiente = 0
-                            if trm_promedio > 0:
-                                pedido.valor_factura_eur = monto_pagar / trm_promedio
                             pedido.estado_pedido = "Pagado"
+                            pedido.monto_pendiente = Decimal('0.0')
+                            pedido.valor_factura_eur = valor_factura_eur
                             pedidos_pagados.append(pedido)
                         else:
-                            # Parcialmente pagado
+                            # Pedido parcialmente pagado
                             pedido.pagado = False
+                            pedido.estado_pedido = "Pago Parcial"
                             pedido.monto_pendiente = monto_pendiente
-                            if trm_promedio > 0:
-                                pedido.valor_factura_eur = monto_a_pagar / trm_promedio
-                            pedido.estado_pedido = "En Proceso"
+                            pedido.valor_factura_eur = valor_factura_eur
                             pedidos_pendientes.append(pedido)
                     else:
-                        # No hay fondos disponibles para este pedido
+                        # No hay fondos suficientes para pagar este pedido
                         pedido.pagado = False
-                        pedido.monto_pendiente = monto_pagar
                         pedido.estado_pedido = "En Proceso"
+                        pedido.monto_pendiente = monto_pagar
+                        pedido.valor_factura_eur = None
                         pedidos_pendientes.append(pedido)
             
-            # Realizar actualizaciones en lote
-            if pedidos_pagados:
-                Pedido.objects.bulk_update(
-                    pedidos_pagados,
-                    ['pagado', 'valor_factura_eur', 'estado_pedido', 'monto_pendiente']
-                )
-            
-            if pedidos_pendientes:
-                Pedido.objects.bulk_update(
-                    pedidos_pendientes,
-                    ['pagado', 'valor_factura_eur', 'estado_pedido', 'monto_pendiente']
-                )
-            
-            # Verificar si hay pedidos pendientes
-            hay_pedidos_pendientes = any(not pedido.pagado for pedido in pedidos)
-            
-            # Calcular saldo final para el balance
-            saldo_final = Decimal('0.0')
-            
-            # Solo mostrar saldo positivo si no hay pedidos pendientes
-            if not hay_pedidos_pendientes:
-                saldo_final = total_disponible - fondos_usados
+            # Actualizar pedidos en lote
+            # Después de marcar todos los pedidos, actualizar cada uno para calcular el valor_x_producto_eur en sus detalles
+            for pedido in pedidos_pagados + pedidos_pendientes:
+                pedido.save(update_fields=['pagado', 'estado_pedido', 'monto_pendiente', 'valor_factura_eur'])
+                
+                # Para los pedidos marcados como pagados, actualizar los detalles llamando a la función en DetallePedido
+                from importacion.models import DetallePedido
+                if pedido.pagado:
+                    DetallePedido.actualizar_totales_pedido(pedido.id)
             
             # Actualizar el balance del exportador
-            BalanceExportador.objects.update_or_create(
-                exportador=exportador,
-                defaults={'saldo_disponible': saldo_final}
-            )
-    
+            balance, created = BalanceExportador.objects.get_or_create(exportador=exportador)
+            balance.saldo_disponible = total_disponible - fondos_usados
+            balance.save()
+                
     finally:
         _processing_exportador_payment = False
 
@@ -638,4 +628,3 @@ def delete_exportador_balance(sender, instance, **kwargs):
     reevaluar_pagos_exportador(instance.exportador)
 
 # Similar handlers could be added for Aduana and Carga transfers
-

@@ -29,6 +29,14 @@ def format_currency(value):
         return f"${formatted_value}"
     except (ValueError, TypeError):
         return value
+    
+@register.filter
+def format_currency_eur(value):
+    try:
+        formatted_value = '{:,.2f}'.format(float(value)).replace(',', '@').replace('.', ',').replace('@', '.')
+        return f"{formatted_value} €"
+    except (ValueError, TypeError):
+        return value
 
 @register.filter
 def format_number(value):

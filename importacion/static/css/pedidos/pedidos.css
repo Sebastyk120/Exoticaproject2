@@ -160,7 +160,11 @@ textarea {
 }
 
 .form-actions {
-    display: none;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    margin-top: 20px;
+    border-top: 1px solid var(--border-color);
 }
 
 .btn {
@@ -390,9 +394,15 @@ detail-header:hover, .detail-header.active {
 }
 
 .details-table td {
-    padding: 8px 10px;
+    padding: 10px;
     border-bottom: 1px solid var(--border-color);
     vertical-align: middle;
+    position: relative;
+}
+
+.details-table tr {
+    margin-bottom: 5px;
+    position: relative;
 }
 
 .details-table tr:hover {
@@ -503,4 +513,63 @@ detail-header:hover, .detail-header.active {
         opacity: 1;
         transform: translateX(0);
     }
+}
+
+/* Form Error Styles */
+.error-message {
+    color: var(--danger-color);
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+}
+
+.error-field {
+    border-color: var(--danger-color) !important;
+    background-color: rgba(239, 68, 68, 0.05) !important;
+}
+
+input.error-field:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
+}
+
+.nc-field-container {
+    position: relative;
+    margin-bottom: 10px; /* Asegurar espacio para el mensaje de error */
+}
+
+.nc-field-container .error-message {
+    position: absolute;
+    left: 0;
+    bottom: -18px;
+    width: 100%;
+}
+
+/* Nuevo estilo para mensajes de error en tabla */
+.details-table .error-message {
+    position: absolute;
+    left: 0;
+    top: 100%; /* Mostrar debajo del campo */
+    width: 100%;
+    background-color: white;
+    padding: 2px 4px;
+    border-radius: 3px;
+    border-left: 3px solid var(--danger-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 10; /* Asegurar que esté por encima de otros elementos */
+}
+
+/* Ajustar espacio entre filas de tabla para errores */
+.details-table tr {
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.details-table td {
+    padding: 10px;
+    position: relative;
+}
+
+.btn-lg {
+    padding: 12px 24px;
+    font-size: 16px;
 }

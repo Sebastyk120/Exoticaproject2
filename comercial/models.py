@@ -38,7 +38,7 @@ class Venta(models.Model):
     subtotal_factura = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Subtotal Factura", editable=False, default=0)
     valor_total_factura_euro = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total Factura Euro", null=True, blank=True, editable=False, default=0)
     valor_total_abono_euro = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total Abono/Reclamacion Euro", null=True, blank=True, default=0, editable=False)
-    numero_nc = models.CharField(max_length=100, verbose_name="Número NC/Reclamacion", null=True, blank=True)
+    numero_nc = models.CharField(max_length=100, verbose_name="Número Abono/Reclamacion", null=True, blank=True)
     monto_pendiente = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto Pendiente", null=True, blank=True, default=0, editable=False)
     pagado = models.BooleanField(verbose_name="Pagado", default=False, editable=False)
     observaciones = models.CharField(verbose_name="Observaciones", max_length=100, blank=True, null=True)
@@ -59,7 +59,8 @@ class Venta(models.Model):
             self.semana = f"{semana_numero}-{ano}"
             self.fecha_vencimiento = self.fecha_entrega + datetime.timedelta(days=self.cliente.dias_pago)
         if not self.numero_factura:
-            current_year = datetime.datetime.now().year
+            # Use the last two digits of the current year
+            current_year = datetime.datetime.now().year % 100
             last_venta = Venta.objects.filter(numero_factura__startswith=f'{current_year}/').order_by(
                 'id').last()
             if last_venta:
@@ -104,8 +105,18 @@ class DetalleVenta(models.Model):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Guardar el valor original de cajas_enviadas
         if self.pk:
-            self._original_cajas = self.cajas_enviadas
+            try:
+                # Intentar obtener el valor de la base de datos para mayor seguridad
+                original = DetalleVenta.objects.filter(pk=self.pk).values_list('cajas_enviadas', flat=True).first()
+                self._original_cajas = original if original is not None else 0
+            except Exception:
+                # Si hay algún error, usar el valor actual como respaldo
+                self._original_cajas = self.cajas_enviadas if self.cajas_enviadas is not None else 0
+        else:
+            # Para nuevos objetos, inicializar en 0
+            self._original_cajas = 0
     
     def clean(self):
         # Realizar cálculos básicos
@@ -122,22 +133,20 @@ class DetalleVenta(models.Model):
             self.valor_abono_euro = Decimal('0')
         
         # Validar stock disponible
-        if self.presentacion and self.cajas_enviadas:
-            # Si es una actualización, obtenemos el objeto original para calcular la diferencia
-            cajas_anteriores = 0
-            if self.pk and hasattr(self, '_original_cajas'):
-                cajas_anteriores = self._original_cajas
+        if self.presentacion and self.cajas_enviadas is not None:
+            # Obtener el valor original de cajas (0 para nuevos objetos)
+            cajas_anteriores = getattr(self, '_original_cajas', 0)
             
-            # Calcular cuántas cajas nuevas se van a usar
+            # Calcular la diferencia neta (solo validamos si hay incremento)
             cajas_nuevas = self.cajas_enviadas - cajas_anteriores
             
-            # Si hay un aumento en cajas, verificar stock disponible
+            # Solo validamos si hay un incremento en las cajas
             if cajas_nuevas > 0:
                 try:
                     bodega = Bodega.objects.get(presentacion=self.presentacion)
                     if bodega.stock_actual < cajas_nuevas:
                         raise ValidationError({
-                            'cajas_enviadas': f"Stock insuficiente. Solo hay {bodega.stock_actual} cajas disponibles de {self.presentacion}."
+                            'cajas_enviadas': f"Stock insuficiente. Solo hay {bodega.stock_actual} cajas disponibles para agregar. Necesita {cajas_nuevas} cajas adicionales."
                         })
                 except Bodega.DoesNotExist:
                     raise ValidationError({
@@ -226,8 +235,8 @@ class DetalleVenta(models.Model):
 class TranferenciasCliente(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, verbose_name="Cliente")
     referencia = models.CharField(max_length=100, verbose_name="Referencia")
-    fecha_transferencia = models.DateField(verbose_name="Fecha Transferencia")
-    valor_transferencia = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Transferencia Euros", validators=[MinValueValidator(0.0)])
+    fecha_transferencia = models.DateField(verbose_name="Fecha Pago")
+    valor_transferencia = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Pago Eur", validators=[MinValueValidator(0.0)])
     concepto = models.CharField(max_length=255, verbose_name="Concepto", null=True, blank=True)
 
     class Meta:
@@ -237,7 +246,7 @@ class TranferenciasCliente(models.Model):
 
 class BalanceCliente(models.Model):
     cliente = models.OneToOneField(Cliente, on_delete=models.CASCADE, verbose_name="Cliente")
-    saldo_disponible = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Saldo Disponible")
+    saldo_disponible = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Saldo Disponible Eur")
     ultima_actualizacion = models.DateTimeField(auto_now=True, verbose_name="Última Actualización")
 
     class Meta:

@@ -21,5 +21,8 @@ urlpatterns = [
     path('obtener-precio-presentacion/<int:presentacion_id>/<int:cliente_id>/', views_ventas.obtener_precio_presentacion, name='obtener_precio_presentacion'),
     path('ventas/<int:venta_id>/generar-factura/', views_ventas.generar_factura, name='generar_factura'),
     path('ventas/<int:venta_id>/generar-rectificativa/', views_ventas.generar_rectificativa, name='generar_rectificativa'),
+    path('ventas/<int:venta_id>/generar-albaran/', views_ventas.generar_albaran, name='generar_albaran'),
+    path('ventas/<int:venta_id>/generar-albaran-cliente/', views_ventas.generar_albaran_cliente, name='generar_albaran_cliente'),
     path('validar-stock/<int:presentacion_id>/<int:cajas_enviadas>/', views_ventas.validar_stock, name='validar_stock'),
+    path('estado-cuenta/cliente/<int:cliente_id>/', views_clientes.estado_cuenta_cliente, name='estado_cuenta_cliente'),
 ]

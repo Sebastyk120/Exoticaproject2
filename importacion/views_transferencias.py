@@ -12,6 +12,7 @@ from .models import (
     Exportador, AgenciaAduana, AgenciaCarga, 
     BalanceExportador, BalanceGastosAduana, BalanceGastosCarga
 )
+from comercial.models import Cliente, TranferenciasCliente, BalanceCliente
 
 def transferencias_view(request):
     """View to display all transfers in a tabbed interface with pagination"""
@@ -22,17 +23,20 @@ def transferencias_view(request):
     transferencias_exportador_list = TranferenciasExportador.objects.all().select_related('exportador').order_by('-id')
     transferencias_aduana_list = TranferenciasAduana.objects.all().select_related('agencia_aduana').order_by('-id')
     transferencias_carga_list = TranferenciasCarga.objects.all().select_related('agencia_carga').order_by('-id')
+    transferencias_cliente_list = TranferenciasCliente.objects.all().select_related('cliente').order_by('-id')
     
     # Get balance data
     balances_exportador = BalanceExportador.objects.all().select_related('exportador')
     balances_aduana = BalanceGastosAduana.objects.all().select_related('agencia_aduana')
     balances_carga = BalanceGastosCarga.objects.all().select_related('agencia_carga')
+    balances_cliente = BalanceCliente.objects.all().select_related('cliente')
     
     # Calculate totals for balance cards
     from decimal import Decimal
     total_balance_exportadores = sum(balance.saldo_disponible or Decimal('0') for balance in balances_exportador)
     total_balance_aduanas = sum(balance.saldo_disponible or Decimal('0') for balance in balances_aduana)
     total_balance_cargas = sum(balance.saldo_disponible or Decimal('0') for balance in balances_carga)
+    total_balance_clientes = sum(balance.saldo_disponible or Decimal('0') for balance in balances_cliente)
     
     # Pagination for each tab
     page = request.GET.get('page', 1)
@@ -42,6 +46,7 @@ def transferencias_view(request):
     paginator_exportador = Paginator(transferencias_exportador_list, items_per_page)
     paginator_aduana = Paginator(transferencias_aduana_list, items_per_page)
     paginator_carga = Paginator(transferencias_carga_list, items_per_page)
+    paginator_cliente = Paginator(transferencias_cliente_list, items_per_page)
     
     # Get requested page for the active tab
     try:
@@ -54,6 +59,9 @@ def transferencias_view(request):
         elif active_tab == 'carga':
             transferencias_carga = paginator_carga.page(page)
             is_paginated = paginator_carga.num_pages > 1
+        elif active_tab == 'cliente':
+            transferencias_cliente = paginator_cliente.page(page)
+            is_paginated = paginator_cliente.num_pages > 1
         else:
             active_tab = 'exportador'  # Default if invalid tab
             transferencias_exportador = paginator_exportador.page(page)
@@ -69,6 +77,9 @@ def transferencias_view(request):
         elif active_tab == 'carga':
             transferencias_carga = paginator_carga.page(1)
             is_paginated = paginator_carga.num_pages > 1
+        elif active_tab == 'cliente':
+            transferencias_cliente = paginator_cliente.page(1)
+            is_paginated = paginator_cliente.num_pages > 1
     except EmptyPage:
         # If page is out of range, deliver last page of results
         if active_tab == 'exportador':
@@ -80,6 +91,9 @@ def transferencias_view(request):
         elif active_tab == 'carga':
             transferencias_carga = paginator_carga.page(paginator_carga.num_pages)
             is_paginated = paginator_carga.num_pages > 1
+        elif active_tab == 'cliente':
+            transferencias_cliente = paginator_cliente.page(paginator_cliente.num_pages)
+            is_paginated = paginator_cliente.num_pages > 1
     
     # Set default empty values for non-active tabs
     if active_tab != 'exportador':
@@ -88,19 +102,24 @@ def transferencias_view(request):
         transferencias_aduana = []
     if active_tab != 'carga':
         transferencias_carga = []
+    if active_tab != 'cliente':
+        transferencias_cliente = []
     
     # Get dropdown data
     exportadores = Exportador.objects.all()
     agencias_aduana = AgenciaAduana.objects.all()
     agencias_carga = AgenciaCarga.objects.all()
+    clientes = Cliente.objects.all()
     
     context = {
         'transferencias_exportador': transferencias_exportador,
         'transferencias_aduana': transferencias_aduana,
         'transferencias_carga': transferencias_carga,
+        'transferencias_cliente': transferencias_cliente,
         'exportadores': exportadores,
         'agencias_aduana': agencias_aduana,
         'agencias_carga': agencias_carga,
+        'clientes': clientes,
         'active_tab': active_tab,
         'is_paginated': is_paginated,
         'page_obj': locals().get(f'transferencias_{active_tab}'),  # Get the appropriate page object
@@ -108,9 +127,11 @@ def transferencias_view(request):
         'balances_exportador': balances_exportador,
         'balances_aduana': balances_aduana,
         'balances_carga': balances_carga,
+        'balances_cliente': balances_cliente,
         'total_balance_exportadores': total_balance_exportadores,
         'total_balance_aduanas': total_balance_aduanas,
         'total_balance_cargas': total_balance_cargas,
+        'total_balance_clientes': total_balance_clientes,
     }
     
     return render(request, 'transferencias/transferencias.html', context)
@@ -318,3 +339,57 @@ def eliminar_transferencia_carga(request, pk):
     
     # Use the explicit redirect with tab parameter instead of hash
     return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=carga')
+
+# -------------------- Transferencias Cliente --------------------
+
+@require_POST
+def crear_transferencia_cliente(request):
+    """Create a new TranferenciasCliente instance"""
+    try:
+        with transaction.atomic():
+            cliente_id = request.POST.get('cliente')
+            TranferenciasCliente.objects.create(
+                cliente_id=cliente_id,
+                referencia=request.POST.get('referencia'),
+                fecha_transferencia=request.POST.get('fecha_transferencia'),
+                valor_transferencia=request.POST.get('valor_transferencia'),
+                concepto=request.POST.get('concepto')
+            )
+            messages.success(request, 'Transferencia de cliente creada exitosamente.')
+    except Exception as e:
+        messages.error(request, f'Error al crear transferencia: {str(e)}')
+    
+    # Use the explicit redirect with tab parameter
+    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=cliente')
+
+@require_POST
+def editar_transferencia_cliente(request, pk):
+    """Edit an existing TranferenciasCliente instance"""
+    transferencia = get_object_or_404(TranferenciasCliente, pk=pk)
+    try:
+        with transaction.atomic():
+            transferencia.cliente_id = request.POST.get('cliente')
+            transferencia.referencia = request.POST.get('referencia')
+            transferencia.fecha_transferencia = request.POST.get('fecha_transferencia')
+            transferencia.valor_transferencia = request.POST.get('valor_transferencia')
+            transferencia.concepto = request.POST.get('concepto')
+            transferencia.save()
+            messages.success(request, 'Transferencia de cliente actualizada exitosamente.')
+    except Exception as e:
+        messages.error(request, f'Error al actualizar transferencia: {str(e)}')
+    
+    # Use the explicit redirect with tab parameter
+    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=cliente')
+
+@require_POST
+def eliminar_transferencia_cliente(request, pk):
+    """Delete a TranferenciasCliente instance"""
+    transferencia = get_object_or_404(TranferenciasCliente, pk=pk)
+    try:
+        transferencia.delete()
+        messages.success(request, 'Transferencia de cliente eliminada exitosamente.')
+    except Exception as e:
+        messages.error(request, f'Error al eliminar transferencia: {str(e)}')
+    
+    # Use the explicit redirect with tab parameter
+    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=cliente')

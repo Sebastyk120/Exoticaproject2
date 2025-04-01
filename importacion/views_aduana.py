@@ -54,7 +54,11 @@ def process_pdf(request):
             # Extract valor_gastos_aduana from "Total Factura(EUR) X"
             valor_match = re.search(r'Total Factura \(EUR\)[\s\S]*?(\d[\d.,]*)\s+Forma de Pago', text)
             if valor_match:
-                valor_str = valor_match.group(1).replace('.', '').replace(',', '.')
+                valor_str_raw = valor_match.group(1).strip()
+                if ',' in valor_str_raw:
+                    valor_str = valor_str_raw.replace('.', '').replace(',', '.')
+                else:
+                    valor_str = valor_str_raw
                 valor_gastos_aduana = Decimal(valor_str)
             else:
                 valor_gastos_aduana = Decimal('0.0')

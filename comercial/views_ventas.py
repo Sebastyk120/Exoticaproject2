@@ -109,6 +109,14 @@ def guardar_venta(request, venta_id=None):
     # Save the sale
     venta.save()
     
+    # Check if the request is AJAX and respond with JSON
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': f'Venta {venta.id} guardada correctamente',
+            'venta_id': venta.id
+        })
+    
     messages.success(request, f'Venta {venta.id} guardada correctamente')
     return redirect('comercial:detalle_venta', venta_id=venta.id)
 
@@ -374,6 +382,13 @@ def validar_stock(request, presentacion_id, cajas_enviadas):
     try:
         presentacion_id = int(presentacion_id)
         cajas_enviadas = int(cajas_enviadas)
+        detalle_id = request.GET.get('detalle_id')
+        
+        if detalle_id:
+            try:
+                detalle_id = int(detalle_id)
+            except ValueError:
+                detalle_id = None
     except ValueError:
         return JsonResponse({
             'success': False,
@@ -388,15 +403,27 @@ def validar_stock(request, presentacion_id, cajas_enviadas):
         bodega = Bodega.objects.get(presentacion=presentacion)
         stock_disponible = bodega.stock_actual
         
+        # Si estamos editando un detalle existente, sumar las cajas que ya tiene ese detalle
+        if detalle_id:
+            try:
+                detalle_existente = DetalleVenta.objects.get(id=detalle_id)
+                # Añadir las cajas que ya están asignadas a este detalle
+                stock_disponible += detalle_existente.cajas_enviadas
+            except DetalleVenta.DoesNotExist:
+                # Si no se encuentra el detalle, continuamos con el stock normal
+                pass
+        
         if stock_disponible < cajas_enviadas:
             return JsonResponse({
                 'success': False,
-                'message': f'Stock insuficiente. Solo hay {stock_disponible} cajas disponibles de {presentacion.fruta.nombre} - {presentacion.kilos} Kg'
+                'message': f'Stock insuficiente. Solo hay {stock_disponible} cajas disponibles de {presentacion.fruta.nombre} - {presentacion.kilos} Kg',
+                'stock_disponible': stock_disponible  # Incluir stock disponible para cálculos en frontend
             })
         
         return JsonResponse({
             'success': True,
-            'message': 'Stock suficiente'
+            'message': 'Stock suficiente',
+            'stock_disponible': stock_disponible  # Incluir también en respuesta exitosa
         })
         
     except Presentacion.DoesNotExist:
@@ -414,3 +441,23 @@ def validar_stock(request, presentacion_id, cajas_enviadas):
             'success': False,
             'message': f'Error al validar stock: {str(e)}'
         }, status=500)
+
+def generar_albaran(request, venta_id):
+    """View to generate the delivery note (albarán) for a sale"""
+    venta = get_object_or_404(Venta, pk=venta_id)
+    detalles = DetalleVenta.objects.filter(venta=venta).select_related('presentacion', 'presentacion__fruta')
+    
+    return render(request, 'ventas/generar_albaran.html', {
+        'venta': venta,
+        'detalles': detalles,
+    })
+
+def generar_albaran_cliente(request, venta_id):
+    """View to generate a client delivery note (albarán) with prices for a sale"""
+    venta = get_object_or_404(Venta, pk=venta_id)
+    detalles = DetalleVenta.objects.filter(venta=venta).select_related('presentacion', 'presentacion__fruta')
+    
+    return render(request, 'ventas/generar_albaran_cliente.html', {
+        'venta': venta,
+        'detalles': detalles,
+    })

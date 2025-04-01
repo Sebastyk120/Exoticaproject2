@@ -1,9 +1,10 @@
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{% if pedido %}Editar Pedido #{{ pedido.id }}{% else %}Nuevo Pedido{% endif %}</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/pedidos/pedidos.css' %}">
@@ -35,23 +36,23 @@
         </div>
 
         <div class="main-content">
-            <!-- Order Information -->
-            <section class="order-info">
-                <div class="section-header">
-                    <h2><i class="fas fa-info-circle"></i> Información del Pedido</h2>
-                    <div class="action-buttons">
-                        <button type="submit" form="order-form" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Guardar Pedido
-                        </button>
-                        {% if pedido %}
-                            <button id="send-request-btn" class="btn btn-success">
-                                <i class="fas fa-paper-plane"></i> Enviar solicitud
-                            </button>
-                        {% endif %}
+            <!-- Unified Form -->
+            <form id="unified-form" method="post" action="{% if pedido %}{% url 'importacion:guardar_detalles_batch' pedido.id %}{% else %}{% url 'importacion:guardar_pedido' %}{% endif %}">
+                {% csrf_token %}
+                
+                <!-- Order Information Section -->
+                <section class="order-info">
+                    <div class="section-header">
+                        <h2><i class="fas fa-info-circle"></i> Información del Pedido</h2>
+                        <div class="action-buttons">
+                            {% if pedido %}
+                                <a href="{% url 'importacion:solicitar_pedido' pedido.id %}" class="btn btn-success">
+                                    <i class="fas fa-paper-plane"></i> Enviar solicitud
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
-                <form id="order-form" method="post" action="{% if pedido %}{% url 'importacion:guardar_pedido' pedido.id %}{% else %}{% url 'importacion:guardar_pedido' %}{% endif %}">
-                    {% csrf_token %}
+                    
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="exportador">Exportador:</label>
@@ -83,6 +84,7 @@
                         <div class="form-group">
                             <label for="numero_nc">Número NC:</label>
                             <input type="text" id="numero_nc" name="numero_nc" value="{{ pedido.numero_nc|default:'' }}">
+                            <div class="error-message" id="numero_nc_error"></div>
                         </div>
                         
                         <div class="form-group">
@@ -127,29 +129,21 @@
                             </div>
                         {% endif %}
                     </div>
-                </form>
-            </section>
-            
-            <!-- Order Details -->
-            {% if pedido %}
-                <section class="order-details">
-                    <div class="section-header">
-                        <h2><i class="fas fa-list"></i> Detalles del Pedido</h2>
-                        <div class="action-buttons">
-                            <button id="add-detail-btn" class="btn btn-success">
-                                <i class="fas fa-plus"></i> Agregar Detalle
-                            </button>
-                            <button id="save-all-details-btn" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Guardar Todos
-                            </button>
+                </section>
+                
+                <!-- Order Details Section (if editing an existing order) -->
+                {% if pedido %}
+                    <section class="order-details">
+                        <div class="section-header">
+                            <h2><i class="fas fa-list"></i> Detalles del Pedido</h2>
+                            <div class="action-buttons">
+                                <button type="button" id="add-detail-btn" class="btn btn-success">
+                                    <i class="fas fa-plus"></i> Agregar Detalle
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div id="details-container">
-                        <!-- Batch Details Form -->
-                        <form id="batch-details-form" method="post" action="{% url 'importacion:guardar_detalles_batch' pedido.id %}">
-                            {% csrf_token %}
-                            
+                        
+                        <div id="details-container">
                             <div id="new-details-container">
                                 <!-- Aquí se añadirán dinámicamente los nuevos detalles -->
                             </div>
@@ -162,6 +156,8 @@
                                         <th>Cajas Recibidas</th>
                                         <th>Valor Caja USD</th>
                                         <th>No Cajas NC</th>
+                                        <th>Total USD</th>
+                                        <th>Total EUR</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
@@ -169,7 +165,7 @@
                                     {% for detalle in detalles %}
                                     <tr class="detail-row" data-id="{{ detalle.id }}">
                                         <td>
-                                            <select name="detalle_{{ detalle.id }}_presentacion" required>
+                                            <select name="detalle_{{ detalle.id }}_presentacion" required class="presentacion-select">
                                                 {% for presentacion in presentaciones %}
                                                     <option value="{{ presentacion.id }}" {% if detalle.presentacion and detalle.presentacion.id == presentacion.id %}selected{% endif %}>
                                                         {{ presentacion.fruta.nombre }} - {{ presentacion.kilos }} Kg
@@ -183,15 +179,28 @@
                                         </td>
                                         <td>
                                             <input type="number" name="detalle_{{ detalle.id }}_cajas_recibidas" 
-                                                   value="{{ detalle.cajas_recibidas|default:'0' }}" min="0">
+                                                   value="{{ detalle.cajas_recibidas|default:'0' }}" min="0" class="cajas-recibidas">
                                         </td>
                                         <td>
                                             <input type="number" name="detalle_{{ detalle.id }}_valor_x_caja_usd" 
-                                                   value="{{ detalle.valor_x_caja_usd_str|default:detalle.valor_x_caja_usd|default:'0.00' }}" min="0" step="0.01">
+                                                   value="{{ detalle.valor_x_caja_usd_str|default:detalle.valor_x_caja_usd|default:'0.00' }}" min="0" step="0.01" class="valor-caja-usd">
+                                        </td>
+                                        <td class="nc-field-container">
+                                            <input type="number" name="detalle_{{ detalle.id }}_no_cajas_nc" 
+                                                   value="{{ detalle.no_cajas_nc_str|default:detalle.no_cajas_nc|default:'0.0' }}" min="0" step="0.1" class="no-cajas-nc">
+                                            <div class="error-message"></div>
                                         </td>
                                         <td>
-                                            <input type="number" name="detalle_{{ detalle.id }}_no_cajas_nc" 
-                                                   value="{{ detalle.no_cajas_nc_str|default:detalle.no_cajas_nc|default:'0.0' }}" min="0" step="0.1">
+                                            <div class="valor-x-producto">{{ detalle.valor_x_producto|format_currency }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="valor-x-producto-eur">
+                                                {% if detalle.valor_x_producto_eur and detalle.valor_x_producto_eur > 0 %}
+                                                    {{ detalle.valor_x_producto_eur|format_currency_eur }}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </div>
                                         </td>
                                         <td class="actions-cell">
                                             <button type="button" class="btn-icon btn-delete" onclick="removeDetailRow(this)">
@@ -206,43 +215,17 @@
                             <div class="empty-state" {% if detalles %}style="display:none"{% endif %}>
                                 <p>No hay detalles para este pedido. Haga clic en "Agregar Detalle" para añadir uno.</p>
                             </div>
-                        </form>
-                        
-                        <!-- Template for new detail row -->
-                        <template id="new-detail-row-template">
-                            <tr class="detail-row new-detail">
-                                <td>
-                                    <select name="new_INDEX_presentacion" required>
-                                        <option value="">Seleccionar Presentación</option>
-                                        {% for presentacion in presentaciones %}
-                                            <option value="{{ presentacion.id }}">
-                                                {{ presentacion.fruta.nombre }} - {{ presentacion.kilos }} Kg
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </td>
-                                <td>
-                                    <input type="number" name="new_INDEX_cajas_solicitadas" value="0" min="0">
-                                </td>
-                                <td>
-                                    <input type="number" name="new_INDEX_cajas_recibidas" value="0" min="0">
-                                </td>
-                                <td>
-                                    <input type="number" name="new_INDEX_valor_x_caja_usd" value="0" min="0" step="0.01">
-                                </td>
-                                <td>
-                                    <input type="number" name="new_INDEX_no_cajas_nc" value="0" min="0" step="0.1">
-                                </td>
-                                <td class="actions-cell">
-                                    <button type="button" class="btn-icon btn-delete" onclick="removeDetailRow(this)">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        </template>
-                    </div>
-                </section>
-            {% endif %}
+                        </div>
+                    </section>
+                {% endif %}
+                
+                <!-- Unified Save Button -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg" id="save-all-btn">
+                        <i class="fas fa-save"></i> Guardar Todo
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -251,54 +234,117 @@
         let newDetailCounter = 0;
         const exportadorId = {% if pedido.exportador %}{{ pedido.exportador.id }}{% else %}null{% endif %};
         
-        function toggleDetail(header) {
-            const card = header.closest('.detail-card');
-            const content = card.querySelector('.detail-content');
-            const icon = header.querySelector('.toggle-icon');
-            
-            if (content.style.maxHeight && content.style.maxHeight !== "none") {
-                content.style.maxHeight = null;
-                icon.classList.remove('fa-chevron-up');
-                icon.classList.add('fa-chevron-down');
-                header.classList.remove('active');
-            } else {
-                content.style.maxHeight = content.scrollHeight + "px";
-                icon.classList.remove('fa-chevron-down');
-                icon.classList.add('fa-chevron-up');
-                header.classList.add('active');
-            }
-        }
-        
-        function showNewDetailForm() {
-            // Añadir una nueva fila al inicio de la tabla
-            addNewDetailRow();
-            
-            // Ocultar mensaje de estado vacío
-            document.querySelector('.empty-state').style.display = 'none';
-            
-            // Mostrar la tabla si está oculta
-            document.getElementById('details-table').style.display = 'table';
-        }
-        
-        function hideNewDetailForm() {
-            document.getElementById('new-detail-form').style.display = 'none';
-        }
+        // Template for new detail row
+        const newDetailRowTemplate = `
+            <tr class="detail-row new-detail">
+                <td>
+                    <select name="new_INDEX_presentacion" required class="presentacion-select">
+                        <option value="">Seleccionar Presentación</option>
+                        {% for presentacion in presentaciones %}
+                            <option value="{{ presentacion.id }}">
+                                {{ presentacion.fruta.nombre }} - {{ presentacion.kilos }} Kg
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <input type="number" name="new_INDEX_cajas_solicitadas" value="0" min="0">
+                </td>
+                <td>
+                    <input type="number" name="new_INDEX_cajas_recibidas" value="0" min="0" class="cajas-recibidas">
+                </td>
+                <td>
+                    <input type="number" name="new_INDEX_valor_x_caja_usd" value="0" min="0" step="0.01" class="valor-caja-usd">
+                </td>
+                <td class="nc-field-container">
+                    <input type="number" name="new_INDEX_no_cajas_nc" value="0" min="0" step="0.1" class="no-cajas-nc">
+                    <div class="error-message"></div>
+                </td>
+                <td>
+                    <div class="valor-x-producto">$ 0.00</div>
+                </td>
+                <td>
+                    <div class="valor-x-producto-eur">-</div>
+                </td>
+                <td class="actions-cell">
+                    <button type="button" class="btn-icon btn-delete" onclick="removeDetailRow(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
         
         function addNewDetailRow() {
             // Crear nueva fila a partir de la plantilla
-            const template = document.getElementById('new-detail-row-template');
-            const newRow = document.importNode(template.content, true);
-            
-            // Actualizar índices en los campos
-            newRow.querySelectorAll('[name*="INDEX"]').forEach(field => {
-                field.name = field.name.replace('INDEX', newDetailCounter);
-            });
+            let newRow = newDetailRowTemplate.replace(/INDEX/g, newDetailCounter);
             
             // Añadir la fila al inicio de la tabla
             const tableBody = document.querySelector('#details-table tbody');
-            tableBody.insertBefore(newRow, tableBody.firstChild);
+            tableBody.insertAdjacentHTML('afterbegin', newRow);
+            
+            // Add event listeners to the new row
+            const newRowElement = tableBody.firstElementChild;
+            addValidationListeners(newRowElement);
+            addPriceLoaderListener(newRowElement); // Añadir el listener para cargar precios
             
             newDetailCounter++;
+            
+            // Show the table if it's hidden
+            document.querySelector('.empty-state').style.display = 'none';
+            document.getElementById('details-table').style.display = 'table';
+        }
+        
+        // Función para cargar el precio de una presentación
+        function loadPresentationPrice(presentacionSelect) {
+            const exportadorSelect = document.getElementById('exportador');
+            const exportadorId = exportadorSelect.value;
+            const presentacionId = presentacionSelect.value;
+            
+            if (!presentacionId || !exportadorId) {
+                return; // Si no hay una presentación o exportador seleccionado, no hacer nada
+            }
+            
+            // Encontrar el campo de valor_x_caja_usd en la misma fila
+            const row = presentacionSelect.closest('tr');
+            const valorCajaField = row.querySelector('.valor-caja-usd') || row.querySelector('[name$="_valor_x_caja_usd"]');
+            
+            if (!valorCajaField) {
+                return; // Si no se encuentra el campo, no hacer nada
+            }
+            
+            // Mostrar indicador de carga
+            valorCajaField.placeholder = "Cargando...";
+            
+            // Hacer la solicitud AJAX para obtener el precio
+            fetch(`/importacion/api/precio/${presentacionId}/${exportadorId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Actualizar el campo con el precio obtenido
+                        valorCajaField.value = data.precio.toFixed(2);
+                    } else {
+                        // Mostrar un mensaje si no se pudo obtener el precio
+                        console.warn('No se pudo obtener el precio:', data.message);
+                        valorCajaField.placeholder = "Precio no disponible";
+                        valorCajaField.value = "";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al obtener precio:', error);
+                    valorCajaField.placeholder = "Error al cargar";
+                    valorCajaField.value = "";
+                });
+        }
+        
+        // Función para añadir listener de carga de precios
+        function addPriceLoaderListener(element) {
+            const presentacionSelect = element.querySelector('.presentacion-select') || element.querySelector('[name$="_presentacion"]');
+            
+            if (presentacionSelect) {
+                presentacionSelect.addEventListener('change', function() {
+                    loadPresentationPrice(this);
+                });
+            }
         }
         
         function removeDetailRow(button) {
@@ -307,7 +353,7 @@
             
             if (detailId) {
                 // Si es un detalle existente, agregar un campo oculto para marcarlo como eliminado
-                const form = document.getElementById('batch-details-form');
+                const form = document.getElementById('unified-form');
                 const deleteField = document.createElement('input');
                 deleteField.type = 'hidden';
                 deleteField.name = 'delete_detail_ids';
@@ -325,154 +371,170 @@
             }
         }
         
-        // Función para cargar precios automáticamente
-        function cargarPrecioPresentacion(selectElement) {
-            const presentacionId = selectElement.value;
-            const row = selectElement.closest('.detail-row');
-            const valorCajaInput = row.querySelector('[name$="_valor_x_caja_usd"]');
+        function validateNCFields() {
+            let isValid = true;
+            const numeroNC = document.getElementById('numero_nc');
+            const numeroNCError = document.getElementById('numero_nc_error');
+            let hasNCCajas = false;
             
-            if (!presentacionId || !exportadorId) return;
-            
-            // Hacer la petición AJAX para obtener el precio
-            fetch(`/importacion/obtener-precio-presentacion/${presentacionId}/${exportadorId}/`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.precio) {
-                        valorCajaInput.value = data.precio;
+            // Check all NC fields
+            document.querySelectorAll('.no-cajas-nc').forEach(function(input) {
+                // Make sure we handle "0", "0.0", "0.00" etc. as zero
+                const cajaNC = parseFloat(input.value) || 0;
+                // Use a small epsilon value to handle floating point precision issues
+                if (cajaNC > 0.001) {
+                    hasNCCajas = true;
+                    
+                    // Validate that NC boxes are not greater than received boxes
+                    const row = input.closest('tr');
+                    const cajasRecibidas = parseInt(row.querySelector('.cajas-recibidas').value) || 0;
+                    const errorDiv = input.nextElementSibling;
+                    
+                    if (cajaNC > cajasRecibidas) {
+                        errorDiv.textContent = 'NC no puede ser mayor que cajas recibidas';
+                        errorDiv.style.display = 'block';
+                        input.classList.add('error-field');
+                        isValid = false;
+                    } else {
+                        errorDiv.style.display = 'none';
+                        input.classList.remove('error-field');
                     }
-                })
-                .catch(error => console.error('Error al cargar el precio:', error));
+                }
+            });
+            
+            // Validate Numero NC if any NC cajas exist
+            if (hasNCCajas && !numeroNC.value.trim()) {
+                numeroNCError.textContent = 'Número NC es requerido cuando hay cajas NC';
+                numeroNCError.style.display = 'block';
+                numeroNC.classList.add('error-field');
+                isValid = false;
+            } else {
+                numeroNCError.style.display = 'none';
+                numeroNC.classList.remove('error-field');
+            }
+            
+            return isValid;
         }
         
-        // Función para mostrar notificación
-        function mostrarNotificacion(mensaje, tipo = 'success') {
-            const notificacion = document.createElement('div');
-            notificacion.className = `notification ${tipo}`;
-            notificacion.innerHTML = `
-                <span class="notification-message">${mensaje}</span>
-                <button type="button" class="close-notification">&times;</button>
-            `;
+        function addValidationListeners(element) {
+            // Add listeners to NC fields to validate on change
+            const ncField = element.querySelector('.no-cajas-nc');
+            const cajasRecibidasField = element.querySelector('.cajas-recibidas');
             
-            const container = document.getElementById('notifications-container');
-            container.appendChild(notificacion);
+            if (ncField && cajasRecibidasField) {
+                // Usar 'input' en vez de 'change' para validación inmediata
+                ncField.addEventListener('input', function() {
+                    validateNCField(this, cajasRecibidasField);
+                });
+                
+                // También mantener el evento 'change' para navegadores antiguos
+                ncField.addEventListener('change', function() {
+                    validateNCField(this, cajasRecibidasField);
+                });
+                
+                cajasRecibidasField.addEventListener('input', function() {
+                    validateNCField(ncField, this);
+                });
+                
+                cajasRecibidasField.addEventListener('change', function() {
+                    validateNCField(ncField, this);
+                });
+            }
+        }
+        
+        function validateNCField(ncField, cajasRecibidasField) {
+            const cajaNC = parseFloat(ncField.value) || 0;
+            const cajasRecibidas = parseInt(cajasRecibidasField.value) || 0;
+            const errorDiv = ncField.nextElementSibling;
             
-            // Auto-cerrar después de 5 segundos
-            setTimeout(() => {
-                notificacion.classList.add('fade-out');
-                setTimeout(() => notificacion.remove(), 500);
-            }, 5000);
+            // Check NC field value doesn't exceed received boxes
+            if (cajaNC > cajasRecibidas) {
+                errorDiv.textContent = 'NC no puede ser mayor que cajas recibidas';
+                errorDiv.style.display = 'block';
+                ncField.classList.add('error-field');
+            } else {
+                errorDiv.style.display = 'none';
+                ncField.classList.remove('error-field');
+            }
             
-            // Configurar botón de cerrar
-            notificacion.querySelector('.close-notification').addEventListener('click', function() {
-                notificacion.remove();
+            // Check if there's any NC value to require Numero NC
+            updateNumeroNCRequirement();
+        }
+        
+        function updateNumeroNCRequirement() {
+            let hasNCCajas = false;
+            const numeroNC = document.getElementById('numero_nc');
+            const numeroNCError = document.getElementById('numero_nc_error');
+            
+            // Check if any NC cajas exist
+            document.querySelectorAll('.no-cajas-nc').forEach(function(input) {
+                // Make sure we handle "0", "0.0", "0.00" etc. as zero
+                const cajaNC = parseFloat(input.value) || 0;
+                if (cajaNC > 0.001) {
+                    hasNCCajas = true;
+                }
             });
+            
+            // Set requirement for Numero NC
+            if (hasNCCajas && !numeroNC.value.trim()) {
+                numeroNCError.textContent = 'Número NC es requerido cuando hay cajas NC';
+                numeroNCError.style.display = 'block';
+                numeroNC.classList.add('error-field');
+            } else {
+                numeroNCError.style.display = 'none';
+                numeroNC.classList.remove('error-field');
+            }
         }
         
         document.addEventListener('DOMContentLoaded', function() {
-            // Evento para agregar detalle
+            // Add event to add detail button
             const addDetailBtn = document.getElementById('add-detail-btn');
             if (addDetailBtn) {
-                addDetailBtn.addEventListener('click', showNewDetailForm);
+                addDetailBtn.addEventListener('click', addNewDetailRow);
             }
             
-            // Evento para guardar todos los detalles
-            const saveAllBtn = document.getElementById('save-all-details-btn');
-            if (saveAllBtn) {
-                saveAllBtn.addEventListener('click', function() {
-                    document.getElementById('batch-details-form').submit();
-                });
-            }
-            
-            // Mostrar/ocultar tabla según si hay elementos
-            const detailsTable = document.getElementById('details-table');
-            const emptyState = document.querySelector('.empty-state');
-            
-            if (detailsTable && emptyState) {
-                if (document.querySelectorAll('#details-table tbody tr').length === 0) {
-                    emptyState.style.display = 'block';
-                    detailsTable.style.display = 'none';
-                }
-            }
-            
-            // Añadir evento para detectar cambios en selects de presentación
-            document.addEventListener('change', function(e) {
-                if (e.target.tagName === 'SELECT' && (e.target.name.includes('presentacion'))) {
-                    cargarPrecioPresentacion(e.target);
+            // Add submit handler to validate before submitting
+            document.getElementById('unified-form').addEventListener('submit', function(e) {
+                if (!validateNCFields()) {
+                    e.preventDefault();
+                    showNotification('Por favor, corrija los errores en el formulario.', 'error');
                 }
             });
             
-            // Añadir eventos a botones de cerrar notificaciones existentes
-            document.querySelectorAll('.close-notification').forEach(button => {
+            // Add validation listeners to existing rows
+            document.querySelectorAll('#details-table .detail-row').forEach(function(row) {
+                addValidationListeners(row);
+                addPriceLoaderListener(row); // Añadir listeners para cargar precios
+            });
+            
+            // Add listener to numero_nc field
+            document.getElementById('numero_nc').addEventListener('input', updateNumeroNCRequirement);
+            
+            // Add change listener to exportador for updating all presentation prices if needed
+            const exportadorSelect = document.getElementById('exportador');
+            exportadorSelect.addEventListener('change', function() {
+                document.querySelectorAll('.presentacion-select, [name$="_presentacion"]').forEach(function(select) {
+                    if (select.value) {
+                        loadPresentationPrice(select);
+                    }
+                });
+            });
+            
+            // Initialize estado empty
+            if (document.querySelectorAll('#details-table tbody tr').length === 0) {
+                document.querySelector('.empty-state').style.display = 'block';
+                document.getElementById('details-table').style.display = 'none';
+            }
+            
+            // Add event listeners to close notification buttons
+            document.querySelectorAll('.close-notification').forEach(function(button) {
                 button.addEventListener('click', function() {
                     this.closest('.notification').remove();
                 });
             });
-            
-            // Agregar evento al botón de enviar solicitud
-            const sendRequestBtn = document.getElementById('send-request-btn');
-            if (sendRequestBtn) {
-                console.log('Botón encontrado, agregando evento...');
-                sendRequestBtn.addEventListener('click', async function(e) {
-                    e.preventDefault();
-                    console.log('Evento click disparado');
-                    
-                    // Mostrar notificación de guardado
-                    mostrarNotificacion('Guardando cambios antes de enviar solicitud...', 'info');
-                    
-                    try {
-                        // Guardar el pedido
-                        const orderForm = document.getElementById('order-form');
-                        if (orderForm) {
-                            console.log('Guardando pedido...');
-                            const orderFormData = new FormData(orderForm);
-                            const orderResponse = await fetch(orderForm.action, {
-                                method: 'POST',
-                                body: orderFormData,
-                                headers: {
-                                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                                }
-                            });
-                            console.log('Pedido guardado:', orderResponse.ok);
-                        }
-                        
-                        // Guardar los detalles
-                        const detailsForm = document.getElementById('batch-details-form');
-                        if (detailsForm) {
-                            console.log('Guardando detalles...');
-                            const detailsFormData = new FormData(detailsForm);
-                            const detailsResponse = await fetch(detailsForm.action, {
-                                method: 'POST',
-                                body: detailsFormData,
-                                headers: {
-                                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                                }
-                            });
-                            console.log('Detalles guardados:', detailsResponse.ok);
-                        }
-                        
-                        // Mostrar notificación de éxito
-                        mostrarNotificacion('Cambios guardados correctamente', 'success');
-                        
-                        // Redirigir después de guardar
-                        setTimeout(() => {
-                            {% if pedido %}
-                                window.location.href = "{% url 'importacion:solicitar_pedido' pedido.id %}";
-                            {% else %}
-                                window.location.reload();
-                            {% endif %}
-                        }, 1500);
-                        
-                    } catch (error) {
-                        console.error('Error al guardar los cambios:', error);
-                        mostrarNotificacion('Error al guardar los cambios. Por favor, intente nuevamente.', 'error');
-                    }
-                });
-            } else {
-                console.log('Botón no encontrado');
-            }
         });
-
-        // Agregar al script existente
+        
+        // Function to show notification
         function showNotification(message, type = 'success') {
             const container = document.getElementById('notifications-container');
             const notification = document.createElement('div');
@@ -484,28 +546,17 @@
             
             container.appendChild(notification);
             
-            // Auto-cerrar después de 5 segundos
+            // Auto-close after 5 seconds
             setTimeout(() => {
                 notification.classList.add('fade-out');
                 setTimeout(() => notification.remove(), 500);
             }, 5000);
             
-            // Configurar botón de cerrar
-            notification.querySelector('.close-notification').addEventListener('click', () => {
+            // Setup close button
+            notification.querySelector('.close-notification').addEventListener('click', function() {
                 notification.remove();
             });
         }
-
-        // Actualizar el manejo de formularios para usar las notificaciones
-        document.getElementById('order-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Mostrar notificación de guardado
-            showNotification('Guardando pedido...', 'info');
-            
-            // Enviar el formulario
-            this.submit();
-        });
     </script>
 </body>
 </html>

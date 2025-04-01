@@ -1,14 +1,14 @@
 /* Estilos para la factura */
 :root {
-    --primary-color: #0b486b; /* Deep blue */
-    --secondary-color: #3b8686; /* Teal */
-    --accent-color: #79bd9a; /* Light teal */
+    --primary-color: #1A7B6B; /* Verde Turquesa Oscuro */
+    --secondary-color: #2A9D8F; /* Verde Turquesa Medio */
+    --accent-color: #8CE2D6; /* Verde Turquesa Claro */
     --text-color: #333;
     --text-light: #666;
     --border-color: #ddd;
     --background-light: #f9f9f9;
     --background-white: #fff;
-    --success-color: #3b8686;
+    --success-color: #43AA8B; /* Verde Turquesa Éxito */
     --warning-color: #e67e22;
     --logo-color: #ea1f78; /* Logo magenta color */
 }
@@ -68,7 +68,7 @@ body {
 }
 
 .btn-primary:hover {
-    background-color: #000;
+    background-color: #135e52; /* Hover turquesa oscuro */
 }
 
 .btn-secondary {
@@ -87,6 +87,24 @@ body {
 
 .btn-warning:hover {
     background-color: #d35400;
+}
+
+.btn-info {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #2980b9;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #338a70; /* Hover turquesa éxito */
 }
 
 /* Invoice container - this is what will be in the PDF */
@@ -112,8 +130,8 @@ body {
 
 .logo {
     margin-right: 12px;
-    height: 100px;
-    width: 100px;
+    height: 150px; /* Increased from 100px */
+    width: 150px; /* Increased from 100px */
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -134,7 +152,7 @@ body {
 
 .company-title {
     color: var(--primary-color);
-    font-size: 22px;
+    font-size: 20px; /* Reduced from 22px */
     font-weight: 900;
     margin-top: 3px;
     text-align: left;
@@ -172,6 +190,11 @@ body {
     margin-bottom: 2px;
     color: var(--text-light);
     font-size: 12px;
+}
+
+.fecha-vencimiento {
+    color: red !important;
+    font-weight: bold !important;
 }
 
 /* Client information section */
@@ -341,7 +364,7 @@ body .invoice-container:has(.invoice-info h2:contains("FACTURA RECTIFICATIVA")) 
 
 .notes-content {
     font-style: italic;
-    color: var(--text-light);
+    color: #1A7B6B; /* Color coherente con primary para la nota */
     font-size: 12px;
 }
 
@@ -465,4 +488,46 @@ body .invoice-container:has(.invoice-info h2:contains("FACTURA RECTIFICATIVA")) 
     .controls {
         display: none;
     }
+}
+
+/* Signature section styles */
+.signature-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.signature-box {
+    flex: 1;
+    text-align: center;
+    margin: 0 20px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.signature-box p {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+/* Albaran specific styles */
+.invoice-container:has(.invoice-info h2:contains("ALBARÁN")) {
+    background-color: #fff;
+}
+
+.invoice-container:has(.invoice-info h2:contains("ALBARÁN")) .invoice-header {
+    border-bottom: 2px solid var(--secondary-color);
+}
+
+.invoice-container:has(.invoice-info h2:contains("ALBARÁN")) .items-table th {
+    background-color: var(--secondary-color);
+}
+
+.invoice-container:has(.invoice-info h2:contains("ALBARÁN")) .summary-row.total {
+    color: var(--secondary-color);
+    border-bottom: 2px solid var(--secondary-color);
 }

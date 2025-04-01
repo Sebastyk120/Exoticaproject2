@@ -1,14 +1,12 @@
-{% load custom_filters %}
-{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Factura #{{ venta.id }} - {{ venta.cliente.nombre }}</title>
+    <title>Albarán #{{ venta.id }} - {{ venta.cliente.nombre }}</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    {% load static %}
     <link rel="stylesheet" href="{% static 'css/ventas/factura_venta.css' %}">
     <!-- html2pdf library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -16,23 +14,12 @@
 <body>
     <div class="container">
         <div class="controls">
-            <a href="{% url 'comercial:lista_ventas' %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Volver
+            <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a Factura
             </a>
             <button id="downloadPdf" class="btn btn-primary">
                 <i class="fas fa-file-pdf"></i> Descargar PDF
             </button>
-            <a href="{% url 'comercial:generar_albaran' venta.id %}" class="btn btn-info">
-                <i class="fas fa-truck"></i> Generar Albarán
-            </a>
-            <a href="{% url 'comercial:generar_albaran_cliente' venta.id %}" class="btn btn-success">
-                <i class="fas fa-file-invoice"></i> Albarán Cliente
-            </a>
-            {% if venta.numero_nc %}
-            <a href="{% url 'comercial:generar_rectificativa' venta.id %}" class="btn btn-warning">
-                <i class="fas fa-file-alt"></i> Ver Factura Rectificativa
-            </a>
-            {% endif %}
         </div>
 
         <div id="invoice" class="invoice-container">
@@ -41,7 +28,6 @@
                     <div class="logo">
                         <!-- Logo oficial -->
                         <img src="{% static 'img/logo-oficial.jpg' %}" alt="L&M Exotic Fruit">
-                        
                     </div>
                     <div class="company-details">
                         <h1 class="company-title">Luz Mery Melo Mejia</h1>
@@ -54,11 +40,11 @@
                 </div>
                 
                 <div class="invoice-info">
-                    <h2>FACTURA</h2>
-                    <div class="invoice-number">Nº: {% if venta.numero_factura %}{{ venta.numero_factura }}{% else %}{{ venta.id }}{% endif %}</div>
+                    <h2>ALBARÁN</h2>
+                    <div class="invoice-number">Nº: {{ venta.id }}</div>
                     <div class="invoice-date">
                         <p><strong>Fecha Emisión:</strong> {% now "d/m/Y" %}</p>
-                        <p class="fecha-vencimiento"><strong>Fecha Vencimiento:</strong> {{ venta.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</p>
+                        <p><strong>Fecha Entrega:</strong> {{ venta.fecha_entrega|date:"d/m/Y"|default:"-" }}</p>
                         <p><strong>Semana:</strong> {{ venta.semana|default:"-" }}</p>
                     </div>
                 </div>
@@ -71,8 +57,6 @@
                     <p><strong>NIF/CIF:</strong> {{ venta.cliente.cif|default:"-" }}</p>
                     <p><strong>Dirección:</strong> {{ venta.cliente.domicilio|default:"-" }}</p>
                     <p><strong>Ciudad:</strong> {{ venta.cliente.ciudad|default:"-" }}, {{ venta.cliente.pais|default:"-" }}</p>
-                    <p><strong>Teléfono:</strong> {{ venta.cliente.telefono|default:"-" }}</p>
-                    <p><strong>Email:</strong> {{ venta.cliente.email|default:"-" }}</p>
                 </div>
             </div>
 
@@ -85,8 +69,6 @@
                             <th>Presentación</th>
                             <th>Total Kg</th>
                             <th>Cajas</th>
-                            <th>Precio/Caja (€)</th>
-                            <th>Total (€)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -96,43 +78,17 @@
                             <td>{{ detalle.presentacion.kilos }} kg</td>
                             <td>{{ detalle.kilos|floatformat:2 }}</td>
                             <td>{{ detalle.cajas_enviadas }}</td>
-                            <td>{{ detalle.valor_x_caja_euro|floatformat:2 }} €</td>
-                            <td>{{ detalle.valor_x_producto|floatformat:2 }} €</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
 
-            <div class="invoice-summary-and-footer">
-                <div class="bank-and-terms">
-                    <div class="payment-info">
-                        <h3>DATOS BANCARIOS</h3>
-                        <p><strong>Banco:</strong> Banco Santander</p>
-                        <p><strong>IBAN:</strong> ES76 0049 0030 2821 1019 2726</p>
-                        <p><strong>SWIFT/BIC:</strong> XXX-XXX-XXX</p>
-                    </div>
-                    <div class="terms">
-                        <h3>TÉRMINOS Y CONDICIONES DE PAGO</h3>
-                        <p>Pago a {{ venta.cliente.dias_pago }} días de la fecha de emisión de la factura.</p>
-                        <p>Forma de pago: Transferencia bancaria.</p>
-                    </div>
-                </div>
-
-                <div class="invoice-summary">
-                    <div class="summary-table">
-                        <div class="summary-row">
-                            <div class="summary-label">Base Imponible:</div>
-                            <div class="summary-value">{{ venta.subtotal_factura|floatformat:2 }} €</div>
-                        </div>
-                        <div class="summary-row">
-                            <div class="summary-label">IVA (4%):</div>
-                            <div class="summary-value">{{ venta.iva|floatformat:2 }} €</div>
-                        </div>
-                        <div class="summary-row total">
-                            <div class="summary-label">TOTAL FACTURA:</div>
-                            <div class="summary-value">{{ venta.valor_total_factura_euro|format_currency_eur }}</div>
-                        </div>
+            <div class="invoice-summary">
+                <div class="summary-table">
+                    <div class="summary-row total">
+                        <div class="summary-label">TOTAL CAJAS:</div>
+                        <div class="summary-value">{{ venta.total_cajas_pedido }}</div>
                     </div>
                 </div>
             </div>
@@ -149,8 +105,13 @@
             </div>
 
             <div class="invoice-signature">
-                <div class="thank-you">
-                    <p>¡Gracias por su confianza!</p>
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <p>Firma del transportista</p>
+                    </div>
+                    <div class="signature-box">
+                        <p>Firma del receptor</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -161,7 +122,7 @@
             // Configuración para PDF
             const pdfOptions = {
                 margin: [5, 5, 5, 5],
-                filename: 'Factura_{{ venta.id }}_{{ venta.cliente.nombre|slugify }}.pdf',
+                filename: 'Albaran_{{ venta.id }}_{{ venta.cliente.nombre|slugify }}.pdf',
                 image: { type: 'jpeg', quality: 1 },
                 html2canvas: { 
                     scale: 3,
@@ -185,7 +146,7 @@
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
                 button.disabled = true;
 
-                // Obtener el elemento que contiene la factura
+                // Obtener el elemento que contiene el albarán
                 const element = document.getElementById('invoice');
                 
                 // Generar PDF

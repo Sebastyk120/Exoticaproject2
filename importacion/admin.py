@@ -12,7 +12,7 @@ from .resources import (
     GastosAduanaResource, TranferenciasAduanaResource, BalanceGastosAduanaResource,
     GastosCargaResource, TranferenciasCargaResource, BalanceGastosCargaResource, BodegaResource
 )
-from comercial.templatetags.custom_filters import format_currency
+from comercial.templatetags.custom_filters import format_currency, format_currency_eur
 from unfold.admin import ModelAdmin
 from unfold.contrib.import_export.forms import ImportForm, SelectableFieldsExportForm
 from unfold.admin import TabularInline
@@ -47,8 +47,8 @@ class ExportadorAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
 class DetallePedidoInline(TabularInline):
     model = DetallePedido
     extra = 0
-    fields = ('presentacion', 'cajas_solicitadas', 'cajas_recibidas', 'valor_x_caja_usd', 'get_valor_x_producto', 'no_cajas_nc', 'get_valor_nc_usd')
-    readonly_fields = ('get_valor_x_producto', 'get_valor_nc_usd')
+    fields = ('presentacion', 'cajas_solicitadas', 'cajas_recibidas', 'valor_x_caja_usd', 'get_valor_x_producto', 'no_cajas_nc', 'get_valor_nc_usd', 'get_valor_x_producto_eur')
+    readonly_fields = ('get_valor_x_producto', 'get_valor_nc_usd', 'get_valor_x_producto_eur')
     show_change_link = True
     classes = ("collapse",)
     verbose_name = "Detalle pedido"
@@ -64,9 +64,15 @@ class DetallePedidoInline(TabularInline):
             return format_currency(obj.valor_nc_usd)
         return "-"
     
+    def get_valor_x_producto_eur(self, obj):
+        if obj.valor_x_producto_eur is not None and obj.valor_x_producto_eur > 0:
+            return format_currency_eur(obj.valor_x_producto_eur)
+        return "-"
+    
     get_valor_x_producto.short_description = "Valor Total Producto"
     get_valor_nc_usd.short_description = "Valor Total NC USD"
-
+    get_valor_x_producto_eur.short_description = "Valor Total EUR"
+    
 @admin.register(Pedido)
 class PedidoAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     import_form_class = ImportForm
@@ -89,12 +95,12 @@ class DetallePedidoAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin)
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
     list_display = ('id', 'pedido', 'presentacion', 'kilos', 'cajas_solicitadas', 'cajas_recibidas', 
-                    'valor_x_caja_usd', 'valor_x_producto')
+                    'valor_x_caja_usd', 'valor_x_producto', 'valor_x_producto_eur')
     search_fields = ('pedido__awb', 'presentacion__fruta__nombre')
     search_help_text = "Buscar por: AWB del pedido, nombre de la fruta."
     list_filter = ('pedido__exportador', 'presentacion__fruta')
     resource_class = DetallePedidoResource
-    exclude = ['valor_x_producto']  # Exclude non-editable fields
+    exclude = ['valor_x_producto', 'valor_x_producto_eur']  # Exclude non-editable fields
 
 @admin.register(TranferenciasExportador)
 class TranferenciasExportadorAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):

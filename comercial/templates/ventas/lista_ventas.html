@@ -234,16 +234,62 @@
 
     <!-- Modal para mostrar contenido de bodega -->
     <div id="bodega-modal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content modal-lg">
             <div class="modal-header">
                 <h2><i class="fas fa-warehouse"></i> Inventario de Bodega</h2>
                 <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <div id="bodega-container" class="inventory-grid">
+                <div class="bodega-controls">
+                    <div class="search-filter">
+                        <input type="text" id="bodega-search" placeholder="Buscar producto..." class="search-input">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    <div class="sort-options">
+                        <label for="sort-inventory">Ordenar por:</label>
+                        <select id="sort-inventory" class="sort-select">
+                            <option value="nombre">Nombre</option>
+                            <option value="stock-asc">Stock (Menor a Mayor)</option>
+                            <option value="stock-desc">Stock (Mayor a Menor)</option>
+                            <option value="reciente">Actualización más reciente</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="inventory-tabs">
+                    <button class="tab-btn active" data-tab="all">Todos</button>
+                    <button class="tab-btn" data-tab="low-stock">Stock Bajo</button>
+                    <button class="tab-btn" data-tab="out-stock">Sin Stock</button>
+                </div>
+                
+                <div id="bodega-container" class="inventory-container">
                     <div class="loading-spinner">
                         <i class="fas fa-circle-notch fa-spin"></i>
                         <p>Cargando inventario...</p>
+                    </div>
+                </div>
+                
+                <div class="inventory-summary">
+                    <div class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-box"></i></div>
+                        <div class="summary-data">
+                            <span class="summary-value" id="total-productos">0</span>
+                            <span class="summary-label">Productos</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-boxes"></i></div>
+                        <div class="summary-data">
+                            <span class="summary-value" id="total-cajas">0</span>
+                            <span class="summary-label">Total Cajas</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon alert-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div class="summary-data">
+                            <span class="summary-value" id="bajo-stock">0</span>
+                            <span class="summary-label">Stock Bajo</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -380,8 +426,11 @@
 
             // Funcionalidad para el modal de detalles
             const modal = document.getElementById('detalles-modal');
-            const closeButtons = document.querySelectorAll('.close-modal, .close-modal-btn');
+            const bodegaModal = document.getElementById('bodega-modal');
             const detailButtons = document.querySelectorAll('.btn-details');
+            const showBodegaBtn = document.getElementById('show-bodega');
+            const closeButtons = document.querySelectorAll('.close-modal, .close-modal-btn');
+            let inventarioData = []; // Para almacenar los datos del inventario
             
             // Abrir modal y cargar detalles
             detailButtons.forEach(button => {
@@ -391,17 +440,30 @@
                 });
             });
             
-            // Cerrar modal
+            // Botón para mostrar modal de bodega
+            showBodegaBtn.addEventListener('click', function() {
+                openBodegaModal();
+            });
+            
+            // Configurar eventos de cierre para todos los modales
             closeButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    closeModal();
+                    // Cerrar ambos modales
+                    modal.style.display = 'none';
+                    bodegaModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
                 });
             });
             
             // Cerrar modal si se hace click fuera del contenido
             window.addEventListener('click', function(event) {
                 if (event.target === modal) {
-                    closeModal();
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+                if (event.target === bodegaModal) {
+                    bodegaModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
                 }
             });
             
@@ -499,25 +561,6 @@
                     });
             }
             
-            function closeModal() {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto'; // Restaurar scroll
-            }
-            
-            // Helper para el selector contains (para buscar texto en elementos)
-            jQuery.expr[':'].contains = function(a, i, m) {
-                return jQuery(a).text().toUpperCase()
-                    .indexOf(m[3].toUpperCase()) >= 0;
-            };
-
-            // Funcionalidad para el modal de bodega
-            const bodegaModal = document.getElementById('bodega-modal');
-            const showBodegaBtn = document.getElementById('show-bodega');
-            
-            showBodegaBtn.addEventListener('click', function() {
-                openBodegaModal();
-            });
-            
             function openBodegaModal() {
                 bodegaModal.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
@@ -539,31 +582,14 @@
                         return response.json();
                     })
                     .then(data => {
-                        let bodegaHTML = '';
+                        // Guardar datos para filtrado y ordenamiento
+                        inventarioData = data.bodegas || [];
                         
-                        if (data.bodegas && data.bodegas.length > 0) {
-                            bodegaHTML = `
-                                <div class="inventory-grid">
-                                    ${data.bodegas.map(bodega => `
-                                        <div class="inventory-card simple-card">
-                                            <div class="card-content">
-                                                <h3>${bodega.presentacion.nombre}</h3>
-                                                <p>Stock: ${bodega.stock_actual} cajas</p>
-                                                <p>Última Actualización: ${bodega.ultima_actualizacion || 'No disponible'}</p>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            `;
-                        } else {
-                            bodegaHTML = `
-                                <div class="empty-state">
-                                    <p>No hay elementos en el inventario de bodega.</p>
-                                </div>
-                            `;
-                        }
+                        // Mostrar los productos
+                        renderInventario(inventarioData);
                         
-                        bodegaContainer.innerHTML = bodegaHTML;
+                        // Actualizar resumen
+                        updateInventarioSummary(inventarioData);
                     })
                     .catch(error => {
                         bodegaContainer.innerHTML = `
@@ -575,21 +601,180 @@
                     });
             }
             
-            // Agregar el modal de bodega a los eventos de cierre
-            closeButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    closeModal();
-                    bodegaModal.style.display = 'none';
-                    document.body.style.overflow = 'auto';
+            // Funciones de renderizado y filtrado
+            function renderInventario(items) {
+                const bodegaContainer = document.getElementById('bodega-container');
+                
+                if (items.length === 0) {
+                    bodegaContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <p>No hay elementos en el inventario de bodega.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const html = `
+                    <div class="inventory-grid">
+                        ${items.map(item => {
+                            // Determinar el estado del stock
+                            const stockLevel = getStockLevel(item.stock_actual);
+                            
+                            return `
+                                <div class="inventory-card ${stockLevel.class}" data-stock="${item.stock_actual}">
+                                    <div class="stock-indicator ${stockLevel.class}"></div>
+                                    <div class="card-content">
+                                        <h3>${item.presentacion.nombre}</h3>
+                                        <div class="stock-info">
+                                            <div class="stock-level ${stockLevel.class}">
+                                                <i class="${stockLevel.icon}"></i>
+                                                <span>${stockLevel.text}</span>
+                                            </div>
+                                            <div class="stock-amount">
+                                                <span class="value">${item.stock_actual}</span>
+                                                <span class="label">cajas</span>
+                                            </div>
+                                        </div>
+                                        <div class="inventory-details">
+                                            <div class="detail-item">
+                                                <span class="label">Última Actualización:</span>
+                                                <span class="value">${item.ultima_actualizacion || 'N/A'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                
+                bodegaContainer.innerHTML = html;
+            }
+            
+            // Determinar nivel de stock
+            function getStockLevel(stock) {
+                if (stock <= 0) {
+                    return {
+                        class: 'no-stock',
+                        text: 'Sin Stock',
+                        icon: 'fas fa-times-circle'
+                    };
+                } else if (stock < 20) {
+                    return {
+                        class: 'low-stock',
+                        text: 'Stock Bajo',
+                        icon: 'fas fa-exclamation-triangle'
+                    };
+                } else {
+                    return {
+                        class: 'normal-stock',
+                        text: 'Disponible',
+                        icon: 'fas fa-check-circle'
+                    };
+                }
+            }
+            
+            // Actualizar resumen del inventario
+            function updateInventarioSummary(items) {
+                const totalProductos = items.length;
+                let totalCajas = 0;
+                let bajoStock = 0;
+                
+                items.forEach(item => {
+                    const stock = parseInt(item.stock_actual) || 0;
+                    totalCajas += stock;
+                    if (stock > 0 && stock < 20) {
+                        bajoStock++;
+                    }
                 });
+                
+                document.getElementById('total-productos').textContent = totalProductos;
+                document.getElementById('total-cajas').textContent = totalCajas;
+                document.getElementById('bajo-stock').textContent = bajoStock;
+            }
+            
+            // Funcionalidad de búsqueda
+            const searchInput = document.getElementById('bodega-search');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                
+                if (searchTerm === '') {
+                    renderInventario(inventarioData);
+                    return;
+                }
+                
+                const filtered = inventarioData.filter(item => 
+                    item.presentacion.nombre.toLowerCase().includes(searchTerm)
+                );
+                
+                renderInventario(filtered);
+                updateInventarioSummary(filtered);
             });
             
-            // Cerrar modal de bodega si se hace click fuera
-            window.addEventListener('click', function(event) {
-                if (event.target === bodegaModal) {
-                    bodegaModal.style.display = 'none';
-                    document.body.style.overflow = 'auto';
+            // Funcionalidad de ordenamiento
+            const sortSelect = document.getElementById('sort-inventory');
+            sortSelect.addEventListener('change', function() {
+                const sortValue = this.value;
+                const sorted = [...inventarioData]; // Clonar el array
+                
+                switch(sortValue) {
+                    case 'nombre':
+                        sorted.sort((a, b) => a.presentacion.nombre.localeCompare(b.presentacion.nombre));
+                        break;
+                    case 'stock-asc':
+                        sorted.sort((a, b) => parseInt(a.stock_actual) - parseInt(b.stock_actual));
+                        break;
+                    case 'stock-desc':
+                        sorted.sort((a, b) => parseInt(b.stock_actual) - parseInt(a.stock_actual));
+                        break;
+                    case 'reciente':
+                        sorted.sort((a, b) => {
+                            if (!a.ultima_actualizacion) return 1;
+                            if (!b.ultima_actualizacion) return -1;
+                            return new Date(b.ultima_actualizacion) - new Date(a.ultima_actualizacion);
+                        });
+                        break;
                 }
+                
+                renderInventario(sorted);
+            });
+            
+            // Funcionalidad de pestañas
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Cambiar pestaña activa
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const tab = this.getAttribute('data-tab');
+                    let filtered = [...inventarioData];
+                    
+                    // Filtrar según la pestaña
+                    if (tab === 'low-stock') {
+                        filtered = inventarioData.filter(item => 
+                            parseInt(item.stock_actual) > 0 && parseInt(item.stock_actual) < 10
+                        );
+                    } else if (tab === 'out-stock') {
+                        filtered = inventarioData.filter(item => 
+                            parseInt(item.stock_actual) <= 0
+                        );
+                    }
+                    
+                    renderInventario(filtered);
+                    updateInventarioSummary(filtered);
+                    
+                    // Si hay una búsqueda activa, aplicarla también
+                    const searchTerm = searchInput.value.toLowerCase().trim();
+                    if (searchTerm !== '') {
+                        filtered = filtered.filter(item => 
+                            item.presentacion.nombre.toLowerCase().includes(searchTerm)
+                        );
+                        renderInventario(filtered);
+                        updateInventarioSummary(filtered);
+                    }
+                });
             });
         });
     </script>

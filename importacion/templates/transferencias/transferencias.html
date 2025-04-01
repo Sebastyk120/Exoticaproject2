@@ -1,3 +1,5 @@
+{% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,7 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="/static/css/transferencias/transferencias.css">
+    <link rel="stylesheet" href="{% static 'css/transferencias/transferencias.css' %}">
 </head>
 <body>
     <!-- Floating Feedback Toast -->
@@ -40,13 +42,13 @@
 
         <!-- Balance Cards -->
         <div class="row mb-4 balance-cards">
-            <div class="col-md-4 col-sm-6 mb-3">
+            <div class="col-md-3 col-sm-6 mb-3">
                 <div class="card balance-card" data-bs-toggle="modal" data-bs-target="#modalBalanceExportador">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-subtitle mb-1 text-muted">Balance Exportadores</h6>
-                                <h3 class="card-title mb-0">${{ total_balance_exportadores|default:"0.00"|floatformat:2 }}</h3>
+                                <h3 class="card-title mb-0">{{ total_balance_exportadores|format_currency }}</h3>
                                 <p class="text-muted mb-0">Saldo disponible total</p>
                             </div>
                             <div class="icon-box bg-primary">
@@ -56,13 +58,13 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-6 mb-3">
+            <div class="col-md-3 col-sm-6 mb-3">
                 <div class="card balance-card" data-bs-toggle="modal" data-bs-target="#modalBalanceAduana">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-subtitle mb-1 text-muted">Balance Aduanas</h6>
-                                <h3 class="card-title mb-0">${{ total_balance_aduanas|default:"0.00"|floatformat:2 }}</h3>
+                                <h3 class="card-title mb-0">{{ total_balance_aduanas|format_currency_eur }}</h3>
                                 <p class="text-muted mb-0">Saldo disponible total</p>
                             </div>
                             <div class="icon-box bg-warning">
@@ -72,17 +74,33 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-6 mb-3">
+            <div class="col-md-3 col-sm-6 mb-3">
                 <div class="card balance-card" data-bs-toggle="modal" data-bs-target="#modalBalanceCarga">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-subtitle mb-1 text-muted">Balance Agencias de Carga</h6>
-                                <h3 class="card-title mb-0">${{ total_balance_cargas|default:"0.00"|floatformat:2 }}</h3>
+                                <h3 class="card-title mb-0">{{ total_balance_cargas|format_currency }}</h3>
                                 <p class="text-muted mb-0">Saldo disponible total</p>
                             </div>
                             <div class="icon-box bg-info">
                                 <i class="bi bi-box-seam"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card balance-card" data-bs-toggle="modal" data-bs-target="#modalBalanceCliente">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-1 text-muted">Balance Clientes</h6>
+                                <h3 class="card-title mb-0">{{ total_balance_clientes|format_currency_eur }}</h3>
+                                <p class="text-muted mb-0">Saldo disponible total</p>
+                            </div>
+                            <div class="icon-box bg-success">
+                                <i class="bi bi-people"></i>
                             </div>
                         </div>
                     </div>
@@ -93,18 +111,23 @@
         <!-- Tabs Navigation with Pills style -->
         <ul class="nav nav-pills mb-4 custom-tabs" id="transferenciasTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="exportador-tab" data-bs-toggle="tab" data-bs-target="#exportador" type="button" role="tab" aria-controls="exportador" aria-selected="true">
+                <button class="nav-link {% if active_tab == 'exportador' %}active{% endif %}" id="exportador-tab" data-bs-toggle="tab" data-bs-target="#exportador" type="button" role="tab" aria-controls="exportador" aria-selected="{% if active_tab == 'exportador' %}true{% else %}false{% endif %}">
                     <i class="bi bi-truck"></i> Exportadores
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="aduana-tab" data-bs-toggle="tab" data-bs-target="#aduana" type="button" role="tab" aria-controls="aduana" aria-selected="false">
+                <button class="nav-link {% if active_tab == 'aduana' %}active{% endif %}" id="aduana-tab" data-bs-toggle="tab" data-bs-target="#aduana" type="button" role="tab" aria-controls="aduana" aria-selected="{% if active_tab == 'aduana' %}true{% else %}false{% endif %}">
                     <i class="bi bi-building"></i> Aduanas
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="carga-tab" data-bs-toggle="tab" data-bs-target="#carga" type="button" role="tab" aria-controls="carga" aria-selected="false">
+                <button class="nav-link {% if active_tab == 'carga' %}active{% endif %}" id="carga-tab" data-bs-toggle="tab" data-bs-target="#carga" type="button" role="tab" aria-controls="carga" aria-selected="{% if active_tab == 'carga' %}true{% else %}false{% endif %}">
                     <i class="bi bi-box-seam"></i> Agencias de Carga
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if active_tab == 'cliente' %}active{% endif %}" id="cliente-tab" data-bs-toggle="tab" data-bs-target="#cliente" type="button" role="tab" aria-controls="cliente" aria-selected="{% if active_tab == 'cliente' %}true{% else %}false{% endif %}">
+                    <i class="bi bi-people"></i> Clientes
                 </button>
             </li>
         </ul>
@@ -170,10 +193,10 @@
                                         </td>
                                         <td>{{ transferencia.fecha_transferencia|date:"d/m/Y" }}</td>
                                         <td class="text-end">
-                                            <span class="currency-value">${{ transferencia.valor_transferencia|floatformat:2 }}</span>
+                                            <span class="currency-value">{{ transferencia.valor_transferencia|format_currency }}</span>
                                         </td>
                                         <td class="text-end">
-                                            <span class="currency-value">{{ transferencia.valor_transferencia_eur|floatformat:2 }} €</span>
+                                            <span class="currency-value">{{ transferencia.valor_transferencia_eur|format_currency_eur }}</span>
                                         </td>
                                         <td class="text-end">{{ transferencia.trm|floatformat:2 }}</td>
                                         <td>
@@ -182,7 +205,7 @@
                                             </span>
                                         </td>
                                         <td class="text-end">
-                                            <span class="currency-value fw-bold">${{ transferencia.saldo_transferencia|floatformat:2 }}</span>
+                                            <span class="currency-value fw-bold">{{ transferencia.saldo_transferencia|format_currency }}</span>
                                         </td>
                                         <td class="text-center">
                                             <div class="action-buttons">
@@ -307,7 +330,7 @@
                                         <th>Agencia Aduana</th>
                                         <th>Referencia</th>
                                         <th>Fecha</th>
-                                        <th class="text-end">Valor USD</th>
+                                        <th class="text-end">Valor EUR</th>
                                         <th>Concepto</th>
                                         <th class="text-center">Acciones</th>
                                     </tr>
@@ -322,7 +345,7 @@
                                         </td>
                                         <td>{{ transferencia.fecha_transferencia|date:"d/m/Y" }}</td>
                                         <td class="text-end">
-                                            <span class="currency-value">${{ transferencia.valor_transferencia|floatformat:2 }}</span>
+                                            <span class="currency-value">{{ transferencia.valor_transferencia|format_currency_eur }}</span>
                                         </td>
                                         <td>
                                             <span class="truncate-text" data-bs-toggle="tooltip" title="{{ transferencia.concepto }}">
@@ -468,10 +491,10 @@
                                         </td>
                                         <td>{{ transferencia.fecha_transferencia|date:"d/m/Y" }}</td>
                                         <td class="text-end">
-                                            <span class="currency-value">${{ transferencia.valor_transferencia|floatformat:2 }}</span>
+                                            <span class="currency-value">{{ transferencia.valor_transferencia|format_currency }}</span>
                                         </td>
                                         <td class="text-end">
-                                            <span class="currency-value">€{{ transferencia.valor_transferencia_eur|floatformat:2 }}</span>
+                                            <span class="currency-value">{{ transferencia.valor_transferencia_eur|format_currency_eur }}</span>
                                         </td>
                                         <td class="text-end">{{ transferencia.trm|floatformat:2 }}</td>
                                         <td>
@@ -559,6 +582,150 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Cliente Tab -->
+            <div class="tab-pane fade {% if active_tab == 'cliente' %}show active{% endif %}" id="cliente" role="tabpanel" aria-labelledby="cliente-tab">
+                <div class="card content-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-people me-2"></i>Pagos de Clientes
+                        </h5>
+                        <div class="actions">
+                            <button type="button" class="btn btn-primary btn-with-icon" data-bs-toggle="modal" data-bs-target="#modalCrearCliente">
+                                <i class="bi bi-plus-circle"></i> Nueva Transferencia
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-filters d-flex flex-wrap justify-content-between mb-3">
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="input-group search-box">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" id="searchCliente" placeholder="Buscar...">
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton4" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-funnel"></i> Filtrar
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton4">
+                                    <li><a class="dropdown-item" href="#" data-filter="all">Todas</a></li>
+                                    <li><a class="dropdown-item" href="#" data-filter="month">Último mes</a></li>
+                                    <li><a class="dropdown-item" href="#" data-filter="week">Última semana</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive table-container">
+                            <table class="table table-striped table-hover data-table" id="tablaCliente">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th>Cliente</th>
+                                        <th>Referencia</th>
+                                        <th>Fecha</th>
+                                        <th class="text-end">Valor EUR</th>
+                                        <th>Concepto</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transferencia in transferencias_cliente %}
+                                    <tr>
+                                        <td class="text-center id-column">{{ transferencia.id }}</td>
+                                        <td>{{ transferencia.cliente.nombre }}</td>
+                                        <td>
+                                            <span class="badge bg-light text-dark">{{ transferencia.referencia }}</span>
+                                        </td>
+                                        <td>{{ transferencia.fecha_transferencia|date:"d/m/Y" }}</td>
+                                        <td class="text-end">
+                                            <span class="currency-value">{{ transferencia.valor_transferencia|format_currency_eur }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="truncate-text" data-bs-toggle="tooltip" title="{{ transferencia.concepto }}">
+                                                {{ transferencia.concepto|truncatechars:20 }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="action-buttons">
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEditarCliente{{ transferencia.id }}" data-bs-toggle="tooltip" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarCliente{{ transferencia.id }}" data-bs-toggle="tooltip" title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        {% if active_tab == 'cliente' and is_paginated %}
+                        <div class="pagination-container mt-4">
+                            <nav aria-label="Navegación de transferencias">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=cliente&page=1" aria-label="Primera">
+                                                <span aria-hidden="true">&laquo;&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=cliente&page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Primera">
+                                                <span aria-hidden="true">&laquo;&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Anterior">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">
+                                            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=cliente&page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab=cliente&page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                                                <span aria-hidden="true">&raquo;&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Siguiente">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Última">
+                                                <span aria-hidden="true">&raquo;&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -571,7 +738,9 @@
         <div class="offcanvas-body">
             <div class="help-section">
                 <h6>Gestión de Transferencias</h6>
-                <p>Este módulo le permite administrar todas las transferencias realizadas a exportadores, agencias de aduana y agencias de carga.</p>
+                <p>Este módulo le permite administrar todas las transferencias realizadas a exportadores, agencias de aduana, agencias de carga y pagos de los clientes</p>
+                <h6>Gestión de Balances</h6>
+                <p>Los balances de cada sección muestran los anticipos pendientes por aplicar a cada entidad</p>
                 <hr>
                 <h6>Cómo usar este módulo</h6>
                 <ul>
@@ -690,7 +859,7 @@
                             <div class="invalid-feedback">Por favor ingrese una fecha válida.</div>
                         </div>
                         <div class="mb-3">
-                            <label for="valor_transferencia" class="form-label">Valor de Transferencia (USD) <span class="text-danger">*</span></label>
+                            <label for="valor_transferencia" class="form-label">Valor de Transferencia (EUR) <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia" name="valor_transferencia" required>
@@ -914,7 +1083,7 @@
                             <div class="invalid-feedback">Por favor ingrese una fecha válida.</div>
                         </div>
                         <div class="mb-3">
-                            <label for="valor_transferencia{{ transferencia.id }}" class="form-label">Valor de Transferencia (USD) <span class="text-danger">*</span></label>
+                            <label for="valor_transferencia{{ transferencia.id }}" class="form-label">Valor de Transferencia (EUR) <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia{{ transferencia.id }}" name="valor_transferencia" value="{{ transferencia.valor_transferencia|stringformat:'g' }}" required>
@@ -1084,7 +1253,7 @@
                                 {% for balance in balances_exportador %}
                                 <tr>
                                     <td>{{ balance.exportador.nombre }}</td>
-                                    <td class="text-end">${{ balance.saldo_disponible|floatformat:2 }}</td>
+                                    <td class="text-end">{{ balance.saldo_disponible|format_currency }}</td>
                                     <td class="text-center">{{ balance.ultima_actualizacion|date:"d/m/Y H:i" }}</td>
                                 </tr>
                                 {% empty %}
@@ -1096,7 +1265,7 @@
                             <tfoot>
                                 <tr>
                                     <th class="text-end">Total:</th>
-                                    <th class="text-end">${{ total_balance_exportadores|default:"0.00"|floatformat:2 }}</th>
+                                    <th class="text-end">{{ total_balance_exportadores|format_currency }}</th>
                                     <th></th>
                                 </tr>
                             </tfoot>
@@ -1134,7 +1303,7 @@
                                 {% for balance in balances_aduana %}
                                 <tr>
                                     <td>{{ balance.agencia_aduana.nombre }}</td>
-                                    <td class="text-end">${{ balance.saldo_disponible|floatformat:2 }}</td>
+                                    <td class="text-end">{{ balance.saldo_disponible|format_currency_eur }}</td>
                                     <td class="text-center">{{ balance.ultima_actualizacion|date:"d/m/Y H:i" }}</td>
                                 </tr>
                                 {% empty %}
@@ -1146,7 +1315,7 @@
                             <tfoot>
                                 <tr>
                                     <th class="text-end">Total:</th>
-                                    <th class="text-end">${{ total_balance_aduanas|default:"0.00"|floatformat:2 }}</th>
+                                    <th class="text-end">{{ total_balance_aduanas|format_currency_eur }}</th>
                                     <th></th>
                                 </tr>
                             </tfoot>
@@ -1184,7 +1353,7 @@
                                 {% for balance in balances_carga %}
                                 <tr>
                                     <td>{{ balance.agencia_carga.nombre }}</td>
-                                    <td class="text-end">${{ balance.saldo_disponible|floatformat:2 }}</td>
+                                    <td class="text-end">{{ balance.saldo_disponible|format_currency }}</td>
                                     <td class="text-center">{{ balance.ultima_actualizacion|date:"d/m/Y H:i" }}</td>
                                 </tr>
                                 {% empty %}
@@ -1196,7 +1365,200 @@
                             <tfoot>
                                 <tr>
                                     <th class="text-end">Total:</th>
-                                    <th class="text-end">${{ total_balance_cargas|default:"0.00"|floatformat:2 }}</th>
+                                    <th class="text-end">{{ total_balance_cargas|format_currency }}</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cliente Create Modal -->
+    <div class="modal fade" id="modalCrearCliente" tabindex="-1" aria-labelledby="modalCrearClienteLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'importacion:crear_transferencia_cliente' %}" method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalCrearClienteLabel">
+                            <i class="bi bi-people me-2"></i>Nueva Transferencia de Cliente
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="cliente" class="form-label">Cliente <span class="text-danger">*</span></label>
+                            <select class="form-select" id="cliente" name="cliente" required>
+                                <option value="">Seleccionar Cliente</option>
+                                {% for cliente in clientes %}
+                                <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Por favor seleccione un cliente.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="referencia" class="form-label">Referencia <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="referencia" name="referencia" required>
+                            <div class="invalid-feedback">Este campo es obligatorio.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_transferencia" class="form-label">Fecha de Transferencia <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="fecha_transferencia" name="fecha_transferencia" required>
+                            <div class="invalid-feedback">Por favor ingrese una fecha válida.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="valor_transferencia" class="form-label">Valor EUR <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia" name="valor_transferencia" required>
+                                <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="concepto" class="form-label">Concepto</label>
+                            <textarea class="form-control" id="concepto" name="concepto" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit and Delete Modals for Cliente -->
+    {% for transferencia in transferencias_cliente %}
+    <!-- Edit Modal -->
+    <div class="modal fade" id="modalEditarCliente{{ transferencia.id }}" tabindex="-1" aria-labelledby="modalEditarClienteLabel{{ transferencia.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'importacion:editar_transferencia_cliente' transferencia.id %}" method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalEditarClienteLabel{{ transferencia.id }}">
+                            <i class="bi bi-people me-2"></i>Editar Transferencia de Cliente
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="cliente{{ transferencia.id }}" class="form-label">Cliente <span class="text-danger">*</span></label>
+                            <select class="form-select" id="cliente{{ transferencia.id }}" name="cliente" required>
+                                {% for cliente in clientes %}
+                                <option value="{{ cliente.id }}" {% if cliente.id == transferencia.cliente.id %}selected{% endif %}>{{ cliente.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Por favor seleccione un cliente.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="referencia{{ transferencia.id }}" class="form-label">Referencia <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="referencia{{ transferencia.id }}" name="referencia" value="{{ transferencia.referencia }}" required>
+                            <div class="invalid-feedback">Este campo es obligatorio.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_transferencia{{ transferencia.id }}" class="form-label">Fecha de Transferencia <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="fecha_transferencia{{ transferencia.id }}" name="fecha_transferencia" value="{{ transferencia.fecha_transferencia|date:'Y-m-d' }}" required>
+                            <div class="invalid-feedback">Por favor ingrese una fecha válida.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="valor_transferencia{{ transferencia.id }}" class="form-label">Valor EUR <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia{{ transferencia.id }}" name="valor_transferencia" value="{{ transferencia.valor_transferencia|stringformat:'g' }}" required>
+                                <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="concepto{{ transferencia.id }}" class="form-label">Concepto</label>
+                            <textarea class="form-control" id="concepto{{ transferencia.id }}" name="concepto" rows="3">{{ transferencia.concepto }}</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            Actualizar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Modal -->
+    <div class="modal fade" id="modalEliminarCliente{{ transferencia.id }}" tabindex="-1" aria-labelledby="modalEliminarClienteLabel{{ transferencia.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'importacion:eliminar_transferencia_cliente' transferencia.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalEliminarClienteLabel{{ transferencia.id }}">
+                            <i class="bi bi-trash me-2"></i>Confirmar Eliminación
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Está seguro que desea eliminar la transferencia <strong>{{ transferencia.referencia }}</strong> del cliente <strong>{{ transferencia.cliente.nombre }}</strong>?</p>
+                        <p class="text-danger">Esta acción no se puede deshacer.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Cliente Balance Modal -->
+    <div class="modal fade" id="modalBalanceCliente" tabindex="-1" aria-labelledby="modalBalanceClienteLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalBalanceClienteLabel">
+                        <i class="bi bi-people me-2"></i>Balance de Clientes
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th class="text-end">Saldo Disponible EUR</th>
+                                    <th class="text-center">Última Actualización</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for balance in balances_cliente %}
+                                <tr>
+                                    <td>{{ balance.cliente.nombre }}</td>
+                                    <td class="text-end">{{ balance.saldo_disponible|floatformat:2 }} €</td>
+                                    <td class="text-center">{{ balance.ultima_actualizacion|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No hay balances registrados</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th class="text-end">Total:</th>
+                                    <th class="text-end">{{ total_balance_clientes|default:"0.00"|floatformat:2 }} €</th>
                                     <th></th>
                                 </tr>
                             </tfoot>
@@ -1256,7 +1618,6 @@
                         emptyTable: "No hay datos disponibles en la tabla"
                     },
                     columnDefs: columnsConfig
-                    // Se ha eliminado la función footerCallback que calculaba los totales
                 });
             }
             
@@ -1276,6 +1637,11 @@
                 { targets: [4, 5, 6], className: 'text-end' }
             ]);
             
+            const tablaCliente = initDataTable('tablaCliente', [
+                { targets: [0, 6], orderable: false },
+                { targets: [4], className: 'text-end' }
+            ]);
+            
             // Connect search boxes to DataTables
             $('#searchExportador').on('keyup', function() {
                 tablaExportador.search(this.value).draw();
@@ -1289,142 +1655,85 @@
                 tablaCarga.search(this.value).draw();
             });
             
-            // Filter functionality
-            $('.dropdown-item[data-filter]').click(function(e) {
-                e.preventDefault();
-                const filter = $(this).data('filter');
-                const table = $(this).closest('.tab-pane').find('table').DataTable();
-                
-                // Clear any existing search
-                table.search('').columns().search('').draw();
-                
-                if (filter === 'month') {
-                    // Filter for last month
-                    const today = new Date();
-                    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-                    const dateStr = formatDate(lastMonth);
-                    
-                    // Apply the search to the date column (assumes date is in column 3)
-                    table.column(3).search(dateStr, true, false, true).draw();
-                } else if (filter === 'week') {
-                    // Filter for last week
-                    const today = new Date();
-                    const lastWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
-                    const dateStr = formatDate(lastWeek);
-                    
-                    // Apply the search to the date column
-                    table.column(3).search(dateStr, true, false, true).draw();
-                } else {
-                    // Reset filters
-                    table.search('').columns().search('').draw();
-                }
-                
-                // Update dropdown button text
-                $(this).closest('.dropdown').find('.dropdown-toggle').html(
-                    '<i class="bi bi-funnel"></i> ' + $(this).text()
-                );
+            $('#searchCliente').on('keyup', function() {
+                tablaCliente.search(this.value).draw();
             });
             
-            function formatDate(date) {
-                const day = date.getDate().toString().padStart(2, '0');
-                const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                const year = date.getFullYear();
-                return `${day}/${month}/${year}`;
+            // TRM calculation for Exportador and Agencia de Carga forms
+            function setupTrmCalculation(usdSelector, eurSelector, trmDisplaySelector) {
+                const usdInput = $(usdSelector);
+                const eurInput = $(eurSelector);
+                const trmDisplay = $(trmDisplaySelector);
+                
+                function calculateTrm() {
+                    const usdValue = parseFloat(usdInput.val()) || 0;
+                    const eurValue = parseFloat(eurInput.val()) || 0;
+                    
+                    if (usdValue > 0 && eurValue > 0) {
+                        const trm = usdValue / eurValue;
+                        trmDisplay.html(`TRM calculada: ${trm.toFixed(2)}`);
+                    } else {
+                        trmDisplay.html('');
+                    }
+                }
+                
+                usdInput.on('input', calculateTrm);
+                eurInput.on('input', calculateTrm);
+                
+                // Initial calculation if values exist
+                calculateTrm();
             }
             
-            // Auto-close alerts after 5 seconds
-            setTimeout(function() {
-                $('.alert').alert('close');
-            }, 5000);
+            // Setup TRM calculation for create forms
+            setupTrmCalculation('#modalCrearExportador #valor_transferencia', 
+                               '#modalCrearExportador #valor_transferencia_eur', 
+                               '#modalCrearExportador .trm-calculation');
+            
+            setupTrmCalculation('#modalCrearCarga #valor_transferencia', 
+                               '#modalCrearCarga #valor_transferencia_eur', 
+                               '#modalCrearCarga .trm-calculation');
+            
+            // Setup TRM calculation for edit forms
+            {% for transferencia in transferencias_exportador %}
+                setupTrmCalculation('#valor_transferencia{{ transferencia.id }}', 
+                                   '#valor_transferencia_eur{{ transferencia.id }}', 
+                                   '#modalEditarExportador{{ transferencia.id }} .trm-calculation');
+            {% endfor %}
+            
+            {% for transferencia in transferencias_carga %}
+                setupTrmCalculation('#valor_transferencia{{ transferencia.id }}', 
+                                   '#valor_transferencia_eur{{ transferencia.id }}', 
+                                   '#modalEditarCarga{{ transferencia.id }} .trm-calculation');
+            {% endfor %}
             
             // Form validation
             (function () {
                 'use strict'
                 
-                // Fetch all forms we want to apply validation to
-                const forms = document.querySelectorAll('.needs-validation');
+                // Fetch all forms we want to apply validation styles to
+                const forms = document.querySelectorAll('.needs-validation')
                 
-                // Loop over them and prevent submission on invalid
-                Array.from(forms).forEach(form => {
-                    form.addEventListener('submit', event => {
-                        if (!form.checkValidity()) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        } else {
-                            // Show loading spinner
-                            const submitBtn = form.querySelector('button[type="submit"]');
-                            const spinner = submitBtn.querySelector('.spinner-border');
-                            submitBtn.disabled = true;
-                            spinner.classList.remove('d-none');
-                        }
-                        
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            })();
-            
-            // Calculate TRM in real-time 
-            $('.modal').on('input', '[name="valor_transferencia"], [name="valor_transferencia_eur"]', function() {
-                const modal = $(this).closest('.modal');
-                const valorUSD = parseFloat(modal.find('[name="valor_transferencia"]').val()) || 0;
-                const valorEUR = parseFloat(modal.find('[name="valor_transferencia_eur"]').val()) || 0;
-                
-                if (valorEUR > 0 && valorUSD > 0) {
-                    const trm = (valorUSD / valorEUR).toFixed(4);
-                    modal.find('.trm-calculation').html(
-                        `TRM calculada: <strong>${trm}</strong>`
-                    );
-                } else {
-                    modal.find('.trm-calculation').html('');
-                }
-            });
-            
-            // Show toast function
-            window.showToast = function(title, message, type = 'success') {
-                const toast = $('#liveToast');
-                const toastTitle = $('#toastTitle');
-                const toastMessage = $('#toastMessage');
-                const toastTime = $('#toastTime');
-                
-                // Set content
-                toastTitle.text(title);
-                toastMessage.text(message);
-                toastTime.text('Ahora');
-                
-                // Set style based on type
-                toast.removeClass('bg-success bg-danger bg-warning bg-info');
-                switch(type) {
-                    case 'success':
-                        toast.addClass('bg-success text-white');
-                        break;
-                    case 'error':
-                        toast.addClass('bg-danger text-white');
-                        break;
-                    case 'warning':
-                        toast.addClass('bg-warning');
-                        break;
-                    case 'info':
-                        toast.addClass('bg-info');
-                        break;
-                }
-                
-                // Show the toast
-                const toastInstance = new bootstrap.Toast(toast);
-                toastInstance.show();
-            }
-            
-            // Detect Django messages and show as toast
-            {% if messages %}
-                {% for message in messages %}
-                    setTimeout(() => {
-                        showToast(
-                            '{{ message.tags|title }}', 
-                            '{{ message }}',
-                            '{{ message.tags }}'
-                        );
-                    }, 500);
-                {% endfor %}
-            {% endif %}
+                // Loop over them and prevent submission
+                Array.prototype.slice.call(forms)
+                    .forEach(function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (!form.checkValidity()) {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            } else {
+                                // Show spinner when form is valid and submitting
+                                const submitBtn = form.querySelector('button[type="submit"]');
+                                const spinner = submitBtn.querySelector('.spinner-border');
+                                if (spinner) {
+                                    spinner.classList.remove('d-none');
+                                    submitBtn.setAttribute('disabled', true);
+                                }
+                            }
+                            
+                            form.classList.add('was-validated')
+                        }, false)
+                    })
+            })()
         });
     </script>
 </body>

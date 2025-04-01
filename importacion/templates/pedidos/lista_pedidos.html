@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -33,7 +34,7 @@
                     <select name="estado" id="estado-filter">
                         <option value="">Todos los estados</option>
                         <option value="En Proceso">En Proceso</option>
-                        <option value="Completado">Completado</option>
+                        <option value="Pagado">Pagado</option>
                     </select>
                     <button id="reset-filters" class="btn btn-secondary">
                         <i class="fas fa-sync-alt"></i> Reiniciar filtros
@@ -60,7 +61,7 @@
                             <label><input type="checkbox" data-column="numero_factura"> Nº Factura</label>
                             <label><input type="checkbox" data-column="numero_nc"> Nº NC</label>
                             <label><input type="checkbox" data-column="observaciones"> Observaciones</label>
-                            <label><input type="checkbox" data-column="monto_pendiente" checked> Monto Pendiente</label>
+                            <label><input type="checkbox" data-column="monto_pendiente" checked> Monto Pendiente USD</label>
                             <label><input type="checkbox" data-column="estado" checked> Estado</label>
                             <label><input type="checkbox" data-column="pagado" checked> Pagado</label>
                             <!-- Acciones siempre visibles -->
@@ -91,7 +92,7 @@
                                 <th class="column-numero_factura">Nº Factura</th>
                                 <th class="column-numero_nc">Nº NC</th>
                                 <th class="column-observaciones">Observaciones</th>
-                                <th class="column-monto_pendiente">Monto Pendiente</th>
+                                <th class="column-monto_pendiente">Monto Pendiente USD</th>
                                 <th class="column-estado">Estado</th>
                                 <th class="column-pagado">Pagado</th>
                                 <th class="column-acciones">Acciones</th>
@@ -107,9 +108,9 @@
                                 <td class="column-semana">{{ pedido.semana|default:"-" }}</td>
                                 <td class="column-awb">{{ pedido.awb|default:"-" }}</td>
                                 <td class="column-cajas">{{ pedido.total_cajas_recibidas|default:0 }}/{{ pedido.total_cajas_solicitadas|default:0 }}</td>
-                                <td class="column-factura_usd">${{ pedido.valor_total_factura_usd|default:0|floatformat:2 }}</td>
-                                <td class="column-factura_eur">€{{ pedido.valor_factura_eur|default:0|floatformat:2 }}</td>
-                                <td class="column-nc_usd">${{ pedido.valor_total_nc_usd|default:0|floatformat:2 }}</td>
+                                <td class="column-factura_usd">{{ pedido.valor_total_factura_usd|format_currency }}</td>
+                                <td class="column-factura_eur">{{ pedido.valor_factura_eur|format_currency_eur }}</td>
+                                <td class="column-nc_usd">{{ pedido.valor_total_nc_usd|format_currency }}</td>
                                 <td class="column-numero_factura">{{ pedido.numero_factura|default:"-" }}</td>
                                 <td class="column-numero_nc">{{ pedido.numero_nc|default:"-" }}</td>
                                 <td class="column-observaciones">
@@ -121,7 +122,7 @@
                                     -
                                     {% endif %}
                                 </td>
-                                <td class="column-monto_pendiente">${{ pedido.monto_pendiente|default:0|floatformat:2 }}</td>
+                                <td class="column-monto_pendiente">{{ pedido.monto_pendiente|format_currency }}</td>
                                 <td class="column-estado">
                                     <span class="status-badge status-{{ pedido.estado_pedido|slugify }}">
                                         {{ pedido.estado_pedido }}
@@ -232,6 +233,10 @@
                     <div class="summary-item">
                         <label>Total USD:</label>
                         <span id="modal-total-usd"></span>
+                    </div>
+                    <div class="summary-item">
+                        <label>Total EUR:</label>
+                        <span id="modal-total-eur"></span>
                     </div>
                 </div>
                 <button class="btn btn-primary close-modal-btn">Cerrar</button>
@@ -447,6 +452,7 @@
                         document.getElementById('modal-awb').textContent = data.pedido.awb;
                         document.getElementById('modal-total-cajas').textContent = data.pedido.total_cajas;
                         document.getElementById('modal-total-usd').textContent = data.pedido.total_usd;
+                        document.getElementById('modal-total-eur').textContent = data.pedido.total_eur;
                         
                         // Generar HTML para los detalles
                         let detallesHTML = '';
@@ -482,6 +488,10 @@
                                                 <div class="nc ${parseFloat(detalle.valor_nc.replace('$', '')) > 0 ? 'has-nc' : ''}">
                                                     <label>NC (${detalle.cajas_nc}):</label> 
                                                     <span>${detalle.valor_nc}</span>
+                                                </div>
+                                                <div class="total-eur ${detalle.valor_total_eur && parseFloat(detalle.valor_total_eur.replace('€', '')) > 0 ? 'has-eur' : ''}">
+                                                    <label>Total EUR:</label> 
+                                                    <span>${detalle.valor_total_eur || '-'}</span>
                                                 </div>
                                             </div>
                                         </div>

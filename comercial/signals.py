@@ -34,18 +34,31 @@ def actualizar_stock_venta(sender, instance, created, **kwargs):
         
         if created:
             # Si es una creación, simplemente restamos las cajas enviadas
-            bodega.stock_actual -= instance.cajas_enviadas
+            cajas_a_descontar = instance.cajas_enviadas or 0
+            bodega.stock_actual -= cajas_a_descontar
         else:
-            # Si es una actualización, primero buscamos el valor anterior
-            try:
-                detalle_anterior = instance._original_cajas if hasattr(instance, '_original_cajas') else instance.cajas_enviadas
-                # Ajustamos la diferencia
-                bodega.stock_actual -= (instance.cajas_enviadas - detalle_anterior)
-            except:
-                # Si no podemos determinar el valor anterior, simplemente restamos el actual
-                bodega.stock_actual -= instance.cajas_enviadas
+            # Si es una actualización, calcular la diferencia con el valor original
+            cajas_anteriores = getattr(instance, '_original_cajas', 0)
+            cajas_actuales = instance.cajas_enviadas or 0
+            
+            # Solo ajustamos la diferencia neta
+            diferencia = cajas_actuales - cajas_anteriores
+            bodega.stock_actual -= diferencia
                 
+        # Guardar los cambios en bodega y asegurar que no quede en negativo
+        if bodega.stock_actual < 0:
+            bodega.stock_actual = 0  # Evitar stock negativo
+            
         bodega.save()
+        
+        # Registrar la operación para depuración
+        import logging
+        logger = logging.getLogger(__name__)
+        if created:
+            logger.info(f"Stock actualizado (nuevo): {presentacion} - {instance.cajas_enviadas} cajas")
+        else:
+            logger.info(f"Stock actualizado (edición): {presentacion} - Anterior: {cajas_anteriores}, Nuevo: {cajas_actuales}, Diferencia: {diferencia}")
+        
     except Bodega.DoesNotExist:
         # No hay registro de bodega para esta presentación
         pass
@@ -103,7 +116,6 @@ def reevaluar_pagos_cliente(cliente):
             
             # Calcular el total de transferencias
             total_transferencias = sum(t.valor_transferencia for t in transferencias)
-            print(f"DEBUG: Total transferencias: {total_transferencias}")
             
             # Marcar todas las Ventas como no pagados inicialmente y reiniciar montos pendientes en una sola consulta
             Venta.objects.filter(cliente=cliente).update(

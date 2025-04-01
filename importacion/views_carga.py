@@ -48,12 +48,20 @@ def process_pdf(request):
 
             valor_match = re.search(valor_pattern, text, re.IGNORECASE)
             if valor_match:
-                valor_str = valor_match.group(1).replace(',', '')
+                valor_str_raw = valor_match.group(1).strip()
+                if ',' in valor_str_raw:
+                    valor_str = valor_str_raw.replace('.', '').replace(',', '.')
+                else:
+                    valor_str = valor_str_raw
                 valor_gastos_carga = Decimal(valor_str)
             else:
                 bruto_match = re.search(bruto_pattern, text, re.IGNORECASE)
                 if bruto_match:
-                    valor_str = bruto_match.group(1).replace(',', '')
+                    valor_str_raw = bruto_match.group(1).strip()
+                    if ',' in valor_str_raw:
+                        valor_str = valor_str_raw.replace('.', '').replace(',', '.')
+                    else:
+                        valor_str = valor_str_raw
                     valor_gastos_carga = Decimal(valor_str)
                 else:
                     valor_gastos_carga = Decimal('0.0')

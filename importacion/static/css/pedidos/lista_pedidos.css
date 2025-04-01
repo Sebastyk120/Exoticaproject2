@@ -351,7 +351,7 @@ header h1 {
     z-index: 10;
     font-size: 0.8rem; /* Smaller header font */
     letter-spacing: 0.01em;
-    white-space: nowrap;
+    white-space: inherit;
 }
 
 #pedidos-table th:first-child {

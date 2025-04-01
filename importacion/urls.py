@@ -37,7 +37,9 @@ urlpatterns = [
     path('pedidos/<int:pedido_id>/guardar-detalles-batch/', views_pedidos.guardar_detalles_batch, name='guardar_detalles_batch'),
     path('pedidos/<int:pedido_id>/detalles-json/', views_pedidos.obtener_detalles_pedido, name='obtener_detalles_pedido'),
     path('pedidos/<int:pedido_id>/solicitar/', views_pedidos.solicitar_pedido, name='solicitar_pedido'),
-    path('obtener-precio-presentacion/<int:presentacion_id>/<int:exportador_id>/', views_pedidos.obtener_precio_presentacion, name='obtener_precio_presentacion'),
+    
+    # Add the API endpoint that matches what the JavaScript is calling
+    path('api/precio/<int:presentacion_id>/<int:exportador_id>/', views_pedidos.obtener_precio_presentacion, name='api_precio_presentacion'),
 
     # URLs for transferencias
     path('transferencias/', views_transferencias.transferencias_view, name='transferencias'),
@@ -55,4 +57,9 @@ urlpatterns = [
     path('transferencias/carga/crear/', views_transferencias.crear_transferencia_carga, name='crear_transferencia_carga'),
     path('transferencias/carga/<int:pk>/editar/', views_transferencias.editar_transferencia_carga, name='editar_transferencia_carga'),
     path('transferencias/carga/<int:pk>/eliminar/', views_transferencias.eliminar_transferencia_carga, name='eliminar_transferencia_carga'),
+    
+    # Cliente CRUD
+    path('transferencias/cliente/crear/', views_transferencias.crear_transferencia_cliente, name='crear_transferencia_cliente'),
+    path('transferencias/cliente/<int:pk>/editar/', views_transferencias.editar_transferencia_cliente, name='editar_transferencia_cliente'),
+    path('transferencias/cliente/<int:pk>/eliminar/', views_transferencias.eliminar_transferencia_cliente, name='eliminar_transferencia_cliente'),
 ]
