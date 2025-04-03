@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -71,7 +72,7 @@
                             <th>Presentación</th>
                             <th>Cajas Abono</th>
                             <th>Precio/Caja (€)</th>
-                            <th>Base Imponible (€)</th>
+                            <th>Subtotal Producto (€)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -82,7 +83,7 @@
                             <td>{{ detalle.presentacion.kilos }} kg</td>
                             <td>{{ detalle.no_cajas_abono|floatformat:1 }}</td>
                             <td>{{ detalle.valor_x_caja_euro|floatformat:2 }} €</td>
-                            <td>{{ detalle.base_imponible|floatformat:2 }} €</td>
+                            <td>{{ detalle.base_imponible|format_currency_eur }}</td>
                         </tr>
                         {% endif %}
                         {% endfor %}
@@ -102,15 +103,15 @@
                     <div class="summary-table">
                         <div class="summary-row">
                             <div class="summary-label">Base Imponible:</div>
-                            <div class="summary-value">{{ venta.total_base_imponible|floatformat:2 }} €</div>
+                            <div class="summary-value">{{ venta.total_base_imponible|format_currency_eur }}</div>
                         </div>
                         <div class="summary-row">
                             <div class="summary-label">IVA (4%):</div>
-                            <div class="summary-value">{{ venta.iva_abono|floatformat:2 }} €</div>
+                            <div class="summary-value">{{ venta.iva_abono|format_currency_eur }}</div>
                         </div>
                         <div class="summary-row total">
                             <div class="summary-label">TOTAL:</div>
-                            <div class="summary-value">{{ venta.valor_total_abono_euro_con_iva|floatformat:2 }} €</div>
+                            <div class="summary-value">{{ venta.valor_total_abono_euro_con_iva|format_currency_eur }}</div>
                         </div>
                     </div>
                 </div>

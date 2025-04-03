@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.db.models import Sum, DecimalField, IntegerField
+from django.db.models.functions import Coalesce
+
 from productos.models import Presentacion
 
 
@@ -52,6 +54,23 @@ class Exportador(models.Model):
 
 # ------------------- PROCESO DE COMPRA --------------------
 
+def get_cajas_vendidas(presentacion_id):
+    """
+    Función utilitaria para calcular cuántas cajas de una presentación han sido vendidas.
+    Importante para validar que no se eliminen productos ya vendidos.
+    """
+    from comercial.models import DetalleVenta
+    from django.db.models import Sum
+    from django.db.models.functions import Coalesce
+    
+    total_vendido = DetalleVenta.objects.filter(
+        presentacion_id=presentacion_id
+    ).aggregate(
+        total=Coalesce(Sum('cajas_enviadas'), 0)
+    )['total'] or 0
+    
+    return total_vendido
+
 class Pedido(models.Model):
     exportador = models.ForeignKey(Exportador, on_delete=models.CASCADE, verbose_name="Exportador")
     fecha_entrega = models.DateField(verbose_name="Fecha Entrega")
@@ -91,7 +110,36 @@ class Pedido(models.Model):
         super(Pedido, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"No: {self.pk} - {self.fecha_entrega} - {self.awb}"
+        return f"No: {self.pk} - {self.awb}"
+
+    def delete(self, *args, **kwargs):
+        """
+        Sobreescribe el método delete para verificar que no se eliminen pedidos con productos vendidos.
+        """
+        # Verifica si hay detalles que contienen productos vendidos
+        detalles = DetallePedido.objects.filter(pedido=self)
+        for detalle in detalles:
+            if detalle.presentacion_id:
+                cajas_vendidas = get_cajas_vendidas(detalle.presentacion_id)
+                
+                if cajas_vendidas > 0:
+                    # Verificar si hay suficiente stock en otros pedidos
+                    cajas_otros_pedidos = DetallePedido.objects.filter(
+                        presentacion_id=detalle.presentacion_id
+                    ).exclude(pedido=self).aggregate(
+                        total=Coalesce(Sum('cajas_recibidas'), 0)
+                    )['total'] or 0
+                    
+                    if cajas_otros_pedidos < cajas_vendidas:
+                        from django.core.exceptions import ValidationError
+                        raise ValidationError(
+                            f'No se puede eliminar este pedido porque contiene productos que ya han sido vendidos. '
+                            f'La presentación {detalle.presentacion} tiene {cajas_vendidas} cajas vendidas '
+                            f'y solo hay {cajas_otros_pedidos} cajas en otros pedidos.'
+                        )
+        
+        # Si pasamos todas las validaciones, proceder con la eliminación normal
+        super().delete(*args, **kwargs)
 
     class Meta:
         ordering = ['-id']
@@ -119,6 +167,19 @@ class DetallePedido(models.Model):
     valor_nc_usd = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor NC USD", default=0,
                                        editable=False)
     valor_nc_usd_manual = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor NC USD Manual", default=0)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Guardar valores originales al instanciar el objeto
+        if self.pk:
+            self._original_cajas_recibidas = self.cajas_recibidas
+            self._original_presentacion_id = self.presentacion_id
+            self._no_update_needed = False  # Flag para marcar si no se necesita actualizar
+        else:
+            # Para nuevos objetos
+            self._original_cajas_recibidas = 0
+            self._original_presentacion_id = None
+            self._no_update_needed = False
 
     def clean(self):
         # Importamos aquí también para asegurar que está disponible
@@ -170,6 +231,49 @@ class DetallePedido(models.Model):
                 self.valor_nc_usd_manual = Decimal('0')
         else:
             self.valor_nc_usd_manual = Decimal('0')
+
+        # Validar que no se reduzca el número de cajas por debajo de lo ya vendido
+        if self.pk and self.presentacion_id:  # Si estamos editando un detalle existente
+            cajas_vendidas = get_cajas_vendidas(self.presentacion_id)
+            
+            # Si estamos cambiando la presentación, verificar si la presentación original tiene ventas
+            original_presentacion_id = getattr(self, '_original_presentacion_id', None)
+            if original_presentacion_id and original_presentacion_id != self.presentacion_id:
+                cajas_vendidas_original = get_cajas_vendidas(original_presentacion_id)
+                if cajas_vendidas_original > 0:
+                    # Verificar si hay suficientes cajas de la presentación original en otros detalles
+                    total_producto = DetallePedido.objects.filter(
+                        presentacion_id=original_presentacion_id
+                    ).exclude(pk=self.pk).aggregate(
+                        total=Coalesce(Sum('cajas_recibidas'), 0)
+                    )['total'] or 0
+                    
+                    if total_producto < cajas_vendidas_original:
+                        from django.core.exceptions import ValidationError
+                        raise ValidationError(
+                            f'No puede cambiar esta presentación porque ya se han vendido {cajas_vendidas_original} cajas '
+                            f'y solo quedarían {total_producto} cajas disponibles en otros pedidos.'
+                        )
+            
+            # Si estamos reduciendo las cajas recibidas, verificar si hay suficiente stock libre
+            if hasattr(self, '_original_cajas_recibidas') and self.cajas_recibidas < self._original_cajas_recibidas:
+                # Calcular cajas totales de esta presentación (excluyendo este detalle)
+                cajas_otros_detalles = DetallePedido.objects.filter(
+                    presentacion_id=self.presentacion_id
+                ).exclude(pk=self.pk).aggregate(
+                    total=Coalesce(Sum('cajas_recibidas'), 0)
+                )['total'] or 0
+                
+                # Stock disponible = cajas totales - cajas vendidas
+                total_disponible = cajas_otros_detalles + self.cajas_recibidas
+                
+                if total_disponible < cajas_vendidas:
+                    from django.core.exceptions import ValidationError
+                    raise ValidationError({
+                        'cajas_recibidas': f'No puede reducir a {self.cajas_recibidas} cajas. '
+                                          f'Ya se han vendido {cajas_vendidas} cajas de esta presentación y '
+                                          f'solo hay {total_disponible} cajas en total.'
+                    })
 
         super().clean()
 
@@ -248,20 +352,50 @@ class DetallePedido(models.Model):
     def save(self, *args, **kwargs):
         # Verificar si debemos saltarnos la actualización de totales
         skip_update = kwargs.pop('skip_update', False)
+        
+        # Verificar si debemos saltarnos la actualización de stock
+        skip_stock_update = kwargs.pop('skip_stock_update', False) or getattr(self, '_no_update_needed', False)
+        if skip_stock_update:
+            self._skip_stock_update = True
 
         # Asegurarnos de que todos los cálculos se realizan antes de guardar
         self.full_clean()  # Esto llamará a clean()
 
         # Guardar el objeto
         super().save(*args, **kwargs)
+        
+        # Actualizar los valores originales después de guardar
+        self._original_cajas_recibidas = self.cajas_recibidas
+        self._original_presentacion_id = self.presentacion_id
 
         # Actualizar totales del pedido relacionado, solo si no estamos saltándonos la actualización
         if self.pedido_id and not skip_update:
             self.actualizar_totales_pedido(self.pedido_id)
 
     def delete(self, *args, **kwargs):
+        """
+        Sobreescribe el método delete para verificar que no se elimine un detalle con productos vendidos
+        sin suficiente stock alternativo.
+        """
+        if self.presentacion_id:
+            cajas_vendidas = get_cajas_vendidas(self.presentacion_id)
+            if cajas_vendidas > 0:
+                # Verificar si hay suficiente stock en otros detalles
+                cajas_otros_detalles = DetallePedido.objects.filter(
+                    presentacion_id=self.presentacion_id
+                ).exclude(pk=self.pk).aggregate(
+                    total=Coalesce(Sum('cajas_recibidas'), 0)
+                )['total'] or 0
+                
+                if cajas_otros_detalles < cajas_vendidas:
+                    from django.core.exceptions import ValidationError
+                    raise ValidationError(
+                        f'No se puede eliminar este detalle porque ya se han vendido {cajas_vendidas} cajas '
+                        f'de esta presentación y solo quedarían {cajas_otros_detalles} cajas disponibles en otros pedidos.'
+                    )
+        
+        # Si pasamos la validación, proceder con la eliminación normal
         pedido_id = self.pedido_id
-        # Primero eliminar el detalle
         super().delete(*args, **kwargs)
         # Luego actualizar el pedido relacionado
         if pedido_id:

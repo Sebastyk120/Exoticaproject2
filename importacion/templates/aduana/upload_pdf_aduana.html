@@ -52,8 +52,8 @@
                         <th>Número Factura</th>
                         <th>Agencia Aduana</th>
                         <th>Valor (EUR)</th>
-                        <th>Número Nota Crédito</th>
-                        <th>Valor Nota Crédito</th>
+                        <th>Número Abono</th>
+                        <th>Valor Abono</th>
                         <th>Monto Pendiente</th>
                         <th>Estado</th>
                         <th>Fecha</th>
@@ -137,11 +137,11 @@
                             <input type="number" name="valor_gastos_aduana" class="form-control" step="0.01" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Número Nota Crédito</label>
+                            <label class="form-label">Número Abono</label>
                             <input type="text" name="numero_nota_credito" class="form-control">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Valor Nota Crédito (EUR)</label>
+                            <label class="form-label">Valor Abono (EUR)</label>
                             <input type="number" name="valor_nota_credito" class="form-control" step="0.01">
                         </div>
                     </form>
@@ -296,7 +296,11 @@
                     }).format(parseFloat(data.monto_pendiente));
                 }
                 
-                const pedidosHTML = data.pedidos.map(pedido => `<li>${pedido}</li>`).join('');
+                // Modificado para incluir enlaces clickeables a los pedidos
+                const pedidosHTML = data.pedidos.map(pedido => {
+                    const pedidoId = pedido.split(' - ')[0];
+                    return `<li><a href="/importacion/pedidos/${pedidoId}/" class="pedido-link">${pedido}</a></li>`;
+                }).join('');
                 
                 modalBody.innerHTML = `
                     <div class="row mb-3">
@@ -307,8 +311,8 @@
                             <p><strong>Estado:</strong> <span class="status-badge ${data.pagado ? 'status-paid' : 'status-unpaid'}">${data.pagado ? 'Pagado' : 'Pendiente'}</span></p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>Número Nota Crédito:</strong> ${data.numero_nota_credito || '-'}</p>
-                            <p><strong>Valor Nota Crédito:</strong> ${valorNotaCreditoFormatted}</p>
+                            <p><strong>Número Abono:</strong> ${data.numero_nota_credito || '-'}</p>
+                            <p><strong>Valor Abono:</strong> ${valorNotaCreditoFormatted}</p>
                             <p><strong>Monto Pendiente:</strong> ${montoPendienteFormatted}</p>
                         </div>
                     </div>

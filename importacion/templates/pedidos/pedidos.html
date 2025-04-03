@@ -109,11 +109,11 @@
                             </div>
                             <div class="calc-field">
                                 <span class="label">Valor Total Factura USD:</span>
-                                <span class="value">{{ pedido.valor_total_factura_usd|default:0|floatformat:2 }}</span>
+                                <span class="value">{{ pedido.valor_total_factura_usd|format_currency }}</span>
                             </div>
                             <div class="calc-field">
                                 <span class="label">Valor Total NC USD:</span>
-                                <span class="value">{{ pedido.valor_total_nc_usd|default:0|floatformat:2 }}</span>
+                                <span class="value">{{ pedido.valor_total_nc_usd|format_currency }}</span>
                             </div>
                             <div class="calc-field">
                                 <span class="label">Estado del Pedido:</span>
@@ -125,7 +125,7 @@
                             </div>
                             <div class="calc-field">
                                 <span class="label">Monto Pendiente USD:</span>
-                                <span class="value">{{ pedido.monto_pendiente|default:0|floatformat:2 }}</span>
+                                <span class="value">{{ pedido.monto_pendiente|format_currency}}</span>
                             </div>
                         {% endif %}
                     </div>

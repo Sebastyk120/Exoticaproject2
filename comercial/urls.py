@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views_clientes, views_ventas
+from . import views_clientes, views_ventas, views_dashboard
 
 app_name = 'comercial'
 
@@ -25,4 +25,17 @@ urlpatterns = [
     path('ventas/<int:venta_id>/generar-albaran-cliente/', views_ventas.generar_albaran_cliente, name='generar_albaran_cliente'),
     path('validar-stock/<int:presentacion_id>/<int:cajas_enviadas>/', views_ventas.validar_stock, name='validar_stock'),
     path('estado-cuenta/cliente/<int:cliente_id>/', views_clientes.estado_cuenta_cliente, name='estado_cuenta_cliente'),
+    
+    # Dashboard URLs
+    path('dashboard/utilidades/', views_dashboard.dashboard_utilidades, name='dashboard_utilidades'),
+    
+    # API endpoints
+    path('api/dashboard/resumen-utilidad/', views_dashboard.api_resumen_utilidad, name='api_resumen_utilidad'),
+    path('api/dashboard/utilidad-por-semana/', views_dashboard.api_utilidad_por_semana, name='api_utilidad_por_semana'),
+    path('api/dashboard/distribucion-costos/', views_dashboard.api_distribucion_costos, name='api_distribucion_costos'),
+    path('api/dashboard/margen-por-producto/', views_dashboard.api_margen_por_producto, name='api_margen_por_producto'),
+    path('api/dashboard/productos-rentables/', views_dashboard.api_productos_rentables, name='api_productos_rentables'),
+    path('api/dashboard/totales-globales/', views_dashboard.api_totales_globales, name='api_totales_globales'),
+    # Add the missing URL for semanas-disponibles
+    path('api/dashboard/semanas-disponibles/', views_dashboard.api_semanas_disponibles, name='api_semanas_disponibles'),
 ]

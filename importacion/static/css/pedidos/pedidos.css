@@ -32,7 +32,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
     background-color: white;
     border-radius: 8px;
@@ -101,6 +101,7 @@ section h2 {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
+    width: 65%;
 }
 
 .form-group {
@@ -136,13 +137,18 @@ textarea {
 }
 
 .calculated-fields {
+    position: absolute;
+    right: 1.5rem;
+    top: 5.5rem; /* Alineado después del header */
+    width: 30%;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: 1fr;
     gap: 15px;
-    margin-top: 20px;
+    margin-top: 0;
     padding: 15px;
     background-color: #f8f9fa;
     border-radius: var(--border-radius);
+    height: fit-content;
 }
 
 .calc-field {
@@ -243,6 +249,7 @@ textarea {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
 }
 
 .section-header h2 {
@@ -572,4 +579,23 @@ input.error-field:focus {
 .btn-lg {
     padding: 12px 24px;
     font-size: 16px;
+}
+
+/* Sección de información del pedido */
+.order-info {
+    position: relative;
+    padding: 1.5rem;
+}
+
+/* Media query para pantallas pequeñas */
+@media (max-width: 992px) {
+    .form-grid {
+        width: 100%;
+    }
+    
+    .calculated-fields {
+        position: static;
+        width: 100%;
+        margin-top: 20px;
+    }
 }

@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -59,7 +60,6 @@
                                 <label><input type="checkbox" data-column="total_abono" checked> Total Abono €</label>
                                 <label><input type="checkbox" data-column="numero_factura"> Nº Factura</label>
                                 <label><input type="checkbox" data-column="numero_nc"> Nº NC</label>
-                                <label><input type="checkbox" data-column="observaciones"> Observaciones</label>
                                 <label><input type="checkbox" data-column="monto_pendiente" checked> Monto Pendiente</label>
                                 <label><input type="checkbox" data-column="pagado" checked> Pagado</label>
                                 <!-- Acciones siempre visibles -->
@@ -92,9 +92,8 @@
                                 <th class="column-total_abono">Total Abono €</th>
                                 <th class="column-numero_factura">Nº Factura</th>
                                 <th class="column-numero_nc">Nº NC</th>
-                                <th class="column-observaciones">Observaciones</th>
                                 <th class="column-monto_pendiente">Monto Pendiente</th>
-                                <th class="column-pagado">Pagado</th>
+                                <th class="column-pagado text-center">Estado</th>
                                 <th class="column-acciones">Acciones</th>
                             </tr>
                         </thead>
@@ -102,30 +101,25 @@
                             {% for venta in ventas %}
                             <tr>
                                 <td class="column-id">#{{ venta.id }}</td>
-                                <td class="column-cliente">{{ venta.cliente.nombre }}</td>
+                                <td class="column-cliente">
+                                    <span class="cliente-nombre">{{ venta.cliente.nombre }}</span>
+                                </td>
                                 <td class="column-fecha_entrega">{{ venta.fecha_entrega|date:"d/m/Y" }}</td>
                                 <td class="column-fecha_vencimiento">{{ venta.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</td>
                                 <td class="column-semana">{{ venta.semana|default:"-" }}</td>
                                 <td class="column-cajas">{{ venta.total_cajas_pedido|default:0 }}</td>
-                                <td class="column-total_factura">{{ venta.valor_total_factura_euro|default:0|floatformat:2 }} €</td>
-                                <td class="column-iva">{{ venta.iva|default:0|floatformat:2 }} €</td>
-                                <td class="column-total_abono">{{ venta.valor_total_abono_euro|default:0|floatformat:2 }} €</td>
+                                <td class="column-total_factura">{{ venta.valor_total_factura_euro|default:0|format_currency_eur }}</td>
+                                <td class="column-iva">{{ venta.iva|default:0|format_currency_eur }}</td>
+                                <td class="column-total_abono">{{ venta.valor_total_abono_euro|default:0|format_currency_eur }}</td>
                                 <td class="column-numero_factura">{{ venta.numero_factura|default:"-" }}</td>
                                 <td class="column-numero_nc">{{ venta.numero_nc|default:"-" }}</td>
-                                <td class="column-observaciones">
-                                    {% if venta.observaciones %}
-                                    <span class="tooltip" data-tooltip="{{ venta.observaciones }}">
-                                        {{ venta.observaciones|truncatechars:15 }}
-                                    </span>
+                                <td class="column-monto_pendiente">{{ venta.monto_pendiente|default:0|format_currency_eur }}</td>
+                                <td class="column-pagado text-center">
+                                    {% if venta.pagado %}
+                                    <i class="fas fa-circle-check text-success" title="Pagado"></i>
                                     {% else %}
-                                    -
+                                    <i class="fas fa-circle-xmark text-warning" title="Pendiente"></i>
                                     {% endif %}
-                                </td>
-                                <td class="column-monto_pendiente">{{ venta.monto_pendiente|default:0|floatformat:2 }} €</td>
-                                <td class="column-pagado">
-                                    <span class="status-badge status-{% if venta.pagado %}pagado{% else %}pendiente{% endif %}">
-                                        {{ venta.pagado|yesno:"Pagado,Pendiente" }}
-                                    </span>
                                 </td>
                                 <td class="column-acciones actions">
                                     <a href="{% url 'comercial:detalle_venta' venta.id %}" class="btn btn-icon" title="Ver/Editar">
@@ -504,7 +498,17 @@
                         let detallesHTML = '';
                         
                         if (data.detalles.length > 0) {
-                            detallesHTML = `
+                            // Show observations if present
+                            if (data.venta.observaciones) {
+                                detallesHTML += `
+                                    <div class="observaciones-section">
+                                        <h3><i class="fas fa-comment-alt"></i> Observaciones</h3>
+                                        <p>${data.venta.observaciones}</p>
+                                    </div>
+                                `;
+                            }
+                            
+                            detallesHTML += `
                                 <div class="detalle-cards">
                                     ${data.detalles.map(detalle => `
                                         <div class="detalle-card">

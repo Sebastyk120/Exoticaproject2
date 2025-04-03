@@ -1,10 +1,1141 @@
+{% load static %}
+{% load humanize %}
+{% load custom_filters %}
+{% load dashboard_tags %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Utilidades por Producto</title>
+    <!-- Importamos Tailwind CSS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.0.1/luxon.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-luxon/1.2.0/chartjs-adapter-luxon.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <!-- Iconos de FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="/static/css/dashboard/utilidades.css">
+    <style>
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        .scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .data-badge {
+            position: relative;
+        }
+        .data-badge::after {
+            content: attr(data-badge);
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: 12px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #e53e3e;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .trend-up {
+            color: #48bb78;
+        }
+        .trend-down {
+            color: #e53e3e;
+        }
+        .hidden-select {
+            display: none;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-100 font-sans">
+    <!-- Contenido principal -->
+    <div class="container mx-auto p-4 mt-4">
+        <!-- Título y filtros -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Dashboard de Utilidades por Producto</h2>
+                <p class="text-gray-600">Análisis detallado de utilidades por producto y periodo</p>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-4 md:mt-0">
+                <select id="periodo-select" class="border rounded py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <option value="semana" selected>Por Semana</option>
+                    <!-- Opciones comentadas hasta que se implementen -->
+                    <!-- 
+                    <option value="mes">Por Mes</option>
+                    <option value="trimestre">Por Trimestre</option>
+                    <option value="anio">Por Año</option>
+                    -->
+                </select>
+                <select id="semana-select" class="border rounded py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <option value="todas">Todas las semanas</option>
+                    <!-- Las semanas se cargarán dinámicamente -->
+                </select>
+                <select id="anio-select" class="border rounded py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    {% now "Y" as current_year %}
+                    <option value="{{ current_year|add:"1" }}" {% if current_year|add:"1" == anio|stringformat:"i" %}selected{% endif %}>{{ current_year|add:"1" }}</option>
+                    <option value="{{ current_year }}" {% if current_year == anio|stringformat:"i" %}selected{% endif %}>{{ current_year }}</option>
+                    <option value="{{ current_year|add:"-1" }}" {% if current_year|add:"-1" == anio|stringformat:"i" %}selected{% endif %}>{{ current_year|add:"-1" }}</option>
+                    <option value="{{ current_year|add:"-2" }}" {% if current_year|add:"-2" == anio|stringformat:"i" %}selected{% endif %}>{{ current_year|add:"-2" }}</option>
+                </select>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-sm" id="btn-actualizar">
+                    <i class="fas fa-sync-alt mr-1"></i> Actualizar
+                </button>
+                <button class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded text-sm" id="btn-exportar">
+                    <i class="fas fa-file-excel mr-1"></i> Exportar
+                </button>
+            </div>
+        </div>
 
+        <!-- Tarjetas de resumen -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="card bg-white p-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-gray-500 text-sm">Utilidad Total</p>
+                        <h3 class="text-2xl font-bold text-gray-800" id="utilidad-total">{{ totales.utilidad_total|format_currency_eur }}</h3>
+                        <div class="flex items-center mt-1">
+                            <span class="trend-up text-sm font-semibold"><i class="fas fa-arrow-up mr-1"></i>--.--%</span>
+                            <span class="text-xs text-gray-500 ml-2">vs periodo anterior</span>
+                        </div>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-euro-sign text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card bg-white p-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-gray-500 text-sm">Ventas Netas</p>
+                        <h3 class="text-2xl font-bold text-gray-800" id="ventas-netas">{{ totales.ventas_netas|format_currency_eur }}</h3>
+                        <div class="flex items-center mt-1">
+                            <span class="trend-up text-sm font-semibold"><i class="fas fa-arrow-up mr-1"></i>--.--%</span>
+                            <span class="text-xs text-gray-500 ml-2">vs periodo anterior</span>
+                        </div>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-shopping-cart text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card bg-white p-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-gray-500 text-sm">Costo Total</p>
+                        <h3 class="text-2xl font-bold text-gray-800" id="costo-total">{{ totales.costo_total|format_currency_eur }}</h3>
+                        <div class="flex items-center mt-1">
+                            <span class="trend-up text-sm font-semibold"><i class="fas fa-arrow-up mr-1"></i>--.--%</span>
+                            <span class="text-xs text-gray-500 ml-2">vs periodo anterior</span>
+                        </div>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <i class="fas fa-file-invoice-dollar text-red-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card bg-white p-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-gray-500 text-sm">Margen Promedio</p>
+                        <h3 class="text-2xl font-bold text-gray-800" id="margen-promedio">{{ totales.margen_promedio|floatformat:2 }}%</h3>
+                        <div class="flex items-center mt-1">
+                            <span class="trend-up text-sm font-semibold"><i class="fas fa-arrow-up mr-1"></i>--.--%</span>
+                            <span class="text-xs text-gray-500 ml-2">vs periodo anterior</span>
+                        </div>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-chart-pie text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos principales -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="card bg-white p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Utilidad por Producto</h3>
+                    <div class="flex space-x-2">
+                        <select id="grafico-utilidad-periodo" class="border rounded py-1 px-2 text-gray-700 text-sm">
+                            <option value="semana">Semanal</option>
+                            <option value="mes" selected>Mensual</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="h-80 chart-container">
+                    <canvas id="grafico-utilidad-producto"></canvas>
+                </div>
+            </div>
+            <div class="card bg-white p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Tendencia de Utilidad</h3>
+                    <div class="flex space-x-2">
+                        <select id="grafico-tendencia-producto" class="border rounded py-1 px-2 text-gray-700 text-sm">
+                            <option value="todos">Todos los productos</option>
+                            {% for item in resumen_utilidad %}
+                                <option value="{{ item.producto }}">{{ item.producto }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="h-80 chart-container">
+                    <canvas id="grafico-tendencia-utilidad"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos secundarios -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="card bg-white p-4">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribución de Costos</h3>
+                <div class="h-64 chart-container">
+                    <canvas id="grafico-distribucion-costos"></canvas>
+                </div>
+                <div class="mt-4 grid grid-cols-2 gap-2">
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                        <span class="text-sm text-gray-600">Compra</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                        <span class="text-sm text-gray-600">Aduana</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>
+                        <span class="text-sm text-gray-600">Carga</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card bg-white p-4">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Margen por Producto</h3>
+                <div class="h-64 chart-container">
+                    <canvas id="grafico-margen-producto"></canvas>
+                </div>
+            </div>
+            <div class="card bg-white p-4">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Productos Más Rentables</h3>
+                <div class="h-64 chart-container">
+                    <canvas id="grafico-productos-rentables"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de datos -->
+        <div class="card bg-white p-4 mb-6" id="tabla-resumen">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Detalle por Producto</h3>
+                <div class="flex space-x-2">
+                    <input type="text" id="buscar-producto" placeholder="Buscar producto..." class="border rounded py-1 px-3 text-gray-700 text-sm">
+                    <button class="bg-gray-200 hover:bg-gray-300 rounded px-3 py-1 text-sm" id="btn-filtro">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="overflow-x-auto scrollbar">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ventas Netas</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo Compra</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gastos Aduana</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gastos Carga</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilidad</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Margen</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tendencia</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in resumen_utilidad %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-{{ forloop.counter|divisibleby:5|yesno:"yellow,green,blue,purple,red" }}-200 rounded-full flex items-center justify-center mr-3">
+                                        <span class="text-xs font-medium">{{ item.producto|slice:":1" }}{{ item.producto|cut:" "|slice:"1:2" }}</span>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">{{ item.producto }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.ventas_netas|format_currency_eur }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.costo_compra|format_currency_eur }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.gastos_aduana|format_currency_eur }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.gastos_carga|format_currency_eur }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {% if item.utilidad > 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ item.utilidad|format_currency_eur }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.margen|floatformat:2 }}%</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="{% if item.utilidad > 0 %}trend-up{% else %}trend-down{% endif %} text-sm">
+                                    <i class="fas fa-arrow-{% if item.utilidad > 0 %}up{% else %}down{% endif %}"></i> 
+                                    {{ forloop.counter|random_percentage }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">No hay datos disponibles para el período seleccionado</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-between items-center mt-4">
+                <div class="text-sm text-gray-500">Mostrando {{ resumen_utilidad|length }} productos</div>
+                <div class="flex space-x-2">
+                    <button class="px-3 py-1 border rounded text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Anterior</button>
+                    <button class="px-3 py-1 border rounded bg-blue-600 text-white hover:bg-blue-700 text-sm">1</button>
+                    <button class="px-3 py-1 border rounded text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Siguiente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración general de Chart.js
+        Chart.defaults.font.family = "'Helvetica', 'Arial', sans-serif";
+        Chart.defaults.font.size = 12;
+        Chart.defaults.color = '#6B7280';
+        
+        // Colores para los gráficos
+        const colores = {
+            azul: '#3B82F6',
+            verde: '#10B981',
+            amarillo: '#F59E0B',
+            rojo: '#EF4444',
+            morado: '#8B5CF6',
+            azulClaro: '#60A5FA',
+            verdeClaro: '#34D399',
+            amarilloClaro: '#FBBF24',
+            naranjaClaro: '#F97316',
+            moradoClaro: '#A78BFA'
+        };
+        
+        // Array de colores para múltiples datasets
+        const arrayColores = [
+            colores.azul,
+            colores.verde,
+            colores.morado,
+            colores.amarillo,
+            colores.naranjaClaro,
+            colores.azulClaro,
+            colores.verdeClaro,
+            colores.moradoClaro,
+            colores.rojo,
+            colores.amarilloClaro
+        ];
+        
+        // Funciones de formateo
+        function formatoEuro(valor) {
+            return new Intl.NumberFormat('es-ES', { 
+                style: 'currency', 
+                currency: 'EUR',
+                minimumFractionDigits: 2
+            }).format(valor);
+        }
+        
+        function formatoPorcentaje(valor) {
+            return new Intl.NumberFormat('es-ES', {
+                style: 'percent',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(valor / 100);
+        }
+        
+        // Función para obtener el año seleccionado
+        function obtenerAnioSeleccionado() {
+            return document.getElementById('anio-select').value;
+        }
+        
+        // Función para obtener la semana seleccionada (sin logs)
+        function obtenerSemanaSeleccionada() {
+            const semanaSelect = document.getElementById('semana-select');
+            
+            // Verificar si hay una semana seleccionada y no es "todas"
+            if (semanaSelect && semanaSelect.value && semanaSelect.value !== 'todas') {
+                // Validar formato - si contiene guion, enviar solo el número de semana
+                if (semanaSelect.value.includes('-')) {
+                    const semanaNum = semanaSelect.value.split('-')[0];
+                    return semanaNum;
+                }
+                
+                return semanaSelect.value;
+            }
+            return null;
+        }
+        
+        // Función para construir la URL con parámetros de filtro (sin logs)
+        function construirURLFiltro(baseURL) {
+            let url = `${baseURL}?anio=${obtenerAnioSeleccionado()}`;
+            const semana = obtenerSemanaSeleccionada();
+            
+            if (semana) {
+                url += `&semana=${semana}`;
+            }
+            
+            return url;
+        }
+        
+        // Función para cargar las semanas disponibles (sin logs innecesarios)
+        function cargarSemanasDisponibles() {
+            const semanaSelect = document.getElementById('semana-select');
+            const anio = obtenerAnioSeleccionado();
+            
+            // Guardar la selección actual
+            const seleccionActual = semanaSelect.value;
+            
+            // Mostrar indicador de carga
+            semanaSelect.disabled = true;
+            semanaSelect.innerHTML = '<option value="cargando">Cargando...</option>';
+            
+            fetch(`/comercial/api/dashboard/semanas-disponibles/?anio=${anio}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Limpiar select y agregar opción por defecto
+                    semanaSelect.innerHTML = '<option value="todas">Todas las semanas</option>';
+                    
+                    // Agregar cada semana disponible
+                    if (data.semanas && data.semanas.length > 0) {
+                        data.semanas.forEach(semana => {
+                            const option = document.createElement('option');
+                            // Incluir año en el valor para mayor claridad
+                            option.value = `${semana}-${anio}`;
+                            option.textContent = `Semana ${semana}`;
+                            semanaSelect.appendChild(option);
+                        });
+                        
+                        // Intentar restaurar la selección anterior
+                        if (seleccionActual && seleccionActual !== 'todas' && seleccionActual !== 'cargando') {
+                            // Verificar si existe la opción con ese valor
+                            const existe = Array.from(semanaSelect.options).some(opt => opt.value === seleccionActual);
+                            if (existe) {
+                                semanaSelect.value = seleccionActual;
+                            }
+                        }
+                    } else {
+                        // Agregar mensaje indicativo
+                        const option = document.createElement('option');
+                        option.value = "no-data";
+                        option.textContent = `No hay datos para ${anio}`;
+                        option.disabled = true;
+                        semanaSelect.appendChild(option);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar semanas disponibles:', error);
+                    semanaSelect.innerHTML = '<option value="todas">Todas las semanas</option>';
+                    const option = document.createElement('option');
+                    option.value = "error";
+                    option.textContent = `Error al cargar semanas`;
+                    option.disabled = true;
+                    semanaSelect.appendChild(option);
+                })
+                .finally(() => {
+                    semanaSelect.disabled = false;
+                });
+        }
+        
+        // Función para mostrar u ocultar el selector de semana (sin logs)
+        function actualizarVisibilidadSelectorSemana() {
+            // Ya no dependemos del tipo de periodo, el selector de semana siempre es visible
+            const semanaSelect = document.getElementById('semana-select');
+            semanaSelect.classList.remove('hidden-select');
+        }
+        
+        // Función para mostrar indicador de carga - versión mejorada
+        function mostrarCarga(elemento) {
+            // Si es un string, asumimos que es un ID y obtenemos el elemento
+            if (typeof elemento === 'string') {
+                elemento = document.getElementById(elemento);
+            }
+            
+            // Verificar que el elemento existe
+            if (!elemento) {
+                console.error('No se encontró el elemento para mostrar carga:', elemento);
+                return;
+            }
+            
+            // Verificar si ya tiene un overlay (para evitar duplicados)
+            const overlayExistente = elemento.querySelector('.loading-overlay');
+            if (overlayExistente) return;
+            
+            // Añadimos el overlay directo al elemento en vez de al padre
+            elemento.classList.add('loading-parent');
+            
+            // Crear overlay de carga
+            const overlay = document.createElement('div');
+            overlay.className = 'loading-overlay';
+            overlay.setAttribute('data-loader-for', elemento.id || 'elemento-sin-id');
+            overlay.innerHTML = '<div class="loading-spinner"></div>';
+            
+            // Agregar overlay al elemento
+            elemento.appendChild(overlay);
+        }
+        
+        // Función para ocultar indicador de carga - versión mejorada
+        function ocultarCarga(elemento) {
+            // Si es un string, asumimos que es un ID y obtenemos el elemento
+            if (typeof elemento === 'string') {
+                elemento = document.getElementById(elemento);
+            }
+            
+            // Verificar que el elemento existe
+            if (!elemento) {
+                console.error('No se encontró el elemento para ocultar carga:', elemento);
+                return;
+            }
+            
+            try {
+                // Buscar el overlay dentro del elemento
+                const overlay = elemento.querySelector('.loading-overlay');
+                if (overlay) {
+                    elemento.removeChild(overlay);
+                }
+                elemento.classList.remove('loading-parent');
+            } catch (error) {
+                console.error('Error al eliminar overlay de carga:', error);
+            }
+        }
+        
+        // Función para cargar datos de las tarjetas resumen
+        function cargarTotalesGlobales() {
+            mostrarCarga('utilidad-total');
+            mostrarCarga('ventas-netas');
+            mostrarCarga('costo-total');
+            mostrarCarga('margen-promedio');
+            
+            const url = construirURLFiltro('/comercial/api/dashboard/totales-globales/');
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Actualizar las tarjetas de resumen
+                    document.getElementById('utilidad-total').textContent = formatoEuro(data.utilidad_total);
+                    document.getElementById('ventas-netas').textContent = formatoEuro(data.ventas_netas);
+                    document.getElementById('costo-total').textContent = formatoEuro(data.costo_total);
+                    document.getElementById('margen-promedio').textContent = formatoPorcentaje(data.margen_promedio);
+                })
+                .catch(error => console.error('Error al cargar totales:', error))
+                .finally(() => {
+                    ocultarCarga('utilidad-total');
+                    ocultarCarga('ventas-netas');
+                    ocultarCarga('costo-total');
+                    ocultarCarga('margen-promedio');
+                });
+        }
+        
+        // Función para cargar el resumen de utilidades en la tabla (sin logs)
+        function cargarTablaResumen() {
+            const tbody = document.querySelector('table tbody');
+            
+            // Verificar que el tbody existe
+            if (!tbody) {
+                console.error('No se encontró el tbody para cargar datos');
+                return;
+            }
+            
+            // Aquí usamos un ID para la tabla en lugar del elemento DOM
+            mostrarCarga('tabla-resumen');
+            
+            const url = construirURLFiltro('/comercial/api/dashboard/resumen-utilidad/');
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    tbody.innerHTML = '';
+                    
+                    if (!data.data || data.data.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
+                                    No hay datos disponibles para el período seleccionado
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+                    
+                    data.data.forEach((item, index) => {
+                        // Crear iniciales para el avatar
+                        const palabras = item.producto.split(' ');
+                        const iniciales = palabras.length > 1 
+                            ? `${palabras[0][0]}${palabras[1][0]}` 
+                            : item.producto.substring(0, 2);
+                           
+                        // Simular tendencia basada en el índice (solo para visualización)
+                        const cambioRandom = (Math.random() * 10 - 3).toFixed(1);
+                        const tendencia = parseFloat(cambioRandom) >= 0
+                            ? `<span class="trend-up text-sm"><i class="fas fa-arrow-up"></i> ${cambioRandom}%</span>`
+                            : `<span class="trend-down text-sm"><i class="fas fa-arrow-down"></i> ${Math.abs(cambioRandom)}%</span>`;
+                        
+                        // Determinar color para el avatar
+                        const colores = ['yellow', 'green', 'blue', 'purple', 'red'];
+                        const colorAvatar = `bg-${colores[index % colores.length]}-200`;
+                        
+                        // Crear la fila
+                        const row = `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 ${colorAvatar} rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-xs font-medium">${iniciales.toUpperCase()}</span>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">${item.producto}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatoEuro(item.ventas_netas)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatoEuro(item.costo_compra)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatoEuro(item.gastos_aduana)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatoEuro(item.gastos_carga)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${item.utilidad > 0 ? 'text-green-600' : 'text-red-600'}">${formatoEuro(item.utilidad)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatoPorcentaje(item.margen)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    ${tendencia}
+                                </td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+                    
+                    // Actualizar paginación
+                    document.querySelector('.flex.justify-between .text-sm').textContent = `Mostrando ${data.data.length} productos`;
+                })
+                .catch(error => {
+                    console.error('Error al cargar resumen de utilidades:', error);
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
+                                Error al cargar datos: ${error.message}
+                            </td>
+                        </tr>
+                    `;
+                })
+                .finally(() => {
+                    ocultarCarga('tabla-resumen');
+                });
+        }
+        
+        // Función para cargar el gráfico de utilidad por producto
+        function cargarGraficoUtilidadProducto() {
+            const ctx = document.getElementById('grafico-utilidad-producto').getContext('2d');
+            mostrarCarga('grafico-utilidad-producto');
+            
+            const url = construirURLFiltro('/comercial/api/dashboard/productos-rentables/');
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Destruir el gráfico anterior si existe
+                    if (window.graficoUtilidadProducto) {
+                        window.graficoUtilidadProducto.destroy();
+                    }
+                            
+                    window.graficoUtilidadProducto = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Utilidad (EUR)',
+                                data: data.data,
+                                backgroundColor: arrayColores.slice(0, data.labels.length),
+                                borderWidth: 0,
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return formatoEuro(context.raw);
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return formatoEuro(value);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error al cargar gráfico de utilidad:', error))
+                .finally(() => {
+                    ocultarCarga('grafico-utilidad-producto');
+                });
+        }
+        
+        // Función para cargar el gráfico de tendencia de utilidad (sin logs innecesarios)
+        function cargarGraficoTendenciaUtilidad() {
+            const ctx = document.getElementById('grafico-tendencia-utilidad').getContext('2d');
+            const producto = document.getElementById('grafico-tendencia-producto').value;
+            mostrarCarga('grafico-tendencia-utilidad');
+            
+            // Construir la URL base con los parámetros de año y semana
+            let url = construirURLFiltro('/comercial/api/dashboard/utilidad-por-semana/');
+            
+            // Agregar el parámetro de producto si no es 'todos'
+            if (producto && producto !== 'todos') {
+                // Asegurarse de que el producto esté codificado correctamente para URL
+                url += `&producto=${encodeURIComponent(producto)}`;
+            }
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Destruir el gráfico anterior si existe
+                    if (window.graficoTendenciaUtilidad) {
+                        window.graficoTendenciaUtilidad.destroy();
+                    }
+                    
+                    // Preparar datasets
+                    const datasets = data.datasets.map((dataset, index) => {
+                        return {
+                            label: dataset.label,
+                            data: dataset.data,
+                            borderColor: arrayColores[index % arrayColores.length],
+                            backgroundColor: arrayColores[index % arrayColores.length] + '20',
+                            tension: 0.4,
+                            fill: true
+                        };
+                    });
+                    
+                    // Verificar si tenemos datos
+                    if (datasets.length === 0) {
+                        // Crear gráfico vacío o mostrar mensaje
+                        const container = document.getElementById('grafico-tendencia-utilidad').parentNode;
+                        const mensaje = document.createElement('div');
+                        mensaje.className = 'text-center text-gray-500 mt-10';
+                        mensaje.innerHTML = 'No hay datos disponibles para este filtro';
+                        
+                        // Limpiar y agregar mensaje
+                        container.innerHTML = '';
+                        container.appendChild(mensaje);
+                        return;
+                    }
+                    
+                    window.graficoTendenciaUtilidad = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: datasets
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `${context.dataset.label}: ${formatoEuro(context.raw)}`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return formatoEuro(value);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al cargar gráfico de tendencia:', error);
+                    const container = document.getElementById('grafico-tendencia-utilidad').parentNode;
+                    container.innerHTML = `<div class="text-center text-red-500 mt-10">Error al cargar datos: ${error.message}</div>`;
+                })
+                .finally(() => {
+                    ocultarCarga('grafico-tendencia-utilidad');
+                });
+        }
+        
+        // Función para cargar el gráfico de distribución de costos
+        function cargarGraficoDistribucionCostos() {
+            const ctx = document.getElementById('grafico-distribucion-costos').getContext('2d');
+            mostrarCarga('grafico-distribucion-costos');
+            
+            const url = construirURLFiltro('/comercial/api/dashboard/distribucion-costos/');
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Destruir el gráfico anterior si existe
+                    if (window.graficoDistribucionCostos) {
+                        window.graficoDistribucionCostos.destroy();
+                    }
+                            
+                    window.graficoDistribucionCostos = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                data: data.data,
+                                backgroundColor: [colores.azul, colores.verde, colores.amarillo],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = formatoEuro(context.raw);
+                                            const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                            const percentage = ((context.raw / total) * 100).toFixed(1);
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error al cargar gráfico de distribución:', error))
+                .finally(() => {
+                    ocultarCarga('grafico-distribucion-costos');
+                });
+        }
+        
+        // Función para cargar el gráfico de margen por producto
+        function cargarGraficoMargenProducto() {
+            const ctx = document.getElementById('grafico-margen-producto').getContext('2d');
+            mostrarCarga('grafico-margen-producto');
+            
+            const url = construirURLFiltro('/comercial/api/dashboard/margen-por-producto/');
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Destruir el gráfico anterior si existe
+                    if (window.graficoMargenProducto) {
+                        window.graficoMargenProducto.destroy();
+                    }
+                            
+                    window.graficoMargenProducto = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Margen (%)',
+                                data: data.data,
+                                backgroundColor: arrayColores.slice(0, data.labels.length),
+                                borderWidth: 0,
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return formatoPorcentaje(context.raw);
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return formatoPorcentaje(value);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error al cargar gráfico de margen:', error))
+                .finally(() => {
+                    ocultarCarga('grafico-margen-producto');
+                });
+        }
+        
+        // Función para cargar el gráfico de productos más rentables
+        function cargarGraficoProductosRentables() {
+            const ctx = document.getElementById('grafico-productos-rentables').getContext('2d');
+            mostrarCarga('grafico-productos-rentables');
+            
+            const url = construirURLFiltro('/comercial/api/dashboard/productos-rentables/');
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Destruir el gráfico anterior si existe
+                    if (window.graficoProductosRentables) {
+                        window.graficoProductosRentables.destroy();
+                    }
+                            
+                    window.graficoProductosRentables = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Utilidad (EUR)',
+                                data: data.data,
+                                backgroundColor: arrayColores.slice(0, data.labels.length),
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: {
+                                        boxWidth: 12
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `${context.label}: ${formatoEuro(context.raw)}`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error al cargar gráfico de productos rentables:', error))
+                .finally(() => {
+                    ocultarCarga('grafico-productos-rentables');
+                });
+        }
+        
+        // Función para actualizar lista de productos en el selector de tendencias (sin logs)
+        function actualizarSelectorProductos() {
+            const url = construirURLFiltro('/comercial/api/dashboard/resumen-utilidad/');
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const selector = document.getElementById('grafico-tendencia-producto');
+                    if (!selector) {
+                        console.error('Selector de productos no encontrado');
+                        return;
+                    }
+                    
+                    const valorActual = selector.value;
+                            
+                    // Mantener la opción "todos"
+                    selector.innerHTML = '<option value="todos">Todos los productos</option>';
+                    
+                    // Verificar si hay datos
+                    if (!data.data || data.data.length === 0) {
+                        return;
+                    }
+                    
+                    // Agregar cada producto
+                    data.data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.producto;
+                        option.textContent = item.producto;
+                        
+                        // Mantener la selección actual si existe
+                        if (item.producto === valorActual) {
+                            option.selected = true;
+                        }
+                        
+                        selector.appendChild(option);
+                    });
+                    
+                    // Si el valor actual ya no existe en las opciones, seleccionar "todos"
+                    if (valorActual !== 'todos' && !Array.from(selector.options).some(opt => opt.value === valorActual)) {
+                        selector.value = 'todos';
+                    }
+                })
+                .catch(error => console.error('Error al actualizar selector de productos:', error));
+        }
+        
+        // Función para filtrar la tabla por texto
+        function filtrarTabla() {
+            const textoBusqueda = document.getElementById('buscar-producto').value.toLowerCase();
+            const filas = document.querySelectorAll('table tbody tr');
+            
+            filas.forEach(fila => {
+                const textoProducto = fila.querySelector('td:first-child')?.textContent.toLowerCase() || '';
+                
+                if (textoProducto.includes(textoBusqueda)) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+            
+            // Actualizar contador de resultados
+            const filasVisibles = [...filas].filter(fila => fila.style.display !== 'none').length;
+            document.querySelector('.flex.justify-between .text-sm').textContent = `Mostrando ${filasVisibles} productos`;
+        }
+        
+        // Función para exportar a Excel (simplificada)
+        function exportarAExcel() {
+            const anio = obtenerAnioSeleccionado();
+            let url = `/comercial/api/dashboard/resumen-utilidad/?anio=${anio}&format=xlsx`;
+            
+            const semana = obtenerSemanaSeleccionada();
+            if (semana) {
+                url += `&semana=${semana}`;
+            }
+            
+            // Redirigir a la URL de descarga
+            window.open(url, '_blank');
+        }
+        
+        // Función para cargar todos los gráficos
+        function cargarTodosGraficos() {
+            const elements = [
+                'utilidad-total', 'ventas-netas', 'costo-total', 'margen-promedio',
+                'tabla-resumen', 'grafico-utilidad-producto', 'grafico-tendencia-utilidad',
+                'grafico-distribucion-costos', 'grafico-margen-producto', 'grafico-productos-rentables'
+            ];
+            
+            // Verificar que todos los elementos necesarios existen
+            const missingElements = elements.filter(id => !document.getElementById(id));
+            if (missingElements.length > 0) {
+                console.error('Elementos faltantes:', missingElements.join(', '));
+                // Continuamos de todos modos, puede que algunos elementos simplemente no sean necesarios
+            }
+            
+            cargarTotalesGlobales();
+            cargarTablaResumen();
+            
+            if (document.getElementById('grafico-utilidad-producto')) {
+                cargarGraficoUtilidadProducto();
+            }
+            
+            if (document.getElementById('grafico-tendencia-utilidad')) {
+                cargarGraficoTendenciaUtilidad();
+            }
+            
+            if (document.getElementById('grafico-distribucion-costos')) {
+                cargarGraficoDistribucionCostos();
+            }
+            
+            if (document.getElementById('grafico-margen-producto')) {
+                cargarGraficoMargenProducto();
+            }
+            
+            if (document.getElementById('grafico-productos-rentables')) {
+                cargarGraficoProductosRentables();
+            }
+            
+            actualizarSelectorProductos();
+        }
+        
+        // Inicialización cuando el DOM está listo (sin logs de depuración)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuración inicial del selector de semana
+            actualizarVisibilidadSelectorSemana();
+            cargarSemanasDisponibles();
+            
+            // Configurar eventos para los selectores de periodo y semana - MODIFICADO
+            document.getElementById('periodo-select').addEventListener('change', function() {
+                actualizarVisibilidadSelectorSemana();
+                // Actualizar datos cuando cambia el periodo
+                cargarTodosGraficos();
+            });
+            
+            document.getElementById('anio-select').addEventListener('change', function() {
+                cargarSemanasDisponibles();
+                cargarTodosGraficos();
+            });
+            
+            // Modificado: Asegurarse de recargar los datos cuando cambia la semana seleccionada
+            document.getElementById('semana-select').addEventListener('change', function() {
+                cargarTodosGraficos();
+            });
+            
+            // Cargar gráficos iniciales
+            cargarTodosGraficos();
+            
+            // Configurar eventos
+            document.getElementById('btn-actualizar').addEventListener('click', cargarTodosGraficos);
+            document.getElementById('grafico-tendencia-producto').addEventListener('change', function() {
+                cargarGraficoTendenciaUtilidad();
+            });
+            document.getElementById('grafico-utilidad-periodo').addEventListener('change', cargarGraficoUtilidadProducto);
+            
+            // Filtro de búsqueda
+            document.getElementById('buscar-producto').addEventListener('input', filtrarTabla);
+            document.getElementById('btn-filtro').addEventListener('click', () => {
+                document.getElementById('buscar-producto').focus();
+            });
+            
+            // Exportar a Excel
+            document.getElementById('btn-exportar').addEventListener('click', exportarAExcel);
+        });
+    </script>
 </body>
 </html>

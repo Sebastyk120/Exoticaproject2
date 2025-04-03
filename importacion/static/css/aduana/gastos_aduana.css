@@ -208,19 +208,17 @@ body {
 /* Enhanced Modal Styles */
 .modal-content {
     border: none;
-    border-radius: 16px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.98);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 249, 250, 0.98));
 }
 
 .modal-header {
-    background: linear-gradient(135deg, rgba(93, 95, 239, 0.95), rgba(74, 76, 216, 0.95));
+    background: linear-gradient(135deg, var(--primary-color), #4A4CD8);
     border-bottom: none;
     padding: 25px 30px;
     position: relative;
-    backdrop-filter: blur(5px);
 }
 
 .modal-header::after {
@@ -238,24 +236,9 @@ body {
 
 .modal-title {
     color: white;
-    font-weight: 500;
-    margin: 0;
-    font-size: 1.3rem;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    letter-spacing: 0.3px;
-}
-
-.modal-title::before {
-    content: '';
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background-color: rgba(255, 255, 255, 0.15);
-    border-radius: 50%;
-    position: relative;
-    backdrop-filter: blur(2px);
+    font-weight: 600;
+    font-size: 1.4rem;
+    letter-spacing: 0.5px;
 }
 
 .modal-body {
@@ -263,144 +246,128 @@ body {
     background-color: rgba(248, 249, 250, 0.5);
 }
 
-.modal-footer {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-top: 1px solid rgba(222, 226, 230, 0.5);
-    padding: 20px 30px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    backdrop-filter: blur(5px);
+/* Enhanced View Modal Content */
+.modal-body .row {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    margin: 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-/* Enhanced Form Styles */
-.form-group {
-    margin-bottom: 25px;
+.modal-body p {
+    position: relative;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    background: rgba(248, 249, 250, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(93, 95, 239, 0.08);
+    transition: all 0.3s ease;
+}
+
+.modal-body p:hover {
+    transform: translateY(-2px);
+    background: white;
+    border-color: rgba(93, 95, 239, 0.2);
+    box-shadow: 0 4px 12px rgba(93, 95, 239, 0.08);
+}
+
+.modal-body strong {
+    display: inline-block;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-right: 10px;
+    min-width: 160px;
     position: relative;
 }
 
-.form-label {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--dark-color);
-    font-weight: 500;
-    font-size: 0.9rem;
-    letter-spacing: 0.2px;
+.modal-body strong::after {
+    content: ':';
+    position: absolute;
+    right: 10px;
+    color: var(--secondary-color);
 }
 
-.form-control {
-    width: 100%;
-    padding: 12px 18px;
-    border: 1px solid rgba(222, 226, 230, 0.8);
-    border-radius: 12px;
-    font-family: inherit;
-    transition: var(--transition);
-    background-color: rgba(255, 255, 255, 0.9);
-    font-size: 0.95rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-}
-
-.form-control:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(93, 95, 239, 0.08);
-    outline: none;
-    background-color: white;
-}
-
-/* Enhanced Gasto Details */
-.gasto-details {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    padding: 25px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-    backdrop-filter: blur(5px);
-}
-
-.gasto-details p {
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border-radius: 12px;
-    background-color: rgba(248, 249, 250, 0.8);
-    transition: var(--transition);
-    border: 1px solid rgba(222, 226, 230, 0.3);
-}
-
-.gasto-details p:hover {
-    background-color: rgba(93, 95, 239, 0.03);
-    transform: translateX(5px);
-    border-color: rgba(93, 95, 239, 0.1);
-}
-
-.gasto-details strong {
-    color: var(--primary-color);
-    min-width: 150px;
-    font-weight: 500;
-    letter-spacing: 0.2px;
-}
-
-.gasto-details ul {
+/* Pedidos List Styling */
+.pedidos-list {
     list-style: none;
-    padding-left: 0;
-    margin-top: 20px;
-    background-color: rgba(248, 249, 250, 0.8);
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid rgba(222, 226, 230, 0.3);
+    padding: 0;
+    margin: 15px 0 0 0;
 }
 
-.gasto-details li {
-    margin-bottom: 12px;
+.pedidos-list li {
+    margin-bottom: 10px;
     padding: 12px 16px;
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-    transition: var(--transition);
-    border: 1px solid rgba(222, 226, 230, 0.3);
+    background: white;
+    border-radius: 10px;
+    border: 1px solid rgba(93, 95, 239, 0.08);
+    transition: all 0.3s ease;
 }
 
-.gasto-details li:hover {
+.pedidos-list li:hover {
     transform: translateX(5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-    border-color: rgba(93, 95, 239, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(93, 95, 239, 0.1);
 }
 
-.pedido-link {
-    color: var(--primary-color);
-    text-decoration: none;
-    transition: var(--transition);
+.pedidos-list a.pedido-link {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 500;
-    letter-spacing: 0.2px;
-}
-
-.pedido-link::before {
-    content: '→';
-    opacity: 0;
-    transition: var(--transition);
-    font-weight: bold;
-}
-
-.pedido-link:hover {
-    color: #4A4CD8;
+    color: var(--primary-color);
     text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
-.pedido-link:hover::before {
+.pedidos-list a.pedido-link:hover {
+    color: #4A4CD8;
+}
+
+.pedidos-list a.pedido-link::before {
+    content: '→';
+    margin-right: 8px;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+}
+
+.pedidos-list a.pedido-link:hover::before {
     opacity: 1;
+    transform: translateX(0);
 }
 
-/* Modal Buttons */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-left: 10px;
+}
+
+.status-badge.status-paid {
+    background-color: rgba(28, 200, 138, 0.1);
+    color: var(--success-color);
+}
+
+.status-badge.status-unpaid {
+    background-color: rgba(231, 74, 59, 0.1);
+    color: var(--danger-color);
+}
+
+/* Modal Footer */
+.modal-footer {
+    background-color: white;
+    border-top: 1px solid rgba(222, 226, 230, 0.5);
+    padding: 20px 30px;
+}
+
 .modal .btn {
     padding: 10px 24px;
     font-weight: 500;
     border-radius: 12px;
-    transition: var(--transition);
-    letter-spacing: 0.2px;
+    transition: all 0.3s ease;
 }
 
 .modal .btn-secondary {

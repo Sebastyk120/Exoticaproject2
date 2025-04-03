@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -100,24 +101,24 @@
                                 <span class="value">{{ venta.total_cajas_pedido|default:0 }}</span>
                             </div>
                             <div class="calc-field">
-                                <span class="label">Subtotal Factura €:</span>
-                                <span class="value">{{ venta.subtotal_factura|default:0|floatformat:2 }}</span>
+                                <span class="label">Subtotal Factura :</span>
+                                <span class="value">{{ venta.subtotal_factura|default:0|format_currency_eur }}</span>
                             </div>
                             <div class="calc-field">
-                                <span class="label">IVA 4% €:</span>
-                                <span class="value">{{ venta.iva|default:0|floatformat:2 }}</span>
+                                <span class="label">IVA 4% :</span>
+                                <span class="value">{{ venta.iva|default:0|format_currency_eur }}</span>
                             </div>
                             <div class="calc-field">
-                                <span class="label">Total Factura €:</span>
-                                <span class="value">{{ venta.valor_total_factura_euro|default:0|floatformat:2 }}</span>
+                                <span class="label">Total Factura :</span>
+                                <span class="value">{{ venta.valor_total_factura_euro|default:0|format_currency_eur }}</span>
                             </div>
                             <div class="calc-field">
-                                <span class="label">Total Abono €:</span>
-                                <span class="value">{{ venta.valor_total_abono_euro|default:0|floatformat:2 }}</span>
+                                <span class="label">Total Abono :</span>
+                                <span class="value">{{ venta.valor_total_abono_euro|default:0|format_currency_eur }}</span>
                             </div>
                             <div class="calc-field">
-                                <span class="label">Monto Pendiente €:</span>
-                                <span class="value">{{ venta.monto_pendiente|default:0|floatformat:2 }}</span>
+                                <span class="label">Monto Pendiente :</span>
+                                <span class="value">{{ venta.monto_pendiente|default:0|format_currency_eur }}</span>
                             </div>
                             <div class="calc-field">
                                 <span class="label">Pagado:</span>
@@ -230,31 +231,6 @@
                             </tr>
                         </template>
                     </div>
-                    
-                    {% if venta %}
-                    <div class="fiscal-info">
-                        <div class="fiscal-row">
-                            <span class="fiscal-label">Subtotal:</span>
-                            <span class="fiscal-value">{{ venta.subtotal_factura|default:0|floatformat:2 }} €</span>
-                        </div>
-                        <div class="fiscal-row">
-                            <span class="fiscal-label">IVA (4%):</span>
-                            <span class="fiscal-value">{{ venta.iva|default:0|floatformat:2 }} €</span>
-                        </div>
-                        <div class="fiscal-row">
-                            <span class="fiscal-label">Total Factura:</span>
-                            <span class="fiscal-value total-value">{{ venta.valor_total_factura_euro|default:0|floatformat:2 }} €</span>
-                        </div>
-                        <div class="fiscal-row">
-                            <span class="fiscal-label">Total Abono:</span>
-                            <span class="fiscal-value">{{ venta.valor_total_abono_euro|default:0|floatformat:2 }} €</span>
-                        </div>
-                        <div class="fiscal-row">
-                            <span class="fiscal-label">Pendiente:</span>
-                            <span class="fiscal-value">{{ venta.monto_pendiente|default:0|floatformat:2 }} €</span>
-                        </div>
-                    </div>
-                    {% endif %}
                 </section>
             {% endif %}
         </div>

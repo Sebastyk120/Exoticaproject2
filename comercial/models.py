@@ -15,7 +15,7 @@ class Cliente(models.Model):
     ciudad = models.CharField(max_length=100, verbose_name="Ciudad", null=True, blank=True)
     cif = models.CharField(max_length=20, verbose_name="Código  CIF", null=True, blank=True)
     email = models.EmailField(verbose_name="Correo")
-    email2 = models.EmailField(verbose_name="Correo 2", blank=True, null=True)
+    email2 = models.CharField(max_length=500, verbose_name="Correos Adicionales", blank=True, null=True)
     telefono = models.CharField(max_length=20, null=True, blank=True)
     dias_pago = models.IntegerField(verbose_name="Días de pago", validators=[MinValueValidator(0)])
 
@@ -108,15 +108,20 @@ class DetalleVenta(models.Model):
         # Guardar el valor original de cajas_enviadas
         if self.pk:
             try:
-                # Intentar obtener el valor de la base de datos para mayor seguridad
-                original = DetalleVenta.objects.filter(pk=self.pk).values_list('cajas_enviadas', flat=True).first()
-                self._original_cajas = original if original is not None else 0
+                # Intentar obtener el valor original de la base de datos
+                original = DetalleVenta.objects.filter(pk=self.pk).values('cajas_enviadas', 'presentacion_id').first()
+                if original:
+                    self._original_cajas = original['cajas_enviadas']
+                    self._original_presentacion_id = original['presentacion_id']
+                else:
+                    self._original_cajas = self.cajas_enviadas
+                    self._original_presentacion_id = self.presentacion_id
             except Exception:
-                # Si hay algún error, usar el valor actual como respaldo
                 self._original_cajas = self.cajas_enviadas if self.cajas_enviadas is not None else 0
+                self._original_presentacion_id = self.presentacion_id
         else:
-            # Para nuevos objetos, inicializar en 0
             self._original_cajas = 0
+            self._original_presentacion_id = None
     
     def clean(self):
         # Realizar cálculos básicos
@@ -196,6 +201,10 @@ class DetalleVenta(models.Model):
             venta.reevaluar_pagos_cliente()
     
     def save(self, *args, **kwargs):
+        # Guarda estado antes de limpieza
+        es_nuevo = not self.pk
+        
+        # Realizar todos los cálculos necesarios
         # Calculate valor_x_producto from the editable fields
         if self.cajas_enviadas and self.valor_x_caja_euro:
             self.valor_x_producto = self.cajas_enviadas * self.valor_x_caja_euro
@@ -215,7 +224,13 @@ class DetalleVenta(models.Model):
             
         self.full_clean()  # Esto llamará a clean() para validar
             
+        # Guardar el objeto
         super().save(*args, **kwargs)
+        
+        # Actualizar valores originales después de guardar
+        self._original_cajas = self.cajas_enviadas
+        self._original_presentacion_id = self.presentacion_id
+        
         # Luego actualizar la venta relacionada
         self.actualizar_totales_venta(self.venta_id)
     

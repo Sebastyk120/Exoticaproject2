@@ -331,27 +331,24 @@ header h1 {
 .table-responsive {
     overflow-x: auto;
     border-radius: var(--border-radius);
+    max-width: 100%;
+    margin: 0;
 }
 
 #pedidos-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 0.85rem; /* Reduced base font size for the table */
+    font-size: 0.75rem; /* Reducción del tamaño base de la fuente */
 }
 
 #pedidos-table th {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
     font-weight: 600;
-    padding: 0.7rem 0.8rem; /* Reduced padding */
-    text-align: left;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    font-size: 0.8rem; /* Smaller header font */
-    letter-spacing: 0.01em;
-    white-space: inherit;
+    padding: 0.5rem 0.6rem; /* Reducción del padding */
+    font-size: 0.75rem;
+    white-space: nowrap;
 }
 
 #pedidos-table th:first-child {
@@ -363,9 +360,10 @@ header h1 {
 }
 
 #pedidos-table td {
-    padding: 0.6rem 0.8rem; /* Reduced cell padding */
+    padding: 0.4rem 0.6rem; /* Reducción del padding */
     border-bottom: 1px solid var(--border-color);
-    font-size: 0.85rem; /* Smaller cell font */
+    font-size: 0.75rem;
+    white-space: nowrap;
     color: var(--text-color);
     vertical-align: middle;
     line-height: 1.3; /* Tighter line height */
@@ -944,5 +942,66 @@ header h1 {
     
     .metric {
         width: 100%;
+    }
+}
+
+/* Ajuste del botón de configurar columnas */
+#toggle-columns.btn-sm {
+    padding: 0.75rem 1.25rem;
+    height: 42px; /* Mismo alto que los otros botones */
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+/* Estilo para los iconos de pagado */
+.pagado-icon {
+    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Ajuste para que todas las columnas sean más compactas */
+.table-responsive {
+    max-width: 100%;
+    margin: 0;
+}
+
+#pedidos-table th, 
+#pedidos-table td {
+    max-width: 150px; /* Ancho máximo para las columnas */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Ajustes específicos para columnas con contenido numérico */
+.column-id,
+.column-cajas,
+.column-pagado {
+    width: 60px;
+    text-align: center;
+}
+
+.column-pagado {
+    width: 40px;
+}
+
+.column-acciones {
+    width: 120px;
+    white-space: nowrap;
+}
+
+/* Ajustes responsive */
+@media (max-width: 768px) {
+    #pedidos-table th, 
+    #pedidos-table td {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.7rem;
+    }
+    
+    .pagado-icon {
+        font-size: 0.9rem;
     }
 }

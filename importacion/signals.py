@@ -11,46 +11,280 @@ from .models import (
     GastosCarga, TranferenciasCarga, BalanceGastosCarga
 )
 
+# Función utilitaria para actualizar el stock de múltiples presentaciones a la vez
+def actualizar_stock_multiple(presentaciones_ids):
+    """
+    Actualiza el stock de varias presentaciones de manera eficiente en una sola operación.
+    Útil para operaciones por lotes donde múltiples productos pueden haberse modificado.
+    """
+    global _actualizando_inventario
+    
+    if _actualizando_inventario:
+        return
+    
+    if not presentaciones_ids:
+        return
+        
+    try:
+        _actualizando_inventario = True
+        
+        with transaction.atomic():
+            from comercial.models import DetalleVenta
+            from productos.models import Presentacion
+            from django.db.models.functions import Coalesce
+            
+            for presentacion_id in presentaciones_ids:
+                try:
+                    presentacion = Presentacion.objects.get(id=presentacion_id)
+                    
+                    # Paso 1: Calcular entradas (cajas recibidas en todos los pedidos)
+                    entradas = DetallePedido.objects.filter(
+                        presentacion=presentacion
+                    ).aggregate(
+                        total_cajas=Coalesce(Sum('cajas_recibidas'), 0)
+                    )['total_cajas'] or 0
+                    
+                    # Paso 2: Calcular salidas (cajas enviadas en todas las ventas)
+                    salidas = DetalleVenta.objects.filter(
+                        presentacion=presentacion
+                    ).aggregate(
+                        total_cajas=Coalesce(Sum('cajas_enviadas'), 0)
+                    )['total_cajas'] or 0
+                    
+                    # Paso 3: Calcular stock actual (entradas - salidas)
+                    stock_actual = max(0, int(entradas - salidas))
+                    
+                    # Paso 4: Actualizar o crear registro en bodega
+                    bodega, created = Bodega.objects.get_or_create(
+                        presentacion=presentacion,
+                        defaults={'stock_actual': stock_actual}
+                    )
+                    
+                    # Paso 5: Actualizar el registro si ya existe
+                    if not created:
+                        bodega.stock_actual = stock_actual
+                        bodega.save(update_fields=['stock_actual', 'ultima_actualizacion'])
+                    
+                    # Registrar operación para depuración
+                    import logging
+                    logger = logging.getLogger('importacion')
+                    logger.info(f"Stock recalculado para {presentacion}: Entradas={entradas}, Salidas={salidas}, Stock actual={stock_actual}")
+                    
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger('importacion')
+                    logger.error(f"Error al actualizar stock de presentación {presentacion_id}: {e}")
+    
+    finally:
+        _actualizando_inventario = False
 
 @receiver(post_save, sender=DetallePedido)
 def actualizar_stock_bodega(sender, instance, created, **kwargs):
-    presentacion = instance.presentacion
+    """
+    Actualiza el stock en Bodega cuando se crea o actualiza un DetallePedido.
+    Si se especifica _skip_stock_update, la actualización se omite.
+    """
+    global _actualizando_inventario
+    
+    # Evitar recursión o actualizaciones redundantes
+    if _actualizando_inventario or getattr(instance, '_skip_stock_update', False):
+        return
 
-    # Obtener o crear el registro en bodega para esta presentación
-    bodega, created_bodega = Bodega.objects.get_or_create(presentacion=presentacion)
+    # Verificar si realmente hubo un cambio en cajas_recibidas
+    if not created and hasattr(instance, '_original_cajas_recibidas'):
+        if instance._original_cajas_recibidas == instance.cajas_recibidas and instance._original_presentacion_id == instance.presentacion_id:
+            # No hubo cambio en la cantidad de cajas ni en la presentación, no actualizar el stock
+            return
+    
+    try:
+        _actualizando_inventario = True
+        
+        # Actualizar el stock usando el método mejorado que considera las ventas
+        actualizar_stock_multiple([instance.presentacion_id])
+        
+        # Si hubo cambio de presentación, también actualizar la presentación anterior
+        if hasattr(instance, '_original_presentacion_id') and instance._original_presentacion_id and instance._original_presentacion_id != instance.presentacion_id:
+            actualizar_stock_multiple([instance._original_presentacion_id])
+    
+    finally:
+        _actualizando_inventario = False
 
-    # Calcular el stock total sumando todas las cajas recibidas para esta presentación
-    resultado = DetallePedido.objects.filter(
-        presentacion=presentacion
-    ).aggregate(total_cajas=Sum('cajas_recibidas'))
+# Variable global para controlar actualizaciones en curso
+_actualizando_inventario = False
 
-    total_cajas = resultado['total_cajas'] or 0
+@receiver(post_save, sender=DetallePedido)
+def actualizar_stock_bodega(sender, instance, created, **kwargs):
+    """
+    Actualiza el stock en Bodega cuando se crea o actualiza un DetallePedido.
+    Si se especifica _skip_stock_update, la actualización se omite.
+    """
+    global _actualizando_inventario
+    
+    # Evitar recursión o actualizaciones redundantes
+    if _actualizando_inventario or getattr(instance, '_skip_stock_update', False):
+        return
 
-    # Asegurar que total_cajas es un entero
-    bodega.stock_actual = int(total_cajas)
-    bodega.save()
+    # Verificar si realmente hubo un cambio en cajas_recibidas
+    if not created and hasattr(instance, '_original_cajas_recibidas'):
+        if instance._original_cajas_recibidas == instance.cajas_recibidas:
+            # No hubo cambio en la cantidad de cajas, no actualizar el stock
+            return
+    
+    try:
+        _actualizando_inventario = True
+        
+        # Identificar la presentación afectada
+        presentacion = instance.presentacion
+        
+        # Actualizar stock para esta presentación usando una única consulta de suma
+        with transaction.atomic():
+            # Obtener o crear el registro en bodega
+            bodega, created_bodega = Bodega.objects.get_or_create(
+                presentacion=presentacion, 
+                defaults={'stock_actual': 0}
+            )
+            
+            # Recalcular el stock total
+            resultado = DetallePedido.objects.filter(
+                presentacion=presentacion
+            ).aggregate(total_cajas=Sum('cajas_recibidas'))
+            total_cajas = resultado['total_cajas'] or 0
+            
+            # Actualizar el registro en bodega con el valor total calculado
+            bodega.stock_actual = int(total_cajas)
+            
+            # Guardar en base de datos
+            bodega.save(update_fields=['stock_actual', 'ultima_actualizacion'])
+            
+            # Registrar la operación para depuración
+            import logging
+            logger = logging.getLogger('importacion')
+            if created:
+                logger.info(f"Stock actualizado (nuevo): {presentacion} - Total: {total_cajas}")
+            else:
+                original = getattr(instance, '_original_cajas_recibidas', 0) 
+                nuevo = instance.cajas_recibidas or 0
+                diferencia = nuevo - original
+                logger.info(f"Stock actualizado (edición): {presentacion} - Diferencia: {diferencia}, Nuevo total: {total_cajas}")
+    
+    finally:
+        _actualizando_inventario = False
 
 
 @receiver(post_delete, sender=DetallePedido)
 def actualizar_stock_bodega_delete(sender, instance, **kwargs):
-    presentacion = instance.presentacion
-
+    """
+    Actualiza el stock en Bodega cuando se elimina un DetallePedido.
+    Usa el mismo método que post_save para garantizar consistencia.
+    """
+    global _actualizando_inventario
+    
+    if _actualizando_inventario:
+        return
+    
     try:
-        bodega = Bodega.objects.get(presentacion=presentacion)
+        _actualizando_inventario = True
+        
+        presentacion = instance.presentacion
+        
+        with transaction.atomic():
+            try:
+                # Recalcular stock total
+                resultado = DetallePedido.objects.filter(
+                    presentacion=presentacion
+                ).aggregate(total_cajas=Sum('cajas_recibidas'))
+                
+                total_cajas = resultado['total_cajas'] or 0
+                
+                # Actualizar o crear registro en bodega
+                bodega, created = Bodega.objects.get_or_create(
+                    presentacion=presentacion,
+                    defaults={'stock_actual': 0}
+                )
+                
+                # Actualizar stock
+                bodega.stock_actual = int(total_cajas)
+                bodega.save(update_fields=['stock_actual', 'ultima_actualizacion'])
+                
+                # Registrar la operación para depuración
+                import logging
+                logger = logging.getLogger('importacion')
+                logger.info(f"Stock actualizado (eliminación): {presentacion} - Cajas eliminadas: {instance.cajas_recibidas}, Nuevo total: {total_cajas}")
+            
+            except Exception as e:
+                import logging
+                logger = logging.getLogger('importacion')
+                logger.error(f"Error al actualizar stock tras eliminación: {e}")
+    finally:
+        _actualizando_inventario = False
 
-        # Recalcular el stock total
-        resultado = DetallePedido.objects.filter(
-            presentacion=presentacion
-        ).aggregate(total_cajas=Sum('cajas_recibidas'))
 
-        total_cajas = resultado['total_cajas'] or 0
-
-        # Asegurar que total_cajas es un entero
-        bodega.stock_actual = int(total_cajas)
-        bodega.save()
-    except Bodega.DoesNotExist:
-        # No hay registro de bodega para esta presentación, no es necesario hacer nada
-        pass
+# Función utilitaria para actualizar el stock de múltiples presentaciones a la vez
+def actualizar_stock_multiple(presentaciones_ids):
+    """
+    Actualiza el stock de varias presentaciones de manera eficiente en una sola operación.
+    Útil para operaciones por lotes donde múltiples productos pueden haberse modificado.
+    """
+    global _actualizando_inventario
+    
+    if _actualizando_inventario:
+        return
+    
+    if not presentaciones_ids:
+        return
+        
+    try:
+        _actualizando_inventario = True
+        
+        with transaction.atomic():
+            from comercial.models import DetalleVenta
+            from productos.models import Presentacion
+            from django.db.models.functions import Coalesce
+            
+            for presentacion_id in presentaciones_ids:
+                try:
+                    presentacion = Presentacion.objects.get(id=presentacion_id)
+                    
+                    # Paso 1: Calcular entradas (cajas recibidas en todos los pedidos)
+                    entradas = DetallePedido.objects.filter(
+                        presentacion=presentacion
+                    ).aggregate(
+                        total_cajas=Coalesce(Sum('cajas_recibidas'), 0)
+                    )['total_cajas'] or 0
+                    
+                    # Paso 2: Calcular salidas (cajas enviadas en todas las ventas)
+                    salidas = DetalleVenta.objects.filter(
+                        presentacion=presentacion
+                    ).aggregate(
+                        total_cajas=Coalesce(Sum('cajas_enviadas'), 0)
+                    )['total_cajas'] or 0
+                    
+                    # Paso 3: Calcular stock actual (entradas - salidas)
+                    stock_actual = max(0, int(entradas - salidas))
+                    
+                    # Paso 4: Actualizar o crear registro en bodega
+                    bodega, created = Bodega.objects.get_or_create(
+                        presentacion=presentacion,
+                        defaults={'stock_actual': stock_actual}
+                    )
+                    
+                    # Paso 5: Actualizar el registro si ya existe
+                    if not created:
+                        bodega.stock_actual = stock_actual
+                        bodega.save(update_fields=['stock_actual', 'ultima_actualizacion'])
+                    
+                    # Registrar operación para depuración
+                    import logging
+                    logger = logging.getLogger('importacion')
+                    logger.info(f"Stock recalculado para {presentacion}: Entradas={entradas}, Salidas={salidas}, Stock actual={stock_actual}")
+                    
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger('importacion')
+                    logger.error(f"Error al actualizar stock de presentación {presentacion_id}: {e}")
+    
+    finally:
+        _actualizando_inventario = False
 
 
 # Variables globales para evitar recursión

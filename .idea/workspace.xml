@@ -4,11 +4,31 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Punto de control funcional 2. OK">
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0022_detallepedido_valor_nc_usd_manual.py" afterDir="false" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Punto de control funcional 3. 7 AM">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/signals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/static/css/dashboard/utilidades.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/dashboard/utilidades.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/static/css/ventas/lista_ventas.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/ventas/lista_ventas.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/static/css/ventas/ventas.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/ventas/ventas.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/dashboard/utilidades.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/dashboard/utilidades.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_factura.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_factura.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_rectificativa.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_rectificativa.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/lista_ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/lista_ventas.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/ventas.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/views_dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_dashboard.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/importacion/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/signals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/static/css/aduana/gastos_aduana.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/aduana/gastos_aduana.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/static/css/carga/gastos_carga.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/carga/gastos_carga.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/static/css/pedidos/lista_pedidos.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/pedidos/lista_pedidos.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/static/css/pedidos/pedidos.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/pedidos/pedidos.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/static/css/pedidos/solicitar_pedido.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/pedidos/solicitar_pedido.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf_aduana.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf_aduana.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/templates/pedidos/lista_pedidos.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/pedidos/lista_pedidos.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/importacion/templates/pedidos/pedidos.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/pedidos/pedidos.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/importacion/views_pedidos.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_pedidos.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -166,7 +186,10 @@
       <workItem from="1743434778193" duration="1681000" />
       <workItem from="1743437678094" duration="7427000" />
       <workItem from="1743458979448" duration="624000" />
-      <workItem from="1743464597658" duration="12100000" />
+      <workItem from="1743464597658" duration="12534000" />
+      <workItem from="1743507820264" duration="1871000" />
+      <workItem from="1743527427440" duration="13942000" />
+      <workItem from="1743617542705" duration="9528000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -248,7 +271,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743478229982</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Punto de control funcional 3. 7 AM">
+      <option name="closed" value="true" />
+      <created>1743482239688</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1743482239688</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -278,6 +309,7 @@
     <MESSAGE value="Actualizaciones." />
     <MESSAGE value="Punto de control funcional." />
     <MESSAGE value="Punto de control funcional 2. OK" />
-    <option name="LAST_COMMIT_MESSAGE" value="Punto de control funcional 2. OK" />
+    <MESSAGE value="Punto de control funcional 3. 7 AM" />
+    <option name="LAST_COMMIT_MESSAGE" value="Punto de control funcional 3. 7 AM" />
   </component>
 </project>

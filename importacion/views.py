@@ -1,7 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
-from .models import Bodega
+from django.contrib import messages
+from django.core.exceptions import ValidationError
+from .models import Bodega, Pedido
 from django.utils import timezone
+from django.db import transaction
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -39,5 +43,21 @@ def bodega_json(request):
     return JsonResponse({
         'bodegas': bodegas_data
     })
+
+@login_required
+def eliminar_pedido(request, pedido_id):
+    """Elimina un pedido si no tiene productos vendidos"""
+    pedido = get_object_or_404(Pedido, pk=pedido_id)
+    
+    try:
+        with transaction.atomic():
+            pedido.delete()
+        messages.success(request, f'Pedido #{pedido_id} eliminado correctamente.')
+    except ValidationError as e:
+        messages.error(request, str(e))
+    except Exception as e:
+        messages.error(request, f'Error al eliminar el pedido: {str(e)}')
+    
+    return redirect('importacion:lista_pedidos')
 
 
