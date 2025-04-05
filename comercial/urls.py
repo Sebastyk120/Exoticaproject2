@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views_clientes, views_ventas, views_dashboard
+from . import views_clientes, views_ventas, views_dashboard, views_enviar_correos, views
 
 app_name = 'comercial'
 
@@ -25,6 +25,12 @@ urlpatterns = [
     path('ventas/<int:venta_id>/generar-albaran-cliente/', views_ventas.generar_albaran_cliente, name='generar_albaran_cliente'),
     path('validar-stock/<int:presentacion_id>/<int:cajas_enviadas>/', views_ventas.validar_stock, name='validar_stock'),
     path('estado-cuenta/cliente/<int:cliente_id>/', views_clientes.estado_cuenta_cliente, name='estado_cuenta_cliente'),
+    # Añadir la ruta para acceso por token
+    path('client-statement/<str:token>/', views_clientes.estado_cuenta_cliente_token, name='estado_cuenta_cliente_token'),
+    path('estado-cuenta/cliente/<int:cliente_id>/', views_clientes.estado_cuenta_cliente, name='estado_cuenta_cliente'),
+    
+    # Nueva ruta directa para acceder a los albaranes (más fácil para JavaScript)
+    path('generar_albaran_directo/<int:venta_id>/', views_ventas.generar_albaran, name='generar_albaran_directo'),
     
     # Dashboard URLs
     path('dashboard/utilidades/', views_dashboard.dashboard_utilidades, name='dashboard_utilidades'),
@@ -38,4 +44,16 @@ urlpatterns = [
     path('api/dashboard/totales-globales/', views_dashboard.api_totales_globales, name='api_totales_globales'),
     # Add the missing URL for semanas-disponibles
     path('api/dashboard/semanas-disponibles/', views_dashboard.api_semanas_disponibles, name='api_semanas_disponibles'),
+    path('enviar_factura_email/<int:venta_id>/', views_enviar_correos.enviar_factura_email, name='enviar_factura_email'),
+    path('enviar_albaran_email/<int:venta_id>/', views_enviar_correos.enviar_albaran_email, name='enviar_albaran_email'),
+    path('enviar_rectificativa_email/<int:venta_id>/', views_enviar_correos.enviar_rectificativa_email, name='enviar_rectificativa_email'),
+    
+    # URLs para el envío de albaranes a agencias de aduana
+    path('get_agencias_aduana/', views_enviar_correos.get_agencias_aduana, name='get_agencias_aduana'),
+    path('get_ventas_recientes/', views_enviar_correos.get_ventas_recientes, name='get_ventas_recientes'),
+    path('enviar_albaranes_aduana/', views_enviar_correos.enviar_albaranes_aduana, name='enviar_albaranes_aduana'),
+
+    # URLs para descarga directa de facturas/rectificativas    path('generar-factura/<int:venta_id>/', views_ventas.generar_factura_download, name='generar-factura'),    path('generar-rectificativa/<int:venta_id>/', views_ventas.generar_rectificativa_download, name='generar-rectificativa'),    # Nueva URLs para acceso por token a facturas y rectificativas
+    path('cliente-factura/<int:venta_id>/<str:token>/', views_ventas.factura_cliente_token, name='factura_cliente_token'),
+    path('cliente-rectificativa/<int:venta_id>/<str:token>/', views_ventas.rectificativa_cliente_token, name='rectificativa_cliente_token'),
 ]

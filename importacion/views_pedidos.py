@@ -9,10 +9,12 @@ from django.utils.dateparse import parse_date
 from decimal import Decimal
 from django.db.models import Q, Sum
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.decorators import login_required
 from .models import Pedido, DetallePedido, Exportador, Bodega
 from productos.models import Presentacion, ListaPreciosImportacion
 
 
+@login_required
 def lista_pedidos(request):
     """View to list all orders with search and filter functionality"""
     # Iniciar con todos los pedidos
@@ -58,6 +60,7 @@ def lista_pedidos(request):
     })
 
 
+@login_required
 def detalle_pedido(request, pedido_id=None):
     """View to display and edit a specific order"""
     if pedido_id:
@@ -102,6 +105,7 @@ def detalle_pedido(request, pedido_id=None):
     return render(request, 'pedidos/pedidos.html', context)
 
 
+@login_required
 @require_POST
 def guardar_pedido(request, pedido_id=None):
     """Handle saving the main order data"""
@@ -183,6 +187,7 @@ def guardar_pedido(request, pedido_id=None):
         return redirect('importacion:detalle_pedido', pedido_id=pedido_id)
 
 
+@login_required
 @require_POST
 def guardar_detalle(request, pedido_id, detalle_id=None):
     """Handle saving an order detail item"""
@@ -216,6 +221,7 @@ def guardar_detalle(request, pedido_id, detalle_id=None):
     return redirect('importacion:detalle_pedido', pedido_id=pedido.id)
 
 
+@login_required
 @require_POST
 def guardar_detalles_batch(request, pedido_id):
     """Handle saving multiple order details at once"""
@@ -550,7 +556,7 @@ def obtener_precio_presentacion(request, presentacion_id, exportador_id):
             exportador_id=exportador_id
         ).first()
 
-        if precio:
+        if (precio):
             # Si existe un precio para esta combinación de presentación y exportador
             return JsonResponse({
                 'success': True,
@@ -574,6 +580,7 @@ def obtener_precio_presentacion(request, presentacion_id, exportador_id):
         }, status=500)
 
 
+@login_required
 def solicitar_pedido(request, pedido_id):
     """View to display the order request form"""
     pedido = get_object_or_404(Pedido, pk=pedido_id)

@@ -7,6 +7,11 @@ from num2words import num2words
 
 register = template.Library()
 
+@register.filter(name='get_item')
+def get_item(dictionary, key):
+    """Get an item from dictionary by key."""
+    return dictionary.get(key, '')
+
 @register.filter
 def filter_by_id(queryset, id_value):
     """Filter a queryset by ID and return the filtered queryset"""

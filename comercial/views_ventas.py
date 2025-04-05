@@ -7,11 +7,13 @@ from django.utils.dateparse import parse_date
 from decimal import Decimal
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.decorators import login_required
 from .models import Venta, DetalleVenta, Cliente, BalanceCliente
 from productos.models import Presentacion, ListaPreciosVentas
 from django.core.exceptions import ValidationError
 from importacion.models import Bodega
 
+@login_required
 def lista_ventas(request):
     """View to list all sales with search and filter functionality"""
     # Iniciar con todas las ventas
@@ -56,6 +58,7 @@ def lista_ventas(request):
         'page_obj': ventas,
     })
 
+@login_required
 def detalle_venta(request, venta_id=None):
     """View to display and edit a specific sale"""
     if venta_id:
@@ -92,6 +95,7 @@ def detalle_venta(request, venta_id=None):
     
     return render(request, 'ventas/ventas.html', context)
 
+@login_required
 @require_POST
 def guardar_venta(request, venta_id=None):
     """Handle saving the main sale data"""
@@ -120,6 +124,7 @@ def guardar_venta(request, venta_id=None):
     messages.success(request, f'Venta {venta.id} guardada correctamente')
     return redirect('comercial:detalle_venta', venta_id=venta.id)
 
+@login_required
 @require_POST
 def guardar_detalle(request, venta_id, detalle_id=None):
     """Handle saving a sale detail item"""
@@ -151,6 +156,7 @@ def guardar_detalle(request, venta_id, detalle_id=None):
     messages.success(request, 'Detalle de venta guardado correctamente')
     return redirect('comercial:detalle_venta', venta_id=venta.id)
 
+@login_required
 @require_POST
 def guardar_detalles_batch(request, venta_id):
     """Handle saving multiple sale details at once"""
@@ -236,6 +242,7 @@ def guardar_detalles_batch(request, venta_id):
     messages.success(request, 'Detalles de la venta guardados correctamente')
     return redirect('comercial:detalle_venta', venta_id=venta.id)
 
+@login_required
 def nueva_venta(request):
     """View to create a new sale"""
     context = {
@@ -246,6 +253,7 @@ def nueva_venta(request):
     }
     return render(request, 'ventas/ventas.html', context)
 
+@login_required
 def obtener_detalles_venta(request, venta_id):
     """Vista para obtener los detalles de una venta en formato JSON para el modal"""
     venta = get_object_or_404(Venta, pk=venta_id)
@@ -280,6 +288,7 @@ def obtener_detalles_venta(request, venta_id):
         'detalles': detalles_data
     })
 
+@login_required
 def obtener_precio_presentacion(request, presentacion_id, cliente_id):
     """API endpoint to get the price for a presentation from a specific client"""
     # Validar IDs
@@ -335,6 +344,7 @@ def obtener_precio_presentacion(request, presentacion_id, cliente_id):
             'message': f'Error al obtener el precio: {str(e)}'
         }, status=500)
 
+@login_required
 def generar_factura(request, venta_id):
     """View to generate the invoice for a sale"""
     venta = get_object_or_404(Venta, pk=venta_id)
@@ -345,6 +355,7 @@ def generar_factura(request, venta_id):
         'detalles': detalles,
     })
 
+@login_required
 def generar_rectificativa(request, venta_id):
     """View to generate the rectification invoice for a sale"""
     venta = get_object_or_404(Venta, pk=venta_id)
@@ -377,6 +388,7 @@ def generar_rectificativa(request, venta_id):
         'detalles': detalles,
     })
 
+@login_required
 def validar_stock(request, presentacion_id, cajas_enviadas):
     """API endpoint para validar el stock disponible"""
     try:
@@ -442,6 +454,7 @@ def validar_stock(request, presentacion_id, cajas_enviadas):
             'message': f'Error al validar stock: {str(e)}'
         }, status=500)
 
+@login_required
 def generar_albaran(request, venta_id):
     """View to generate the delivery note (albarán) for a sale"""
     venta = get_object_or_404(Venta, pk=venta_id)
@@ -452,6 +465,7 @@ def generar_albaran(request, venta_id):
         'detalles': detalles,
     })
 
+@login_required
 def generar_albaran_cliente(request, venta_id):
     """View to generate a client delivery note (albarán) with prices for a sale"""
     venta = get_object_or_404(Venta, pk=venta_id)
@@ -460,4 +474,57 @@ def generar_albaran_cliente(request, venta_id):
     return render(request, 'ventas/generar_albaran_cliente.html', {
         'venta': venta,
         'detalles': detalles,
+    })
+
+def factura_cliente_token(request, venta_id, token):
+    """Vista para que clientes puedan ver y descargar facturas mediante token"""
+    # Verificar que el token sea válido
+    cliente = get_object_or_404(Cliente, token_acceso=token)
+    
+    # Verificar que la venta corresponda al cliente que tiene el token
+    venta = get_object_or_404(Venta, pk=venta_id, cliente=cliente)
+    
+    detalles = DetalleVenta.objects.filter(venta=venta).select_related('presentacion', 'presentacion__fruta')
+    
+    return render(request, 'ventas/factura_cliente_token.html', {
+        'venta': venta,
+        'detalles': detalles,
+        'token': token
+    })
+
+def rectificativa_cliente_token(request, venta_id, token):
+    """Vista para que clientes puedan ver y descargar facturas rectificativas mediante token"""
+    # Verificar que el token sea válido
+    cliente = get_object_or_404(Cliente, token_acceso=token)
+    
+    # Verificar que la venta corresponda al cliente que tiene el token
+    venta = get_object_or_404(Venta, pk=venta_id, cliente=cliente)
+    
+    # Solo permitir acceso si la venta tiene una nota de crédito
+    if not venta.numero_nc:
+        messages.error(request, "Esta venta no tiene una factura rectificativa asociada.")
+        return redirect('comercial:factura_cliente_token', venta_id=venta_id, token=token)
+    
+    detalles = DetalleVenta.objects.filter(venta=venta).select_related('presentacion', 'presentacion__fruta')
+    
+    # Calculate base_imponible for each detail
+    for detalle in detalles:
+        if detalle.valor_abono_euro:
+            detalle.base_imponible = detalle.valor_abono_euro / Decimal('1.04')
+        else:
+            detalle.base_imponible = Decimal('0')
+    
+    # If iva_abono doesn't exist as a model field, calculate it
+    if not hasattr(venta, 'iva_abono'):
+        venta.iva_abono = (venta.valor_total_abono_euro / Decimal('1.04')) * Decimal('0.04')
+        venta.total_base_imponible = (venta.valor_total_abono_euro / Decimal('1.04'))
+    
+    # If valor_total_abono_euro_con_iva doesn't exist as a model field, calculate it
+    if not hasattr(venta, 'valor_total_abono_euro_con_iva'):
+        venta.valor_total_abono_euro_con_iva = venta.valor_total_abono_euro
+        
+    return render(request, 'ventas/rectificativa_cliente_token.html', {
+        'venta': venta,
+        'detalles': detalles,
+        'token': token
     })

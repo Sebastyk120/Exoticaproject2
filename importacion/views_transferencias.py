@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.decorators import login_required
 
 from .models import (
     TranferenciasExportador, TranferenciasAduana, TranferenciasCarga,
@@ -14,6 +15,7 @@ from .models import (
 )
 from comercial.models import Cliente, TranferenciasCliente, BalanceCliente
 
+@login_required
 def transferencias_view(request):
     """View to display all transfers in a tabbed interface with pagination"""
     # Get active tab from request or default to 'exportador'
@@ -138,6 +140,7 @@ def transferencias_view(request):
 
 # -------------------- Transferencias Exportador --------------------
 
+@login_required
 @require_POST
 def crear_transferencia_exportador(request):
     """Create a new TranferenciasExportador instance"""
@@ -169,6 +172,7 @@ def crear_transferencia_exportador(request):
     # Redirect to the correct tab
     return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=exportador')
 
+@login_required
 @require_POST
 def editar_transferencia_exportador(request, pk):
     """Edit an existing TranferenciasExportador instance"""
@@ -198,6 +202,7 @@ def editar_transferencia_exportador(request, pk):
     # Redirect to the correct tab
     return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=exportador')
 
+@login_required
 @require_POST
 def eliminar_transferencia_exportador(request, pk):
     """Delete a TranferenciasExportador instance"""
@@ -213,6 +218,7 @@ def eliminar_transferencia_exportador(request, pk):
 
 # -------------------- Transferencias Aduana --------------------
 
+@login_required
 @require_POST
 def crear_transferencia_aduana(request):
     """Create a new TranferenciasAduana instance"""
@@ -233,6 +239,7 @@ def crear_transferencia_aduana(request):
     # Use the explicit redirect with tab parameter instead of hash
     return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=aduana')
 
+@login_required
 @require_POST
 def editar_transferencia_aduana(request, pk):
     """Edit an existing TranferenciasAduana instance"""
@@ -252,6 +259,7 @@ def editar_transferencia_aduana(request, pk):
     # Use the explicit redirect with tab parameter instead of hash
     return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=aduana')
 
+@login_required
 @require_POST
 def eliminar_transferencia_aduana(request, pk):
     """Delete a TranferenciasAduana instance"""
@@ -267,6 +275,7 @@ def eliminar_transferencia_aduana(request, pk):
 
 # -------------------- Transferencias Carga --------------------
 
+@login_required
 @require_POST
 def crear_transferencia_carga(request):
     """Create a new TranferenciasCarga instance"""
@@ -298,6 +307,7 @@ def crear_transferencia_carga(request):
     # Use the explicit redirect with tab parameter instead of hash
     return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=carga')
 
+@login_required
 @require_POST
 def editar_transferencia_carga(request, pk):
     """Edit an existing TranferenciasCarga instance"""
@@ -327,6 +337,7 @@ def editar_transferencia_carga(request, pk):
     # Use the explicit redirect with tab parameter instead of hash
     return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=carga')
 
+@login_required
 @require_POST
 def eliminar_transferencia_carga(request, pk):
     """Delete a TranferenciasCarga instance"""
@@ -342,6 +353,7 @@ def eliminar_transferencia_carga(request, pk):
 
 # -------------------- Transferencias Cliente --------------------
 
+@login_required
 @require_POST
 def crear_transferencia_cliente(request):
     """Create a new TranferenciasCliente instance"""
@@ -362,6 +374,7 @@ def crear_transferencia_cliente(request):
     # Use the explicit redirect with tab parameter
     return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=cliente')
 
+@login_required
 @require_POST
 def editar_transferencia_cliente(request, pk):
     """Edit an existing TranferenciasCliente instance"""
@@ -381,6 +394,7 @@ def editar_transferencia_cliente(request, pk):
     # Use the explicit redirect with tab parameter
     return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=cliente')
 
+@login_required
 @require_POST
 def eliminar_transferencia_cliente(request, pk):
     """Delete a TranferenciasCliente instance"""

@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,8 +11,56 @@
     <link rel="stylesheet" href="{% static 'css/ventas/factura_venta.css' %}">
     <!-- html2pdf library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Bootstrap CSS para el modal -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Estilos adicionales para el modal */
+        .modal-dialog {
+            max-width: 550px;
+        }
+        .agency-selection {
+            margin-bottom: 20px;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            font-size: 20px;
+            display: none;
+        }
+        .albaran-selection {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .albaran-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .albaran-item:last-child {
+            border-bottom: none;
+        }
+        .albaran-item:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
 </head>
 <body>
+    <div class="loading-overlay">
+        <div><i class="fas fa-spinner fa-spin"></i> Enviando correo...</div>
+    </div>
+
     <div class="container">
         <div class="controls">
             <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn btn-secondary">
@@ -19,6 +68,9 @@
             </a>
             <button id="downloadPdf" class="btn btn-primary">
                 <i class="fas fa-file-pdf"></i> Descargar PDF
+            </button>
+            <button id="sendEmail" class="btn btn-success">
+                <i class="fas fa-envelope"></i> Enviar por Email
             </button>
         </div>
 
@@ -76,8 +128,8 @@
                         <tr>
                             <td>{{ detalle.presentacion.fruta.nombre }}</td>
                             <td>{{ detalle.presentacion.kilos }} kg</td>
-                            <td>{{ detalle.kilos|floatformat:2 }}</td>
-                            <td>{{ detalle.cajas_enviadas }}</td>
+                            <td>{{ detalle.kilos|format_number }}</td>
+                            <td>{{ detalle.cajas_enviadas|format_integer }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -88,7 +140,7 @@
                 <div class="summary-table">
                     <div class="summary-row total">
                         <div class="summary-label">TOTAL CAJAS:</div>
-                        <div class="summary-value">{{ venta.total_cajas_pedido }}</div>
+                        <div class="summary-value">{{ venta.total_cajas_pedido|format_integer }}</div>
                     </div>
                 </div>
             </div>
@@ -116,6 +168,76 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal para seleccionar agencia de aduana y múltiples albaranes -->
+    <div class="modal fade" id="aduanaModal" tabindex="-1" aria-labelledby="aduanaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="aduanaModalLabel">Enviar Albarán(es) a Agencia de Aduana</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="agency-selection mb-4">
+                        <label for="agenciaAduana" class="form-label">Seleccionar Agencia de Aduana:</label>
+                        <select class="form-select" id="agenciaAduana">
+                            <option value="">Cargando agencias...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Seleccionar Albaranes para Enviar:</label>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="form-check ms-2">
+                                <input class="form-check-input" type="checkbox" id="selectAllAlbaranes">
+                                <label class="form-check-label" for="selectAllAlbaranes">
+                                    Seleccionar todos
+                                </label>
+                            </div>
+                            <div class="ms-auto">
+                                <input type="text" class="form-control form-control-sm" id="searchAlbaranes" placeholder="Buscar albaranes...">
+                            </div>
+                        </div>
+                        
+                        <div class="albaran-selection" id="albaranesContainer">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <p class="mt-2">Cargando albaranes recientes...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="text-muted small">
+                            <i class="fas fa-info-circle me-1"></i> Se mostrarán los albaranes más recientes. Seleccione los que desee enviar.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label" for="emailSubject">Asunto del correo:</label>
+                        <input type="text" class="form-control" id="emailSubject" 
+                               value="Albaranes para trámites de aduana - L&M Exotic Fruit">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label" for="emailMessage">Mensaje adicional (opcional):</label>
+                        <textarea class="form-control" id="emailMessage" rows="3" 
+                                  placeholder="Escriba aquí cualquier información adicional..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="enviarAlbaranes" disabled>
+                        Enviar <span id="selectedCount">(0 seleccionados)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS y Popper.js para el modal -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -157,6 +279,322 @@
                         button.disabled = false;
                     }, 1500);
                 });
+            });
+            
+            // Función para obtener el token CSRF
+            function getCsrfToken() {
+                let csrftoken = document.cookie.split(';')
+                    .map(c => c.trim())
+                    .find(c => c.startsWith('csrftoken='));
+                    
+                if (csrftoken) {
+                    return csrftoken.split('=')[1];
+                }
+                
+                const csrfElement = document.querySelector('[name=csrfmiddlewaretoken]');
+                if (csrfElement) {
+                    return csrfElement.value;
+                }
+                
+                const metaToken = document.querySelector('meta[name="csrf-token"]');
+                if (metaToken) {
+                    return metaToken.getAttribute('content');
+                }
+                
+                console.error('CSRF token no encontrado. Añadiendo uno de seguridad.');
+                const meta = document.createElement('meta');
+                meta.name = 'csrf-token';
+                meta.content = '{{ csrf_token }}';
+                document.head.appendChild(meta);
+                return '{{ csrf_token }}';
+            }
+            
+            // Función para actualizar el contador de albaranes seleccionados
+            function updateSelectedCount() {
+                const selectedCheckboxes = document.querySelectorAll('#albaranesContainer input[type="checkbox"]:checked');
+                const count = selectedCheckboxes.length;
+                document.getElementById('selectedCount').textContent = `(${count} seleccionado${count !== 1 ? 's' : ''})`;
+                document.getElementById('enviarAlbaranes').disabled = count === 0;
+            }
+            
+            // Función para filtrar albaranes según búsqueda
+            function filterAlbaranes() {
+                const searchTerm = document.getElementById('searchAlbaranes').value.toLowerCase();
+                const items = document.querySelectorAll('.albaran-item');
+                
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Manejar el botón para enviar por email
+            document.getElementById('sendEmail').addEventListener('click', function() {
+                // Cargar las agencias de aduana antes de mostrar el modal
+                fetch('/comercial/get_agencias_aduana/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const select = document.getElementById('agenciaAduana');
+                        select.innerHTML = '';
+                        
+                        if (data.length === 0) {
+                            const option = document.createElement('option');
+                            option.value = '';
+                            option.textContent = 'No hay agencias disponibles';
+                            select.appendChild(option);
+                        } else {
+                            const defaultOption = document.createElement('option');
+                            defaultOption.value = '';
+                            defaultOption.textContent = 'Seleccione una agencia...';
+                            select.appendChild(defaultOption);
+                            
+                            data.forEach(agencia => {
+                                const option = document.createElement('option');
+                                option.value = agencia.id;
+                                option.textContent = agencia.nombre;
+                                select.appendChild(option);
+                            });
+                        }
+                        
+                        // Cargar los albaranes recientes
+                        fetch('/comercial/get_ventas_recientes/')
+                            .then(response => response.json())
+                            .then(data => {
+                                const container = document.getElementById('albaranesContainer');
+                                container.innerHTML = '';
+                                
+                                if (data.length === 0) {
+                                    container.innerHTML = '<div class="text-center py-3">No hay albaranes recientes disponibles</div>';
+                                } else {
+                                    // Marcar el albarán actual como preseleccionado
+                                    const currentAlbaranId = {{ venta.id }};
+                                    
+                                    data.forEach(venta => {
+                                        const isCurrentAlbaran = venta.id === currentAlbaranId;
+                                        const item = document.createElement('div');
+                                        item.className = 'albaran-item';
+                                        item.innerHTML = `
+                                            <div class="form-check">
+                                                <input class="form-check-input albaran-checkbox" type="checkbox" 
+                                                       value="${venta.id}" id="albaran-${venta.id}" 
+                                                       ${isCurrentAlbaran ? 'checked' : ''}>
+                                                <label class="form-check-label" for="albaran-${venta.id}">
+                                                    #${venta.id} - ${venta.cliente} - ${venta.fecha}
+                                                    ${isCurrentAlbaran ? ' <span class="badge bg-primary">Actual</span>' : ''}
+                                                </label>
+                                            </div>
+                                        `;
+                                        container.appendChild(item);
+                                    });
+                                    
+                                    // Configurar eventos para checkboxes
+                                    document.querySelectorAll('.albaran-checkbox').forEach(checkbox => {
+                                        checkbox.addEventListener('change', updateSelectedCount);
+                                    });
+                                    
+                                    // Actualizar contador inicial
+                                    updateSelectedCount();
+                                }
+                            })
+                            .catch(error => {
+                                const container = document.getElementById('albaranesContainer');
+                                container.innerHTML = `<div class="text-center py-3 text-danger">
+                                    Error al cargar albaranes: ${error.message}
+                                </div>`;
+                            });
+                        
+                        // Mostrar el modal
+                        const aduanaModal = new bootstrap.Modal(document.getElementById('aduanaModal'));
+                        aduanaModal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error al cargar las agencias:', error);
+                        alert('Error al cargar las agencias de aduana');
+                    });
+            });
+            
+            // Manejar el botón "Seleccionar todos"
+            document.getElementById('selectAllAlbaranes').addEventListener('change', function() {
+                const isChecked = this.checked;
+                document.querySelectorAll('.albaran-checkbox').forEach(checkbox => {
+                    if (checkbox.parentElement.parentElement.style.display !== 'none') {
+                        checkbox.checked = isChecked;
+                    }
+                });
+                updateSelectedCount();
+            });
+            
+            // Configurar búsqueda de albaranes
+            document.getElementById('searchAlbaranes').addEventListener('input', filterAlbaranes);
+            
+            // Manejar el envío de albaranes
+            document.getElementById('enviarAlbaranes').addEventListener('click', function() {
+                const agenciaId = document.getElementById('agenciaAduana').value;
+                const selectedAlbaranes = Array.from(
+                    document.querySelectorAll('.albaran-checkbox:checked')
+                ).map(checkbox => parseInt(checkbox.value));
+                const emailSubject = document.getElementById('emailSubject').value.trim();
+                const emailMessage = document.getElementById('emailMessage').value.trim();
+                
+                if (!agenciaId) {
+                    alert('Por favor, seleccione una agencia de aduana');
+                    return;
+                }
+                
+                if (selectedAlbaranes.length === 0) {
+                    alert('Por favor, seleccione al menos un albarán para enviar');
+                    return;
+                }
+                
+                // Mostrar overlay de carga
+                document.querySelector('.loading-overlay').style.display = 'flex';
+                
+                // Generar PDFs para todos los albaranes seleccionados
+                const generateAlbaranPDFs = async () => {
+                    const pdfs = [];
+                    
+                    for (const ventaId of selectedAlbaranes) {
+                        // Si es el albarán actual, podemos generar su PDF directamente
+                        if (ventaId === {{ venta.id }}) {
+                            const element = document.getElementById('invoice');
+                            const options = {
+                                ...pdfOptions, 
+                                filename: `Albaran_${ventaId}.pdf`
+                            };
+                            
+                            try {
+                                const pdf = await html2pdf().set(options).from(element).outputPdf('blob');
+                                pdfs.push({
+                                    id: ventaId, 
+                                    pdf: pdf
+                                });
+                            } catch (error) {
+                                throw new Error(`Error al generar PDF del albarán #${ventaId}: ${error.message}`);
+                            }
+                        } else {
+                            // Para otros albaranes, hay que obtener su HTML y generar el PDF
+                            try {
+                                // Usar la nueva ruta directa para los albaranes
+                                const response = await fetch(`/comercial/generar_albaran_directo/${ventaId}/`);
+                                if (!response.ok) {
+                                    throw new Error(`Error HTTP ${response.status}`);
+                                }
+                                
+                                const html = await response.text();
+                                
+                                // Crear un div temporal para el documento HTML
+                                const tempDiv = document.createElement('div');
+                                tempDiv.style.position = 'absolute';
+                                tempDiv.style.left = '-9999px';
+                                tempDiv.innerHTML = html;
+                                document.body.appendChild(tempDiv);
+                                
+                                // Extraer el elemento que contiene el albarán
+                                const invoice = tempDiv.querySelector('#invoice');
+                                
+                                if (!invoice) {
+                                    document.body.removeChild(tempDiv);
+                                    throw new Error(`No se pudo encontrar el contenido del albarán #${ventaId}`);
+                                }
+                                
+                                const options = {
+                                    ...pdfOptions, 
+                                    filename: `Albaran_${ventaId}.pdf`
+                                };
+                                
+                                const pdf = await html2pdf().set(options).from(invoice).outputPdf('blob');
+                                document.body.removeChild(tempDiv);
+                                
+                                pdfs.push({
+                                    id: ventaId, 
+                                    pdf: pdf
+                                });
+                                
+                            } catch (error) {
+                                throw new Error(`Error al procesar albarán #${ventaId}: ${error.message}`);
+                            }
+                        }
+                    }
+                    
+                    return pdfs;
+                };
+                
+                // Procesar la generación y el envío
+                generateAlbaranPDFs()
+                    .then(pdfObjects => {
+                        // Convertir los PDFs a base64
+                        const pdfsBase64Promises = pdfObjects.map(obj => {
+                            return new Promise((resolve, reject) => {
+                                const reader = new FileReader();
+                                reader.onloadend = () => resolve({
+                                    id: obj.id, 
+                                    base64: reader.result
+                                });
+                                reader.onerror = reject;
+                                reader.readAsDataURL(obj.pdf);
+                            });
+                        });
+                        
+                        return Promise.all(pdfsBase64Promises);
+                    })
+                    .then(pdfsBase64 => {
+                        // Crear el FormData para enviar
+                        const formData = new FormData();
+                        formData.append('agencia_id', agenciaId);
+                        formData.append('email_subject', emailSubject);
+                        formData.append('email_message', emailMessage);
+                        formData.append('current_venta_id', '{{ venta.id }}');  // Añadir el ID de la venta actual
+                        
+                        // Añadir IDs de las ventas
+                        formData.append('venta_ids', JSON.stringify(selectedAlbaranes));
+                        
+                        // Añadir los PDFs en base64
+                        pdfsBase64.forEach((pdf, index) => {
+                            formData.append(`pdf_id_${index}`, pdf.id);
+                            formData.append(`pdf_data_${index}`, pdf.base64);
+                        });
+                        
+                        // Obtener el token CSRF
+                        const csrftoken = getCsrfToken();
+                        
+                        // Enviar al servidor
+                        return fetch('/comercial/enviar_albaranes_aduana/', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRFToken': csrftoken,
+                            },
+                            credentials: 'same-origin'
+                        });
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error(`Error HTTP ${response.status}: ${text}`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        document.querySelector('.loading-overlay').style.display = 'none';
+                        
+                        if (data.success) {
+                            // Cerrar el modal
+                            bootstrap.Modal.getInstance(document.getElementById('aduanaModal')).hide();
+                            alert(`${data.message} enviados correctamente a: ${data.emails}`);
+                        } else {
+                            alert('Error al enviar los albaranes: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        document.querySelector('.loading-overlay').style.display = 'none';
+                        console.error('Error completo:', error);
+                        alert('Error al procesar los albaranes: ' + error.message);
+                    });
             });
         });
     </script>

@@ -23,6 +23,9 @@
             <button id="downloadPdf" class="btn btn-primary">
                 <i class="fas fa-file-pdf"></i> Descargar PDF
             </button>
+            <button id="sendEmail" class="btn btn-success">
+                <i class="fas fa-envelope"></i> Enviar por Email
+            </button>
         </div>
 
         <div id="order" class="invoice-container">
@@ -169,6 +172,111 @@
                     }, 1500);
                 });
             });
+
+            // Nueva función para enviar por email
+            document.getElementById('sendEmail').addEventListener('click', function() {
+                // Mostrar mensaje de procesamiento
+                const button = this;
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando Email...';
+                button.disabled = true;
+
+                // Obtener el elemento que contiene el pedido
+                const element = document.getElementById('order');
+                
+                // Generar PDF con html2pdf
+                html2pdf().set(pdfOptions).from(element).output('blob').then(pdfBlob => {
+                    // Convertir el PDF a base64
+                    const reader = new FileReader();
+                    reader.onloadend = function() {
+                        const pdfBase64 = reader.result;
+                        
+                        // Crear un FormData para enviar el PDF
+                        const formData = new FormData();
+                        formData.append('pdf_data', pdfBase64);
+                        
+                        // Obtener el token CSRF correctamente
+                        const csrftoken = getCsrfToken();
+                        
+                        // Enviar el PDF al servidor
+                        fetch(`/importacion/enviar_pedido_email/{{ pedido.id }}/`, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRFToken': csrftoken,
+                            },
+                            credentials: 'same-origin'
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.text().then(text => {
+                                    throw new Error(`Error HTTP ${response.status}: ${text}`);
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                alert('Solicitud de pedido enviada correctamente a: ' + data.emails);
+                            } else {
+                                alert('Error al enviar la solicitud de pedido: ' + data.error);
+                            }
+                            // Restaurar el botón
+                            setTimeout(() => {
+                                button.innerHTML = originalText;
+                                button.disabled = false;
+                            }, 1000);
+                        })
+                        .catch(error => {
+                            console.error('Error completo:', error);
+                            alert('Error al enviar la solicitud de pedido: ' + error);
+                            // Restaurar el botón
+                            button.innerHTML = originalText;
+                            button.disabled = false;
+                        });
+                    };
+                    
+                    reader.readAsDataURL(pdfBlob);
+                })
+                .catch(error => {
+                    alert('Error al generar el PDF: ' + error);
+                    // Restaurar el botón
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+            });
+            
+            // Función para obtener el token CSRF
+            function getCsrfToken() {
+                // Primera opción: buscar en la cookie directamente
+                let csrftoken = document.cookie.split(';')
+                    .map(c => c.trim())
+                    .find(c => c.startsWith('csrftoken='));
+                    
+                if (csrftoken) {
+                    return csrftoken.split('=')[1];
+                }
+                
+                // Segunda opción: buscar en las meta tags
+                const csrfElement = document.querySelector('[name=csrfmiddlewaretoken]');
+                if (csrfElement) {
+                    return csrfElement.value;
+                }
+                
+                // Tercera opción: meta tag csrf-token
+                const metaToken = document.querySelector('meta[name="csrf-token"]');
+                if (metaToken) {
+                    return metaToken.getAttribute('content');
+                }
+                
+                console.error('CSRF token no encontrado. Añadiendo uno de seguridad.');
+                // Si no encuentras el token, añade este tag al HTML
+                const meta = document.createElement('meta');
+                meta.name = 'csrf-token';
+                meta.content = '{{ csrf_token }}';
+                document.head.appendChild(meta);
+                return '{{ csrf_token }}';
+            }
         });
     </script>
 </body>

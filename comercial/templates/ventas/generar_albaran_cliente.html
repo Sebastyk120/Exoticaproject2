@@ -1,9 +1,11 @@
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Albarán Cliente #{{ venta.id }} - {{ venta.cliente.nombre }}</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     {% load static %}
@@ -21,8 +23,11 @@
                 <i class="fas fa-file-pdf"></i> Descargar PDF
             </button>
             <a href="{% url 'comercial:generar_albaran' venta.id %}" class="btn btn-info">
-                <i class="fas fa-truck"></i> Albarán sin precios
+                <i class="fas fa-truck"></i> Albarán Aduana
             </a>
+            <button id="sendEmail" class="btn btn-success">
+                <i class="fas fa-envelope"></i> Enviar por Email
+            </button>
         </div>
 
         <div id="invoice" class="invoice-container">
@@ -82,8 +87,8 @@
                         <tr>
                             <td>{{ detalle.presentacion.fruta.nombre }}</td>
                             <td>{{ detalle.presentacion.kilos }} kg</td>
-                            <td>{{ detalle.kilos|floatformat:2 }}</td>
-                            <td>{{ detalle.cajas_enviadas }}</td>
+                            <td>{{ detalle.kilos|format_number }}</td>
+                            <td>{{ detalle.cajas_enviadas|format_integer }}</td>
                             <td>{{ detalle.valor_x_caja_euro|floatformat:2 }} €</td>
                         </tr>
                         {% endfor %}
@@ -96,7 +101,7 @@
                     <div class="summary-table">
                         <div class="summary-row total">
                             <div class="summary-label">TOTAL CAJAS:</div>
-                            <div class="summary-value">{{ venta.total_cajas_pedido }}</div>
+                            <div class="summary-value">{{ venta.total_cajas_pedido|format_integer }}</div>
                         </div>
                     </div>
                 </div>
@@ -162,6 +167,101 @@
                     }, 1500);
                 });
             });
+
+            // Nueva función para enviar el albarán por email
+            document.getElementById('sendEmail').addEventListener('click', function() {
+                const button = this;
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando Email...';
+                button.disabled = true;
+
+                const element = document.getElementById('invoice');
+
+                html2pdf().set(pdfOptions).from(element).output('blob').then(pdfBlob => {
+                    const reader = new FileReader();
+                    reader.onloadend = function() {
+                        const pdfBase64 = reader.result;
+
+                        const formData = new FormData();
+                        formData.append('pdf_data', pdfBase64);
+
+                        const csrftoken = getCsrfToken();
+
+                        fetch(`/comercial/enviar_albaran_email/{{ venta.id }}/`, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRFToken': csrftoken,
+                            },
+                            credentials: 'same-origin'
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.text().then(text => {
+                                    throw new Error(`Error HTTP ${response.status}: ${text}`);
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                alert('Albarán enviado correctamente a: ' + data.emails);
+                            } else {
+                                alert('Error al enviar el albarán: ' + data.error);
+                            }
+                            setTimeout(() => {
+                                button.innerHTML = originalText;
+                                button.disabled = false;
+                            }, 1000);
+                        })
+                        .catch(error => {
+                            console.error('Error completo:', error);
+                            alert('Error al enviar el albarán: ' + error);
+                            button.innerHTML = originalText;
+                            button.disabled = false;
+                        });
+                    };
+
+                    reader.readAsDataURL(pdfBlob);
+                })
+                .catch(error => {
+                    alert('Error al generar el PDF: ' + error);
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+            });
+
+            // Función mejorada para obtener el token CSRF
+            function getCsrfToken() {
+                // Primera opción: buscar en la cookie directamente
+                let csrftoken = document.cookie.split(';')
+                    .map(c => c.trim())
+                    .find(c => c.startsWith('csrftoken='));
+                    
+                if (csrftoken) {
+                    return csrftoken.split('=')[1];
+                }
+                
+                // Segunda opción: buscar en los inputs
+                const csrfElement = document.querySelector('[name=csrfmiddlewaretoken]');
+                if (csrfElement) {
+                    return csrfElement.value;
+                }
+                
+                // Tercera opción: meta tag csrf-token
+                const metaToken = document.querySelector('meta[name="csrf-token"]');
+                if (metaToken) {
+                    return metaToken.getAttribute('content');
+                }
+                
+                console.error('CSRF token no encontrado. Añadiendo uno de seguridad.');
+                // Si no encuentras el token, añade este tag al HTML
+                const meta = document.createElement('meta');
+                meta.name = 'csrf-token';
+                meta.content = '{{ csrf_token }}';
+                document.head.appendChild(meta);
+                return '{{ csrf_token }}';
+            }
         });
     </script>
 </body>

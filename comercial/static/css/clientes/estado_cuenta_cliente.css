@@ -15,6 +15,20 @@ body {
     margin: 0 auto;
 }
 
+/* Títulos y encabezados con Poppins */
+h1, h2, h3, h4, h5, h6, 
+.card-title, 
+.summary-amount,
+.balance-amount {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+/* Texto de cuerpo con DM Sans */
+p, div, span, td, th, li, label, input, select, textarea {
+    font-family: 'DM Sans', sans-serif;
+}
+
 /* Card Styles */
 .card {
     border: none;
@@ -62,6 +76,14 @@ body {
     font-weight: 700;
     font-size: 1.75rem;
     margin-bottom: 1.25rem;
+}
+
+/* Estilo específico para el título de la empresa */
+.card-title:has(+ .client-info) {
+    font-size: 1.9rem;
+    text-transform: none;
+    letter-spacing: -0.5px;
+    color: #0f172a;
 }
 
 .card-body h4 {
@@ -544,23 +566,6 @@ body {
     }
 }
 
-/* Facturas Proximas a Vencer Styles */
-.table-danger {
-    background-color: rgba(239, 68, 68, 0.15) !important;
-}
-
-.table-warning {
-    background-color: rgba(245, 158, 11, 0.15) !important;
-}
-
-.table-success {
-    background-color: rgba(34, 197, 94, 0.15) !important;
-}
-
-.table-secondary {
-    background-color: rgba(100, 116, 139, 0.15) !important;
-}
-
 /* Make badges more visible */
 .badge {
     font-size: 0.8rem;
@@ -584,7 +589,48 @@ body {
     background-color: #64748b !important;
 }
 
-/* Print Styles */
-@media print {
-    /* ... existing code ... */
+/* Compact buttons for action columns */
+.btn-xs {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    border-radius: 6px;
+    margin-right: 4px;
+    min-width: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-xs i {
+    font-size: 0.75rem;
+}
+
+.btn-xs:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Action cell layout */
+.table td .btn-xs:last-child {
+    margin-right: 0;
+}
+
+/* Specific button colors - making them a bit deeper for better visibility at small sizes */
+.btn-xs.btn-primary {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.btn-xs.btn-danger {
+    background-color: #dc2626;
+    border-color: #dc2626;
+}
+
+/* Touch-friendly buttons on mobile */
+@media (max-width: 576px) {
+    .btn-xs {
+        padding: 0.3rem 0.6rem;
+        min-width: 36px;
+    }
 }

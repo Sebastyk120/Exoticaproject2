@@ -15,7 +15,7 @@ from unfold.admin import TabularInline
 class ClienteAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
-    list_display = ('nombre', 'domicilio', 'ciudad', 'cif', 'email', 'email2', 'telefono', 'dias_pago')
+    list_display = ('nombre', 'domicilio', 'ciudad', 'cif', 'email', 'correos_adicionales', 'telefono', 'dias_pago', 'token_acceso')
     search_fields = ('nombre', 'email')
     search_help_text = "Buscar por: nombre, email."
     list_filter = ('ciudad',)

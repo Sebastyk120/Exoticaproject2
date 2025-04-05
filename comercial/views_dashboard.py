@@ -2,12 +2,12 @@ from django.shortcuts import render
 from django.db.models import Sum, F, DecimalField, Value, Q, Case, When, ExpressionWrapper
 from django.db.models.functions import Coalesce
 from decimal import Decimal
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.contrib.auth.decorators import login_required
 from importacion.models import Pedido, DetallePedido, GastosAduana, GastosCarga
 from comercial.models import Venta, DetalleVenta
 from productos.models import Presentacion, Fruta
 from datetime import datetime
-from django.http import HttpResponse
 import xlsxwriter
 from io import BytesIO
 
@@ -379,6 +379,7 @@ def procesar_parametro_semana(semana_str):
     except ValueError:
         return None
 
+@login_required
 def dashboard_utilidades(request):
     """
     Vista principal para el dashboard de utilidades.
@@ -410,6 +411,7 @@ def dashboard_utilidades(request):
 
 # API endpoints para los datos del dashboard
 
+@login_required
 def api_semanas_disponibles(request):
     """API para obtener las semanas que tienen datos en el año seleccionado."""
     anio = request.GET.get('anio')
@@ -433,6 +435,7 @@ def api_semanas_disponibles(request):
     
     return JsonResponse({'semanas': semanas})
 
+@login_required
 def api_resumen_utilidad(request):
     """API para obtener el resumen de utilidad por producto."""
     anio = request.GET.get('anio')
@@ -559,6 +562,7 @@ def exportar_resumen_excel(resumen, anio, semana=None):
     
     return response
 
+@login_required
 def api_utilidad_por_semana(request):
     """API para obtener la utilidad por producto y semana."""
     anio = request.GET.get('anio')
@@ -602,6 +606,7 @@ def api_utilidad_por_semana(request):
         'datasets': datasets
     })
 
+@login_required
 def api_distribucion_costos(request):
     """API para obtener la distribución de costos por tipo."""
     anio = request.GET.get('anio')
@@ -628,6 +633,7 @@ def api_distribucion_costos(request):
         'data': [round(total_compra, 2), round(total_aduana, 2), round(total_carga, 2)]
     })
 
+@login_required
 def api_margen_por_producto(request):
     """API para obtener el margen por producto."""
     anio = request.GET.get('anio')
@@ -653,6 +659,7 @@ def api_margen_por_producto(request):
         'data': margenes
     })
 
+@login_required
 def api_productos_rentables(request):
     """API para obtener los productos más rentables."""
     anio = request.GET.get('anio')
@@ -681,6 +688,7 @@ def api_productos_rentables(request):
         'data': utilidades
     })
 
+@login_required
 def api_totales_globales(request):
     """API para obtener los totales globales."""
     anio = request.GET.get('anio')

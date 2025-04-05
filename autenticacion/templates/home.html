@@ -4,83 +4,381 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L&M Exotic Fruit - Panel Principal</title>
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Exotica Admin Panel</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'css/home.css' %}" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="brand">
-                <h1>L&M EXOTIC FRUIT</h1>
-                <div class="logo-container">
-                    <img src="{% static 'img/login.png' %}" alt="L&M Logo" onerror="this.style.display='none'">
+    <div class="app-container">
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="top-bar">
+                <div class="brand">
+                    <img src="{% static 'img/login.png' %}" alt="Exotica Logo" class="top-logo" onerror="this.src='https://via.placeholder.com/150x50?text=Exotica'">
+                    <h1 class="brand-name">L&M Exotic Fruits</h1>
                 </div>
-            </div>
-            <div class="user-info">
-                <span><i class="fas fa-user"></i> {{ user.username }}</span>
-                <a href="{% url 'logout' %}" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-                </a>
-            </div>
-        </header>
 
-        <main>
-            <div class="modules">
-                <div class="module-section">
-                    <h2><i class="fas fa-box"></i> Gestión de Productos</h2>
-                    <div class="module-grid">
-                        <a href="{% url 'lista_precios_importacion' %}" class="module-card">
-                            <i class="fas fa-truck-loading"></i>
-                            <h3>Precios de Importación</h3>
-                            <p>Gestiona los precios de importación de productos</p>
-                        </a>
-                        <a href="{% url 'lista_precios_ventas' %}" class="module-card">
-                            <i class="fas fa-euro-sign"></i>
-                            <h3>Precios de Venta</h3>
-                            <p>Administra los precios de venta al cliente</p>
-                        </a>
+                <div class="breadcrumb-wrapper d-none d-md-block">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                        </ol>
+                    </nav>
+                </div>
+
+                <div class="top-actions">
+                    <div class="dropdown me-3">
+                        <button class="notification-btn" type="button" id="notificationsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge">3</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                            <li><h6 class="dropdown-header">Notificaciones</h6></li>
+                            <li><a class="dropdown-item" href="#">Nueva venta registrada</a></li>
+                            <li><a class="dropdown-item" href="#">Llegada de importación</a></li>
+                            <li><a class="dropdown-item" href="#">Actualización de precios</a></li>
+                        </ul>
                     </div>
-                </div>
 
-                <div class="module-section">
-                    <h2><i class="fas fa-shipping-fast"></i> Gestión de Importaciones</h2>
-                    <div class="module-grid">
-                        <a href="{% url 'lista_ordenes_compra' %}" class="module-card">
-                            <i class="fas fa-file-invoice"></i>
-                            <h3>Órdenes de Compra</h3>
-                            <p>Gestiona las órdenes de compra a proveedores</p>
-                        </a>
-                        <a href="{% url 'lista_cargas' %}" class="module-card">
-                            <i class="fas fa-truck"></i>
-                            <h3>Control de Cargas</h3>
-                            <p>Supervisa las cargas en tránsito</p>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="module-section">
-                    <h2><i class="fas fa-chart-line"></i> Gestión Comercial</h2>
-                    <div class="module-grid">
-                        <a href="{% url 'lista_ventas' %}" class="module-card">
-                            <i class="fas fa-shopping-cart"></i>
-                            <h3>Ventas</h3>
-                            <p>Control y seguimiento de ventas</p>
-                        </a>
-                        <a href="{% url 'lista_clientes' %}" class="module-card">
-                            <i class="fas fa-users"></i>
-                            <h3>Clientes</h3>
-                            <p>Gestión de clientes y contactos</p>
-                        </a>
+                    <div class="dropdown">
+                        <button class="user-menu-btn" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="avatar">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="user-info d-none d-md-block">
+                                <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+                                <span class="user-role {% if user.is_superuser %}role-admin{% else %}role-staff{% endif %}">
+                                    {% if user.is_superuser %}Administrator{% else %}Staff{% endif %}
+                                </span>
+                            </div>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog"></i> Mi Perfil</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> Configuración</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'autenticacion:logout' %}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                        </ul>
                     </div>
                 </div>
             </div>
-        </main>
 
-        <footer>
-            <p>&copy; 2024 L&M Exotic Fruit. Todos los derechos reservados.</p>
-        </footer>
+            <div class="content-wrapper">
+                <div class="dashboard-header">
+                    <h2>Panel Principal</h2>
+                    <p class="text-muted">Bienvenido, {{ user.get_full_name|default:user.username }}. Aquí puedes acceder a todas las funcionalidades del sistema.</p>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="quick-stats">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-4">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background-color: var(--section-comercial);">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-data">
+                                    <h3>Clientes</h3>
+                                    <p class="stat-number">{{ client_count|default:"0" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-4">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background-color: var(--section-productos);">
+                                    <i class="fas fa-apple-alt"></i>
+                                </div>
+                                <div class="stat-data">
+                                    <h3>Productos</h3>
+                                    <p class="stat-number">{{ product_count|default:"0" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-4">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background-color: var(--section-importacion);">
+                                    <i class="fas fa-ship"></i>
+                                </div>
+                                <div class="stat-data">
+                                    <h3>Importaciones</h3>
+                                    <p class="stat-number">{{ import_count|default:"0" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-4">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background-color: var(--section-comercial-alt);">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                <div class="stat-data">
+                                    <h3>Ventas</h3>
+                                    <p class="stat-number">{{ sales_count|default:"0" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- App Categories -->
+                <div class="app-categories">
+                    <!-- Productos Category -->
+                    <div class="category-section">
+                        <div class="category-header productos-category">
+                            <div class="category-icon">
+                                <i class="fas fa-apple-alt"></i>
+                            </div>
+                            <h3>Gestión de Productos</h3>
+                        </div>
+
+                        <div class="app-grid">
+                            <a href="{% url 'frutas_view' %}" class="app-card">
+                                <div class="app-icon productos-bg">
+                                    <i class="fas fa-lemon"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Frutas</h4>
+                                    <p>Administre el catálogo de frutas</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'presentaciones_view' %}" class="app-card">
+                                <div class="app-icon productos-bg">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Presentaciones</h4>
+                                    <p>Gestione los formatos de presentación</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'lista_precios_importacion' %}" class="app-card">
+                                <div class="app-icon productos-bg">
+                                    <i class="fas fa-ship"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Precios de Importación</h4>
+                                    <p>Consulte y actualice los precios de importación</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'lista_precios_ventas' %}" class="app-card">
+                                <div class="app-icon productos-bg">
+                                    <i class="fas fa-tags"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Precios de Venta</h4>
+                                    <p>Administre los precios de venta</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Importación Category -->
+                    <div class="category-section">
+                        <div class="category-header importacion-category">
+                            <div class="category-icon">
+                                <i class="fas fa-ship"></i>
+                            </div>
+                            <h3>Gestión de Importaciones</h3>
+                        </div>
+
+                        <div class="app-grid">
+                            <a href="{% url 'importacion:aduana_pdf' %}" class="app-card">
+                                <div class="app-icon importacion-bg">
+                                    <i class="fas fa-passport"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Aduana PDF</h4>
+                                    <p>Procese documentos de aduana</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'importacion:carga_pdf' %}" class="app-card">
+                                <div class="app-icon importacion-bg">
+                                    <i class="fas fa-truck-loading"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Carga PDF</h4>
+                                    <p>Procese documentos de carga</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'importacion:bodega' %}" class="app-card">
+                                <div class="app-icon importacion-bg">
+                                    <i class="fas fa-warehouse"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Bodega</h4>
+                                    <p>Administre el inventario en bodega</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'importacion:lista_pedidos' %}" class="app-card">
+                                <div class="app-icon importacion-bg">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Pedidos</h4>
+                                    <p>Gestione los pedidos de importación</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'importacion:transferencias' %}" class="app-card">
+                                <div class="app-icon importacion-bg">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Transferencias</h4>
+                                    <p>Gestione pagos y gastos generales.</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Comercial Category -->
+                    <div class="category-section">
+                        <div class="category-header comercial-category">
+                            <div class="category-icon">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <h3>Gestión Comercial</h3>
+                        </div>
+
+                        <div class="app-grid">
+                            <a href="{% url 'comercial:clientes' %}" class="app-card">
+                                <div class="app-icon comercial-bg">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Clientes</h4>
+                                    <p>Administre la base de clientes</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'comercial:lista_ventas' %}" class="app-card">
+                                <div class="app-icon comercial-bg">
+                                    <i class="fas fa-list"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Lista de Ventas</h4>
+                                    <p>Consulte el historial de ventas</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'comercial:nueva_venta' %}" class="app-card">
+                                <div class="app-icon comercial-bg">
+                                    <i class="fas fa-cash-register"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Nueva Venta</h4>
+                                    <p>Registre una nueva transacción</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'comercial:dashboard_utilidades' %}" class="app-card">
+                                <div class="app-icon comercial-bg">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Análisis de Utilidades</h4>
+                                    <p>Visualice reportes de utilidad</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Administración Category -->
+                    <div class="category-section">
+                        <div class="category-header admin-category">
+                            <div class="category-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <h3>Administración del Sistema</h3>
+                        </div>
+
+                        <div class="app-grid">
+                            <a href="/admin/" class="app-card">
+                                <div class="app-icon admin-bg">
+                                    <i class="fas fa-tools"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Panel de Admin</h4>
+                                    <p>Acceda al panel de administración del sistema</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'autenticacion:logout' %}" class="app-card">
+                                <div class="app-icon admin-bg">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                </div>
+                                <div class="app-info">
+                                    <h4>Cerrar Sesión</h4>
+                                    <p>Salir del sistema de manera segura</p>
+                                </div>
+                                <div class="app-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="dashboard-footer">
+                    <p>L&M Exotic Fruits - v1.2.0 &copy; 2023 Todos los derechos reservados</p>
+                </footer>
+            </div>
+        </div>
     </div>
+
+    <!-- Bootstrap JS with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

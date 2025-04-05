@@ -11,83 +11,81 @@
     <link href="{% static 'css/clientes/clientes.css' %}" rel="stylesheet">
 </head>
 <body>
-    <div class="page-header">
-        <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col">
-                    <h2 class="page-title">Gestión de Clientes</h2>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-users"></i> Gestión de Clientes</h1>
+            <nav class="breadcrumb">
+                <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a> &gt;
+                <span>Clientes</span>
+            </nav>
+        </header>
+
+        <div class="main-content">
+            <div class="actions-bar">
+                <div class="search-bar">
+                    <form method="get" action="">
+                        <input type="text" id="searchClient" name="q" placeholder="Buscar cliente..." value="{{ request.GET.q|default:'' }}">
+                        <button type="submit" class="btn btn-search"><i class="fas fa-search"></i> Buscar</button>
+                    </form>
                 </div>
-                <div class="col-auto">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModal">
-                        <i class="bi bi-plus-lg me-1"></i>Nuevo Cliente
-                    </button>
-                </div>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addClientModal">
+                    <i class="bi bi-plus-lg me-1"></i>Nuevo Cliente
+                </button>
             </div>
-        </div>
-    </div>
 
-    <div class="container-fluid">
-        <!-- Alerts container for Django messages -->
-        <div id="alerts-container">
-            {% if messages %}
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-
-        <div class="card">
-            <div class="card-body">
-                <div class="row mb-4">
-                    <div class="col-lg-4 col-md-6">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-search"></i>
-                            </span>
-                            <input type="text" class="form-control search-box" id="searchClient" placeholder="Buscar clientes...">
-                        </div>
+            <!-- Alerts container for Django messages -->
+            <div id="alerts-container">
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
 
-                <div class="table-responsive">
-                    <table class="table table-hover" id="clientsTable">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Ciudad</th>
-                                <th>Domicilio</th>
-                                <th>Email</th>
-                                <th>Email 2</th>
-                                <th>Teléfono</th>
-                                <th>CIF</th>
-                                <th>Días Pago</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cliente in clientes %}
-                            <tr>
-                                <td>{{ cliente.nombre }}</td>
-                                <td>{{ cliente.ciudad }}</td>
-                                <td>{{ cliente.domicilio }}</td>
-                                <td>{{ cliente.email }}</td>
-                                <td>{{ cliente.email2 }}</td>
-                                <td>{{ cliente.telefono }}</td>
-                                <td>{{ cliente.cif }}</td>
-                                <td>{{ cliente.dias_pago }}</td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-primary" onclick="editClient({{ cliente.id }})" title="Editar cliente">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="table-responsive">
+                <table class="table table-hover" id="clientsTable">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Ciudad</th>
+                            <th>Domicilio</th>
+                            <th>Email</th>
+                            <th>Correos Adicionales</th>
+                            <th>Teléfono</th>
+                            <th>CIF</th>
+                            <th>Días Pago</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cliente in clientes %}
+                        <tr>
+                            <td>{{ cliente.nombre }}</td>
+                            <td>{{ cliente.ciudad }}</td>
+                            <td>{{ cliente.domicilio }}</td>
+                            <td>{{ cliente.email }}</td>
+                            <td>{{ cliente.correos_adicionales }}</td>
+                            <td>{{ cliente.telefono }}</td>
+                            <td>{{ cliente.cif }}</td>
+                            <td>{{ cliente.dias_pago }}</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary" onclick="editClient({{ cliente.id }})" title="Editar cliente">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-info ms-1" onclick="copyStatementLink('{{ cliente.token_acceso }}')" title="Copiar enlace de estado de cuenta">
+                                    <i class="bi bi-link-45deg"></i>
+                                </button>
+                                <a href="{% url 'comercial:estado_cuenta_cliente' cliente.id %}" class="btn btn-sm btn-outline-success ms-1" title="Ver estado de cuenta">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -128,11 +126,12 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Email 2</label>
+                                <label class="form-label">Correos Adicionales</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                    <input type="email" class="form-control" name="email2">
+                                    <input type="text" class="form-control" name="email2" placeholder="Separar correos por coma">
                                 </div>
+                                <small class="form-text text-muted">Ingrese múltiples correos separados por coma (ej: correo1@ejemplo.com, correo2@ejemplo.com)</small>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -205,11 +204,12 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Email 2</label>
+                                <label class="form-label">Correos Adicionales</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                    <input type="email" class="form-control" name="email2" id="edit_email2">
+                                    <input type="text" class="form-control" name="email2" id="edit_email2" placeholder="Separar correos por coma">
                                 </div>
+                                <small class="form-text text-muted">Ingrese múltiples correos separados por coma (ej: correo1@ejemplo.com, correo2@ejemplo.com)</small>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -340,6 +340,24 @@
             // Los mensajes ya están insertados en el HTML en el contenedor alerts-container
         });
         {% endif %}
+
+        // Función para copiar el enlace del estado de cuenta al portapapeles
+        function copyStatementLink(token) {
+            // Construir la URL completa con el token
+            const baseUrl = window.location.origin;
+            const statementUrl = `${baseUrl}/comercial/client-statement/${token}/`;
+            
+            // Crear un elemento temporal para copiar el texto
+            const tempInput = document.createElement('input');
+            tempInput.value = statementUrl;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            
+            // Mostrar mensaje de confirmación
+            createAlert('Enlace copiado al portapapeles: ' + statementUrl, 'success');
+        }
     </script>
 </body>
 </html>

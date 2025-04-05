@@ -63,7 +63,7 @@ body {
 }
 
 .btn-primary {
-    background-color: var(--secondary-color);
+    background-color: var(--logo-color);
     color: white;
 }
 
@@ -105,6 +105,15 @@ body {
 
 .btn-success:hover {
     background-color: #338a70; /* Hover turquesa éxito */
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
 }
 
 /* Invoice container - this is what will be in the PDF */

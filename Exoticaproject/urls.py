@@ -3,11 +3,11 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
-from autenticacion.views import login_view, logout_view, home_view
+from autenticacion.views import login_view, logout_view, home_view, index_view
 
 urlpatterns = [
-    # Redirect root URL to login page
-    path('', RedirectView.as_view(url='login/', permanent=False), name='index'),
+    # Root URL now uses index_view to handle authentication logic
+    path('', index_view, name='index'),
     
     # Authentication routes
     path('login/', login_view, name='login'),

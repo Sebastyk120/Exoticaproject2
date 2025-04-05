@@ -23,6 +23,8 @@ def validate_awb(value):
 
 class AgenciaAduana(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
+    correo = models.EmailField(verbose_name="Correo")
+    correos_adicionales = models.CharField(max_length=255, verbose_name="Correos Adicionales", null=True, blank=True)
 
     def __str__(self):
         return self.nombre
@@ -30,6 +32,8 @@ class AgenciaAduana(models.Model):
 
 class AgenciaCarga(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
+    correo = models.EmailField(verbose_name="Correo")
+    correos_adicionales = models.CharField(max_length=255, verbose_name="Correos Adicionales", null=True, blank=True)
 
     def __str__(self):
         return self.nombre
@@ -38,7 +42,7 @@ class AgenciaCarga(models.Model):
 class Exportador(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
     email = models.EmailField(verbose_name="Correo")
-    email2 = models.EmailField(verbose_name="Correo 2", blank=True, null=True)
+    correos_adicionales = models.CharField(max_length=255, verbose_name="Correos Adicionales", null=True, blank=True)
     telefono = models.CharField(max_length=20, null=True, blank=True)
     datos_bancarios = models.CharField(max_length=255, verbose_name="Datos Bancarios", null=True, blank=True)
     dias_credito = models.IntegerField(verbose_name="Días Crédito", default=0, validators=[MinValueValidator(0)])

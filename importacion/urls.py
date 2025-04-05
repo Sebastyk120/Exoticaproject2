@@ -37,6 +37,7 @@ urlpatterns = [
     path('pedidos/<int:pedido_id>/guardar-detalles-batch/', views_pedidos.guardar_detalles_batch, name='guardar_detalles_batch'),
     path('pedidos/<int:pedido_id>/detalles-json/', views_pedidos.obtener_detalles_pedido, name='obtener_detalles_pedido'),
     path('pedidos/<int:pedido_id>/solicitar/', views_pedidos.solicitar_pedido, name='solicitar_pedido'),
+    path('enviar_pedido_email/<int:pedido_id>/', views.enviar_pedido_email, name='enviar_pedido_email'),
     
     # Add the API endpoint that matches what the JavaScript is calling
     path('api/precio/<int:presentacion_id>/<int:exportador_id>/', views_pedidos.obtener_precio_presentacion, name='api_precio_presentacion'),

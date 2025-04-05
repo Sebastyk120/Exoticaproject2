@@ -1,10 +1,19 @@
 import datetime
 from decimal import Decimal
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, validate_email
 from django.db import models
 from importacion.models import Exportador, Bodega
 from productos.models import Fruta, Presentacion
+import uuid  # Import uuid for generating unique tokens
+
+
+def validate_multiple_emails(value):
+    if not value:
+        return
+    emails = [email.strip() for email in value.split(',')]
+    for email in emails:
+        validate_email(email)
 
 
 # Modulo Ventas.
@@ -15,9 +24,32 @@ class Cliente(models.Model):
     ciudad = models.CharField(max_length=100, verbose_name="Ciudad", null=True, blank=True)
     cif = models.CharField(max_length=20, verbose_name="Código  CIF", null=True, blank=True)
     email = models.EmailField(verbose_name="Correo")
-    email2 = models.CharField(max_length=500, verbose_name="Correos Adicionales", blank=True, null=True)
+    correos_adicionales = models.CharField(
+        max_length=255, 
+        verbose_name="Correos adicionales", 
+        null=True, 
+        blank=True,
+        validators=[validate_multiple_emails],
+        help_text="Ingrese múltiples correos separados por coma"
+    )
     telefono = models.CharField(max_length=20, null=True, blank=True)
     dias_pago = models.IntegerField(verbose_name="Días de pago", validators=[MinValueValidator(0)])
+    token_acceso = models.CharField(max_length=8, unique=True, editable=False, verbose_name="Token de Acceso", null=True, blank=True)
+
+    def clean(self):
+        super().clean()
+        if self.correos_adicionales:
+            try:
+                validate_multiple_emails(self.correos_adicionales)
+            except ValidationError as e:
+                raise ValidationError({'correos_adicionales': e.messages})
+
+    def save(self, *args, **kwargs):
+        if not self.token_acceso:
+            # Generate a short unique token (8 characters)
+            self.token_acceso = uuid.uuid4().hex[:8]
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nombre

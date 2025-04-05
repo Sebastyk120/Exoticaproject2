@@ -3,15 +3,18 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 from .models import Fruta, Presentacion, ListaPreciosImportacion, ListaPreciosVentas
 from importacion.models import Exportador
 from comercial.models import Cliente
 from decimal import Decimal
 
+@login_required
 def frutas_view(request):
     frutas = Fruta.objects.all()
     return render(request, 'frutas.html', {'frutas': frutas})
 
+@login_required
 def create_fruta(request):
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
@@ -21,6 +24,7 @@ def create_fruta(request):
     return JsonResponse({'status': 'error'})
 
 # Vista para gestionar las presentaciones (solo visualización y creación)
+@login_required
 def presentaciones_view(request):
     presentaciones = Presentacion.objects.all().order_by('fruta__nombre', 'kilos')
     frutas = Fruta.objects.all().order_by('nombre')
@@ -29,6 +33,7 @@ def presentaciones_view(request):
         'frutas': frutas
     })
 
+@login_required
 def create_presentacion(request):
     if request.method == 'POST':
         fruta_id = request.POST.get('fruta')
@@ -51,6 +56,7 @@ def create_presentacion(request):
     
     return JsonResponse({'status': 'error'})
 
+@login_required
 def lista_precios_importacion(request):
     # Get all necessary data
     frutas = Fruta.objects.all().order_by('nombre')
@@ -99,6 +105,7 @@ def lista_precios_importacion(request):
     
     return render(request, 'lista_precios_importacion.html', context)
 
+@login_required
 def crear_precio_importacion(request):
     if request.method == 'POST':
         presentacion_id = request.POST.get('presentacion')
@@ -150,6 +157,7 @@ def crear_precio_importacion(request):
             
     return redirect('lista_precios_importacion')
 
+@login_required
 def editar_precio_importacion(request, precio_id):
     precio = get_object_or_404(ListaPreciosImportacion, id=precio_id)
     
@@ -198,6 +206,7 @@ def editar_precio_importacion(request, precio_id):
             
     return redirect('lista_precios_importacion')
 
+@login_required
 def lista_precios_ventas(request):
     # Get all necessary data
     frutas = Fruta.objects.all().order_by('nombre')
@@ -246,6 +255,7 @@ def lista_precios_ventas(request):
     
     return render(request, 'lista_precios_ventas.html', context)
 
+@login_required
 def crear_precio_ventas(request):
     if request.method == 'POST':
         presentacion_id = request.POST.get('presentacion')
@@ -297,6 +307,7 @@ def crear_precio_ventas(request):
             
     return redirect('lista_precios_ventas')
 
+@login_required
 def editar_precio_ventas(request, precio_id):
     precio = get_object_or_404(ListaPreciosVentas, id=precio_id)
     

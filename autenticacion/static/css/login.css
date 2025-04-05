@@ -17,7 +17,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 body {
@@ -78,9 +78,8 @@ body {
 }
 
 .logo-container img {
-    max-width: 150px;
+    max-width: 170px;
     height: auto;
-    margin-bottom: 10px;
 }
 
 h2 {
@@ -93,7 +92,7 @@ h2 {
 
 .input-group {
     position: relative;
-    margin-bottom: 32px; /* Increased from 26px to provide more space */
+    margin-bottom: 26px;
     transition: transform 0.3s ease;
 }
 
@@ -121,7 +120,7 @@ h2 {
 
 .error-text {
     position: absolute;
-    bottom: -22px; /* Adjusted from -20px to prevent overlap */
+    bottom: -20px;
     left: 0;
     font-size: 12px;
     color: var(--error-red);
@@ -174,20 +173,19 @@ h2 {
     color: #8e8e93;
     pointer-events: none;
     transition: all 0.3s ease;
+    background-color: transparent;
+    padding: 0 4px;
+    z-index: 2; /* Asegura que el label esté siempre por encima */
 }
 
 .input-group input:focus + label,
 .input-group input:not(:placeholder-shown) + label {
-    top: -10px; /* Adjusted from -8px for better positioning */
-    left: 12px;
+    top: 0;
+    transform: translateY(-50%);
     font-size: 12px;
-    padding: 0 6px; /* Increased padding for better visibility */
-    background-color: white;
-    border-radius: 4px;
     color: var(--highlight-color);
-    transform: translateY(0);
-    z-index: 1; /* Ensure label appears above input border */
-    transition: all 0.3s ease;
+    background-color: white;
+    z-index: 2;
 }
 
 .input-group input:-webkit-autofill {
@@ -359,25 +357,47 @@ h2 {
         margin-bottom: 25px;
     }
     
-    .input-group {
-        margin-bottom: 36px; /* Increased for mobile to provide more space */
-    }
-    
     .input-group input {
         padding: 14px;
     }
-    
+
+    .input-group {
+        margin-bottom: 30px;
+    }
+
+    .input-group label {
+        font-size: 14px;
+    }
+
     .input-group input:focus + label,
     .input-group input:not(:placeholder-shown) + label {
-        top: -12px; /* Adjusted for better positioning on mobile */
-        background-color: white;
-        padding: 1px 6px;
-        font-size: 11px; /* Smaller font on mobile */
-    }
-    
-    .error-text {
-        bottom: -24px; /* Adjusted for mobile */
+        top: 0;
+        transform: translateY(-50%);
         font-size: 11px;
+    }
+}
+
+/* Fix para iOS cuando el teclado está desplegado */
+@supports (-webkit-touch-callout: none) {
+    .input-group {
+        padding-top: 8px; /* Añade espacio extra arriba para el label */
+    }
+
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label {
+        background-color: white;
+        padding: 0 4px;
+        top: 0;
+        transform: translateY(-50%);
+        box-shadow: 0 0 0 2px white; /* Añade un "halo" blanco alrededor del label */
+        border-radius: 2px;
+        z-index: 3; /* Asegura que esté por encima del borde verde */
+    }
+
+    /* Ajuste adicional para el modo de enfoque */
+    .input-group input:focus {
+        padding-top: 20px; /* Aumenta el padding superior cuando está enfocado */
+        padding-bottom: 12px; /* Reduce el padding inferior para mantener la altura total */
     }
 }
 
@@ -385,9 +405,10 @@ h2 {
 @supports (-webkit-touch-callout: none) {
     .input-group input:focus + label,
     .input-group input:not(:placeholder-shown) + label {
-        background-color: white; /* Changed from transparent to white */
-        z-index: 2; /* Ensure higher priority */
-        padding: 0 6px;
+        background-color: white;
+        padding: 0 4px;
+        top: 0;
+        transform: translateY(-50%);
     }
 }
 

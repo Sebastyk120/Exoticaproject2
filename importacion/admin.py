@@ -21,19 +21,21 @@ from unfold.admin import TabularInline
 class AgenciaAduanaAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
-    list_display = ('nombre',)
-    search_fields = ('nombre',)
-    search_help_text = "Buscar por: nombre."
+    list_display = ('nombre', 'correo', 'correos_adicionales')
+    search_fields = ('nombre', 'correo')
+    search_help_text = "Buscar por: nombre, correo."
     resource_class = AgenciaAduanaResource
+    list_per_page = 20
 
 @admin.register(AgenciaCarga)
 class AgenciaCargaAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
-    list_display = ('nombre',)
-    search_fields = ('nombre',)
-    search_help_text = "Buscar por: nombre."
+    list_display = ('nombre', 'correo', 'correos_adicionales')
+    search_fields = ('nombre', 'correo')
+    search_help_text = "Buscar por: nombre, correo."
     resource_class = AgenciaCargaResource
+    list_per_page = 20
 
 @admin.register(Exportador)
 class ExportadorAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
