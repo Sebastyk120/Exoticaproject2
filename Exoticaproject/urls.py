@@ -3,16 +3,17 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
-from autenticacion.views import login_view, logout_view, home_view, index_view
+from autenticacion.views import login_view, logout_view, home_view, index_view, landing_page_view
 
 urlpatterns = [
-    # Root URL now uses index_view to handle authentication logic
-    path('', index_view, name='index'),
+    # Root URL now points to the public landing page
+    path('', landing_page_view, name='landing_page'),
     
-    # Authentication routes
-    path('login/', login_view, name='login'),
-    path('logout/', logout_view, name='logout'),
-    path('home/', home_view, name='home'),
+    # Internal application routes
+    path('app/', index_view, name='index'),
+    path('app/login/', login_view, name='login'),
+    path('app/logout/', logout_view, name='logout'),
+    path('app/home/', home_view, name='home'),
     
     # Admin and other app URLs
     path('admin/', admin.site.urls),

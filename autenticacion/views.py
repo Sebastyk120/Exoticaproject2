@@ -9,6 +9,8 @@ from django.core.management import call_command
 from django.contrib.auth.decorators import login_required
 from django.urls import get_resolver, reverse, NoReverseMatch
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.conf import settings
 from comercial.models import Cliente, Venta
 from productos.models import Fruta, Presentacion
 from importacion.models import Pedido
@@ -46,6 +48,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
+    # Redirect to the app login page after logout, not the public landing page
     return redirect('login')  # Redirect to login page after logout
 
 @login_required
@@ -153,4 +156,38 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'registration/password_reset_complete.html'
     title = 'Contraseña Restablecida - L&M Exotic Fruit'
+
+def landing_page_view(request):
+    if request.method == 'POST':
+        name = request.POST.get('name', '')
+        email = request.POST.get('email', '')
+        subject = request.POST.get('subject', 'Consulta desde el sitio web')
+        message = request.POST.get('message', '')
+        
+        # Validación básica del email
+        if '@' not in email or '.' not in email:
+            messages.error(request, 'Por favor, introduce un correo electrónico válido.')
+            return redirect('autenticacion:landing_page') + '#contact'
+        
+        # Preparar el contenido del email
+        email_message = f"Nombre: {name}\nEmail: {email}\nAsunto: {subject}\n\nMensaje:\n{message}"
+        
+        # Enviar email
+        try:
+            send_mail(
+                f"Contacto sitio web: {subject}",
+                email_message,
+                settings.DEFAULT_FROM_EMAIL,
+                ['import@luzmeloexoticfruits.com'],
+                fail_silently=False,
+            )
+            messages.success(request, 'Tu mensaje ha sido enviado con éxito. Nos pondremos en contacto contigo pronto.')
+        except Exception as e:
+            messages.error(request, 'Ha ocurrido un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.')
+        
+        # Redireccionar a la misma página con el ancla del formulario
+        return redirect(f"{request.path}#contact")
+    
+    return render(request, 'index.html')
+
 

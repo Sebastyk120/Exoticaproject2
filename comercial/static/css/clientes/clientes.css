@@ -8,6 +8,10 @@
     --border-color: #e2e8f0;
     --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     --border-radius: 6px;
+    --box-shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --box-shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --box-shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
+    --transition: all 0.2s ease;
 }
 
 body {
@@ -24,16 +28,30 @@ body {
     margin: 0 auto;
     background-color: white;
     border-radius: 12px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--box-shadow-lg);
     overflow: hidden;
 }
 
 /* Header y Breadcrumb */
 header {
-    padding: 2rem;
+    padding: 1.75rem 2rem;
     background: linear-gradient(135deg, var(--primary-color), #2d4ed8);
     color: white;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 30%;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 100%);
+    transform: skewX(-15deg) translateX(10%);
+    pointer-events: none;
 }
 
 header h1 {
@@ -81,7 +99,12 @@ header h1 {
     background: white;
     padding: 15px;
     border-radius: 10px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--box-shadow-sm);
+    transition: var(--transition);
+}
+
+.actions-bar:hover {
+    box-shadow: var(--box-shadow-md);
 }
 
 /* Barra de búsqueda */
@@ -131,7 +154,14 @@ header h1 {
     transform: translateY(-1px);
 }
 
-/* Botón de nuevo cliente */
+/* Botones mejorados */
+.btn {
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    transition: var(--transition);
+    border-radius: var(--border-radius);
+}
+
 .btn-success {
     background-color: var(--success-color);
     border: none;
@@ -144,41 +174,172 @@ header h1 {
     align-items: center;
     gap: 0.5rem;
     height: 42px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .btn-success:hover {
     background-color: #0ea472;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--box-shadow-md);
 }
 
-/* Tabla responsive */
+/* Tabla compacta y mejorada */
 .table-responsive {
     margin-top: 1rem;
     border-radius: 8px;
     overflow: hidden;
+    box-shadow: var(--box-shadow-sm);
+    border: 1px solid var(--border-color);
 }
 
 .table {
     width: 100%;
     background: white;
     margin-bottom: 0;
+    font-size: 0.9rem;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 .table th {
     background: #f8fafc;
     font-weight: 600;
-    padding: 1rem;
+    padding: 0.75rem 0.5rem;
     border-bottom: 2px solid var(--border-color);
+    white-space: nowrap;
+    color: #475569;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .table td {
-    padding: 1rem;
+    padding: 0.6rem 0.5rem;
     vertical-align: middle;
     border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.15s;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(67, 97, 238, 0.03);
+}
+
+/* Columnas más compactas */
+.table th:nth-child(1), .table td:nth-child(1) { min-width: 120px; } /* Nombre */
+.table th:nth-child(2), .table td:nth-child(2) { width: 100px; } /* Ciudad */
+.table th:nth-child(3), .table td:nth-child(3) { width: 150px; } /* Domicilio */
+.table th:nth-child(4), .table td:nth-child(4) { width: 180px; } /* Email */
+.table th:nth-child(5), .table td:nth-child(5) { width: 180px; } /* Correos adicionales */
+.table th:nth-child(6), .table td:nth-child(6) { width: 100px; } /* Teléfono */
+.table th:nth-child(7), .table td:nth-child(7) { width: 80px; } /* CIF */
+.table th:nth-child(8), .table td:nth-child(8) { width: 80px; } /* Días Pago */
+.table th:nth-child(9), .table td:nth-child(9) { width: 120px; } /* Acciones */
+
+/* Truncar texto largo en celdas */
+.table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+/* Estilos para botones de acción en la tabla */
+.table .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+}
+
+.table .btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.table .btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.table .btn-outline-info {
+    color: #0ea5e9;
+    border-color: #0ea5e9;
+}
+
+.table .btn-outline-info:hover {
+    background-color: #0ea5e9;
+    color: white;
+}
+
+.table .btn-outline-success {
+    color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.table .btn-outline-success:hover {
+    background-color: var(--success-color);
+    color: white;
+}
+
+/* Mejoras para modales */
+.modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: none;
+}
+
+.modal-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1.25rem;
+    border-bottom: none;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
+}
+
+/* Mejoras para formularios */
+.form-control, .input-group-text {
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+    border-color: var(--primary-color);
+}
+
+.input-group-text {
+    background-color: #f8fafc;
+    border-color: var(--border-color);
+}
+
+/* Mejoras para alertas */
+.alert {
+    border-radius: var(--border-radius);
+    border: none;
+    box-shadow: var(--box-shadow-sm);
 }
 
 /* Responsive */
+@media (max-width: 1200px) {
+    .table td, .table th {
+        padding: 0.5rem 0.4rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .table th:nth-child(5), .table td:nth-child(5) { display: none; } /* Ocultar columna de correos adicionales */
+    .table th:nth-child(3), .table td:nth-child(3) { display: none; } /* Ocultar columna de domicilio */
+}
+
 @media (max-width: 768px) {
     body {
         padding: 10px;
@@ -191,4 +352,21 @@ header h1 {
     .main-content {
         padding: 0 1rem 1rem 1rem;
     }
+    
+    .table th:nth-child(7), .table td:nth-child(7) { display: none; } /* Ocultar columna de CIF */
+    
+    .actions-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .search-bar {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .table th:nth-child(2), .table td:nth-child(2) { display: none; } /* Ocultar columna de ciudad */
+    .table th:nth-child(8), .table td:nth-child(8) { display: none; } /* Ocultar columna de días pago */
 }

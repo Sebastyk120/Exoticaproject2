@@ -1,18 +1,14 @@
+{% extends 'base.html' %}
 {% load custom_filters %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Ventas</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Añadir jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+{% block title %}Lista de Ventas{% endblock %}
+
+{% block extra_css %}
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/ventas/lista_ventas.css' %}">
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <div class="container">
         <header>
             <h1><i class="fas fa-shopping-cart"></i> Lista de Ventas</h1>
@@ -292,7 +288,9 @@
             </div>
         </div>
     </div>
+{% endblock %}
 
+{% block extra_js %}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Estado de filtro
@@ -782,5 +780,4 @@
             });
         });
     </script>
-</body>
-</html>
+{% endblock %}

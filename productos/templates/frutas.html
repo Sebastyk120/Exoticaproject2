@@ -1,14 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exotica - Gestión de Frutas</title>
+{% extends 'base.html' %}
+
+{% block title %}Exotica - Gestión de Frutas{% endblock %}
+
+{% block extra_css %}
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/frutas.css' %}">
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <div class="container">
         <header>
             <h1>Gestión de Frutas</h1>
@@ -87,5 +86,4 @@
             }
         });
     </script>
-</body>
-</html>
+{% endblock %}

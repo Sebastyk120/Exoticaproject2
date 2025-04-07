@@ -8,12 +8,12 @@ UNFOLD = {
     "SITE_SUBHEADER": "Administración L&M Exótica",
     "SITE_URL": "/",
     "SITE_ICON": {
-        "light": lambda request: static("img/favicon.png"),
-        "dark": lambda request: static("img/favicon.png"),
+        "light": lambda request: static("img/favicon.jpg"),
+        "dark": lambda request: static("img/favicon.jpg"),
     },
     "SITE_LOGO": {
-        "light": lambda request: static("img/favicon.png"),
-        "dark": lambda request: static("img/favicon.png"),
+        "light": lambda request: static("img/favicon.jpg"),
+        "dark": lambda request: static("img/favicon.jpg"),
     },
     "SITE_SYMBOL": "agriculture",
     "SITE_FAVICONS": [
