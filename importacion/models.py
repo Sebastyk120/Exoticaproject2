@@ -78,7 +78,7 @@ def get_cajas_vendidas(presentacion_id):
 class Pedido(models.Model):
     exportador = models.ForeignKey(Exportador, on_delete=models.CASCADE, verbose_name="Exportador")
     fecha_entrega = models.DateField(verbose_name="Fecha Entrega")
-    semana = models.CharField(verbose_name="Semana", null=True, blank=True, editable=False)
+    semana = models.CharField(max_length=20, verbose_name="Semana", null=True, blank=True, editable=False)
     awb = models.CharField(max_length=12, verbose_name="AWB", null=True, blank=True, default=None,
                            validators=[validate_awb])
     total_cajas_solicitadas = models.IntegerField(verbose_name="Cajas Solicitadas", null=True, blank=True,
@@ -93,7 +93,7 @@ class Pedido(models.Model):
     valor_factura_eur = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total Factura EUR",
                                             null=True, blank=True, editable=False)
     numero_nc = models.CharField(max_length=100, verbose_name="Número NC", null=True, blank=True)
-    estado_pedido = models.CharField(verbose_name="Estado del Pedido", default="En Proceso", editable=False)
+    estado_pedido = models.CharField(max_length=20, verbose_name="Estado del Pedido", default="En Proceso", editable=False)
     pagado = models.BooleanField(verbose_name="Pagado", default=False, editable=False)
     observaciones = models.CharField(verbose_name="Observaciones", max_length=100, blank=True, null=True)
     monto_pendiente = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto Pendiente USD",

@@ -63,7 +63,7 @@ class Venta(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, verbose_name="Cliente")
     fecha_entrega = models.DateField(verbose_name="Fecha Entrega")
     fecha_vencimiento = models.DateField(verbose_name="Fecha Vencimiento", editable=False)
-    semana = models.CharField(verbose_name="Semana", null=True, blank=True, editable=False)
+    semana = models.CharField(max_length=20, verbose_name="Semana", null=True, blank=True, editable=False)
     total_cajas_pedido = models.IntegerField(verbose_name="Total Cajas", null=True, blank=True, editable=False)
     numero_factura = models.CharField(max_length=100, verbose_name="Número Factura", null=True, blank=True, editable=False)
     iva = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="IVA 4%", validators=[MinValueValidator(0)], editable=False, default=0)
