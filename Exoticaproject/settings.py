@@ -103,7 +103,7 @@ WSGI_APPLICATION = 'Exoticaproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-"""
+
 DATABASES = {
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
@@ -118,7 +118,7 @@ DATABASES = {
         'HOST': 'localhost',  # Deja esto como 'localhost' si estás ejecutando PostgreSQL localmente
         'PORT': '5433',  # Puerto de PostgreSQL (por defecto es 5432)
     }
-}
+}"""
 
 
 # Password validation
