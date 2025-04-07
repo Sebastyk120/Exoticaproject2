@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Commit Final" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Commit Final 2">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -170,7 +174,7 @@
       <workItem from="1743785379877" duration="13746000" />
       <workItem from="1743856764682" duration="14157000" />
       <workItem from="1743950159357" duration="19090000" />
-      <workItem from="1744021923942" duration="2571000" />
+      <workItem from="1744021923942" duration="3620000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -284,7 +288,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744026208946</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Commit Final 2">
+      <option name="closed" value="true" />
+      <created>1744026389315</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1744026389315</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -318,6 +330,7 @@
     <MESSAGE value="Punto de control funcional 4. Capas de inventario corregidas." />
     <MESSAGE value="Punto de control completo. Login, home." />
     <MESSAGE value="Commit Final" />
-    <option name="LAST_COMMIT_MESSAGE" value="Commit Final" />
+    <MESSAGE value="Commit Final 2" />
+    <option name="LAST_COMMIT_MESSAGE" value="Commit Final 2" />
   </component>
 </project>
