@@ -172,10 +172,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.0.22', 'heavens-server.up.railway.app']
+ALLOWED_HOSTS = [
+    'exoticfruits.up.railway.app', 'localhost'
+]
 CSRF_TRUSTED_ORIGINS = ["https://*.up.railway.app"]
-CSRF_ALLOWED_ORIGINS = ["https://heavens-server.up.railway.app"]
-CORS_ORIGINS_WHITELIST = ["https://heavens-server.up.railway.app"]
+CSRF_ALLOWED_ORIGINS = ["https://exoticfruits.up.railway.app"]
+CORS_ORIGINS_WHITELIST = ["https://exoticfruits.up.railway.app"]
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 
