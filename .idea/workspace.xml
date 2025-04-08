@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Cabeceras de dominio.">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Cabeceras de dominio 2">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -173,7 +174,7 @@
       <workItem from="1743856764682" duration="14157000" />
       <workItem from="1743950159357" duration="19090000" />
       <workItem from="1744021923942" duration="8731000" />
-      <workItem from="1744033912031" duration="15166000" />
+      <workItem from="1744033912031" duration="15503000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -399,7 +400,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744081512456</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="Cabeceras de dominio 2">
+      <option name="closed" value="true" />
+      <created>1744082540670</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1744082540670</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -417,7 +426,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="2" />
     <MESSAGE value="Finalizacion de logicas." />
     <MESSAGE value="Automatizacion de PDF Aduana." />
     <MESSAGE value="Nuevas vistas" />
@@ -442,6 +450,7 @@
     <MESSAGE value="Cambio de URL Database 4" />
     <MESSAGE value="Cambios en documentos." />
     <MESSAGE value="Cabeceras de dominio." />
-    <option name="LAST_COMMIT_MESSAGE" value="Cabeceras de dominio." />
+    <MESSAGE value="Cabeceras de dominio 2" />
+    <option name="LAST_COMMIT_MESSAGE" value="Cabeceras de dominio 2" />
   </component>
 </project>
