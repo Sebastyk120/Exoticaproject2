@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Cambio Ema Back">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/static/css/pedidos/lista_pedidos.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/pedidos/lista_pedidos.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/static/css/pedidos/solicitar_pedido.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/pedidos/solicitar_pedido.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/templates/pedidos/lista_pedidos.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/pedidos/lista_pedidos.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/templates/pedidos/solicitar_pedido.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/pedidos/solicitar_pedido.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/views_pedidos.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_pedidos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/views_transferencias.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_transferencias.py" afterDir="false" />
-    </list>
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Puntos de control" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -181,7 +173,7 @@
       <workItem from="1744021923942" duration="8731000" />
       <workItem from="1744033912031" duration="17770000" />
       <workItem from="1744109370016" duration="5228000" />
-      <workItem from="1744124501090" duration="4504000" />
+      <workItem from="1744124501090" duration="4979000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -455,7 +447,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744117680140</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="Puntos de control">
+      <option name="closed" value="true" />
+      <created>1744132963660</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1744132963660</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -473,7 +473,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="finalizacion de generar_factura" />
     <MESSAGE value="Actualizaciones." />
     <MESSAGE value="Punto de control funcional." />
     <MESSAGE value="Punto de control funcional 2. OK" />
@@ -498,6 +497,7 @@
     <MESSAGE value="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS" />
     <MESSAGE value="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS 2" />
     <MESSAGE value="Cambio Ema Back" />
-    <option name="LAST_COMMIT_MESSAGE" value="Cambio Ema Back" />
+    <MESSAGE value="Puntos de control" />
+    <option name="LAST_COMMIT_MESSAGE" value="Puntos de control" />
   </component>
 </project>
