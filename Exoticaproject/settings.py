@@ -175,7 +175,7 @@ ALLOWED_HOSTS = [
     'exoticfruits.up.railway.app',
     'localhost',
     'luzmeloexoticfruits.com',
-    'www.luzmeloexoticfruits.com'  # Añade el subdominio www
+    'www.luzmeloexoticfruits.com'
 ]
 
 CSRF_TRUSTED_ORIGINS = ["https://*.up.railway.app", "https://*.luzmeloexoticfruits.com"]
@@ -183,18 +183,18 @@ CSRF_TRUSTED_ORIGINS = ["https://*.up.railway.app", "https://*.luzmeloexoticfrui
 CORS_ORIGINS_WHITELIST = [
     "https://exoticfruits.up.railway.app",
     "https://luzmeloexoticfruits.com",
-    "https://www.luzmeloexoticfruits.com"  # Añade el subdominio www
+    "https://www.luzmeloexoticfruits.com"
 ]
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 
 # CONFIGURACIÓN MAIL:
-DEFAULT_FROM_EMAIL = "subgerencia@heavensfruit.com"
+DEFAULT_FROM_EMAIL = "import@luzmeloexoticfruits.com"
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.office365.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = DEFAULT_FROM_EMAIL
-EMAIL_HOST_PASSWORD = 'Isabella2025+'
+EMAIL_HOST_PASSWORD = 'Bogota1973'
 ADMIN_SITE_NAME = 'Administración L&M Exótica'
 

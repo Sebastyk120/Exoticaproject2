@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS 2">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -173,7 +174,8 @@
       <workItem from="1743856764682" duration="14157000" />
       <workItem from="1743950159357" duration="19090000" />
       <workItem from="1744021923942" duration="8731000" />
-      <workItem from="1744033912031" duration="17481000" />
+      <workItem from="1744033912031" duration="17770000" />
+      <workItem from="1744109370016" duration="2934000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -423,7 +425,23 @@
       <option name="project" value="LOCAL" />
       <updated>1744084430535</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS 2">
+      <option name="closed" value="true" />
+      <created>1744084656554</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1744084656554</updated>
+    </task>
+    <task id="LOCAL-00033" summary="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS 2">
+      <option name="closed" value="true" />
+      <created>1744084731986</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1744084731986</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -441,7 +459,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Nuevas vistas" />
     <MESSAGE value="Checkpoint 28/03/2024 1pm" />
     <MESSAGE value="finalizacion de generar_factura" />
     <MESSAGE value="Actualizaciones." />
@@ -466,6 +483,7 @@
     <MESSAGE value="Cabeceras de dominio 2" />
     <MESSAGE value="Cabeceras de dominio 3" />
     <MESSAGE value="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS" />
-    <option name="LAST_COMMIT_MESSAGE" value="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS" />
+    <MESSAGE value="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS 2" />
+    <option name="LAST_COMMIT_MESSAGE" value="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS 2" />
   </component>
 </project>
