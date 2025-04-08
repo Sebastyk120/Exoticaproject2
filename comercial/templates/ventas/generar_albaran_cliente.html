@@ -12,10 +12,63 @@
     <link rel="stylesheet" href="{% static 'css/ventas/factura_venta.css' %}">
     <!-- html2pdf library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        /* Estilos para el modal de selección de correos */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .modal-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-close:hover {
+            color: #333;
+        }
+        .modal-actions {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .modal-actions button {
+            margin-left: 10px;
+        }
+        .email-option {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            background-color: #f5f5f5;
+        }
+        .email-option label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .email-option input {
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="controls">
+        <div class="btn-container">
             <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver a Factura
             </a>
@@ -126,11 +179,39 @@
         </div>
     </div>
 
+    <!-- Modal para selección de correos -->
+    <div id="emailModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3>Enviar Albarán Cliente por Email</h3>
+            <div id="emailOptions">
+                <p>Cargando contactos...</p>
+            </div>
+            
+            <div class="form-group" style="margin-top: 20px;">
+                <label for="emailSubject"><strong>Asunto del correo:</strong></label>
+                <input type="text" id="emailSubject" class="form-control" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;" 
+                       value="Albarán Cliente #{{ venta.id }} - L&M Exotic Fruit">
+            </div>
+            
+            <div class="form-group" style="margin-top: 15px;">
+                <label for="emailMessage"><strong>Mensaje adicional (opcional):</strong></label>
+                <textarea id="emailMessage" class="form-control" rows="3" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;" 
+                          placeholder="Escriba aquí cualquier información adicional..."></textarea>
+            </div>
+            
+            <div class="modal-actions">
+                <button id="cancelSendEmail" class="btn btn-secondary">Cancelar</button>
+                <button id="confirmSendEmail" class="btn btn-success">Enviar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Configuración para PDF
             const pdfOptions = {
-                margin: [5, 5, 5, 5],
+                margin: [10, 10, 10, 10],
                 filename: 'Albaran_Cliente_{{ venta.id }}_{{ venta.cliente.nombre|slugify }}.pdf',
                 image: { type: 'jpeg', quality: 1 },
                 html2canvas: { 
@@ -168,25 +249,123 @@
                 });
             });
 
-            // Nueva función para enviar el albarán por email
+            // Referencia al modal y elementos relacionados
+            const emailModal = document.getElementById('emailModal');
+            const emailOptions = document.getElementById('emailOptions');
+            const modalClose = document.querySelector('.modal-close');
+            const cancelSendEmailBtn = document.getElementById('cancelSendEmail');
+            const confirmSendEmailBtn = document.getElementById('confirmSendEmail');
+            
+            // Abrir modal al hacer clic en "Enviar por Email"
             document.getElementById('sendEmail').addEventListener('click', function() {
-                const button = this;
+                // Obtener los correos del cliente
+                loadEmailOptions();
+                // Mostrar el modal
+                emailModal.style.display = 'block';
+            });
+            
+            // Cerrar modal
+            modalClose.addEventListener('click', function() {
+                emailModal.style.display = 'none';
+            });
+            
+            cancelSendEmailBtn.addEventListener('click', function() {
+                emailModal.style.display = 'none';
+            });
+            
+            // Cargar opciones de correo
+            function loadEmailOptions() {
+                emailOptions.innerHTML = '<p>Cargando contactos...</p>';
+                
+                const clientEmail = "{{ venta.cliente.email }}";
+                let additionalEmails = [];
+                
+                {% if venta.cliente.correos_adicionales %}
+                    additionalEmails = "{{ venta.cliente.correos_adicionales }}".split(',').map(email => email.trim());
+                {% endif %}
+                
+                let html = '<div class="email-list">';
+                
+                if (clientEmail) {
+                    html += `
+                        <div class="email-option">
+                            <label>
+                                <input type="checkbox" name="selected_emails" value="${clientEmail}" checked>
+                                ${clientEmail} <span class="email-label">(Correo principal)</span>
+                            </label>
+                        </div>
+                    `;
+                }
+                
+                if (additionalEmails.length > 0) {
+                    additionalEmails.forEach(email => {
+                        html += `
+                            <div class="email-option">
+                                <label>
+                                    <input type="checkbox" name="selected_emails" value="${email}" checked>
+                                    ${email} <span class="email-label">(Correo adicional)</span>
+                                </label>
+                            </div>
+                        `;
+                    });
+                }
+                
+                if (!clientEmail && additionalEmails.length === 0) {
+                    html += '<p>No hay correos disponibles para este cliente.</p>';
+                    confirmSendEmailBtn.disabled = true;
+                } else {
+                    confirmSendEmailBtn.disabled = false;
+                }
+                
+                html += '</div>';
+                emailOptions.innerHTML = html;
+            }
+            
+            // Enviar email con los correos seleccionados
+            confirmSendEmailBtn.addEventListener('click', function() {
+                const selectedEmails = Array.from(
+                    document.querySelectorAll('input[name="selected_emails"]:checked')
+                ).map(input => input.value);
+                
+                if (selectedEmails.length === 0) {
+                    alert('Por favor, seleccione al menos un correo electrónico.');
+                    return;
+                }
+                
+                // Obtener el asunto y mensaje adicional
+                const emailSubject = document.getElementById('emailSubject').value.trim();
+                const emailMessage = document.getElementById('emailMessage').value.trim();
+                
+                // Cerrar el modal
+                emailModal.style.display = 'none';
+                
+                // Mostrar mensaje de carga
+                const button = document.getElementById('sendEmail');
                 const originalText = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando Email...';
                 button.disabled = true;
-
+                
+                // Generar PDF y enviar
+                sendEmailWithSelectedRecipients(selectedEmails, emailSubject, emailMessage, button, originalText);
+            });
+            
+            // Función para enviar el albarán con los destinatarios seleccionados
+            function sendEmailWithSelectedRecipients(selectedEmails, emailSubject, emailMessage, button, originalText) {
                 const element = document.getElementById('invoice');
-
+                
                 html2pdf().set(pdfOptions).from(element).output('blob').then(pdfBlob => {
                     const reader = new FileReader();
                     reader.onloadend = function() {
                         const pdfBase64 = reader.result;
-
+                        
                         const formData = new FormData();
                         formData.append('pdf_data', pdfBase64);
-
+                        formData.append('selected_emails', JSON.stringify(selectedEmails));
+                        formData.append('email_subject', emailSubject);
+                        formData.append('email_message', emailMessage);
+                        
                         const csrftoken = getCsrfToken();
-
+                        
                         fetch(`/comercial/enviar_albaran_email/{{ venta.id }}/`, {
                             method: 'POST',
                             body: formData,
@@ -221,7 +400,7 @@
                             button.disabled = false;
                         });
                     };
-
+                    
                     reader.readAsDataURL(pdfBlob);
                 })
                 .catch(error => {
@@ -229,7 +408,7 @@
                     button.innerHTML = originalText;
                     button.disabled = false;
                 });
-            });
+            }
 
             // Función mejorada para obtener el token CSRF
             function getCsrfToken() {

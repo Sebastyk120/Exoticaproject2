@@ -62,7 +62,7 @@
     </div>
 
     <div class="container">
-        <div class="controls">
+        <div class="btn-container">
             <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver a Factura
             </a>
@@ -183,6 +183,24 @@
                         <select class="form-select" id="agenciaAduana">
                             <option value="">Cargando agencias...</option>
                         </select>
+                    </div>
+                    
+                    <!-- Nueva sección para seleccionar correos -->
+                    <div class="mb-4 email-selection-container" style="display: none;">
+                        <label class="form-label">Seleccionar correos destinatarios:</label>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="form-check ms-2">
+                                <input class="form-check-input" type="checkbox" id="selectAllEmails" checked>
+                                <label class="form-check-label" for="selectAllEmails">
+                                    Seleccionar todos
+                                </label>
+                            </div>
+                        </div>
+                        <div class="email-selection border rounded p-2" id="emailsContainer">
+                            <div class="text-center py-2">
+                                <p class="text-muted">Seleccione una agencia para ver los correos disponibles</p>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-4">
@@ -356,6 +374,9 @@
                                 const option = document.createElement('option');
                                 option.value = agencia.id;
                                 option.textContent = agencia.nombre;
+                                // Guardar los correos como atributos data para accederlos después
+                                option.dataset.correo = agencia.correo || '';
+                                option.dataset.correosAdicionales = agencia.correos_adicionales || '';
                                 select.appendChild(option);
                             });
                         }
@@ -417,6 +438,90 @@
                     });
             });
             
+            // Función para actualizar los emails cuando se selecciona una agencia
+            document.getElementById('agenciaAduana').addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const emailsContainer = document.getElementById('emailsContainer');
+                const emailSelectionContainer = document.querySelector('.email-selection-container');
+                
+                if (!this.value) {
+                    emailSelectionContainer.style.display = 'none';
+                    return;
+                }
+                
+                // Mostrar el contenedor de selección de emails
+                emailSelectionContainer.style.display = 'block';
+                
+                // Obtener los correos
+                const correo = selectedOption.dataset.correo || '';
+                const correosAdicionales = selectedOption.dataset.correosAdicionales || '';
+                
+                // Limpiar el contenedor
+                emailsContainer.innerHTML = '';
+                
+                // Agregar el correo principal si existe
+                if (correo) {
+                    const emailItem = document.createElement('div');
+                    emailItem.className = 'form-check mb-2';
+                    emailItem.innerHTML = `
+                        <input class="form-check-input email-checkbox" type="checkbox" 
+                               value="${correo}" id="email-principal" checked>
+                        <label class="form-check-label" for="email-principal">
+                            ${correo} <span class="badge bg-primary">Principal</span>
+                        </label>
+                    `;
+                    emailsContainer.appendChild(emailItem);
+                }
+                
+                // Agregar correos adicionales si existen
+                if (correosAdicionales) {
+                    const adicionales = correosAdicionales.split(',').map(email => email.trim()).filter(email => email);
+                    
+                    adicionales.forEach((email, index) => {
+                        const emailItem = document.createElement('div');
+                        emailItem.className = 'form-check mb-2';
+                        emailItem.innerHTML = `
+                            <input class="form-check-input email-checkbox" type="checkbox" 
+                                   value="${email}" id="email-adicional-${index}" checked>
+                            <label class="form-check-label" for="email-adicional-${index}">
+                                ${email}
+                            </label>
+                        `;
+                        emailsContainer.appendChild(emailItem);
+                    });
+                }
+                
+                // Si no hay correos, mostrar mensaje
+                if (!correo && !correosAdicionales) {
+                    emailsContainer.innerHTML = '<div class="text-center py-2"><p class="text-danger">La agencia no tiene correos configurados</p></div>';
+                }
+                
+                // Configurar eventos para los checkboxes de email
+                document.querySelectorAll('.email-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', updateSelectedEmailsCount);
+                });
+                
+                // Actualizar contador inicial
+                updateSelectedEmailsCount();
+            });
+            
+            // Función para actualizar el contador de emails seleccionados
+            function updateSelectedEmailsCount() {
+                const allCheckboxes = document.querySelectorAll('.email-checkbox');
+                const checkedCheckboxes = document.querySelectorAll('.email-checkbox:checked');
+                
+                document.getElementById('selectAllEmails').checked = allCheckboxes.length === checkedCheckboxes.length;
+            }
+            
+            // Manejar el checkbox "Seleccionar todos" para correos
+            document.getElementById('selectAllEmails').addEventListener('change', function() {
+                const isChecked = this.checked;
+                document.querySelectorAll('.email-checkbox').forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                });
+                updateSelectedEmailsCount();
+            });
+            
             // Manejar el botón "Seleccionar todos"
             document.getElementById('selectAllAlbaranes').addEventListener('change', function() {
                 const isChecked = this.checked;
@@ -440,6 +545,11 @@
                 const emailSubject = document.getElementById('emailSubject').value.trim();
                 const emailMessage = document.getElementById('emailMessage').value.trim();
                 
+                // Obtener los correos electrónicos seleccionados
+                const selectedEmails = Array.from(
+                    document.querySelectorAll('.email-checkbox:checked')
+                ).map(checkbox => checkbox.value);
+                
                 if (!agenciaId) {
                     alert('Por favor, seleccione una agencia de aduana');
                     return;
@@ -447,6 +557,11 @@
                 
                 if (selectedAlbaranes.length === 0) {
                     alert('Por favor, seleccione al menos un albarán para enviar');
+                    return;
+                }
+                
+                if (selectedEmails.length === 0) {
+                    alert('Por favor, seleccione al menos un correo destinatario');
                     return;
                 }
                 
@@ -551,6 +666,9 @@
                         
                         // Añadir IDs de las ventas
                         formData.append('venta_ids', JSON.stringify(selectedAlbaranes));
+                        
+                        // Añadir los correos seleccionados
+                        formData.append('selected_emails', JSON.stringify(selectedEmails));
                         
                         // Añadir los PDFs en base64
                         pdfsBase64.forEach((pdf, index) => {

@@ -365,6 +365,21 @@ body {
 
 /* Page break controls */
 @media print {
+    body {
+        background-color: white;
+    }
+    
+    .container {
+        box-shadow: none;
+        margin: 0;
+        max-width: 100%;
+        width: 100% !important;
+    }
+    
+    .controls {
+        display: none;
+    }
+
     .invoice-header, 
     .invoice-client, 
     .invoice-items, 
@@ -382,6 +397,11 @@ body {
     .items-table tr {
         page-break-inside: avoid;
         page-break-after: auto;
+    }
+    
+    .invoice-items h3,
+    .invoice-notes h3 {
+        page-break-after: avoid;
     }
 }
 
@@ -418,22 +438,5 @@ body {
     
     .summary-table {
         width: 100%;
-    }
-}
-
-/* Print styles */
-@media print {
-    body {
-        background-color: white;
-    }
-    
-    .container {
-        box-shadow: none;
-        margin: 0;
-        max-width: 100%;
-    }
-    
-    .controls {
-        display: none;
     }
 }

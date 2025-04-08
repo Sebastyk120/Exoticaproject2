@@ -47,18 +47,33 @@ def enviar_factura_email(request, venta_id):
         # Obtener la información de la venta
         venta = get_object_or_404(Venta, pk=venta_id)
         
-        # Preparar las direcciones de correo
-        emails = [venta.cliente.email] if venta.cliente.email else []  # Correo principal
-        if venta.cliente.correos_adicionales:
-            # Añadir correos adicionales si existen (separados por coma)
-            additional_emails = [email.strip() for email in venta.cliente.correos_adicionales.split(',') if email.strip()]
-            emails.extend(additional_emails)
+        # Obtener los correos seleccionados por el usuario
+        selected_emails_json = request.POST.get('selected_emails')
+        if selected_emails_json:
+            try:
+                emails = json.loads(selected_emails_json)
+                # Asegurar que emails es una lista
+                if not isinstance(emails, list):
+                    emails = []
+            except json.JSONDecodeError:
+                emails = []
+        else:
+            # Si no se especificaron correos seleccionados, usar el comportamiento anterior
+            emails = [venta.cliente.email] if venta.cliente.email else []  # Correo principal
+            if venta.cliente.correos_adicionales:
+                # Añadir correos adicionales si existen (separados por coma)
+                additional_emails = [email.strip() for email in venta.cliente.correos_adicionales.split(',') if email.strip()]
+                emails.extend(additional_emails)
         
         if not emails:
             return JsonResponse({
                 'success': False,
-                'error': 'El cliente no tiene dirección de correo electrónico'
+                'error': 'No se seleccionaron direcciones de correo electrónico'
             })
+        
+        # Obtener asunto y mensaje personalizados
+        custom_subject = request.POST.get('email_subject')
+        custom_message = request.POST.get('email_message')
         
         # Generar enlace para el estado de cuenta del cliente
         account_link = ""
@@ -67,7 +82,7 @@ def enviar_factura_email(request, venta_id):
             account_link = f"\nConsulte y descargue fácilmente su estado de cuenta, facturas y facturas de abono a través del siguiente enlace: {account_url}"
         
         # Preparar el mensaje de correo
-        subject = f"Factura #{venta.numero_factura} - L&M Exotic Fruit"
+        subject = custom_subject or f"Factura #{venta.numero_factura} - L&M Exotic Fruit"
         body = f"""
 Estimado/a {venta.cliente.nombre},
 
@@ -76,7 +91,15 @@ Adjunto encontrará la factura #{venta.numero_factura} correspondiente a su comp
 Fecha de emisión: {venta.fecha_entrega.strftime('%d/%m/%Y')}
 Fecha de vencimiento: {venta.fecha_vencimiento.strftime('%d/%m/%Y')}
 Importe total: {format_currency_eur(venta.valor_total_factura_euro)}{account_link}
+"""
 
+        # Añadir mensaje personalizado si existe
+        if custom_message:
+            body += f"""
+{custom_message}
+"""
+
+        body += """
 Gracias por su confianza.
 
 Atentamente,
@@ -122,7 +145,7 @@ L&M Exotic Fruit
 def enviar_albaran_email(request, venta_id):
     """
     Vista para enviar el PDF del albarán generado en el cliente por correo electrónico
-    al cliente principal y los correos adicionales.
+    a los correos seleccionados por el usuario.
     """
     if request.method != 'POST':
         return JsonResponse({
@@ -146,25 +169,49 @@ def enviar_albaran_email(request, venta_id):
         pdf_bytes = base64.b64decode(pdf_base64)
         venta = get_object_or_404(Venta, pk=venta_id)
 
-        emails = [venta.cliente.email] if venta.cliente.email else []
-        if venta.cliente.correos_adicionales:
-            additional_emails = [email.strip() for email in venta.cliente.correos_adicionales.split(',') if email.strip()]
-            emails.extend(additional_emails)
+        # Obtener los correos seleccionados por el usuario
+        selected_emails_json = request.POST.get('selected_emails')
+        if selected_emails_json:
+            try:
+                emails = json.loads(selected_emails_json)
+                # Asegurar que emails es una lista
+                if not isinstance(emails, list):
+                    emails = []
+            except json.JSONDecodeError:
+                emails = []
+        else:
+            # Si no se especificaron correos seleccionados, usar el comportamiento anterior
+            emails = [venta.cliente.email] if venta.cliente.email else []
+            if venta.cliente.correos_adicionales:
+                additional_emails = [email.strip() for email in venta.cliente.correos_adicionales.split(',') if email.strip()]
+                emails.extend(additional_emails)
 
         if not emails:
             return JsonResponse({
                 'success': False,
-                'error': 'El cliente no tiene dirección de correo electrónico'
+                'error': 'No se seleccionaron direcciones de correo electrónico'
             })
 
-        subject = f"Albarán Cliente #{venta.id} - L&M Exotic Fruit"
+        # Obtener asunto y mensaje personalizados
+        custom_subject = request.POST.get('email_subject')
+        custom_message = request.POST.get('email_message')
+
+        subject = custom_subject or f"Albarán Cliente #{venta.id} - L&M Exotic Fruit"
         body = f"""
 Estimado/a {venta.cliente.nombre},
 
 Adjunto encontrará el albarán correspondiente a su pedido.
 
 Fecha de emisión: {venta.fecha_entrega.strftime('%d/%m/%Y')}
+"""
 
+        # Añadir mensaje personalizado si existe
+        if custom_message:
+            body += f"""
+{custom_message}
+"""
+
+        body += """
 Gracias por su confianza.
 
 Atentamente,
@@ -237,16 +284,32 @@ def enviar_rectificativa_email(request, venta_id):
         if not hasattr(venta, 'valor_total_abono_euro_con_iva'):
             venta.valor_total_abono_euro_con_iva = venta.valor_total_abono_euro
 
-        emails = [venta.cliente.email] if venta.cliente.email else []
-        if venta.cliente.correos_adicionales:
-            additional_emails = [email.strip() for email in venta.cliente.correos_adicionales.split(',') if email.strip()]
-            emails.extend(additional_emails)
+        # Obtener los correos seleccionados por el usuario
+        selected_emails_json = request.POST.get('selected_emails')
+        if selected_emails_json:
+            try:
+                emails = json.loads(selected_emails_json)
+                # Asegurar que emails es una lista
+                if not isinstance(emails, list):
+                    emails = []
+            except json.JSONDecodeError:
+                emails = []
+        else:
+            # Si no se especificaron correos seleccionados, usar el comportamiento anterior
+            emails = [venta.cliente.email] if venta.cliente.email else []
+            if venta.cliente.correos_adicionales:
+                additional_emails = [email.strip() for email in venta.cliente.correos_adicionales.split(',') if email.strip()]
+                emails.extend(additional_emails)
 
         if not emails:
             return JsonResponse({
                 'success': False,
-                'error': 'El cliente no tiene dirección de correo electrónico'
+                'error': 'No se seleccionaron direcciones de correo electrónico'
             })
+
+        # Obtener asunto y mensaje personalizados
+        custom_subject = request.POST.get('email_subject')
+        custom_message = request.POST.get('email_message')
 
         # Generar enlace para el estado de cuenta del cliente
         account_link = ""
@@ -255,7 +318,7 @@ def enviar_rectificativa_email(request, venta_id):
             account_link = f"\nConsulte y descargue fácilmente su estado de cuenta, facturas y facturas de abono a través del siguiente enlace: {account_url}"
 
         # Mensaje específico para facturas rectificativas
-        subject = f"Factura Rectificativa #{venta.numero_nc} - L&M Exotic Fruit"
+        subject = custom_subject or f"Factura Rectificativa #{venta.numero_nc} - L&M Exotic Fruit"
         body = f"""
 Estimado/a {venta.cliente.nombre},
 
@@ -268,7 +331,15 @@ Detalles de la rectificativa:
 - Número de rectificativa: {venta.numero_nc}
 - Fecha de emisión: {venta.fecha_entrega.strftime('%d/%m/%Y')}
 - Importe total del abono: {format_currency_eur(venta.valor_total_abono_euro_con_iva)}{account_link}
+"""
 
+        # Añadir mensaje personalizado si existe
+        if custom_message:
+            body += f"""
+{custom_message}
+"""
+
+        body += """
 Para cualquier consulta relacionada con esta rectificativa, no dude en contactarnos.
 
 Gracias por su confianza.
@@ -314,7 +385,15 @@ def get_agencias_aduana(request):
     """
     try:
         agencias = AgenciaAduana.objects.all()
-        agencias_list = [{'id': a.id, 'nombre': a.nombre} for a in agencias]
+        agencias_list = [
+            {
+                'id': a.id, 
+                'nombre': a.nombre, 
+                'correo': a.correo or '',
+                'correos_adicionales': a.correos_adicionales or ''
+            } 
+            for a in agencias
+        ]
         return JsonResponse(agencias_list, safe=False)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
@@ -403,17 +482,28 @@ def enviar_albaranes_aduana(request):
             'error': 'La agencia de aduana especificada no existe'
         }, status=404)
     
-    # Preparar las direcciones de correo
-    emails = [agencia.correo] if agencia.correo else []
-    if agencia.correos_adicionales:
-        # Añadir correos adicionales si existen (separados por coma)
-        additional_emails = [email.strip() for email in agencia.correos_adicionales.split(',') if email.strip()]
-        emails.extend(additional_emails)
+    # Obtener los correos seleccionados por el usuario
+    selected_emails_json = request.POST.get('selected_emails')
+    if selected_emails_json:
+        try:
+            emails = json.loads(selected_emails_json)
+            # Asegurar que emails es una lista
+            if not isinstance(emails, list):
+                emails = []
+        except json.JSONDecodeError:
+            emails = []
+    else:
+        # Si no se especificaron correos seleccionados, usar todos los correos de la agencia (comportamiento anterior)
+        emails = [agencia.correo] if agencia.correo else []
+        if agencia.correos_adicionales:
+            # Añadir correos adicionales si existen (separados por coma)
+            additional_emails = [email.strip() for email in agencia.correos_adicionales.split(',') if email.strip()]
+            emails.extend(additional_emails)
     
     if not emails:
         return JsonResponse({
             'success': False,
-            'error': 'La agencia de aduana no tiene dirección de correo electrónico'
+            'error': 'No se seleccionaron direcciones de correo electrónico'
         })
     
     # Obtener las ventas para incluir información en el correo

@@ -27,35 +27,23 @@ body {
     font-size: 13px;
 }
 
-/* Contenedor principal */
-.container, .our-container {
+.container {
     max-width: 210mm; /* A4 width */
-    margin: 0 auto;
+    margin: 5px auto; /* Reduced from 15px */
     background-color: var(--background-white);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Contenedor de botones - similar a factura_cliente_token.html */
-.btn-container {
-    padding: 15px;
-    text-align: center;
-    margin-bottom: 15px;
+/* Controls section - not included in PDF */
+.controls {
     background-color: var(--primary-color);
-    border-radius: 4px 4px 0 0;
+    padding: 8px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
+    border-radius: 4px 4px 0 0;
 }
 
-/* Invoice container - this is what will be in the PDF */
-.invoice-container {
-    padding: 10px 15px;
-    background-color: white;
-}
-
-/* Estilos de botones */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -64,18 +52,14 @@ body {
     border-radius: 4px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     border: none;
     text-decoration: none;
     font-size: 12px;
-    min-width: 100px;
-    text-align: center;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .btn i {
     margin-right: 5px;
-    font-size: 12px;
 }
 
 .btn-primary {
@@ -84,9 +68,7 @@ body {
 }
 
 .btn-primary:hover {
-    background-color: #c71a62;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    background-color: #135e52; /* Hover turquesa oscuro */
 }
 
 .btn-secondary {
@@ -96,8 +78,6 @@ body {
 
 .btn-secondary:hover {
     background-color: #000;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .btn-warning {
@@ -107,8 +87,6 @@ body {
 
 .btn-warning:hover {
     background-color: #d35400;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .btn-info {
@@ -118,8 +96,6 @@ body {
 
 .btn-info:hover {
     background-color: #2980b9;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .btn-success {
@@ -128,9 +104,7 @@ body {
 }
 
 .btn-success:hover {
-    background-color: #338a70;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    background-color: #338a70; /* Hover turquesa éxito */
 }
 
 .btn-danger {
@@ -140,68 +114,13 @@ body {
 
 .btn-danger:hover {
     background-color: #c82333;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
-.btn:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+/* Invoice container - this is what will be in the PDF */
+.invoice-container {
+    padding: 10px 15px;
+    background-color: white;
 }
-
-/* Print styles */
-@media print {
-    body {
-        background-color: white;
-    }
-    
-    .container, .our-container {
-        box-shadow: none;
-        margin: 0;
-        max-width: 100%;
-        width: 100% !important;
-    }
-    
-    .btn-container {
-        display: none;
-    }
-}
-
-/* Responsive design solo para los botones */
-@media (max-width: 768px) {
-    .btn-container {
-        padding: 8px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .btn {
-        margin-bottom: 5px;
-    }
-}
-
-@media (max-width: 480px) {
-    .btn-container {
-        border-radius: 0;
-        padding: 6px;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .btn {
-        font-size: 11px;
-        padding: 5px 8px;
-        min-width: 85px;
-        margin: 2px;
-    }
-    
-    .btn i {
-        font-size: 11px;
-    }
-}
-
-/* Estilos para el contenido del documento */
 
 /* Invoice header with company info and invoice details */
 .invoice-header {
@@ -220,8 +139,8 @@ body {
 
 .logo {
     margin-right: 12px;
-    height: 150px;
-    width: 150px;
+    height: 150px; /* Increased from 100px */
+    width: 150px; /* Increased from 100px */
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -242,7 +161,7 @@ body {
 
 .company-title {
     color: var(--primary-color);
-    font-size: 20px;
+    font-size: 20px; /* Reduced from 22px */
     font-weight: 900;
     margin-top: 3px;
     text-align: left;
@@ -354,6 +273,28 @@ body {
     background-color: var(--background-light);
 }
 
+/* Credit note section */
+.invoice-credit-note {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #ffecb3;
+    border-radius: 4px;
+    border-left: 4px solid var(--warning-color);
+    page-break-inside: avoid;
+}
+
+.invoice-credit-note h3 {
+    color: var(--primary-color);
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+/* Esto asegura que las facturas rectificativas tengan un aspecto diferente */
+body .invoice-container:has(.invoice-info h2:contains("FACTURA RECTIFICATIVA")) {
+    background-color: #fff9e6;
+    border: 1px solid var(--warning-color);
+}
+
 /* Invoice summary section */
 .invoice-summary-and-footer {
     display: flex;
@@ -432,8 +373,30 @@ body {
 
 .notes-content {
     font-style: italic;
-    color: #1A7B6B;
+    color: #1A7B6B; /* Color coherente con primary para la nota */
     font-size: 12px;
+}
+
+/* Footer section */
+.invoice-footer {
+    display: flex;
+    gap: 15px; /* Reduced from 20px */
+    margin-bottom: 15px; /* Reduced from 20px */
+    padding-top: 12px; /* Reduced from 15px */
+    border-top: 1px solid var(--border-color);
+    page-break-inside: avoid;
+}
+
+.invoice-footer h3 {
+    color: var(--primary-color);
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.invoice-footer p {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 2px;
 }
 
 /* Signature and thank you */
@@ -450,38 +413,90 @@ body {
     font-weight: 500;
 }
 
-/* Credit note section */
-.invoice-credit-note {
-    margin-bottom: 20px;
-    padding: 15px;
-    background-color: #ffecb3;
-    border-radius: 4px;
-    border-left: 4px solid var(--warning-color);
-    page-break-inside: avoid;
+/* Page break controls */
+@media print {
+    .invoice-header,
+    .invoice-client,
+    .invoice-items,
+    .invoice-credit-note,
+    .invoice-summary,
+    .invoice-notes,
+    .invoice-footer,
+    .invoice-signature {
+        page-break-inside: avoid;
+    }
+
+    .items-table {
+        page-break-inside: auto;
+    }
+
+    .items-table tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    .invoice-items h3,
+    .invoice-credit-note h3,
+    .invoice-notes h3 {
+        page-break-after: avoid;
+    }
 }
 
-/* Esto asegura que las facturas rectificativas tengan un aspecto diferente */
-body .invoice-container:has(.invoice-info h2:contains("FACTURA RECTIFICATIVA")) {
-    background-color: #fff9e6;
-    border: 1px solid var(--warning-color);
+/* Responsive design */
+@media (max-width: 768px) {
+    .invoice-container {
+        padding: 15px;
+    }
+
+    .invoice-header {
+        flex-direction: column;
+    }
+
+    .invoice-info {
+        text-align: left;
+        margin-top: 15px;
+    }
+
+    .client-info p {
+        flex: 0 0 100%;
+    }
+
+    .invoice-footer {
+        flex-direction: column;
+    }
+
+    .invoice-summary-and-footer {
+        flex-direction: column;
+    }
+
+    .bank-and-terms {
+        margin-bottom: 15px;
+    }
+
+    .invoice-summary {
+        width: 100%;
+    }
+
+    .summary-table {
+        width: 100%;
+    }
 }
 
-/* Albaran specific styles */
-.invoice-container:has(.invoice-info h2:contains("ALBARÁN")) {
-    background-color: #fff;
-}
+/* Print styles */
+@media print {
+    body {
+        background-color: white;
+    }
 
-.invoice-container:has(.invoice-info h2:contains("ALBARÁN")) .invoice-header {
-    border-bottom: 2px solid var(--secondary-color);
-}
+    .container {
+        box-shadow: none;
+        margin: 0;
+        max-width: 100%;
+    }
 
-.invoice-container:has(.invoice-info h2:contains("ALBARÁN")) .items-table th {
-    background-color: var(--secondary-color);
-}
-
-.invoice-container:has(.invoice-info h2:contains("ALBARÁN")) .summary-row.total {
-    color: var(--secondary-color);
-    border-bottom: 2px solid var(--secondary-color);
+    .controls {
+        display: none;
+    }
 }
 
 /* Signature section styles */
@@ -508,31 +523,20 @@ body .invoice-container:has(.invoice-info h2:contains("FACTURA RECTIFICATIVA")) 
     font-size: 12px;
 }
 
-/* Page break controls */
-@media print {
-    .invoice-header, 
-    .invoice-client, 
-    .invoice-items, 
-    .invoice-credit-note, 
-    .invoice-summary, 
-    .invoice-notes, 
-    .invoice-footer,
-    .invoice-signature {
-        page-break-inside: avoid;
-    }
-    
-    .items-table {
-        page-break-inside: auto;
-    }
-    
-    .items-table tr {
-        page-break-inside: avoid;
-        page-break-after: auto;
-    }
-    
-    .invoice-items h3,
-    .invoice-credit-note h3,
-    .invoice-notes h3 {
-        page-break-after: avoid;
-    }
+/* Albaran specific styles */
+.invoice-container:has(.invoice-info h2:contains("ALBARÁN")) {
+    background-color: #fff;
+}
+
+.invoice-container:has(.invoice-info h2:contains("ALBARÁN")) .invoice-header {
+    border-bottom: 2px solid var(--secondary-color);
+}
+
+.invoice-container:has(.invoice-info h2:contains("ALBARÁN")) .items-table th {
+    background-color: var(--secondary-color);
+}
+
+.invoice-container:has(.invoice-info h2:contains("ALBARÁN")) .summary-row.total {
+    color: var(--secondary-color);
+    border-bottom: 2px solid var(--secondary-color);
 }
