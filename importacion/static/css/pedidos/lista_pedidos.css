@@ -24,8 +24,8 @@
     --modal-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     
     /* Typography */
-    --heading-font: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    --body-font: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --heading-font: 'DM Sans', sans-serif;
+    --body-font: 'DM Sans', sans-serif;
     --text-color: #334155;
     --text-muted: #64748b;
     
@@ -37,16 +37,6 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* Fix for iOS Safari - prevent rubber band scrolling */
-html {
-    position: fixed;
-    height: 100%;
-    overflow: hidden;
-    width: 100%;
 }
 
 body {
@@ -56,10 +46,6 @@ body {
     background-color: var(--bg-color);
     padding: 20px;
     font-size: 0.95rem;
-    /* Fix for iOS scrolling */
-    height: 100%;
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
 }
 
 /* Container & Layout */
@@ -338,78 +324,61 @@ header h1 {
     background: white;
     border-radius: var(--border-radius);
     box-shadow: var(--card-shadow);
+    padding: 0.75rem;
     overflow: hidden;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
-/* Configuración responsiva para tablas y tarjetas */
-/* Escritorio: Visualización de tabla normal */
 .table-responsive {
     overflow-x: auto;
     border-radius: var(--border-radius);
-    width: 100%;
+    max-width: 100%;
     margin: 0;
-    -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
-    /* Fix for horizontal scrolling on Safari */
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
 }
 
 #pedidos-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 0.85rem;
+    font-size: 0.75rem; /* Reducción del tamaño base de la fuente */
 }
 
 #pedidos-table th {
-    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 0.6rem; /* Reducción del padding */
+    font-size: 0.75rem;
     white-space: nowrap;
-    position: relative;
+}
+
+#pedidos-table th:first-child {
+    border-top-left-radius: var(--border-radius);
+}
+
+#pedidos-table th:last-child {
+    border-top-right-radius: var(--border-radius);
 }
 
 #pedidos-table td {
-    padding: 0.75rem 1rem;
+    padding: 0.4rem 0.6rem; /* Reducción del padding */
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    color: var(--text-color);
     vertical-align: middle;
+    line-height: 1.3; /* Tighter line height */
 }
 
-/* Estilos para el icono de pagado */
-.pagado-icon {
-    font-size: 1.1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+#pedidos-table tr:last-child td {
+    border-bottom: none;
 }
 
-/* Botón de configurar columnas mejorado */
-#toggle-columns {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-    white-space: nowrap;
+#pedidos-table tr {
+    transition: var(--transition);
 }
 
-/* Estilos específicos para diferentes tipos de columnas */
-.column-acciones {
-    width: auto;
-    white-space: nowrap;
-}
-
-.column-id {
-    width: 80px;
-    text-align: center;
-    font-weight: 500;
-}
-
-/* Transición a tarjetas en dispositivos móviles */
-@media (max-width: 992px) {
-    #pedidos-table th,
-    #pedidos-table td {
-        padding: 0.6rem 0.75rem;
-        font-size: 0.8rem;
-    }
+#pedidos-table tr:hover {
+    background-color: rgba(59, 130, 246, 0.05);
 }
 
 /* Status Badges - More Compact */
@@ -517,8 +486,6 @@ header h1 {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.6);
@@ -526,10 +493,8 @@ header h1 {
     justify-content: center;
     align-items: center;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
     padding: 20px;
     backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px); /* Safari support */
 }
 
 .modal-content {
@@ -539,23 +504,15 @@ header h1 {
     width: 95%;
     box-shadow: var(--modal-shadow);
     animation: modalFadeIn 0.3s;
-    -webkit-animation: modalFadeIn 0.3s;
     max-height: 90vh;
     display: flex;
-    display: -webkit-flex; /* Safari */
     flex-direction: column;
-    -webkit-flex-direction: column; /* Safari */
     overflow: hidden;
 }
 
 @keyframes modalFadeIn {
     from { opacity: 0; transform: translateY(-20px) scale(0.98); }
     to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@-webkit-keyframes modalFadeIn {
-    from { opacity: 0; -webkit-transform: translateY(-20px) scale(0.98); }
-    to { opacity: 1; -webkit-transform: translateY(0) scale(1); }
 }
 
 .modal-header {
@@ -890,8 +847,6 @@ header h1 {
 @media (max-width: 992px) {
     .container {
         max-width: 100%;
-        margin: 0;
-        border-radius: 0;
     }
     
     .info-header {
@@ -900,51 +855,34 @@ header h1 {
     
     .modal-content {
         width: 95%;
-        margin: 10px;
     }
 }
 
 @media (max-width: 768px) {
     body {
-        padding: 0;
+        padding: 10px;
     }
     
     header {
-        padding: 1rem;
-        border-radius: 0;
-    }
-    
-    header h1 {
-        font-size: 1.4rem;
+        padding: 1.5rem;
     }
     
     .actions-bar {
         flex-direction: column;
         align-items: stretch;
         gap: 0.75rem;
-        padding: 0.75rem;
     }
     
     .search-bar {
         min-width: 100%;
     }
     
-    .search-bar form {
-        flex-direction: column;
-    }
-    
-    .search-bar input {
-        width: 100%;
-    }
-    
     .filter-options {
         flex-wrap: wrap;
-        gap: 0.5rem;
     }
     
     .filter-options select {
         flex: 1;
-        min-width: 100%;
     }
     
     .detalle-cards {
@@ -966,278 +904,44 @@ header h1 {
     .summary-item {
         width: 100%;
     }
+}
 
-    /* Mejoras para la tabla en móviles */
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        margin: 0 -1rem;
-        padding: 0 1rem;
+@media (max-width: 576px) {
+    .main-content {
+        padding: 1rem;
     }
-
-    #pedidos-table {
-        min-width: 800px;
+    
+    .btn {
+        padding: 0.6rem 1rem;
     }
-
-    #pedidos-table th, 
-    #pedidos-table td {
+    
+    #pedidos-table td, 
+    #pedidos-table th {
         padding: 0.5rem 0.4rem;
         font-size: 0.75rem;
     }
-
+    
     .status-badge {
         padding: 0.2rem 0.4rem;
         font-size: 0.65rem;
     }
-
+    
     .actions .btn-icon {
         width: 26px;
         height: 26px;
         font-size: 0.75rem;
     }
-
+    
     .modal-header h2 {
         font-size: 1.1rem;
     }
-
+    
     .card-body {
         flex-direction: column;
     }
-
-    .metric {
-        width: 100%;
-    }
-}
-
-@media (max-width: 576px) {
-    .main-content {
-        padding: 0.75rem;
-    }
-    
-    .btn {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.8rem;
-    }
-    
-    .btn-icon {
-        width: 52px; /* Aumentado para mejor legibilidad */
-        height: 52px;
-        font-size: 1.2rem;
-    }
-    
-    .info-item {
-        min-width: 100%;
-    }
-    
-    .info-row {
-        gap: 1.5rem;
-    }
-    
-    .modal {
-        padding: 1rem;
-    }
-    
-    .modal-content {
-        width: 100%;
-        margin: 0;
-        max-height: 90vh; /* Ajuste para evitar desbordamiento */
-        height: 90vh;
-        overflow-y: auto;
-        border-radius: 0;
-    }
-    
-    .modal-header,
-    .modal-body,
-    .modal-footer {
-        padding: 1rem;
-    }
-    
-    .details-title,
-    .card-header h4 {
-        font-size: 1rem;
-    }
     
     .metric {
-        padding: 0.75rem; /* Aumentado */
-    }
-    
-    .metric i {
-        font-size: 0.9rem;
-    }
-    
-    .metric span,
-    .nc {
-        font-size: 0.9rem; /* Aumentado */
-    }
-    
-    .total {
-        font-size: 1rem;
-    }
-    
-    .table-responsive {
-        overflow-x: hidden;
-        padding: 0;
-    }
-
-    #pedidos-table {
-        display: block;
         width: 100%;
-    }
-
-    #pedidos-table thead {
-        display: none;
-    }
-
-    #pedidos-table tbody {
-        display: block;
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    #pedidos-table tr {
-        display: block;
-        margin-bottom: 1rem; /* Reducido */
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        width: 100%;
-    }
-
-    #pedidos-table td {
-        padding: 14px 16px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between; 
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-        text-align: right;
-    }
-
-    #pedidos-table td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        color: var(--text-muted);
-        text-align: left;
-        min-width: 45%;
-        padding-right: 20px;
-    }
-
-    #pedidos-table td > span, 
-    #pedidos-table td > div {
-        flex: 1;
-        text-align: right;
-    }
-
-    .column-id {
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-        color: white !important;
-        font-weight: 600;
-        font-size: 1rem !important;
-        text-align: center !important;
-    }
-
-    .column-id::before {
-        color: white !important;
-        opacity: 0.9;
-    }
-
-    .column-exportador {
-        background-color: #f8fafc;
-        font-weight: 600;
-    }
-
-    .column-acciones {
-        background-color: #f8fafc;
-        border-top: 1px solid var(--border-color);
-        padding: 16px !important;
-    }
-
-    .column-acciones .actions {
-        gap: 10px;
-        justify-content: flex-end;
-    }
-
-    .column-acciones .btn-icon {
-        width: 42px;
-        height: 42px;
-        font-size: 1rem;
-    }
-
-    .column-estado .status-badge {
-        padding: 6px 12px;
-        min-width: 110px;
-        font-size: 0.8rem;
-    }
-
-    .column-pagado .pagado-icon {
-        font-size: 1.3rem;
-    }
-
-    #pedidos-table tbody tr {
-        margin-bottom: 20px;
-        box-shadow: var(--card-shadow);
-    }
-
-    .column-factura_usd,
-    .column-monto_pendiente {
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
-    .column-factura_usd {
-        background-color: rgba(59, 130, 246, 0.05);
-    }
-}
-
-@media (max-width: 768px) {
-    .column-selector {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        border-radius: 0;
-        overflow-y: auto;
-    }
-    
-    .column-selector-content {
-        padding: 1rem;
-    }
-    
-    .checkbox-list {
-        max-height: calc(100vh - 200px);
-        overflow-y: auto;
-    }
-    
-    .empty-message {
-        padding: 2rem 1rem;
-    }
-    
-    .empty-message i {
-        font-size: 2.5rem;
-    }
-    
-    .empty-message p {
-        font-size: 1rem;
-    }
-    
-    .pagination {
-        margin-top: 1rem;
-    }
-    
-    .step-links {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.25rem;
-    }
-    
-    .step-links a,
-    .current {
-        padding: 0.4rem 0.6rem;
-        font-size: 0.8rem;
     }
 }
 
@@ -1299,142 +1003,5 @@ header h1 {
     
     .pagado-icon {
         font-size: 0.9rem;
-    }
-}
-
-/* Ensure proper appearance on Safari */
-@supports (-webkit-appearance:none) {
-    .filter-options select {
-        background-position: right 0.8rem center;
-    }
-    
-    .checkbox-list input[type="checkbox"] {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 18px;
-        height: 18px;
-        border: 1px solid var(--border-color);
-        border-radius: 3px;
-        position: relative;
-    }
-    
-    .checkbox-list input[type="checkbox"]:checked {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-    
-    .checkbox-list input[type="checkbox"]:checked::after {
-        content: '';
-        position: absolute;
-        left: 6px;
-        top: 2px;
-        width: 5px;
-        height: 10px;
-        border: solid white;
-        border-width: 0 2px 2px 0;
-        -webkit-transform: rotate(45deg);
-        transform: rotate(45deg);
-    }
-}
-
-/* Fix for iOS Safari viewport height issues */
-@media (max-width: 576px) {
-    .modal {
-        padding: 0;
-        align-items: flex-end;
-    }
-    
-    .modal-content {
-        width: 100%;
-        margin: 0;
-        max-height: 85vh; /* Reduced to account for iOS Safari UI elements */
-        height: auto;
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-    
-    /* Fix for 100vh issues on iOS */
-    .column-selector {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        max-height: -webkit-fill-available; /* iOS height fix */
-        height: -webkit-fill-available;
-    }
-    
-    /* Fix for iOS touch events */
-    .btn, 
-    .btn-icon,
-    a.btn, 
-    button {
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
-    }
-
-    /* Ensure proper scrolling on iOS */
-    #pedidos-table {
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    /* Fix for iOS Safari rendering issues with table cards */
-    #pedidos-table tr {
-        -webkit-transform: translateZ(0); /* Activate hardware acceleration */
-    }
-    
-    /* iOS Safari sometimes has issues with flexbox alignment */
-    #pedidos-table td {
-        display: -webkit-flex;
-        display: flex;
-        -webkit-align-items: center;
-        align-items: center;
-        -webkit-justify-content: space-between;
-        justify-content: space-between;
-    }
-    
-    /* Better touch targets for iOS */
-    .column-acciones .btn-icon {
-        min-width: 44px; /* Apple recommends min 44px touch targets */
-        min-height: 44px;
-    }
-}
-
-/* Fix for macOS Safari specific issues */
-@media screen and (min-width: 768px) and (-webkit-min-device-pixel-ratio: 0) {
-    /* Safari-specific adjustments for desktop */
-    .filter-options select {
-        text-indent: 3px; /* Fix text alignment in select boxes */
-    }
-    
-    /* Fix Safari flexbox gap issues in older versions */
-    .actions-bar,
-    .filter-options,
-    .info-row,
-    .card-body {
-        display: -webkit-flex;
-        gap: initial;
-    }
-    
-    .actions-bar > *:not(:last-child),
-    .filter-options > *:not(:last-child),
-    .info-row > *:not(:last-child),
-    .card-body > *:not(:last-child) {
-        margin-right: 1rem;
-    }
-    
-    /* Fix Safari checkbox rendering */
-    input[type="checkbox"] {
-        -webkit-appearance: checkbox;
-    }
-}
-
-/* Specific fix for iPhone notch area */
-@supports (padding: max(0px)) {
-    .modal, 
-    .column-selector {
-        padding-left: max(20px, env(safe-area-inset-left));
-        padding-right: max(20px, env(safe-area-inset-right));
-        padding-bottom: max(20px, env(safe-area-inset-bottom));
     }
 }
