@@ -177,11 +177,9 @@ ALLOWED_HOSTS = [
     'luzmeloexoticfruits.com',
     'www.luzmeloexoticfruits.com'  # Añade el subdominio www
 ]
-CSRF_ALLOWED_ORIGINS = [
-    "https://exoticfruits.up.railway.app",
-    "https://luzmeloexoticfruits.com",
-    "https://www.luzmeloexoticfruits.com"  # Añade el subdominio www
-]
+
+CSRF_TRUSTED_ORIGINS = ["https://*.up.railway.app"]
+
 CORS_ORIGINS_WHITELIST = [
     "https://exoticfruits.up.railway.app",
     "https://luzmeloexoticfruits.com",
