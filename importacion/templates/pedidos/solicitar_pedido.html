@@ -26,6 +26,15 @@
             <button id="sendEmail" class="btn btn-success">
                 <i class="fas fa-envelope"></i> Enviar por Email
             </button>
+            <div class="whatsapp-dropdown">
+                <button id="whatsappBtn" class="btn btn-whatsapp">
+                    <i class="fab fa-whatsapp"></i> Enviar por WhatsApp
+                </button>
+                <div class="whatsapp-options">
+                    <button class="whatsapp-option" data-type="prepedido">Prepedido</button>
+                    <button class="whatsapp-option" data-type="actualizacion">Actualización</button>
+                </div>
+            </div>
         </div>
 
         <div id="order" class="invoice-container">
@@ -287,6 +296,56 @@
                 document.head.appendChild(meta);
                 return '{{ csrf_token }}';
             }
+
+            // WhatsApp functionality
+            const whatsappBtn = document.getElementById('whatsappBtn');
+            const whatsappOptions = document.querySelector('.whatsapp-options');
+            const whatsappOptionsBtns = document.querySelectorAll('.whatsapp-option');
+
+            // Toggle dropdown
+            whatsappBtn.addEventListener('click', function() {
+                whatsappOptions.style.display = whatsappOptions.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.whatsapp-dropdown')) {
+                    whatsappOptions.style.display = 'none';
+                }
+            });
+
+            // Handle WhatsApp option selection
+            whatsappOptionsBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    const phone = '{{ pedido.exportador.telefono }}';
+                    
+                    if (!phone) {
+                        alert('No hay número de teléfono disponible para este exportador');
+                        return;
+                    }
+
+                    // Format the message
+                    let message = `*${type.toUpperCase()}*\n\n`;
+                    message += `*Número Solicitud:* {{ pedido.id }}\n`;
+                    message += `*Semana:* {{ pedido.semana }}\n\n`;
+                    message += `*Detalles del Pedido:*\n`;
+
+                    // Add each presentation and requested boxes
+                    {% for detalle in detalles %}
+                    message += `- {{ detalle.presentacion }} | Cajas: {{ detalle.cajas_solicitadas }}\n`;
+                    {% endfor %}
+
+                    // Encode the message for URL
+                    const encodedMessage = encodeURIComponent(message);
+                    
+                    // Open WhatsApp with the formatted message
+                    window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+                    
+                    // Hide the dropdown
+                    whatsappOptions.style.display = 'none';
+                });
+            });
         });
     </script>
 </body>

@@ -39,7 +39,7 @@ def lista_pedidos(request):
     queryset = queryset.order_by('-id')
 
     # Implementar paginación
-    paginator = Paginator(queryset, 10)  # Mostrar 10 pedidos por página
+    paginator = Paginator(queryset, 5)  # Mostrar 10 pedidos por página
     page = request.GET.get('page')
 
     try:

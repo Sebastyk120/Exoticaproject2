@@ -42,7 +42,7 @@ def transferencias_view(request):
     
     # Pagination for each tab
     page = request.GET.get('page', 1)
-    items_per_page = 10  # Adjust as needed
+    items_per_page = 5  # Adjust as needed
     
     # Create paginators for each list
     paginator_exportador = Paginator(transferencias_exportador_list, items_per_page)
