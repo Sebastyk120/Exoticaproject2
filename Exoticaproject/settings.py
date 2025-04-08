@@ -172,11 +172,19 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 ALLOWED_HOSTS = [
-    'exoticfruits.up.railway.app', 'localhost'
+    'exoticfruits.up.railway.app',
+    'localhost',
+    'luzmeloexoticfruits.com'  # Reemplaza con tu dominio real
 ]
 CSRF_TRUSTED_ORIGINS = ["https://*.up.railway.app"]
-CSRF_ALLOWED_ORIGINS = ["https://exoticfruits.up.railway.app"]
-CORS_ORIGINS_WHITELIST = ["https://exoticfruits.up.railway.app"]
+CSRF_ALLOWED_ORIGINS = [
+    "https://exoticfruits.up.railway.app",
+    "https://luzmeloexoticfruits.com"  # Reemplaza con tu dominio real
+]
+CORS_ORIGINS_WHITELIST = [
+    "https://exoticfruits.up.railway.app",
+    "https://luzmeloexoticfruits.com"  # Reemplaza con tu dominio real
+]
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 

@@ -4,18 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Cambio de URL Database 4">
-      <change afterPath="$PROJECT_DIR$/comercial/static/css/ventas/factura_venta_backup.css" afterDir="false" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Cambios en documentos.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/static/css/ventas/factura_venta.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/ventas/factura_venta.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran_cliente.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_factura.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_factura.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_rectificativa.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_rectificativa.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/views_enviar_correos.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_enviar_correos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/static/css/pedidos/solicitar_pedido.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/pedidos/solicitar_pedido.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/templates/pedidos/solicitar_pedido.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/pedidos/solicitar_pedido.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -183,7 +174,7 @@
       <workItem from="1743856764682" duration="14157000" />
       <workItem from="1743950159357" duration="19090000" />
       <workItem from="1744021923942" duration="8731000" />
-      <workItem from="1744033912031" duration="12245000" />
+      <workItem from="1744033912031" duration="14443000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -393,7 +384,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744034452950</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="Cambios en documentos.">
+      <option name="closed" value="true" />
+      <created>1744078434536</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1744078434536</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -411,7 +410,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="inicial" />
     <MESSAGE value="Modelado Completo." />
     <MESSAGE value="2" />
     <MESSAGE value="Finalizacion de logicas." />
@@ -436,6 +434,7 @@
     <MESSAGE value="Cambio de URL Database 2" />
     <MESSAGE value="Cambio de URL Database 3" />
     <MESSAGE value="Cambio de URL Database 4" />
-    <option name="LAST_COMMIT_MESSAGE" value="Cambio de URL Database 4" />
+    <MESSAGE value="Cambios en documentos." />
+    <option name="LAST_COMMIT_MESSAGE" value="Cambios en documentos." />
   </component>
 </project>
