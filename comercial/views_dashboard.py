@@ -34,14 +34,17 @@ def calcular_ventas_netas_por_producto_semana(anio=None, semana=None):
         'presentacion__fruta__nombre',
         'venta__semana'
     ).annotate(
-        ventas_netas=Sum(F('valor_x_producto') - 
-            Coalesce(
-                ExpressionWrapper(
-                    F('valor_abono_euro') / Value(Decimal('1.04')),
-                    output_field=DecimalField()
-                ),
-                Value(0, output_field=DecimalField())
-            )
+        ventas_netas=Coalesce(
+            Sum(F('valor_x_producto') - 
+                Coalesce(
+                    ExpressionWrapper(
+                        F('valor_abono_euro') / Value(Decimal('1.04')),
+                        output_field=DecimalField()
+                    ),
+                    Value(0, output_field=DecimalField())
+                )
+            ),
+            Value(0, output_field=DecimalField())
         )
     )
     
