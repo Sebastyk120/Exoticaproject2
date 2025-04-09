@@ -422,6 +422,50 @@ def get_ventas_recientes(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
+def get_awbs_recientes(request):
+    """
+    Vista para obtener una lista de los AWBs más recientes de pedidos
+    """
+    try:
+        from importacion.models import Pedido
+        # Obtener los últimos 20 pedidos con AWB no vacío
+        pedidos = Pedido.objects.filter(awb__isnull=False).exclude(awb='').order_by('-id')[:20]
+        
+        awbs_list = []
+        for p in pedidos:
+            try:
+                # Usar getattr con valores predeterminados para evitar errores si faltan atributos
+                exportador_nombre = getattr(p.exportador, 'nombre', 'Sin exportador') if p.exportador else 'Sin exportador'
+                
+                # Manejar con cuidado la fecha para evitar errores de formato
+                fecha_str = '-'
+                if hasattr(p, 'fecha_entrega') and p.fecha_entrega:
+                    try:
+                        fecha_str = p.fecha_entrega.strftime('%d/%m/%Y')
+                    except:
+                        fecha_str = 'Fecha inválida'
+                
+                # Construir el elemento seguro
+                awbs_list.append({
+                    'id': p.id,
+                    'awb': p.awb or '',
+                    'exportador': exportador_nombre,
+                    'fecha': fecha_str,
+                    'semana': p.semana or '-'
+                })
+            except Exception as inner_e:
+                # Registrar el error pero continuar con el siguiente pedido
+                print(f"Error al procesar pedido #{p.id}: {str(inner_e)}")
+                continue
+        
+        return JsonResponse(awbs_list, safe=False)
+    except Exception as e:
+        import traceback
+        print(f"Error al obtener AWBs recientes: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
 def enviar_albaranes_aduana(request):
     """
     Vista para enviar múltiples PDFs de albaranes generados en el cliente por correo electrónico
@@ -435,7 +479,7 @@ def enviar_albaranes_aduana(request):
 
     # Verificar que se recibió la agencia y al menos un PDF
     agencia_id = request.POST.get('agencia_id')
-    email_subject = request.POST.get('email_subject', 'Albaranes para trámites de aduana - L&M Exotic Fruit')
+    email_subject = request.POST.get('email_subject', 'Datos de reparto - Awb: ')
     email_message = request.POST.get('email_message', '')
     
     if not agencia_id:
@@ -471,6 +515,13 @@ def enviar_albaranes_aduana(request):
         return JsonResponse({
             'success': False,
             'error': 'No se seleccionaron albaranes para enviar'
+        }, status=400)
+    
+    # Verificar si hay demasiados albaranes seleccionados
+    if len(venta_ids) > 10:
+        return JsonResponse({
+            'success': False,
+            'error': 'Se seleccionaron demasiados albaranes. Por favor, envíe un máximo de 10 albaranes a la vez.'
         }, status=400)
     
     # Obtener la agencia de aduana
@@ -529,9 +580,22 @@ def enviar_albaranes_aduana(request):
                 pdf_base64 = pdf_data.split('base64,')[1]
             else:
                 pdf_base64 = pdf_data
+                
+            # Verificar la longitud del PDF antes de decodificar
+            if len(pdf_base64) > 5000000:  # Aproximadamente 5MB en base64
+                return JsonResponse({
+                    'success': False,
+                    'error': f'El PDF del albarán #{pdf_id} es demasiado grande. Intente comprimir el PDF o enviar menos albaranes a la vez.'
+                }, status=413)  # 413 Payload Too Large
             
             # Decodificar los datos PDF
-            pdf_bytes = base64.b64decode(pdf_base64)
+            try:
+                pdf_bytes = base64.b64decode(pdf_base64)
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Error al decodificar el PDF del albarán #{pdf_id}: {str(e)}'
+                }, status=400)
             
             # Buscar la venta correspondiente
             venta_id = int(pdf_id)

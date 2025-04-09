@@ -35,6 +35,7 @@ body {
     border: none;
     transition: transform 0.3s, box-shadow 0.3s;
     overflow: hidden;
+    height: 100%;
 }
 
 .balance-card:hover {
@@ -96,11 +97,20 @@ body {
     margin-right: 0.5rem;
 }
 
-/* Custom tabs navigation */
+/* Tabs container and navigation */
+.tabs-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+}
+
 .custom-tabs {
     border-bottom: none;
     gap: 0.5rem;
     margin-bottom: 1.5rem;
+    flex-wrap: nowrap;
+    min-width: max-content;
 }
 
 .custom-tabs .nav-link {
@@ -112,6 +122,7 @@ body {
     border: 1px solid transparent;
     display: flex;
     align-items: center;
+    white-space: nowrap;
 }
 
 .custom-tabs .nav-link i {
@@ -135,6 +146,7 @@ body {
     border-radius: 8px;
     overflow: hidden;
     margin-bottom: 1.5rem;
+    width: 100%;
 }
 
 .data-table {
@@ -166,13 +178,6 @@ body {
 
 .data-table tbody tr:hover {
     background-color: rgba(93, 95, 239, 0.03);
-}
-
-.data-table tfoot th {
-    font-weight: 600;
-    background-color: #F8F8FB;
-    padding: 0.85rem 0.75rem;
-    border-top: 2px solid #e9ecef;
 }
 
 .id-column {
@@ -393,49 +398,6 @@ body {
     color: #c6c6c6;
 }
 
-/* Help section */
-.offcanvas {
-    border-radius: 12px 0 0 12px;
-}
-
-.offcanvas-header {
-    background-color: #F8F8FB;
-    border-bottom: 1px solid rgba(0,0,0,.05);
-}
-
-.offcanvas-title {
-    color: #5D5FEF;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-}
-
-.help-section h6 {
-    color: #5D5FEF;
-    font-weight: 600;
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
-}
-
-.help-section p {
-    color: #6c757d;
-    font-size: 0.95rem;
-    line-height: 1.6;
-}
-
-.help-section ul {
-    padding-left: 1.25rem;
-}
-
-.help-section li {
-    margin-bottom: 0.5rem;
-    color: #6c757d;
-}
-
-.help-section strong {
-    color: #343a40;
-}
-
 /* Badge styling */
 .badge {
     font-weight: 500;
@@ -463,15 +425,6 @@ body {
     display: none; /* Hide default length selector as we handle pagination server-side */
 }
 
-/* Animation for row actions */
-.action-buttons .btn {
-    transition: all 0.2s;
-}
-
-.action-buttons .btn:hover {
-    transform: translateY(-2px);
-}
-
 /* Responsive adjustments */
 @media (max-width: 992px) {
     .content-wrapper {
@@ -480,6 +433,19 @@ body {
     
     .card-header {
         padding: 1rem;
+    }
+    
+    .balance-card .card-title {
+        font-size: 1.5rem;
+    }
+    
+    .icon-box {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .icon-box i {
+        font-size: 1.25rem;
     }
 }
 
@@ -515,6 +481,19 @@ body {
     
     .page-title {
         font-size: 1.5rem;
+    }
+    
+    .data-table {
+        font-size: 0.85rem;
+    }
+    
+    .data-table thead th,
+    .data-table tbody td {
+        padding: 0.65rem 0.5rem;
+    }
+    
+    .truncate-text {
+        max-width: 80px;
     }
 }
 
@@ -553,6 +532,14 @@ body {
     .modal-footer {
         padding: 1rem;
     }
+    
+    .balance-card .card-title {
+        font-size: 1.25rem;
+    }
+    
+    .balance-card .card-subtitle {
+        font-size: 0.8rem;
+    }
 }
 
 /* Themed colors for different sections */
@@ -575,4 +562,49 @@ body {
 .nav-link:focus-visible {
     outline: 2px solid #5D5FEF;
     outline-offset: 2px;
+}
+
+/* DataTables responsive styles */
+@media screen and (max-width: 767px) {
+    .data-table thead {
+        display: none;
+    }
+    
+    .data-table tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+    }
+    
+    .data-table tbody td {
+        display: block;
+        text-align: right;
+        padding: 0.5rem;
+        position: relative;
+        padding-left: 50%;
+    }
+    
+    .data-table tbody td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 45%;
+        padding-right: 1rem;
+        font-weight: 600;
+        text-align: left;
+    }
+    
+    .data-table tbody td.id-column,
+    .data-table tbody td:last-child {
+        text-align: center;
+    }
+    
+    .data-table tbody td:last-child::before {
+        display: none;
+    }
+    
+    .data-table tbody td.currency-value {
+        font-weight: 600;
+    }
 }

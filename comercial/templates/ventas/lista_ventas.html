@@ -9,38 +9,48 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-shopping-cart"></i> Lista de Ventas</h1>
-            <nav class="breadcrumb">
-                <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a> &gt;
-                <span>Ventas</span>
-            </nav>
+    <div class="container-fluid">
+        <header class="content-header">
+            <div class="header-content">
+                <h1><i class="fas fa-shopping-cart"></i> Lista de Ventas</h1>
+                <nav class="breadcrumb">
+                    <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a> &gt;
+                    <span>Ventas</span>
+                </nav>
+            </div>
         </header>
 
         <div class="main-content">
             <div class="actions-bar">
                 <div class="search-bar">
                     <form method="get" action="{% url 'comercial:lista_ventas' %}">
-                        <input type="text" name="q" placeholder="Buscar por cliente, factura..." value="{{ request.GET.q|default:'' }}">
-                        <button type="submit" class="btn btn-search"><i class="fas fa-search"></i> Buscar</button>
+                        <div class="search-input-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" name="q" placeholder="Buscar por cliente, factura..." value="{{ request.GET.q|default:'' }}">
+                        </div>
+                        <button type="submit" class="btn btn-search">Buscar</button>
                     </form>
                 </div>
-                <div class="filter-options">
-                    <select name="pagado" id="pagado-filter">
-                        <option value="">Todos los pagos</option>
-                        <option value="Si">Pagado</option>
-                        <option value="No">Pendiente</option>
-                    </select>
-                    <button id="reset-filters" class="btn btn-secondary">
-                        <i class="fas fa-sync-alt"></i> Reiniciar filtros
+                
+                <div class="filter-controls">
+                    <div class="filter-dropdown">
+                        <select name="pagado" id="pagado-filter">
+                            <option value="">Todos los pagos</option>
+                            <option value="Si">Pagado</option>
+                            <option value="No">Pendiente</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-icon"></i>
+                    </div>
+                    
+                    <button id="reset-filters" class="btn btn-outline">
+                        <i class="fas fa-sync-alt"></i> <span class="btn-text">Reiniciar filtros</span>
                     </button>
-                </div>
-                <div class="table-config">
-                    <button id="toggle-columns" class="btn btn-secondary">
-                        <i class="fas fa-columns"></i> Configurar columnas
+                    
+                    <button id="toggle-columns" class="btn btn-outline">
+                        <i class="fas fa-columns"></i> <span class="btn-text">Columnas</span>
                     </button>
-                    <div id="column-selector" class="column-selector" style="display: none;">
+                    
+                    <div id="column-selector" class="column-selector" style="display: none; position: absolute; right: 150px; top: 60px; z-index: 1000;">
                         <div class="column-selector-content">
                             <h4>Mostrar/Ocultar Columnas</h4>
                             <div class="checkbox-list">
@@ -57,116 +67,239 @@
                                 <label><input type="checkbox" data-column="numero_factura"> Nº Factura</label>
                                 <label><input type="checkbox" data-column="numero_nc"> Nº NC</label>
                                 <label><input type="checkbox" data-column="monto_pendiente" checked> Monto Pendiente</label>
-                                <label><input type="checkbox" data-column="pagado" checked> Pagado</label>
+                                <label><input type="checkbox" data-column="pagado" checked disabled> Estado</label>
                                 <!-- Acciones siempre visibles -->
                                 <label><input type="checkbox" data-column="acciones" checked disabled> Acciones</label>
                             </div>
                         </div>
                     </div>
+                    
+                    <button id="show-bodega" class="btn btn-highlight" style="background-color: #4CAF50; color: white; font-weight: bold; border: 2px solid #2E7D32; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                        <i class="fas fa-warehouse"></i> <span class="btn-text">Bodega</span>
+                    </button>
+                    
+                    <a href="{% url 'comercial:nueva_venta' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> <span class="btn-text">Nueva Venta</span>
+                    </a>
+                    
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="table" title="Vista de tabla">
+                            <i class="fas fa-table"></i>
+                        </button>
+                        <button class="view-btn" data-view="cards" title="Vista de tarjetas">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                    </div>
                 </div>
-                <button id="show-bodega" class="btn btn-secondary">
-                    <i class="fas fa-warehouse"></i> Ver Bodega
-                </button>
-                <a href="{% url 'comercial:nueva_venta' %}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Nueva Venta
-                </a>
             </div>
 
-            <section class="ventas-list">
-                <div class="table-responsive">
-                    <table id="ventas-table">
-                        <thead>
-                            <tr>
-                                <th class="column-id">ID</th>
-                                <th class="column-cliente">Cliente</th>
-                                <th class="column-fecha_entrega">Fecha Entrega</th>
-                                <th class="column-fecha_vencimiento">Fecha Vencimiento</th>
-                                <th class="column-semana">Semana</th>
-                                <th class="column-cajas">Total Cajas</th>
-                                <th class="column-total_factura">Total €</th>
-                                <th class="column-iva">IVA 4% €</th>
-                                <th class="column-total_abono">Total Abono €</th>
-                                <th class="column-numero_factura">Nº Factura</th>
-                                <th class="column-numero_nc">Nº NC</th>
-                                <th class="column-monto_pendiente">Monto Pendiente</th>
-                                <th class="column-pagado text-center">Estado</th>
-                                <th class="column-acciones">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for venta in ventas %}
-                            <tr>
-                                <td class="column-id">#{{ venta.id }}</td>
-                                <td class="column-cliente">
+            <div class="ventas-container">
+                <!-- Vista de tabla (escritorio) -->
+                <div class="table-view active-view">
+                    <div class="table-responsive">
+                        <table id="ventas-table">
+                            <thead>
+                                <tr>
+                                    <th class="column-id">ID</th>
+                                    <th class="column-cliente">Cliente</th>
+                                    <th class="column-fecha_entrega">Fecha Entrega</th>
+                                    <th class="column-fecha_vencimiento">Fecha Vencimiento</th>
+                                    <th class="column-semana">Semana</th>
+                                    <th class="column-cajas">Total Cajas</th>
+                                    <th class="column-total_factura">Total €</th>
+                                    <th class="column-iva">IVA 4% €</th>
+                                    <th class="column-total_abono">Total Abono €</th>
+                                    <th class="column-numero_factura">Nº Factura</th>
+                                    <th class="column-numero_nc">Nº NC</th>
+                                    <th class="column-monto_pendiente">Monto Pendiente</th>
+                                    <th class="column-pagado">Estado</th>
+                                    <th class="column-acciones">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for venta in ventas %}
+                                <tr>
+                                    <td class="column-id">#{{ venta.id }}</td>
+                                    <td class="column-cliente">
+                                        <span class="cliente-nombre">{{ venta.cliente.nombre }}</span>
+                                    </td>
+                                    <td class="column-fecha_entrega">{{ venta.fecha_entrega|date:"d/m/Y" }}</td>
+                                    <td class="column-fecha_vencimiento">{{ venta.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</td>
+                                    <td class="column-semana">{{ venta.semana|default:"-" }}</td>
+                                    <td class="column-cajas">{{ venta.total_cajas_pedido|default:0 }}</td>
+                                    <td class="column-total_factura">{{ venta.valor_total_factura_euro|default:0|format_currency_eur }}</td>
+                                    <td class="column-iva">{{ venta.iva|default:0|format_currency_eur }}</td>
+                                    <td class="column-total_abono">{{ venta.valor_total_abono_euro|default:0|format_currency_eur }}</td>
+                                    <td class="column-numero_factura">{{ venta.numero_factura|default:"-" }}</td>
+                                    <td class="column-numero_nc">{{ venta.numero_nc|default:"-" }}</td>
+                                    <td class="column-monto_pendiente">{{ venta.monto_pendiente|default:0|format_currency_eur }}</td>
+                                    <td class="column-pagado">
+                                        {% if venta.pagado %}
+                                        <span class="status-badge status-pagado">
+                                            <i class="fas fa-circle-check"></i> Pagado
+                                        </span>
+                                        {% else %}
+                                        <span class="status-badge status-pendiente">
+                                            <i class="fas fa-clock"></i> Pendiente
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="column-acciones">
+                                        <div class="action-buttons">
+                                            <a href="{% url 'comercial:detalle_venta' venta.id %}" class="btn-icon" title="Ver/Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn-icon" title="Generar Factura" target="_blank">
+                                                <i class="fas fa-file-invoice"></i>
+                                            </a>
+                                            <button type="button" class="btn-icon btn-details" title="Ver Detalles"
+                                                    data-venta-id="{{ venta.id }}">
+                                                <i class="fas fa-boxes"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="15" class="empty-message">
+                                        <div class="empty-state">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            <p>No hay ventas para mostrar</p>
+                                            <a href="{% url 'comercial:nueva_venta' %}" class="btn btn-primary">
+                                                <i class="fas fa-plus"></i> Crear Venta
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Vista de tarjetas (móvil) -->
+                <div class="cards-view">
+                    <div class="cards-container">
+                        {% for venta in ventas %}
+                        <div class="venta-card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <h3>#{{ venta.id }}</h3>
                                     <span class="cliente-nombre">{{ venta.cliente.nombre }}</span>
-                                </td>
-                                <td class="column-fecha_entrega">{{ venta.fecha_entrega|date:"d/m/Y" }}</td>
-                                <td class="column-fecha_vencimiento">{{ venta.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</td>
-                                <td class="column-semana">{{ venta.semana|default:"-" }}</td>
-                                <td class="column-cajas">{{ venta.total_cajas_pedido|default:0 }}</td>
-                                <td class="column-total_factura">{{ venta.valor_total_factura_euro|default:0|format_currency_eur }}</td>
-                                <td class="column-iva">{{ venta.iva|default:0|format_currency_eur }}</td>
-                                <td class="column-total_abono">{{ venta.valor_total_abono_euro|default:0|format_currency_eur }}</td>
-                                <td class="column-numero_factura">{{ venta.numero_factura|default:"-" }}</td>
-                                <td class="column-numero_nc">{{ venta.numero_nc|default:"-" }}</td>
-                                <td class="column-monto_pendiente">{{ venta.monto_pendiente|default:0|format_currency_eur }}</td>
-                                <td class="column-pagado text-center">
-                                    {% if venta.pagado %}
-                                    <i class="fas fa-circle-check text-success" title="Pagado"></i>
-                                    {% else %}
-                                    <i class="fas fa-circle-xmark text-warning" title="Pendiente"></i>
-                                    {% endif %}
-                                </td>
-                                <td class="column-acciones actions">
-                                    <a href="{% url 'comercial:detalle_venta' venta.id %}" class="btn btn-icon" title="Ver/Editar">
+                                </div>
+                                {% if venta.pagado %}
+                                <span class="status-badge status-pagado">
+                                    <i class="fas fa-circle-check"></i> Pagado
+                                </span>
+                                {% else %}
+                                <span class="status-badge status-pendiente">
+                                    <i class="fas fa-clock"></i> Pendiente
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="card-body">
+                                <div class="info-grid">
+                                    <div class="info-item column-fecha_entrega">
+                                        <span class="info-label">Fecha Entrega</span>
+                                        <span class="info-value">{{ venta.fecha_entrega|date:"d/m/Y" }}</span>
+                                    </div>
+                                    <div class="info-item column-fecha_vencimiento">
+                                        <span class="info-label">Fecha Vencimiento</span>
+                                        <span class="info-value">{{ venta.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</span>
+                                    </div>
+                                    <div class="info-item column-semana">
+                                        <span class="info-label">Semana</span>
+                                        <span class="info-value">{{ venta.semana|default:"-" }}</span>
+                                    </div>
+                                    <div class="info-item column-cajas">
+                                        <span class="info-label">Total Cajas</span>
+                                        <span class="info-value highlight">{{ venta.total_cajas_pedido|default:0 }}</span>
+                                    </div>
+                                    <div class="info-item column-total_factura">
+                                        <span class="info-label">Total</span>
+                                        <span class="info-value highlight">{{ venta.valor_total_factura_euro|default:0|format_currency_eur }}</span>
+                                    </div>
+                                    <div class="info-item column-iva">
+                                        <span class="info-label">IVA 4%</span>
+                                        <span class="info-value">{{ venta.iva|default:0|format_currency_eur }}</span>
+                                    </div>
+                                    <div class="info-item column-total_abono">
+                                        <span class="info-label">Total Abono</span>
+                                        <span class="info-value">{{ venta.valor_total_abono_euro|default:0|format_currency_eur }}</span>
+                                    </div>
+                                    <div class="info-item column-numero_factura">
+                                        <span class="info-label">Nº Factura</span>
+                                        <span class="info-value">{{ venta.numero_factura|default:"-" }}</span>
+                                    </div>
+                                    <div class="info-item column-numero_nc">
+                                        <span class="info-label">Nº NC</span>
+                                        <span class="info-value">{{ venta.numero_nc|default:"-" }}</span>
+                                    </div>
+                                    <div class="info-item column-monto_pendiente">
+                                        <span class="info-label">Monto Pendiente</span>
+                                        <span class="info-value">{{ venta.monto_pendiente|default:0|format_currency_eur }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer">
+                                <div class="action-buttons">
+                                    <a href="{% url 'comercial:detalle_venta' venta.id %}" class="btn-icon" title="Ver/Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn btn-icon" title="Generar Factura" target="_blank">
+                                    <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn-icon" title="Generar Factura" target="_blank">
                                         <i class="fas fa-file-invoice"></i>
                                     </a>
-                                    <button type="button" class="btn btn-icon btn-details" title="Ver Detalles"
+                                    <button type="button" class="btn-icon btn-details" title="Ver Detalles"
                                             data-venta-id="{{ venta.id }}">
                                         <i class="fas fa-boxes"></i>
                                     </button>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="15" class="empty-message">
-                                    <div>
-                                        <i class="fas fa-shopping-cart"></i>
-                                        <p>No hay ventas para mostrar</p>
-                                        <a href="{% url 'comercial:nueva_venta' %}" class="btn btn-primary">
-                                            <i class="fas fa-plus"></i> Crear Venta
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state">
+                            <i class="fas fa-shopping-cart"></i>
+                            <p>No hay ventas para mostrar</p>
+                            <a href="{% url 'comercial:nueva_venta' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Crear Venta
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
 
                 {% if is_paginated %}
-                <div class="pagination">
-                    <span class="step-links">
-                        {% if page_obj.has_previous %}
-                            <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.pagado %}&pagado={{ request.GET.pagado }}{% endif %}">&laquo; Primera</a>
-                            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.pagado %}&pagado={{ request.GET.pagado }}{% endif %}">Anterior</a>
-                        {% endif %}
+                <div class="pagination-container">
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if page_obj.has_previous %}
+                                <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.pagado %}&pagado={{ request.GET.pagado }}{% endif %}" class="page-link first">
+                                    <i class="fas fa-angle-double-left"></i><span class="link-text">Primera</span>
+                                </a>
+                                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.pagado %}&pagado={{ request.GET.pagado }}{% endif %}" class="page-link prev">
+                                    <i class="fas fa-angle-left"></i><span class="link-text">Anterior</span>
+                                </a>
+                            {% endif %}
 
-                        <span class="current">
-                            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                            <span class="current-page">
+                                <span class="current">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                            </span>
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.pagado %}&pagado={{ request.GET.pagado }}{% endif %}" class="page-link next">
+                                    <span class="link-text">Siguiente</span><i class="fas fa-angle-right"></i>
+                                </a>
+                                <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.pagado %}&pagado={{ request.GET.pagado }}{% endif %}" class="page-link last">
+                                    <span class="link-text">Última</span><i class="fas fa-angle-double-right"></i>
+                                </a>
+                            {% endif %}
                         </span>
-
-                        {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.pagado %}&pagado={{ request.GET.pagado }}{% endif %}">Siguiente</a>
-                            <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.pagado %}&pagado={{ request.GET.pagado }}{% endif %}">Última &raquo;</a>
-                        {% endif %}
-                    </span>
+                    </div>
                 </div>
                 {% endif %}
-            </section>
+            </div>
         </div>
     </div>
 
@@ -232,17 +365,20 @@
             <div class="modal-body">
                 <div class="bodega-controls">
                     <div class="search-filter">
-                        <input type="text" id="bodega-search" placeholder="Buscar producto..." class="search-input">
                         <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="bodega-search" placeholder="Buscar producto..." class="search-input">
                     </div>
                     <div class="sort-options">
                         <label for="sort-inventory">Ordenar por:</label>
-                        <select id="sort-inventory" class="sort-select">
-                            <option value="nombre">Nombre</option>
-                            <option value="stock-asc">Stock (Menor a Mayor)</option>
-                            <option value="stock-desc">Stock (Mayor a Menor)</option>
-                            <option value="reciente">Actualización más reciente</option>
-                        </select>
+                        <div class="select-container">
+                            <select id="sort-inventory" class="sort-select">
+                                <option value="nombre">Nombre</option>
+                                <option value="stock-asc">Stock (Menor a Mayor)</option>
+                                <option value="stock-desc">Stock (Mayor a Menor)</option>
+                                <option value="reciente">Actualización más reciente</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-icon"></i>
+                        </div>
                     </div>
                 </div>
                 
@@ -337,19 +473,100 @@
                 pagadoFilter.value = pagadoParam;
             }
 
+            // Cambio entre vista de tabla y tarjetas
+            const viewButtons = document.querySelectorAll('.view-btn');
+            const tableView = document.querySelector('.table-view');
+            const cardsView = document.querySelector('.cards-view');
+            
+            // Comprobar el ancho de la pantalla al cargar
+            checkScreenSize();
+            
+            // Cambiar vista al hacer clic en los botones
+            viewButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const view = this.getAttribute('data-view');
+                    viewButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    if (view === 'table') {
+                        tableView.classList.add('active-view');
+                        cardsView.classList.remove('active-view');
+                        localStorage.setItem('ventasViewMode', 'table');
+                    } else {
+                        cardsView.classList.add('active-view');
+                        tableView.classList.remove('active-view');
+                        localStorage.setItem('ventasViewMode', 'cards');
+                    }
+                });
+            });
+            
+            // Comprobar tamaño de la pantalla y ajustar vista
+            function checkScreenSize() {
+                const savedView = localStorage.getItem('ventasViewMode');
+                if (window.innerWidth < 768) {
+                    // En móviles, mostrar vista de tarjetas
+                    cardsView.classList.add('active-view');
+                    tableView.classList.remove('active-view');
+                    viewButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.getAttribute('data-view') === 'cards') {
+                            btn.classList.add('active');
+                        }
+                    });
+                } else {
+                    // En escritorio, respetar preferencia o mostrar tabla
+                    if (savedView === 'cards') {
+                        cardsView.classList.add('active-view');
+                        tableView.classList.remove('active-view');
+                        viewButtons.forEach(btn => {
+                            btn.classList.remove('active');
+                            if (btn.getAttribute('data-view') === 'cards') {
+                                btn.classList.add('active');
+                            }
+                        });
+                    } else {
+                        tableView.classList.add('active-view');
+                        cardsView.classList.remove('active-view');
+                        viewButtons.forEach(btn => {
+                            btn.classList.remove('active');
+                            if (btn.getAttribute('data-view') === 'table') {
+                                btn.classList.add('active');
+                            }
+                        });
+                    }
+                }
+            }
+            
+            // Verificar tamaño de pantalla al redimensionar
+            window.addEventListener('resize', checkScreenSize);
+
             // Funcionalidad para mostrar/ocultar columnas
             const toggleColumnsBtn = document.getElementById('toggle-columns');
             const columnSelector = document.getElementById('column-selector');
             
-            toggleColumnsBtn.addEventListener('click', function() {
+            toggleColumnsBtn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Evitar propagación del evento
                 columnSelector.style.display = columnSelector.style.display === 'none' ? 'block' : 'none';
             });
 
-            // Cerrar el selector de columnas si se hace clic fuera de él
+            // Permitir que los clics dentro del botón también activen el selector
+            toggleColumnsBtn.querySelectorAll('*').forEach(element => {
+                element.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    columnSelector.style.display = columnSelector.style.display === 'none' ? 'block' : 'none';
+                });
+            });
+
+            // Cerrar el selector de columnas si se hace clic fuera de él o del botón
             document.addEventListener('click', function(event) {
-                if (!columnSelector.contains(event.target) && event.target !== toggleColumnsBtn) {
+                if (!columnSelector.contains(event.target) && !toggleColumnsBtn.contains(event.target)) {
                     columnSelector.style.display = 'none';
                 }
+            });
+
+            // Evitar que los clics dentro del selector lo cierren
+            columnSelector.addEventListener('click', function(e) {
+                e.stopPropagation();
             });
 
             // Manejo de las preferencias de columnas
@@ -662,7 +879,7 @@
                         text: 'Sin Stock',
                         icon: 'fas fa-times-circle'
                     };
-                } else if (stock < 20) {
+                } else if (stock <= 10) {
                     return {
                         class: 'low-stock',
                         text: 'Stock Bajo',
@@ -686,7 +903,7 @@
                 items.forEach(item => {
                     const stock = parseInt(item.stock_actual) || 0;
                     totalCajas += stock;
-                    if (stock > 0 && stock < 20) {
+                    if (stock > 0 && stock <= 10) {
                         bajoStock++;
                     }
                 });
@@ -756,7 +973,7 @@
                     // Filtrar según la pestaña
                     if (tab === 'low-stock') {
                         filtered = inventarioData.filter(item => 
-                            parseInt(item.stock_actual) > 0 && parseInt(item.stock_actual) < 10
+                            parseInt(item.stock_actual) > 0 && parseInt(item.stock_actual) <= 10
                         );
                     } else if (tab === 'out-stock') {
                         filtered = inventarioData.filter(item => 

@@ -80,48 +80,56 @@
                 <div class="quick-stats">
                     <div class="row">
                         <div class="col-md-3 col-sm-6 mb-4">
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background-color: var(--section-comercial);">
-                                    <i class="fas fa-users"></i>
+                            <a href="{% url 'comercial:clientes' %}" class="text-decoration-none">
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="background-color: var(--section-comercial);">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="stat-data">
+                                        <h3>Clientes</h3>
+                                        <p class="stat-number">{{ client_count|default:"0" }}</p>
+                                    </div>
                                 </div>
-                                <div class="stat-data">
-                                    <h3>Clientes</h3>
-                                    <p class="stat-number">{{ client_count|default:"0" }}</p>
-                                </div>
-                            </div>
+                            </a>
                         </div>
                         <div class="col-md-3 col-sm-6 mb-4">
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background-color: var(--section-productos);">
-                                    <i class="fas fa-apple-alt"></i>
+                            <a href="{% url 'frutas_view' %}" class="text-decoration-none">
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="background-color: var(--section-productos);">
+                                        <i class="fas fa-apple-alt"></i>
+                                    </div>
+                                    <div class="stat-data">
+                                        <h3>Productos</h3>
+                                        <p class="stat-number">{{ product_count|default:"0" }}</p>
+                                    </div>
                                 </div>
-                                <div class="stat-data">
-                                    <h3>Productos</h3>
-                                    <p class="stat-number">{{ product_count|default:"0" }}</p>
-                                </div>
-                            </div>
+                            </a>
                         </div>
                         <div class="col-md-3 col-sm-6 mb-4">
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background-color: var(--section-importacion);">
-                                    <i class="fas fa-ship"></i>
+                            <a href="{% url 'importacion:lista_pedidos' %}" class="text-decoration-none">
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="background-color: var(--section-importacion);">
+                                        <i class="fas fa-ship"></i>
+                                    </div>
+                                    <div class="stat-data">
+                                        <h3>Importaciones</h3>
+                                        <p class="stat-number">{{ import_count|default:"0" }}</p>
+                                    </div>
                                 </div>
-                                <div class="stat-data">
-                                    <h3>Importaciones</h3>
-                                    <p class="stat-number">{{ import_count|default:"0" }}</p>
-                                </div>
-                            </div>
+                            </a>
                         </div>
                         <div class="col-md-3 col-sm-6 mb-4">
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background-color: var(--section-comercial-alt);">
-                                    <i class="fas fa-store"></i>
+                            <a href="{% url 'comercial:lista_ventas' %}" class="text-decoration-none">
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="background-color: var(--section-comercial-alt);">
+                                        <i class="fas fa-store"></i>
+                                    </div>
+                                    <div class="stat-data">
+                                        <h3>Ventas</h3>
+                                        <p class="stat-number">{{ sales_count|default:"0" }}</p>
+                                    </div>
                                 </div>
-                                <div class="stat-data">
-                                    <h3>Ventas</h3>
-                                    <p class="stat-number">{{ sales_count|default:"0" }}</p>
-                                </div>
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -253,19 +261,6 @@
                                     <i class="fas fa-chevron-right"></i>
                                 </div>
                             </a>
-
-                            <a href="{% url 'importacion:transferencias' %}" class="app-card">
-                                <div class="app-icon importacion-bg">
-                                    <i class="fas fa-exchange-alt"></i>
-                                </div>
-                                <div class="app-info">
-                                    <h4>Transferencias</h4>
-                                    <p>Gestione pagos y gastos generales.</p>
-                                </div>
-                                <div class="app-action">
-                                    <i class="fas fa-chevron-right"></i>
-                                </div>
-                            </a>
                         </div>
                     </div>
 
@@ -305,13 +300,13 @@
                                 </div>
                             </a>
 
-                            <a href="{% url 'comercial:nueva_venta' %}" class="app-card">
+                            <a href="{% url 'importacion:transferencias' %}" class="app-card">
                                 <div class="app-icon comercial-bg">
                                     <i class="fas fa-cash-register"></i>
                                 </div>
                                 <div class="app-info">
-                                    <h4>Nueva Venta</h4>
-                                    <p>Registre una nueva transacción</p>
+                                    <h4>Tranferencias / Pagos</h4>
+                                    <p>Gestione pagos y gastos generales</p>
                                 </div>
                                 <div class="app-action">
                                     <i class="fas fa-chevron-right"></i>
@@ -373,7 +368,7 @@
                 </div>
 
                 <footer class="dashboard-footer">
-                    <p>L&M Exotic Fruits - v1.2.0 &copy; 2023 Todos los derechos reservados</p>
+                    <p>L&M Exotic Fruits - v1.2.0 &copy; 2025 Todos los derechos reservados</p>
                 </footer>
             </div>
         </div>

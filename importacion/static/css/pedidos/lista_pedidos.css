@@ -44,22 +44,25 @@ body {
     line-height: 1.6;
     color: var(--text-color);
     background-color: var(--bg-color);
-    padding: 20px;
+    padding: 0;
     font-size: 0.95rem;
 }
 
-/* Container & Layout */
-.container {
-    max-width: 98%;
-    margin: 0 auto;
-    background-color: var(--card-bg);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    overflow: hidden;
+/* Nuevo contenedor de ancho completo */
+.container-fluid {
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.pedidos-container {
+    width: 100%;
+    background-color: var(--bg-color);
 }
 
 /* Header Redesign */
-header {
+.page-header {
     padding: 2rem;
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
@@ -67,7 +70,7 @@ header {
     overflow: hidden;
 }
 
-header::before {
+.page-header::before {
     content: '';
     position: absolute;
     top: -50%;
@@ -79,7 +82,7 @@ header::before {
     pointer-events: none;
 }
 
-header h1 {
+.page-header h1 {
     margin-bottom: 10px;
     font-weight: 700;
     font-size: 1.8rem;
@@ -110,21 +113,23 @@ header h1 {
 /* Actions Bar Redesign */
 .actions-bar {
     display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
     margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    align-items: center;
     background-color: var(--light-color);
     padding: 1rem;
     border-radius: var(--border-radius);
+    position: relative;
+    box-shadow: var(--card-shadow);
+    align-items: center;
+    justify-content: space-between;
 }
 
 .search-bar {
-    flex: 1;
-    min-width: 300px;
+    flex: 1 0 300px; /* Base width but can grow */
 }
 
-.search-bar form {
+.search-input-group {
     display: flex;
     gap: 0.5rem;
 }
@@ -137,6 +142,7 @@ header h1 {
     font-size: 0.9rem;
     transition: var(--transition);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    width: 100%;
 }
 
 .search-bar input:focus {
@@ -145,29 +151,14 @@ header h1 {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
-.btn-search {
-    padding: 0.75rem 1.25rem;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: var(--transition);
-    font-weight: 500;
-}
-
-.btn-search:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-1px);
-}
-
-.filter-options {
+.actions-toolbar {
     display: flex;
-    gap: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     align-items: center;
 }
 
-.filter-options select {
+.filter-dropdown select {
     padding: 0.75rem 1rem;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
@@ -175,7 +166,7 @@ header h1 {
     background-color: white;
     transition: var(--transition);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    min-width: 180px;
+    min-width: 160px;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -183,13 +174,13 @@ header h1 {
     background-size: 16px 12px;
 }
 
-.filter-options select:focus {
+.filter-dropdown select:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
-/* Button Redesign */
+/* Botones */
 .btn {
     padding: 0.75rem 1.25rem;
     border: none;
@@ -203,6 +194,8 @@ header h1 {
     gap: 8px;
     font-size: 0.9rem;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    white-space: nowrap;
+    justify-content: center;
 }
 
 .btn-primary {
@@ -227,15 +220,16 @@ header h1 {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.btn-sm {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
+.btn-search {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-search:hover {
+    background-color: var(--primary-dark);
 }
 
 .btn-icon {
-    width: 40px;
-    height: 40px;
-    padding: 0;
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -250,12 +244,7 @@ header h1 {
     color: var(--primary-color);
 }
 
-.btn-icon[disabled] {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Column Selector Styling */
+/* Column Selector */
 .column-selector {
     position: absolute;
     top: 100%;
@@ -319,7 +308,12 @@ header h1 {
     cursor: not-allowed;
 }
 
-/* Table Redesign - More Compact */
+/* Desktop and Mobile Views */
+.desktop-view, .mobile-view {
+    display: none; /* Se controla mediante JS según tamaño de pantalla */
+}
+
+/* TABLA PARA VISTA DESKTOP */
 .pedidos-list {
     background: white;
     border-radius: var(--border-radius);
@@ -339,16 +333,19 @@ header h1 {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 0.75rem; /* Reducción del tamaño base de la fuente */
+    font-size: 0.8rem;
 }
 
 #pedidos-table th {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
     font-weight: 600;
-    padding: 0.5rem 0.6rem; /* Reducción del padding */
-    font-size: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.8rem;
     white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 #pedidos-table th:first-child {
@@ -360,13 +357,12 @@ header h1 {
 }
 
 #pedidos-table td {
-    padding: 0.4rem 0.6rem; /* Reducción del padding */
+    padding: 0.6rem 0.75rem;
     border-bottom: 1px solid var(--border-color);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     white-space: nowrap;
     color: var(--text-color);
     vertical-align: middle;
-    line-height: 1.3; /* Tighter line height */
 }
 
 #pedidos-table tr:last-child td {
@@ -375,17 +371,108 @@ header h1 {
 
 #pedidos-table tr {
     transition: var(--transition);
+    cursor: pointer;
 }
 
 #pedidos-table tr:hover {
     background-color: rgba(59, 130, 246, 0.05);
 }
 
-/* Status Badges - More Compact */
+/* TARJETAS PARA VISTA MÓVIL */
+.cards-view {
+    display: grid;
+    gap: 1rem;
+}
+
+.pedido-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: var(--transition);
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+}
+
+.pedido-card:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+.pedido-card .card-header {
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+}
+
+.pedido-card .card-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.pedido-card .card-title h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.pedido-card .card-subtitle {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.pedido-card .card-body {
+    padding: 1rem;
+}
+
+.pedido-card .card-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+}
+
+.pedido-card .card-row:last-child {
+    border-bottom: none;
+}
+
+.pedido-card .card-row .label {
+    font-weight: 500;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.pedido-card .card-row .value {
+    font-weight: 600;
+}
+
+.pedido-card .card-footer {
+    padding: 1rem;
+    background-color: #f8fafc;
+    border-top: 1px solid var(--border-color);
+}
+
+.pedido-card .actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.pedido-card .btn-icon {
+    padding: 0.5rem 1rem;
+    flex: 1;
+    justify-content: center;
+}
+
+/* Status Badges */
 .status-badge {
-    padding: 0.25rem 0.6rem; /* Smaller padding */
-    border-radius: 12px; /* Smaller radius */
-    font-size: 0.7rem; /* Smaller font */
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
     font-weight: 500;
     display: inline-block;
     text-align: center;
@@ -402,62 +489,84 @@ header h1 {
     color: #065F46;
 }
 
-.text-success {
-    color: var(--success-color);
+.status-pagado {
+    background-color: #DCFCE7;
+    color: #15803D;
 }
 
-.text-danger {
-    color: var(--danger-color);
-}
-
-/* Actions Column - More Compact */
+/* Actions Column */
 .actions {
     display: flex;
-    gap: 0.3rem; /* Reduced gap between action buttons */
+    gap: 0.3rem;
     justify-content: flex-end;
 }
 
-.actions .btn-icon {
-    width: 30px; /* Smaller action buttons */
+#pedidos-table .actions .btn-icon {
+    width: 30px;
     height: 30px;
     font-size: 0.8rem;
     background-color: rgba(59, 130, 246, 0.1);
     color: var(--primary-color);
+    padding: 0;
 }
 
-/* Empty State Redesign */
-.empty-message {
+/* Empty State */
+.empty-state {
     text-align: center;
     padding: 4rem 1rem;
 }
 
-.empty-message i {
+.empty-state i {
     font-size: 3.5rem;
     color: var(--secondary-color);
     margin-bottom: 1.5rem;
     opacity: 0.6;
 }
 
-.empty-message p {
+.empty-state p {
     color: var(--text-muted);
     margin-bottom: 1.5rem;
     font-size: 1.1rem;
 }
 
-/* Pagination Redesign */
-.pagination {
+/* Empty message para tablas */
+.empty-message {
+    text-align: center;
+    padding: 2rem;
+}
+
+/* Estilo para los iconos de pagado */
+.pagado-icon {
+    font-size: 1rem;
     display: flex;
     justify-content: center;
+    align-items: center;
+}
+
+/* Pagination container styling */
+.pagination-container {
     margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .step-links {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
-.step-links a {
+.page-link {
     padding: 0.6rem 1rem;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
@@ -466,21 +575,24 @@ header h1 {
     transition: all 0.2s;
     font-size: 0.875rem;
     background-color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.step-links a:hover {
+.page-link:hover {
     background-color: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
 }
 
-.current {
+.current-page {
     padding: 0.6rem 1rem;
     color: var(--text-muted);
     font-size: 0.875rem;
 }
 
-/* Modal Redesign */
+/* Modal Styling */
 .modal {
     display: none;
     position: fixed;
@@ -571,6 +683,8 @@ header h1 {
     align-items: center;
     background-color: #f8fafc;
     border-radius: 0 0 var(--border-radius) var(--border-radius);
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 /* Pedido Info Redesign */
@@ -629,13 +743,14 @@ header h1 {
     background: linear-gradient(to right, var(--primary-color), var(--primary-light));
 }
 
-/* Card Redesign */
-.detalle-cards {
+/* Detail grid for modal */
+.detalle-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.25rem;
 }
 
+/* Cards del Modal */
 .detalle-card {
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
@@ -650,13 +765,13 @@ header h1 {
     box-shadow: var(--hover-shadow);
 }
 
-.card-header {
+.detalle-card .card-header {
     padding: 1rem 1.25rem;
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
 }
 
-.card-header h4 {
+.detalle-card .card-header h4 {
     margin: 0 0 5px;
     font-size: 1.1rem;
     font-weight: 600;
@@ -667,7 +782,7 @@ header h1 {
     opacity: 0.9;
 }
 
-.card-body {
+.detalle-card .card-body {
     padding: 1.25rem;
     display: flex;
     flex-wrap: wrap;
@@ -697,32 +812,64 @@ header h1 {
     font-weight: 500;
 }
 
-.card-footer {
+.detalle-card .card-footer {
     padding: 1rem 1.25rem;
     background-color: #f8fafc;
     border-top: 1px solid var(--border-color);
 }
 
-.total, .nc {
+.total, .nc, .total-eur {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 0.5rem;
 }
 
 .total {
     font-weight: 600;
     font-size: 1.1rem;
-    margin-bottom: 0.5rem;
     color: var(--text-color);
 }
 
-.nc {
+.nc, .total-eur {
     font-size: 0.9rem;
     color: var(--text-muted);
 }
 
 .has-nc {
     color: var(--danger-color);
+}
+
+.has-eur {
+    color: var(--info-color);
+}
+
+/* Modal Summary */
+.modal-summary {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.summary-item {
+    background-color: white;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+
+.summary-item label {
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.summary-item span {
+    font-weight: 600;
+    color: var(--text-color);
 }
 
 /* Loading and Error States */
@@ -776,81 +923,38 @@ header h1 {
     opacity: 0.6;
 }
 
-.modal-summary {
-    display: flex;
-    gap: 1.5rem;
-}
-
-.summary-item {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-    background-color: white;
-    padding: 0.75rem 1rem;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-}
-
-.summary-item label {
-    font-weight: 600;
-    color: var(--text-muted);
-    font-size: 0.875rem;
-}
-
-.summary-item span {
-    font-weight: 600;
-    color: var(--text-color);
-}
-
-/* Tooltip */
-.tooltip {
-    position: relative;
-    cursor: help;
-    border-bottom: 1px dashed var(--border-color);
-    display: inline-block;
-}
-
-.tooltip::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--dark-color);
-    color: white;
-    padding: 0.5rem 0.75rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    z-index: 10;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
-    pointer-events: none;
-    max-width: 250px;
-    white-space: normal;
-    text-align: center;
-}
-
-.tooltip:hover::after {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Media queries for responsiveness */
-@media (max-width: 1200px) {
-    .detalle-cards {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+/* Responsive Media Queries */
+@media (min-width: 992px) {
+    .desktop-view {
+        display: block;
+    }
+    
+    .mobile-view {
+        display: none;
     }
 }
 
 @media (max-width: 992px) {
-    .container {
-        max-width: 100%;
+    .desktop-view {
+        display: none;
     }
     
-    .info-header {
-        padding: 1rem;
+    .mobile-view {
+        display: block;
+    }
+    
+    .actions-toolbar {
+        margin-top: 0.5rem;
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .btn .btn-text {
+        display: none;
+    }
+    
+    .detalle-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     }
     
     .modal-content {
@@ -859,149 +963,91 @@ header h1 {
 }
 
 @media (max-width: 768px) {
-    body {
-        padding: 10px;
-    }
-    
-    header {
-        padding: 1.5rem;
-    }
-    
     .actions-bar {
         flex-direction: column;
         align-items: stretch;
-        gap: 0.75rem;
     }
     
     .search-bar {
-        min-width: 100%;
+        width: 100%;
     }
     
-    .filter-options {
+    .modal-summary {
         flex-wrap: wrap;
     }
     
-    .filter-options select {
-        flex: 1;
+    .summary-item {
+        flex: 1 0 100%;
+        margin-bottom: 0.5rem;
     }
     
-    .detalle-cards {
-        grid-template-columns: 1fr;
+    .page-header {
+        padding: 1.5rem;
+    }
+    
+    .page-link .link-text {
+        display: none;
     }
     
     .modal-footer {
         flex-direction: column;
         gap: 1rem;
-        align-items: stretch;
     }
     
     .modal-summary {
-        flex-direction: column;
-        gap: 0.75rem;
         width: 100%;
     }
     
-    .summary-item {
-        width: 100%;
+    .info-item {
+        flex: 1 0 100%;
     }
 }
 
 @media (max-width: 576px) {
     .main-content {
-        padding: 1rem;
+        padding: 1rem 0.75rem;
+    }
+    
+    .pedido-card .card-footer .actions {
+        flex-direction: column;
     }
     
     .btn {
         padding: 0.6rem 1rem;
     }
     
-    #pedidos-table td, 
-    #pedidos-table th {
-        padding: 0.5rem 0.4rem;
-        font-size: 0.75rem;
-    }
-    
-    .status-badge {
-        padding: 0.2rem 0.4rem;
-        font-size: 0.65rem;
-    }
-    
-    .actions .btn-icon {
-        width: 26px;
-        height: 26px;
-        font-size: 0.75rem;
-    }
-    
-    .modal-header h2 {
-        font-size: 1.1rem;
-    }
-    
-    .card-body {
-        flex-direction: column;
-    }
-    
-    .metric {
+    .modal-content {
         width: 100%;
-    }
-}
-
-/* Ajuste del botón de configurar columnas */
-#toggle-columns.btn-sm {
-    padding: 0.75rem 1.25rem;
-    height: 42px; /* Mismo alto que los otros botones */
-    font-size: 0.9rem;
-    display: inline-flex;
-    align-items: center;
-    white-space: nowrap;
-}
-
-/* Estilo para los iconos de pagado */
-.pagado-icon {
-    font-size: 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Ajuste para que todas las columnas sean más compactas */
-.table-responsive {
-    max-width: 100%;
-    margin: 0;
-}
-
-#pedidos-table th, 
-#pedidos-table td {
-    max-width: 150px; /* Ancho máximo para las columnas */
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Ajustes específicos para columnas con contenido numérico */
-.column-id,
-.column-cajas,
-.column-pagado {
-    width: 60px;
-    text-align: center;
-}
-
-.column-pagado {
-    width: 40px;
-}
-
-.column-acciones {
-    width: 120px;
-    white-space: nowrap;
-}
-
-/* Ajustes responsive */
-@media (max-width: 768px) {
-    #pedidos-table th, 
-    #pedidos-table td {
-        padding: 0.3rem 0.4rem;
-        font-size: 0.7rem;
+        max-height: 100vh;
+        border-radius: 0;
     }
     
-    .pagado-icon {
-        font-size: 0.9rem;
+    .modal {
+        padding: 0;
     }
+    
+    .detalle-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .btn-search {
+        padding: 0.75rem;
+    }
+    
+    .btn-search i {
+        margin: 0;
+    }
+    
+    .btn-search span {
+        display: none;
+    }
+}
+
+/* Eliminar estilos no usados */
+.container {
+    display: none; /* Reemplazado por container-fluid */
 }

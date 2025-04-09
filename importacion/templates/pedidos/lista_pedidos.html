@@ -9,8 +9,8 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <header>
+    <div class="container-fluid pedidos-container">
+        <header class="page-header">
             <h1><i class="fas fa-box"></i> Lista de Pedidos Importación</h1>
             <nav class="breadcrumb">
                 <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a> &gt;
@@ -19,26 +19,36 @@
         </header>
 
         <div class="main-content">
+            <!-- Barra de Acciones Rediseñada -->
             <div class="actions-bar">
                 <div class="search-bar">
                     <form method="get" action="{% url 'importacion:lista_pedidos' %}">
-                        <input type="text" name="q" placeholder="Buscar por AWB, exportador..." value="{{ request.GET.q|default:'' }}">
-                        <button type="submit" class="btn btn-search"><i class="fas fa-search"></i> Buscar</button>
+                        <div class="search-input-group">
+                            <input type="text" name="q" placeholder="Buscar por AWB, exportador..." value="{{ request.GET.q|default:'' }}">
+                            <button type="submit" class="btn btn-search"><i class="fas fa-search"></i><span class="btn-text">Buscar</span></button>
+                        </div>
                     </form>
                 </div>
-                <div class="filter-options">
-                    <select name="estado" id="estado-filter">
-                        <option value="">Todos los estados</option>
-                        <option value="En Proceso">En Proceso</option>
-                        <option value="Pagado">Pagado</option>
-                    </select>
+                <div class="actions-toolbar">
+                    <div class="filter-dropdown">
+                        <select name="estado" id="estado-filter" class="form-control">
+                            <option value="">Todos los estados</option>
+                            <option value="En Proceso">En Proceso</option>
+                            <option value="Pagado">Pagado</option>
+                        </select>
+                    </div>
                     <button id="reset-filters" class="btn btn-secondary">
-                        <i class="fas fa-sync-alt"></i> Reiniciar filtros
+                        <i class="fas fa-sync-alt"></i><span class="btn-text">Reiniciar</span>
                     </button>
+                    <button id="toggle-columns" class="btn btn-secondary">
+                        <i class="fas fa-columns"></i><span class="btn-text">Columnas</span>
+                    </button>
+                    <a href="{% url 'importacion:nuevo_pedido' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i><span class="btn-text">Nuevo Pedido</span>
+                    </a>
                 </div>
-                <button id="toggle-columns" class="btn btn-secondary btn-sm">
-                    <i class="fas fa-columns"></i> Configurar columnas
-                </button>
+                
+                <!-- Selector de columnas (flotante) -->
                 <div id="column-selector" class="column-selector" style="display: none;">
                     <div class="column-selector-content">
                         <h4>Mostrar/Ocultar Columnas</h4>
@@ -64,13 +74,12 @@
                         </div>
                     </div>
                 </div>
-                <a href="{% url 'importacion:nuevo_pedido' %}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Nuevo Pedido
-                </a>
             </div>
 
-            <section class="pedidos-list">
-                <div class="table-responsive">
+            <!-- Diseño Responsivo: Tabla para Desktop / Tarjetas para Mobile -->
+            <div class="pedidos-list">
+                <!-- Vista de escritorio: Tabla -->
+                <div class="table-responsive desktop-view">
                     <table id="pedidos-table">
                         <thead>
                             <tr>
@@ -80,13 +89,13 @@
                                 <th class="column-fecha_vencimiento">Fecha Vencimiento</th>
                                 <th class="column-semana">Semana</th>
                                 <th class="column-awb">AWB</th>
-                                <th class="column-cajas">Cajas Recibidas</th>
+                                <th class="column-cajas">Cajas</th>
                                 <th class="column-factura_usd">Total USD</th>
                                 <th class="column-factura_eur">Total EUR</th>
                                 <th class="column-nc_usd">NC USD</th>
                                 <th class="column-numero_factura">Nº Factura</th>
                                 <th class="column-numero_nc">Nº NC</th>
-                                <th class="column-monto_pendiente">Monto Pendiente USD</th>
+                                <th class="column-monto_pendiente">Pendiente USD</th>
                                 <th class="column-estado">Estado</th>
                                 <th class="column-pagado">Pagado</th>
                                 <th class="column-acciones">Acciones</th>
@@ -94,7 +103,7 @@
                         </thead>
                         <tbody>
                             {% for pedido in pedidos %}
-                            <tr>
+                            <tr data-pedido-id="{{ pedido.id }}">
                                 <td class="column-id">#{{ pedido.id }}</td>
                                 <td class="column-exportador">{{ pedido.exportador.nombre }}</td>
                                 <td class="column-fecha_entrega">{{ pedido.fecha_entrega|date:"d/m/Y" }}</td>
@@ -135,8 +144,8 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="17" class="empty-message">
-                                    <div>
+                                <td colspan="16" class="empty-message">
+                                    <div class="empty-state">
                                         <i class="fas fa-boxes"></i>
                                         <p>No hay pedidos para mostrar</p>
                                         <a href="{% url 'importacion:nuevo_pedido' %}" class="btn btn-primary">
@@ -149,31 +158,135 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Vista móvil: Tarjetas -->
+                <div class="cards-view mobile-view">
+                    {% if pedidos %}
+                        {% for pedido in pedidos %}
+                        <div class="pedido-card" data-pedido-id="{{ pedido.id }}">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <h3>#{{ pedido.id }} - {{ pedido.exportador.nombre }}</h3>
+                                    <span class="status-badge status-{{ pedido.estado_pedido|slugify }}">
+                                        {{ pedido.estado_pedido }}
+                                    </span>
+                                </div>
+                                <div class="card-subtitle">
+                                    <span class="awb"><i class="fas fa-plane"></i> {{ pedido.awb|default:"Sin AWB" }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <div class="card-row column-fecha_entrega">
+                                    <span class="label">Fecha Entrega:</span>
+                                    <span class="value">{{ pedido.fecha_entrega|date:"d/m/Y" }}</span>
+                                </div>
+                                <div class="card-row column-fecha_vencimiento">
+                                    <span class="label">Fecha Vencimiento:</span>
+                                    <span class="value">{{ pedido.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</span>
+                                </div>
+                                <div class="card-row column-semana">
+                                    <span class="label">Semana:</span>
+                                    <span class="value">{{ pedido.semana|default:"-" }}</span>
+                                </div>
+                                <div class="card-row column-cajas">
+                                    <span class="label">Cajas:</span>
+                                    <span class="value">{{ pedido.total_cajas_recibidas|default:0 }}/{{ pedido.total_cajas_solicitadas|default:0 }}</span>
+                                </div>
+                                <div class="card-row column-factura_usd">
+                                    <span class="label">Total USD:</span>
+                                    <span class="value">{{ pedido.valor_total_factura_usd|format_currency }}</span>
+                                </div>
+                                <div class="card-row column-monto_pendiente">
+                                    <span class="label">Pendiente USD:</span>
+                                    <span class="value">{{ pedido.monto_pendiente|format_currency }}</span>
+                                </div>
+                                <div class="card-row column-pagado">
+                                    <span class="label">Pagado:</span>
+                                    <span class="value pagado-icon">
+                                        {% if pedido.pagado %}✅{% else %}❌{% endif %}
+                                    </span>
+                                </div>
+                                <!-- Filas adicionales ocultas por defecto -->
+                                <div class="card-row column-factura_eur">
+                                    <span class="label">Total EUR:</span>
+                                    <span class="value">{{ pedido.valor_factura_eur|format_currency_eur }}</span>
+                                </div>
+                                <div class="card-row column-nc_usd">
+                                    <span class="label">NC USD:</span>
+                                    <span class="value">{{ pedido.valor_total_nc_usd|format_currency }}</span>
+                                </div>
+                                <div class="card-row column-numero_factura">
+                                    <span class="label">Nº Factura:</span>
+                                    <span class="value">{{ pedido.numero_factura|default:"-" }}</span>
+                                </div>
+                                <div class="card-row column-numero_nc">
+                                    <span class="label">Nº NC:</span>
+                                    <span class="value">{{ pedido.numero_nc|default:"-" }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer">
+                                <div class="actions">
+                                    <a href="{% url 'importacion:detalle_pedido' pedido.id %}" class="btn btn-icon" title="Ver/Editar">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </a>
+                                    <a href="{% url 'importacion:solicitar_pedido' pedido.id %}" class="btn btn-icon" title="Solicitar Pedido" target="_blank">
+                                        <i class="fas fa-file-alt"></i> Solicitar
+                                    </a>
+                                    <button type="button" class="btn btn-icon btn-details" title="Ver Detalles"
+                                            data-pedido-id="{{ pedido.id }}">
+                                        <i class="fas fa-boxes"></i> Detalles
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-boxes"></i>
+                            <p>No hay pedidos para mostrar</p>
+                            <a href="{% url 'importacion:nuevo_pedido' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Crear Pedido
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
 
                 {% if is_paginated %}
-                <div class="pagination">
-                    <span class="step-links">
-                        {% if page_obj.has_previous %}
-                            <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">&laquo; Primera</a>
-                            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">Anterior</a>
-                        {% endif %}
+                <div class="pagination-container">
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if page_obj.has_previous %}
+                                <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="page-link first">
+                                    <i class="fas fa-angle-double-left"></i><span class="link-text">Primera</span>
+                                </a>
+                                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="page-link prev">
+                                    <i class="fas fa-angle-left"></i><span class="link-text">Anterior</span>
+                                </a>
+                            {% endif %}
 
-                        <span class="current">
-                            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                            <span class="current-page">
+                                <span class="current">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                            </span>
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="page-link next">
+                                    <span class="link-text">Siguiente</span><i class="fas fa-angle-right"></i>
+                                </a>
+                                <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="page-link last">
+                                    <span class="link-text">Última</span><i class="fas fa-angle-double-right"></i>
+                                </a>
+                            {% endif %}
                         </span>
-
-                        {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">Siguiente</a>
-                            <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">Última &raquo;</a>
-                        {% endif %}
-                    </span>
+                    </div>
                 </div>
                 {% endif %}
-            </section>
+            </div>
         </div>
     </div>
 
-    <!-- Modal para mostrar detalles del pedido -->
+    <!-- Modal de detalles rediseñado -->
     <div id="detalles-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -201,7 +314,6 @@
 
                     <h3 class="details-title">Productos en este pedido</h3>
                     <div id="detalles-container" class="detalles-container">
-                        <!-- Aquí se cargarán los detalles dinámicamente -->
                         <div class="loading-spinner">
                             <i class="fas fa-circle-notch fa-spin"></i>
                             <p>Cargando detalles...</p>
@@ -287,6 +399,7 @@
                 
                 // Posicionar el selector correctamente
                 if (columnSelector.style.display === 'block') {
+                    const rect = toggleColumnsBtn.getBoundingClientRect();
                     columnSelector.style.top = (toggleColumnsBtn.offsetTop + toggleColumnsBtn.offsetHeight) + 'px';
                     columnSelector.style.right = '0';
                 }
@@ -322,6 +435,7 @@
             });
 
             function toggleColumnVisibility(columnName, isVisible) {
+                // Afecta tanto a la tabla como a las tarjetas
                 const columns = document.querySelectorAll(`.column-${columnName}`);
                 columns.forEach(col => {
                     col.style.display = isVisible ? '' : 'none';
@@ -361,7 +475,7 @@
                     });
                 } else {
                     // Configuración inicial - ocultar algunas columnas por defecto
-                    const defaultHiddenColumns = ['factura_eur', 'nc_usd', 'numero_factura', 'numero_nc', 'observaciones'];
+                    const defaultHiddenColumns = ['factura_eur', 'nc_usd', 'numero_factura', 'numero_nc'];
                     defaultHiddenColumns.forEach(column => {
                         const checkbox = document.querySelector(`input[data-column="${column}"]`);
                         if (checkbox && !checkbox.disabled) {
@@ -385,11 +499,25 @@
             const closeButtons = document.querySelectorAll('.close-modal, .close-modal-btn');
             const detailButtons = document.querySelectorAll('.btn-details');
             
-            // Abrir modal y cargar detalles
+            // Abrir modal y cargar detalles - ahora funciona para ambas vistas
             detailButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const pedidoId = this.getAttribute('data-pedido-id');
                     openModal(pedidoId);
+                });
+            });
+            
+            // También permitir abrir detalles al hacer clic en las filas/tarjetas
+            const tableRows = document.querySelectorAll('#pedidos-table tbody tr[data-pedido-id]');
+            const cardItems = document.querySelectorAll('.pedido-card[data-pedido-id]');
+            
+            [...tableRows, ...cardItems].forEach(item => {
+                item.addEventListener('click', function(e) {
+                    // Solo activar si el clic no fue en un botón o enlace
+                    if (!e.target.closest('a') && !e.target.closest('button')) {
+                        const pedidoId = this.getAttribute('data-pedido-id');
+                        openModal(pedidoId);
+                    }
                 });
             });
             
@@ -407,6 +535,7 @@
                 }
             });
             
+            // El resto del código para manejar el modal se mantiene igual
             function openModal(pedidoId) {
                 // Mostrar el modal
                 modal.style.display = 'flex';
@@ -441,12 +570,12 @@
                         document.getElementById('modal-total-usd').textContent = data.pedido.total_usd;
                         document.getElementById('modal-total-eur').textContent = data.pedido.total_eur;
                         
-                        // Generar HTML para los detalles
+                        // Generar HTML para los detalles con diseño responsive
                         let detallesHTML = '';
                         
                         if (data.detalles.length > 0) {
                             detallesHTML = `
-                                <div class="detalle-cards">
+                                <div class="detalle-grid">
                                     ${data.detalles.map(detalle => `
                                         <div class="detalle-card">
                                             <div class="card-header">
@@ -472,11 +601,11 @@
                                                     <label>Total:</label> 
                                                     <span>${detalle.valor_total}</span>
                                                 </div>
-                                                <div class="nc ${parseFloat(detalle.valor_nc.replace('$', '')) > 0 ? 'has-nc' : ''}">
+                                                <div class="nc ${parseFloat(detalle.valor_nc.replace('$', '').replace(',', '')) > 0 ? 'has-nc' : ''}">
                                                     <label>NC (${detalle.cajas_nc}):</label> 
                                                     <span>${detalle.valor_nc}</span>
                                                 </div>
-                                                <div class="total-eur ${detalle.valor_total_eur && parseFloat(detalle.valor_total_eur.replace('€', '')) > 0 ? 'has-eur' : ''}">
+                                                <div class="total-eur ${detalle.valor_total_eur && parseFloat(detalle.valor_total_eur.replace('€', '').replace(',', '')) > 0 ? 'has-eur' : ''}">
                                                     <label>Total EUR:</label> 
                                                     <span>${detalle.valor_total_eur || '-'}</span>
                                                 </div>
@@ -510,12 +639,24 @@
                 modal.style.display = 'none';
                 document.body.style.overflow = 'auto'; // Restaurar scroll
             }
+
+            // Detectar cambios en el tamaño de la ventana para mostrar la vista adecuada
+            function handleResponsiveView() {
+                const desktopView = document.querySelector('.desktop-view');
+                const mobileView = document.querySelector('.mobile-view');
+                
+                if (window.innerWidth < 992) {
+                    desktopView.style.display = 'none';
+                    mobileView.style.display = 'block';
+                } else {
+                    desktopView.style.display = 'block';
+                    mobileView.style.display = 'none';
+                }
+            }
             
-            // Helper para el selector contains (para buscar texto en elementos)
-            jQuery.expr[':'].contains = function(a, i, m) {
-                return jQuery(a).text().toUpperCase()
-                    .indexOf(m[3].toUpperCase()) >= 0;
-            };
+            // Aplicar al cargar y al redimensionar
+            window.addEventListener('resize', handleResponsiveView);
+            handleResponsiveView();
         });
     </script>
 {% endblock %}

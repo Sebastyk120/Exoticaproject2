@@ -72,7 +72,7 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="numero_nc">Número NC/Reclamación:</label>
+                            <label for="numero_nc">Número Abono/Reclamación:</label>
                             <input type="text" id="numero_nc" name="numero_nc" value="{{ venta.numero_nc|default:'' }}">
                         </div>
                         
@@ -268,6 +268,13 @@
             const tableBody = document.querySelector('#details-table tbody');
             tableBody.insertBefore(newRow, tableBody.firstChild);
             
+            // Get the newly added row element
+            const addedRow = tableBody.querySelector('tr:first-child');
+            console.log("New row added:", addedRow);
+            
+            // Apply handleZeroFields to the new row
+            handleZeroFields(addedRow);
+            
             newDetailCounter++;
         }
         
@@ -310,6 +317,40 @@
                 document.querySelector('.empty-state').style.display = 'block';
                 document.getElementById('details-table').style.display = 'none';
             }
+        }
+        
+        // Función para manejar los campos con valor cero
+        function handleZeroFields(element) {
+            // Seleccionar todos los campos numéricos
+            const numericInputs = element.querySelectorAll('input[type="number"]');
+            
+            numericInputs.forEach(input => {
+                // Evento focus - Vaciar cuando el valor es 0
+                input.addEventListener('focus', function() {
+                    // Verificar si el valor actual es 0, 0.0, 0.00, etc.
+                    const value = parseFloat(this.value) || 0;
+                    if (value === 0) {
+                        this.value = '';
+                    }
+                });
+                
+                // Evento blur - Restaurar 0 si se deja vacío
+                input.addEventListener('blur', function() {
+                    if (this.value === '' || this.value === null) {
+                        // Usar el paso (step) del input para determinar el formato
+                        // Si tiene decimales, mostrar con decimales, sino entero
+                        const step = parseFloat(this.getAttribute('step') || 1);
+                        if (step < 1) {
+                            // Es un campo decimal
+                            const decimals = step.toString().split('.')[1].length;
+                            this.value = (0).toFixed(decimals);
+                        } else {
+                            // Es un campo entero
+                            this.value = '0';
+                        }
+                    }
+                });
+            });
         }
         
         // Función para cargar precios automáticamente
@@ -613,6 +654,15 @@
                 showNotification(message, type);
             });
 
+            // Validar valores iniciales de caja
+            document.querySelectorAll('input[name$="_valor_x_caja_euro"]').forEach(input => {
+                validarValorCaja(input);
+            });
+
+            // Aplicar manejo de campos con valor cero a todos los campos numéricos existentes
+            handleZeroFields(document);
+            console.log("Zero field handling has been applied to all existing numeric inputs");
+
             // Evento para agregar detalle
             const addDetailBtn = document.getElementById('add-detail-btn');
             if (addDetailBtn) {
@@ -676,6 +726,11 @@
 
         // Función para validar stock y mostrar error
         async function validarStock(presentacionId, cajasEnviadas, inputElement) {
+            // Si el campo está vacío (durante edición), tratar como 0
+            if (inputElement.value === '') {
+                cajasEnviadas = 0;
+            }
+            
             if (!presentacionId || !cajasEnviadas) return true;
             
             try {
@@ -750,8 +805,9 @@
             
             if (!cajasEnviadasInput || !noCajasAbonoInput) return true;
             
-            const cajasEnviadas = parseFloat(cajasEnviadasInput.value) || 0;
-            const noCajasAbono = parseFloat(noCajasAbonoInput.value) || 0;
+            // Manejar caso de campo vacío (temporalmente durante la edición)
+            const cajasEnviadas = cajasEnviadasInput.value === '' ? 0 : parseFloat(cajasEnviadasInput.value) || 0;
+            const noCajasAbono = noCajasAbonoInput.value === '' ? 0 : parseFloat(noCajasAbonoInput.value) || 0;
             
             if (noCajasAbono > cajasEnviadas) {
                 // Mostrar error en el campo
@@ -837,7 +893,7 @@
                 if (presentacionSelect && cajasInput) {
                     const isValidStock = await validarStock(
                         presentacionSelect.value,
-                        parseInt(cajasInput.value) || 0,
+                        parseFloat(cajasInput.value) || 0,
                         cajasInput
                     );
                     if (!isValidStock) isValid = false;
@@ -852,15 +908,27 @@
             return isValid;
         }
         
+        // Función para validar valor de caja
+        function validarValorCaja(input) {
+            const valor = parseFloat(input.value) || 0;
+            if (valor === 0) {
+                input.classList.add('zero-value');
+            } else {
+                input.classList.remove('zero-value');
+            }
+        }
+
         // Modificar el evento de cambio de cajas enviadas
         document.addEventListener('input', function(e) {
             if (e.target.name && e.target.name.endsWith('_cajas_enviadas')) {
                 const row = e.target.closest('.detail-row');
                 const presentacionSelect = row.querySelector('select[name$="_presentacion"]');
                 if (presentacionSelect && presentacionSelect.value) {
+                    // Usar parseFloat en lugar de parseInt para manejar valores vacíos correctamente
+                    const cajasEnviadas = parseFloat(e.target.value) || 0;
                     validarStock(
                         presentacionSelect.value,
-                        parseInt(e.target.value) || 0,
+                        cajasEnviadas,
                         e.target
                     );
                 }
@@ -873,6 +941,11 @@
             if (e.target.name && e.target.name.endsWith('_no_cajas_abono')) {
                 const row = e.target.closest('.detail-row');
                 validarCajasAbono(row);
+            }
+
+            // Validar valor de caja cuando cambia
+            if (e.target.name && e.target.name.endsWith('_valor_x_caja_euro')) {
+                validarValorCaja(e.target);
             }
         });
         

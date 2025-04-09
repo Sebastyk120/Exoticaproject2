@@ -61,7 +61,7 @@
         <div><i class="fas fa-spinner fa-spin"></i> Enviando correo...</div>
     </div>
 
-    <div class="container">
+    <div class="invoice-page-container">
         <div class="btn-container">
             <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver a Factura
@@ -183,6 +183,29 @@
                         <select class="form-select" id="agenciaAduana">
                             <option value="">Cargando agencias...</option>
                         </select>
+                    </div>
+                    
+                    <!-- Nueva sección para seleccionar AWB -->
+                    <div class="mb-4">
+                        <label class="form-label">Seleccionar AWB para incluir en el asunto:</label>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="ms-auto">
+                                <input type="text" class="form-control form-control-sm" id="searchAwb" placeholder="Buscar AWB...">
+                            </div>
+                        </div>
+                        
+                        <div class="albaran-selection" id="awbContainer" style="max-height: 150px;">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <p class="mt-2">Cargando AWBs recientes...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="text-muted small">
+                            <i class="fas fa-info-circle me-1"></i> Seleccione un AWB para incluirlo automáticamente en el asunto del correo.
+                        </div>
                     </div>
                     
                     <!-- Nueva sección para seleccionar correos -->
@@ -333,6 +356,28 @@
                 const count = selectedCheckboxes.length;
                 document.getElementById('selectedCount').textContent = `(${count} seleccionado${count !== 1 ? 's' : ''})`;
                 document.getElementById('enviarAlbaranes').disabled = count === 0;
+                
+                // Añadir advertencia si se seleccionan demasiados albaranes
+                const warningContainer = document.getElementById('warningContainer');
+                if (!warningContainer) {
+                    const newWarningContainer = document.createElement('div');
+                    newWarningContainer.id = 'warningContainer';
+                    newWarningContainer.className = 'mt-2';
+                    document.querySelector('.modal-footer').prepend(newWarningContainer);
+                }
+                
+                const warningDiv = document.getElementById('warningContainer');
+                if (count > 10) {
+                    warningDiv.innerHTML = `
+                        <div class="alert alert-warning py-1 px-2 mb-2">
+                            <small><i class="fas fa-exclamation-triangle"></i> Has seleccionado ${count} albaranes. 
+                            Se recomienda enviar máximo 10 para evitar errores.</small>
+                        </div>
+                    `;
+                    // No deshabilitar el botón, solo advertir
+                } else {
+                    warningDiv.innerHTML = '';
+                }
             }
             
             // Función para filtrar albaranes según búsqueda
@@ -348,6 +393,38 @@
                         item.style.display = 'none';
                     }
                 });
+            }
+            
+            // Función para filtrar AWBs según búsqueda
+            function filterAwbs() {
+                const searchTerm = document.getElementById('searchAwb').value.toLowerCase();
+                const items = document.querySelectorAll('#awbContainer .albaran-item');
+                
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Función para actualizar el asunto del correo con el AWB seleccionado
+            function updateEmailSubject() {
+                const selectedAwb = document.querySelector('.awb-radio:checked');
+                const subjectField = document.getElementById('emailSubject');
+                
+                if (selectedAwb && selectedAwb.value) {
+                    const awbValue = selectedAwb.value;
+                    const semanaValue = selectedAwb.dataset.semana || '-';
+                    
+                    // Actualizar el asunto incluyendo AWB y semana
+                    subjectField.value = `Albaranes para trámites de aduana - AWB: ${awbValue} - Semana: ${semanaValue}`;
+                } else {
+                    // Restaurar el asunto original si no hay AWB seleccionado
+                    subjectField.value = `Albaranes para trámites de aduana - L&M Exotic Fruit`;
+                }
             }
             
             // Manejar el botón para enviar por email
@@ -425,6 +502,57 @@
                                 const container = document.getElementById('albaranesContainer');
                                 container.innerHTML = `<div class="text-center py-3 text-danger">
                                     Error al cargar albaranes: ${error.message}
+                                </div>`;
+                            });
+                        
+                        // Cargar los AWBs recientes
+                        fetch('/comercial/get_awbs_recientes/')
+                            .then(response => {
+                                if (!response.ok) {
+                                    return response.text().then(text => {
+                                        throw new Error(`Error HTTP ${response.status}: ${text.substring(0, 100)}...`);
+                                    });
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                const container = document.getElementById('awbContainer');
+                                container.innerHTML = '';
+                                
+                                if (!data || data.length === 0) {
+                                    container.innerHTML = '<div class="text-center py-3">No hay AWBs recientes disponibles</div>';
+                                    return;
+                                }
+                                
+                                data.forEach(pedido => {
+                                    if (!pedido || !pedido.awb) return; // Skip invalid entries
+                                    
+                                    const item = document.createElement('div');
+                                    item.className = 'albaran-item';
+                                    item.innerHTML = `
+                                        <div class="form-check">
+                                            <input class="form-check-input awb-radio" type="radio" 
+                                                   name="awbRadio" value="${pedido.awb}" 
+                                                   id="awb-${pedido.id}" data-semana="${pedido.semana || '-'}">
+                                            <label class="form-check-label" for="awb-${pedido.id}">
+                                                AWB: ${pedido.awb} - ${pedido.exportador || 'Sin exportador'} - ${pedido.fecha || '-'}
+                                                <span class="badge bg-secondary">Sem. ${pedido.semana || '-'}</span>
+                                            </label>
+                                        </div>
+                                    `;
+                                    container.appendChild(item);
+                                });
+                                
+                                // Configurar eventos para radio buttons de AWB
+                                document.querySelectorAll('.awb-radio').forEach(radio => {
+                                    radio.addEventListener('change', updateEmailSubject);
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error al cargar AWBs:', error);
+                                const container = document.getElementById('awbContainer');
+                                container.innerHTML = `<div class="text-center py-3 text-danger">
+                                    Error al cargar AWBs: ${error.message || 'Error desconocido'}
                                 </div>`;
                             });
                         
@@ -536,6 +664,9 @@
             // Configurar búsqueda de albaranes
             document.getElementById('searchAlbaranes').addEventListener('input', filterAlbaranes);
             
+            // Configurar búsqueda de AWBs
+            document.getElementById('searchAwb').addEventListener('input', filterAwbs);
+            
             // Manejar el envío de albaranes
             document.getElementById('enviarAlbaranes').addEventListener('click', function() {
                 const agenciaId = document.getElementById('agenciaAduana').value;
@@ -563,6 +694,13 @@
                 if (selectedEmails.length === 0) {
                     alert('Por favor, seleccione al menos un correo destinatario');
                     return;
+                }
+                
+                // Si hay demasiados albaranes seleccionados, mostrar confirmación
+                if (selectedAlbaranes.length > 10) {
+                    if (!confirm(`Ha seleccionado ${selectedAlbaranes.length} albaranes, lo que puede causar problemas al procesar la solicitud debido a limitaciones de tamaño. ¿Desea continuar de todos modos?`)) {
+                        return;
+                    }
                 }
                 
                 // Mostrar overlay de carga

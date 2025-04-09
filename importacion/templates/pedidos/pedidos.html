@@ -46,9 +46,9 @@
                         <h2><i class="fas fa-info-circle"></i> Información del Pedido</h2>
                         <div class="action-buttons">
                             {% if pedido %}
-                                <a href="{% url 'importacion:solicitar_pedido' pedido.id %}" class="btn btn-success">
+                                <button type="button" id="enviar-solicitud-btn" class="btn btn-success" data-url="{% url 'importacion:solicitar_pedido' pedido.id %}">
                                     <i class="fas fa-paper-plane"></i> Enviar solicitud
-                                </a>
+                                </button>
                             {% endif %}
                         </div>
                     </div>
@@ -137,6 +137,12 @@
                         <div class="section-header">
                             <h2><i class="fas fa-list"></i> Detalles del Pedido</h2>
                             <div class="action-buttons">
+                                <div class="copy-boxes-container">
+                                    <label for="copy-boxes-checkbox" class="copy-boxes-label">
+                                        <input type="checkbox" id="copy-boxes-checkbox">
+                                        Copiar cajas solicitadas a recibidas
+                                    </label>
+                                </div>
                                 <button type="button" id="add-detail-btn" class="btn btn-success">
                                     <i class="fas fa-plus"></i> Agregar Detalle
                                 </button>
@@ -177,6 +183,9 @@
                                         <td>
                                             <input type="number" name="detalle_{{ detalle.id }}_cajas_solicitadas"
                                                    value="{{ detalle.cajas_solicitadas|default:'0' }}" min="0">
+                                            <button type="button" class="btn-copy-individual" title="Copiar a cajas recibidas">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
                                         </td>
                                         <td>
                                             <input type="number" name="detalle_{{ detalle.id }}_cajas_recibidas"
@@ -255,6 +264,9 @@
                 </td>
                 <td>
                     <input type="number" name="new_INDEX_cajas_solicitadas" value="0" min="0">
+                    <button type="button" class="btn-copy-individual" title="Copiar a cajas recibidas">
+                        <i class="fas fa-copy"></i>
+                    </button>
                 </td>
                 <td>
                     <input type="number" name="new_INDEX_cajas_recibidas" value="0" min="0" class="cajas-recibidas">
@@ -296,6 +308,8 @@
             const newRowElement = tableBody.firstElementChild;
             addValidationListeners(newRowElement);
             addPriceLoaderListener(newRowElement); // Añadir el listener para cargar precios
+            addCopyButtonListener(newRowElement); // Añadir el listener para botón de copiar individual
+            handleZeroFields(newRowElement); // Aplicar manejo de campos cero
 
             newDetailCounter++;
 
@@ -429,7 +443,7 @@
 
             // Validate Numero NC if any NC (boxes or manual) exist
             if ((hasNCCajas || hasNCManual) && !numeroNC.value.trim()) {
-                numeroNCError.textContent = 'Número NC es requerido cuando hay notas de crédito';
+                numeroNCError.textContent = 'Número NC es requerido cuando hay cajas notas de crédito';
                 numeroNCError.style.display = 'block';
                 numeroNC.classList.add('error-field');
                 isValid = false;
@@ -461,11 +475,23 @@
 
                 cajasRecibidasField.addEventListener('input', function() {
                     validateNCField(ncField, this);
+                    
+                    // Añadir validación para Valor Caja USD
+                    if (valorCajaField) {
+                        validateValorCaja(valorCajaField, this);
+                    }
+                    
                     updateProductValue(this.closest('tr'));
                 });
 
                 cajasRecibidasField.addEventListener('change', function() {
                     validateNCField(ncField, this);
+                    
+                    // Añadir validación para Valor Caja USD
+                    if (valorCajaField) {
+                        validateValorCaja(valorCajaField, this);
+                    }
+                    
                     updateProductValue(this.closest('tr'));
                 });
             }
@@ -483,10 +509,20 @@
                 // Update product value when valor_caja changes
                 valorCajaField.addEventListener('input', function() {
                     updateProductValue(this.closest('tr'));
+                    // Añadir validación para Valor Caja USD
+                    const cajasRecibidasField = this.closest('tr').querySelector('.cajas-recibidas');
+                    if (cajasRecibidasField) {
+                        validateValorCaja(this, cajasRecibidasField);
+                    }
                 });
                 
                 valorCajaField.addEventListener('change', function() {
                     updateProductValue(this.closest('tr'));
+                    // Añadir validación para Valor Caja USD
+                    const cajasRecibidasField = this.closest('tr').querySelector('.cajas-recibidas');
+                    if (cajasRecibidasField) {
+                        validateValorCaja(this, cajasRecibidasField);
+                    }
                 });
             }
         }
@@ -536,6 +572,20 @@
             }
         }
 
+        // Function to validate Valor Caja USD field
+        function validateValorCaja(valorCajaField, cajasRecibidasField) {
+            const valorCaja = parseFloat(valorCajaField.value) || 0;
+            const cajasRecibidas = parseFloat(cajasRecibidasField.value) || 0;
+            
+            if (cajasRecibidas > 0 && valorCaja === 0) {
+                valorCajaField.classList.add('error-field');
+                return false;
+            } else {
+                valorCajaField.classList.remove('error-field');
+                return true;
+            }
+        }
+
         function updateNumeroNCRequirement() {
             let hasNC = false;
             const numeroNC = document.getElementById('numero_nc');
@@ -561,6 +611,72 @@
             }
         }
 
+        // Función para copiar valor individual de cajas solicitadas a recibidas
+        function copyCajasValue(button) {
+            const row = button.closest('tr');
+            const cajasSolicitadasInput = row.querySelector('[name$="_cajas_solicitadas"]');
+            const cajasRecibidasInput = row.querySelector('[name$="_cajas_recibidas"]');
+            
+            if (cajasSolicitadasInput && cajasRecibidasInput) {
+                // Copiar el valor
+                cajasRecibidasInput.value = cajasSolicitadasInput.value;
+                
+                // Disparar evento input para actualizar cálculos
+                const inputEvent = new Event('input', { bubbles: true });
+                cajasRecibidasInput.dispatchEvent(inputEvent);
+                
+                // Mostrar una pequeña animación para feedback visual
+                cajasRecibidasInput.classList.add('highlight-field');
+                setTimeout(() => {
+                    cajasRecibidasInput.classList.remove('highlight-field');
+                }, 800);
+            }
+        }
+        
+        // Función para manejar los campos con valor cero
+        function handleZeroFields(element) {
+            // Seleccionar todos los campos numéricos
+            const numericInputs = element.querySelectorAll('input[type="number"]');
+            
+            numericInputs.forEach(input => {
+                // Evento focus - Vaciar cuando el valor es 0
+                input.addEventListener('focus', function() {
+                    // Verificar si el valor actual es 0, 0.0, 0.00, etc.
+                    const value = parseFloat(this.value) || 0;
+                    if (value === 0) {
+                        this.value = '';
+                    }
+                });
+                
+                // Evento blur - Restaurar 0 si se deja vacío
+                input.addEventListener('blur', function() {
+                    if (this.value === '' || this.value === null) {
+                        // Usar el paso (step) del input para determinar el formato
+                        // Si tiene decimales, mostrar con decimales, sino entero
+                        const step = parseFloat(this.getAttribute('step') || 1);
+                        if (step < 1) {
+                            // Es un campo decimal
+                            const decimals = step.toString().split('.')[1].length;
+                            this.value = (0).toFixed(decimals);
+                        } else {
+                            // Es un campo entero
+                            this.value = '0';
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Función para añadir listener al botón de copia individual
+        function addCopyButtonListener(element) {
+            const copyButton = element.querySelector('.btn-copy-individual');
+            if (copyButton) {
+                copyButton.addEventListener('click', function() {
+                    copyCajasValue(this);
+                });
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Add event to add detail button
             const addDetailBtn = document.getElementById('add-detail-btn');
@@ -568,9 +684,95 @@
                 addDetailBtn.addEventListener('click', addNewDetailRow);
             }
 
+            // Manejar el botón "Enviar solicitud"
+            const enviarSolicitudBtn = document.getElementById('enviar-solicitud-btn');
+            if (enviarSolicitudBtn) {
+                enviarSolicitudBtn.addEventListener('click', function() {
+                    // Obtener la URL de solicitar_pedido a la que redirigir después de guardar
+                    const redirectUrl = this.getAttribute('data-url');
+                    
+                    // Crear un input hidden para indicar que se está enviando una solicitud
+                    const enviarSolicitudInput = document.createElement('input');
+                    enviarSolicitudInput.type = 'hidden';
+                    enviarSolicitudInput.name = 'enviar_solicitud';
+                    enviarSolicitudInput.value = 'true';
+                    
+                    // Añadir el input hidden al formulario
+                    const form = document.getElementById('unified-form');
+                    form.appendChild(enviarSolicitudInput);
+                    
+                    // Añadir un input hidden con la URL de redirección
+                    const redirectInput = document.createElement('input');
+                    redirectInput.type = 'hidden';
+                    redirectInput.name = 'redirect_url';
+                    redirectInput.value = redirectUrl;
+                    form.appendChild(redirectInput);
+                    
+                    // Validar el formulario y enviarlo si es válido
+                    let isValid = validateNCFields();
+                    
+                    // Validar todos los campos de valor caja
+                    document.querySelectorAll('.valor-caja-usd').forEach(function(valorCajaField) {
+                        const row = valorCajaField.closest('tr');
+                        const cajasRecibidasField = row.querySelector('.cajas-recibidas');
+                        if (!validateValorCaja(valorCajaField, cajasRecibidasField)) {
+                            isValid = false;
+                        }
+                    });
+                    
+                    if (isValid) {
+                        form.submit();
+                    } else {
+                        showNotification('Por favor, corrija los errores en el formulario antes de enviar la solicitud.', 'error');
+                        // Eliminar los inputs hidden si no se envía el formulario
+                        form.removeChild(enviarSolicitudInput);
+                        form.removeChild(redirectInput);
+                    }
+                });
+            }
+
+            // Aplicar manejo de campos cero a todos los campos numéricos existentes
+            handleZeroFields(document);
+
+            // Agregar evento al checkbox para copiar cajas solicitadas a recibidas
+            const copyBoxesCheckbox = document.getElementById('copy-boxes-checkbox');
+            if (copyBoxesCheckbox) {
+                copyBoxesCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Copiar valores de cajas solicitadas a cajas recibidas
+                        document.querySelectorAll('#details-table tbody tr').forEach(function(row) {
+                            const cajasSolicitadasInput = row.querySelector('[name$="_cajas_solicitadas"]');
+                            const cajasRecibidasInput = row.querySelector('[name$="_cajas_recibidas"]');
+                            
+                            if (cajasSolicitadasInput && cajasRecibidasInput) {
+                                // Copiar el valor
+                                cajasRecibidasInput.value = cajasSolicitadasInput.value;
+                                
+                                // Disparar evento input para actualizar cálculos
+                                const inputEvent = new Event('input', { bubbles: true });
+                                cajasRecibidasInput.dispatchEvent(inputEvent);
+                            }
+                        });
+                        
+                        showNotification('Valores de cajas solicitadas copiados a cajas recibidas', 'success');
+                    }
+                });
+            }
+
             // Add submit handler to validate before submitting
             document.getElementById('unified-form').addEventListener('submit', function(e) {
-                if (!validateNCFields()) {
+                let isValid = validateNCFields();
+                
+                // Validar todos los campos de valor caja
+                document.querySelectorAll('.valor-caja-usd').forEach(function(valorCajaField) {
+                    const row = valorCajaField.closest('tr');
+                    const cajasRecibidasField = row.querySelector('.cajas-recibidas');
+                    if (!validateValorCaja(valorCajaField, cajasRecibidasField)) {
+                        isValid = false;
+                    }
+                });
+                
+                if (!isValid) {
                     e.preventDefault();
                     showNotification('Por favor, corrija los errores en el formulario.', 'error');
                 }
@@ -580,6 +782,7 @@
             document.querySelectorAll('#details-table .detail-row').forEach(function(row) {
                 addValidationListeners(row);
                 addPriceLoaderListener(row); // Añadir listeners para cargar precios
+                addCopyButtonListener(row);  // Añadir listeners para botones de copia individual
                 
                 // Initial calculation of product values
                 updateProductValue(row);
@@ -604,10 +807,17 @@
                 document.getElementById('details-table').style.display = 'none';
             }
 
-            // Add event listeners to close notification buttons
-            document.querySelectorAll('.close-notification').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    this.closest('.notification').remove();
+            // Add event listeners to close notification buttons and set auto-close for all notifications
+            document.querySelectorAll('.notification').forEach(function(notification) {
+                // Set up auto-close timer for all notifications
+                setTimeout(() => {
+                    notification.classList.add('fade-out');
+                    setTimeout(() => notification.remove(), 500);
+                }, 5000);
+
+                // Setup close button
+                notification.querySelector('.close-notification').addEventListener('click', function() {
+                    notification.remove();
                 });
             });
         });

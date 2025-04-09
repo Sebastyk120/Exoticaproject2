@@ -451,3 +451,20 @@ textarea {
     background-color: rgba(245, 158, 11, 0.1);
     color: var(--warning-color);
 }
+
+input.error {
+    border-color: #dc3545;
+}
+
+input.error:focus {
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+input.zero-value {
+    border-color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+input.zero-value:focus {
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}

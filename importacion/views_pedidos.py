@@ -469,6 +469,13 @@ def guardar_detalles_batch(request, pedido_id):
     pedido.refresh_from_db()
 
     messages.success(request, 'Pedido y detalles guardados correctamente')
+    
+    # Verificar si se debe redirigir a solicitar_pedido
+    if request.POST.get('enviar_solicitud') == 'true':
+        redirect_url = request.POST.get('redirect_url')
+        if redirect_url:
+            return redirect(redirect_url)
+    
     return redirect('importacion:detalle_pedido', pedido_id=pedido.id)
 
 

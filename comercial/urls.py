@@ -51,6 +51,7 @@ urlpatterns = [
     # URLs para el envío de albaranes a agencias de aduana
     path('get_agencias_aduana/', views_enviar_correos.get_agencias_aduana, name='get_agencias_aduana'),
     path('get_ventas_recientes/', views_enviar_correos.get_ventas_recientes, name='get_ventas_recientes'),
+    path('get_awbs_recientes/', views_enviar_correos.get_awbs_recientes, name='get_awbs_recientes'),
     path('enviar_albaranes_aduana/', views_enviar_correos.enviar_albaranes_aduana, name='enviar_albaranes_aduana'),
 
     # URLs para descarga directa de facturas/rectificativas    path('generar-factura/<int:venta_id>/', views_ventas.generar_factura_download, name='generar-factura'),    path('generar-rectificativa/<int:venta_id>/', views_ventas.generar_rectificativa_download, name='generar-rectificativa'),    # Nueva URLs para acceso por token a facturas y rectificativas

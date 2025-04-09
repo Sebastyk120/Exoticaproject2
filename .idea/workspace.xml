@@ -4,9 +4,32 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Mac compatible">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Correo.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/static/css/clientes/clientes.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/clientes/clientes.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/static/css/ventas/factura_venta.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/ventas/factura_venta.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/static/css/ventas/lista_ventas.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/ventas/lista_ventas.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/static/css/ventas/ventas.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/ventas/ventas.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/clientes/clientes.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/clientes/clientes.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/dashboard/utilidades.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/dashboard/utilidades.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran_cliente.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_factura.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_factura.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_rectificativa.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_rectificativa.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/lista_ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/lista_ventas.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/ventas.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/views_dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_dashboard.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/views_enviar_correos.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_enviar_correos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/static/css/pedidos/lista_pedidos.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/pedidos/lista_pedidos.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/static/css/pedidos/pedidos.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/pedidos/pedidos.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/static/css/transferencias/transferencias.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/transferencias/transferencias.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/templates/pedidos/lista_pedidos.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/pedidos/lista_pedidos.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/templates/pedidos/pedidos.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/pedidos/pedidos.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/templates/transferencias/transferencias.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/transferencias/transferencias.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/views_pedidos.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_pedidos.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -177,6 +200,8 @@
       <workItem from="1744033912031" duration="17770000" />
       <workItem from="1744109370016" duration="5228000" />
       <workItem from="1744124501090" duration="7440000" />
+      <workItem from="1744137302652" duration="5162000" />
+      <workItem from="1744160904473" duration="4890000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -466,7 +491,47 @@
       <option name="project" value="LOCAL" />
       <updated>1744134677946</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="Correo.">
+      <option name="closed" value="true" />
+      <created>1744137311932</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1744137311932</updated>
+    </task>
+    <task id="LOCAL-00038" summary="Correo.">
+      <option name="closed" value="true" />
+      <created>1744139272546</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1744139272546</updated>
+    </task>
+    <task id="LOCAL-00039" summary="Correo.">
+      <option name="closed" value="true" />
+      <created>1744141725673</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1744141725673</updated>
+    </task>
+    <task id="LOCAL-00040" summary="Correo.">
+      <option name="closed" value="true" />
+      <created>1744142286310</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1744142286310</updated>
+    </task>
+    <task id="LOCAL-00041" summary="Correo.">
+      <option name="closed" value="true" />
+      <created>1744145760254</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1744145760254</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -484,7 +549,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Punto de control funcional." />
     <MESSAGE value="Punto de control funcional 2. OK" />
     <MESSAGE value="Punto de control funcional 3. 7 AM" />
     <MESSAGE value="Punto de control funcional 4. Capas de inventario corregidas." />
@@ -509,6 +573,7 @@
     <MESSAGE value="Cambio Ema Back" />
     <MESSAGE value="Puntos de control" />
     <MESSAGE value="Mac compatible" />
-    <option name="LAST_COMMIT_MESSAGE" value="Mac compatible" />
+    <MESSAGE value="Correo." />
+    <option name="LAST_COMMIT_MESSAGE" value="Correo." />
   </component>
 </project>

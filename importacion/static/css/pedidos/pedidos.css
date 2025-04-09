@@ -275,6 +275,34 @@ textarea {
     font-size: 14px;
 }
 
+.copy-boxes-container {
+    display: flex;
+    align-items: center;
+}
+
+.copy-boxes-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    color: var(--secondary-color);
+    cursor: pointer;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.copy-boxes-label:hover {
+    background-color: #e9ecef;
+}
+
+.copy-boxes-label input[type="checkbox"] {
+    width: auto;
+    margin-right: 5px;
+}
+
 /* Order Details Styles */
 .detail-card {
     margin-bottom: 15px;
@@ -598,4 +626,41 @@ input.error-field:focus {
         width: 100%;
         margin-top: 20px;
     }
+}
+
+/* Estilo para los campos de cajas solicitadas y el botón de copia */
+.details-table td:nth-child(2) {
+    position: relative;
+}
+
+.btn-copy-individual {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--secondary-color);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: var(--transition);
+    padding: 4px;
+    border-radius: 3px;
+}
+
+.btn-copy-individual:hover {
+    opacity: 1;
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+/* Animación para el campo destacado al copiar */
+@keyframes highlight-field {
+    0% { background-color: rgba(59, 130, 246, 0.1); }
+    50% { background-color: rgba(59, 130, 246, 0.3); }
+    100% { background-color: rgba(59, 130, 246, 0); }
+}
+
+.highlight-field {
+    animation: highlight-field 0.8s ease;
 }

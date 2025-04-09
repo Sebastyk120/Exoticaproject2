@@ -335,13 +335,17 @@ def calcular_totales_globales(anio=None, semana=None):
             'utilidad_total': 0,
             'ventas_netas': 0,
             'costo_total': 0,
-            'margen_promedio': 0
+            'margen_promedio': 0,
+            'perdidas_totales': 0
         }
     
     # Calcular los totales
     utilidad_total = sum(item['utilidad'] for item in resumen)
     ventas_netas = sum(item['ventas_netas'] for item in resumen)
     costo_total = sum(item['total_costos'] for item in resumen)
+    
+    # Calcular total de pérdidas (solo utilidades negativas)
+    perdidas_totales = abs(sum(item['utilidad'] for item in resumen if item['utilidad'] < 0))
     
     # Calcular el margen promedio ponderado
     if ventas_netas > 0:
@@ -353,7 +357,8 @@ def calcular_totales_globales(anio=None, semana=None):
         'utilidad_total': round(utilidad_total, 2),
         'ventas_netas': round(ventas_netas, 2),
         'costo_total': round(costo_total, 2),
-        'margen_promedio': round(margen_promedio, 2)
+        'margen_promedio': round(margen_promedio, 2),
+        'perdidas_totales': round(perdidas_totales, 2)
     }
 
 # Función auxiliar para procesar el parámetro de semana
@@ -543,6 +548,10 @@ def exportar_resumen_excel(resumen, anio, semana=None):
     worksheet.write(total_row, 6, totales['margen_promedio'] / 100, percent_format)
     worksheet.write(total_row, 7, totales['costo_total'], money_format)
     
+    # Agregar pérdidas totales
+    worksheet.write(total_row + 1, 0, 'PÉRDIDAS TOTALES', header_format)
+    worksheet.write(total_row + 1, 5, totales['perdidas_totales'], money_format)
+    
     workbook.close()
     output.seek(0)
     
@@ -676,8 +685,11 @@ def api_productos_rentables(request):
     # Obtener el resumen de utilidad por producto
     resumen = calcular_resumen_utilidad(anio, semana)
     
+    # Filtrar solo productos con utilidad positiva
+    productos_rentables = [item for item in resumen if item['utilidad'] > 0]
+    
     # Ordenar por utilidad y tomar los 5 más rentables
-    top_productos = sorted(resumen, key=lambda x: x['utilidad'], reverse=True)[:5]
+    top_productos = sorted(productos_rentables, key=lambda x: x['utilidad'], reverse=True)[:5]
     
     # Extraer los datos para el gráfico
     productos = [item['producto'] for item in top_productos]

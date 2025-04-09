@@ -30,6 +30,12 @@
                 </button>
             </div>
 
+            <!-- Toggle para cambiar entre vista tabla y tarjetas (solo visible en algunos tamaños) -->
+            <div class="view-toggle d-none d-md-flex d-lg-none mb-3">
+                <button class="btn btn-outline-secondary btn-sm active" data-view="table"><i class="bi bi-table"></i> Tabla</button>
+                <button class="btn btn-outline-secondary btn-sm" data-view="cards"><i class="bi bi-grid-3x3-gap-fill"></i> Tarjetas</button>
+            </div>
+
             <!-- Alerts container for Django messages -->
             <div id="alerts-container">
                 {% if messages %}
@@ -42,49 +48,121 @@
                 {% endif %}
             </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover" id="clientsTable">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Ciudad</th>
-                            <th>Domicilio</th>
-                            <th>Email</th>
-                            <th>Correos Adicionales</th>
-                            <th>Teléfono</th>
-                            <th>CIF</th>
-                            <th>Días Pago</th>
-                            <th class="text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for cliente in clientes %}
-                        <tr>
-                            <td title="{{ cliente.nombre }}">{{ cliente.nombre }}</td>
-                            <td title="{{ cliente.ciudad }}">{{ cliente.ciudad }}</td>
-                            <td title="{{ cliente.domicilio }}">{{ cliente.domicilio }}</td>
-                            <td title="{{ cliente.email }}">{{ cliente.email }}</td>
-                            <td title="{{ cliente.correos_adicionales }}">{{ cliente.correos_adicionales }}</td>
-                            <td title="{{ cliente.telefono }}">{{ cliente.telefono }}</td>
-                            <td title="{{ cliente.cif }}">{{ cliente.cif }}</td>
-                            <td class="text-center">{{ cliente.dias_pago }}</td>
-                            <td class="text-center">
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-outline-primary" onclick="editClient({{ cliente.id }})" title="Editar cliente">
-                                        <i class="bi bi-pencil"></i>
+            <!-- Vista de tabla (predeterminada para pantallas grandes) -->
+            <div class="table-view">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="clientsTable">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Ciudad</th>
+                                <th>Domicilio</th>
+                                <th>Email</th>
+                                <th>Correos Adicionales</th>
+                                <th>Teléfono</th>
+                                <th>CIF</th>
+                                <th>Días Pago</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cliente in clientes %}
+                            <tr>
+                                <td title="{{ cliente.nombre }}">{{ cliente.nombre }}</td>
+                                <td title="{{ cliente.ciudad }}">{{ cliente.ciudad }}</td>
+                                <td title="{{ cliente.domicilio }}">{{ cliente.domicilio }}</td>
+                                <td title="{{ cliente.email }}">{{ cliente.email }}</td>
+                                <td title="{{ cliente.correos_adicionales }}">{{ cliente.correos_adicionales }}</td>
+                                <td title="{{ cliente.telefono }}">{{ cliente.telefono }}</td>
+                                <td title="{{ cliente.cif }}">{{ cliente.cif }}</td>
+                                <td class="text-center">{{ cliente.dias_pago }}</td>
+                                <td class="text-center">
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editClient({{ cliente.id }})" title="Editar cliente">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="copyStatementLink('{{ cliente.token_acceso }}')" title="Copiar enlace de estado de cuenta">
+                                            <i class="bi bi-link-45deg"></i>
+                                        </button>
+                                        <a href="{% url 'comercial:estado_cuenta_cliente' cliente.id %}" class="btn btn-sm btn-outline-success" title="Ver estado de cuenta">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Vista de tarjetas (para dispositivos móviles) -->
+            <div class="cards-view">
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                    {% for cliente in clientes %}
+                    <div class="col cliente-card-col">
+                        <div class="card cliente-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ cliente.nombre }}</h5>
+                                
+                                <div class="card-info">
+                                    {% if cliente.ciudad %}
+                                    <div class="info-item">
+                                        <i class="bi bi-geo-alt"></i>
+                                        <span>{{ cliente.ciudad }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if cliente.email %}
+                                    <div class="info-item">
+                                        <i class="bi bi-envelope"></i>
+                                        <span>{{ cliente.email }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if cliente.telefono %}
+                                    <div class="info-item">
+                                        <i class="bi bi-telephone"></i>
+                                        <span>{{ cliente.telefono }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if cliente.cif %}
+                                    <div class="info-item">
+                                        <i class="bi bi-card-text"></i>
+                                        <span>CIF: {{ cliente.cif }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="info-item">
+                                        <i class="bi bi-calendar-check"></i>
+                                        <span>Días de pago: {{ cliente.dias_pago }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="btn-group w-100">
+                                    <button class="btn btn-outline-primary" onclick="editClient({{ cliente.id }})" title="Editar cliente">
+                                        <i class="bi bi-pencil"></i> Editar
                                     </button>
-                                    <button class="btn btn-sm btn-outline-info" onclick="copyStatementLink('{{ cliente.token_acceso }}')" title="Copiar enlace de estado de cuenta">
-                                        <i class="bi bi-link-45deg"></i>
+                                    <button class="btn btn-outline-info" onclick="copyStatementLink('{{ cliente.token_acceso }}')" title="Copiar enlace de estado de cuenta">
+                                        <i class="bi bi-link-45deg"></i> Copiar enlace
                                     </button>
-                                    <a href="{% url 'comercial:estado_cuenta_cliente' cliente.id %}" class="btn btn-sm btn-outline-success" title="Ver estado de cuenta">
-                                        <i class="bi bi-eye"></i>
+                                    <a href="{% url 'comercial:estado_cuenta_cliente' cliente.id %}" class="btn btn-outline-success" title="Ver estado de cuenta">
+                                        <i class="bi bi-eye"></i> Ver cuenta
                                     </a>
                                 </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Indicador de no hay resultados (común para ambas vistas) -->
+            <div id="no-results" class="text-center py-5 d-none">
+                <i class="bi bi-search" style="font-size: 3rem; opacity: 0.3;"></i>
+                <p class="mt-3 text-muted">No se encontraron clientes con esa búsqueda.</p>
             </div>
         </div>
     </div>
@@ -247,27 +325,76 @@
 
 {% block extra_js %}
     <script>
-        // Funcionalidad de búsqueda
+        // Detectar el tamaño de pantalla y establecer la vista adecuada
+        function setInitialView() {
+            const isMobile = window.innerWidth < 768;
+            document.querySelector('.table-view').style.display = isMobile ? 'none' : 'block';
+            document.querySelector('.cards-view').style.display = isMobile ? 'block' : 'none';
+            
+            // Actualizar botones de toggle si están visibles
+            const tableBtn = document.querySelector('[data-view="table"]');
+            const cardsBtn = document.querySelector('[data-view="cards"]');
+            
+            if (tableBtn && cardsBtn) {
+                if (isMobile) {
+                    tableBtn.classList.remove('active');
+                    cardsBtn.classList.add('active');
+                } else {
+                    tableBtn.classList.add('active');
+                    cardsBtn.classList.remove('active');
+                }
+            }
+        }
+
+        // Cambiar entre vistas de tabla y tarjetas
+        document.querySelectorAll('.view-toggle button').forEach(button => {
+            button.addEventListener('click', function() {
+                const view = this.getAttribute('data-view');
+                document.querySelectorAll('.view-toggle button').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                if (view === 'table') {
+                    document.querySelector('.table-view').style.display = 'block';
+                    document.querySelector('.cards-view').style.display = 'none';
+                } else {
+                    document.querySelector('.table-view').style.display = 'none';
+                    document.querySelector('.cards-view').style.display = 'block';
+                }
+            });
+        });
+
+        // Funcionalidad de búsqueda (ahora funciona para ambas vistas)
         document.getElementById('searchClient').addEventListener('keyup', function() {
             const searchText = this.value.toLowerCase();
-            const table = document.getElementById('clientsTable');
-            const rows = table.getElementsByTagName('tr');
-
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
-                const cells = row.getElementsByTagName('td');
+            let foundResults = false;
+            
+            // Buscar en la vista de tabla
+            const tableRows = document.querySelectorAll('#clientsTable tbody tr');
+            tableRows.forEach(row => {
                 let found = false;
-
-                for (let j = 0; j < cells.length; j++) {
-                    const cellText = cells[j].textContent.toLowerCase();
-                    if (cellText.includes(searchText)) {
+                row.querySelectorAll('td').forEach(cell => {
+                    if (cell.textContent.toLowerCase().includes(searchText)) {
                         found = true;
-                        break;
                     }
-                }
-
+                });
                 row.style.display = found ? '' : 'none';
-            }
+                if (found) foundResults = true;
+            });
+            
+            // Buscar en la vista de tarjetas
+            const cards = document.querySelectorAll('.cliente-card-col');
+            cards.forEach(card => {
+                let found = false;
+                const cardText = card.textContent.toLowerCase();
+                if (cardText.includes(searchText)) {
+                    found = true;
+                }
+                card.style.display = found ? '' : 'none';
+                if (found) foundResults = true;
+            });
+            
+            // Mostrar mensaje de "no hay resultados" si corresponde
+            document.getElementById('no-results').classList.toggle('d-none', foundResults);
         });
 
         // Funcionalidad de edición
@@ -299,21 +426,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    
-                    // Crear alerta de error
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-danger alert-dismissible fade show mb-3';
-                    alertDiv.innerHTML = `
-                        Error al cargar los datos del cliente. Por favor, intente nuevamente.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    `;
-                    document.getElementById('alerts-container').appendChild(alertDiv);
-                    
-                    // Auto-eliminar después de 5 segundos
-                    setTimeout(() => {
-                        alertDiv.classList.remove('show');
-                        setTimeout(() => alertDiv.remove(), 150);
-                    }, 5000);
+                    createAlert('Error al cargar los datos del cliente. Por favor, intente nuevamente.', 'danger');
                 });
         }
 
@@ -334,38 +447,46 @@
             }, 5000);
         }
 
-        // Manejo de mensajes de Django
-        {% if messages %}
-        document.addEventListener('DOMContentLoaded', function() {
-            // Los mensajes ya están insertados en el HTML en el contenedor alerts-container
-        });
-        {% endif %}
-
         // Función para copiar el enlace del estado de cuenta al portapapeles
         function copyStatementLink(token) {
             // Construir la URL completa con el token
             const baseUrl = window.location.origin;
             const statementUrl = `${baseUrl}/comercial/client-statement/${token}/`;
             
-            // Crear un elemento temporal para copiar el texto
+            // Usar la API de Clipboard moderna si está disponible
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(statementUrl)
+                    .then(() => createAlert('Enlace copiado al portapapeles', 'success'))
+                    .catch(err => {
+                        console.error('Error al copiar: ', err);
+                        fallbackCopyToClipboard(statementUrl);
+                    });
+            } else {
+                fallbackCopyToClipboard(statementUrl);
+            }
+        }
+        
+        // Método de respaldo para copiar al portapapeles
+        function fallbackCopyToClipboard(text) {
             const tempInput = document.createElement('input');
-            tempInput.value = statementUrl;
+            tempInput.value = text;
             document.body.appendChild(tempInput);
             tempInput.select();
             document.execCommand('copy');
             document.body.removeChild(tempInput);
-            
-            // Mostrar mensaje de confirmación
-            createAlert('Enlace copiado al portapapeles: ' + statementUrl, 'success');
+            createAlert('Enlace copiado al portapapeles', 'success');
         }
 
-        // Mejoras visuales con JavaScript
+        // Inicialización al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
-            // Alternar colores de fondo para filas para mejor legibilidad
-            const rows = document.querySelectorAll('#clientsTable tbody tr');
-            rows.forEach((row, index) => {
-                if (index % 2 === 0) {
-                    row.style.backgroundColor = 'rgba(248, 250, 252, 0.5)';
+            setInitialView();
+            
+            // Escuchar cambios en el tamaño de la ventana
+            window.addEventListener('resize', function() {
+                // Solo cambiamos la vista automáticamente si estamos en un punto crítico de cambio de diseño
+                if ((window.innerWidth < 768 && document.querySelector('.table-view').style.display !== 'none') || 
+                    (window.innerWidth >= 768 && document.querySelector('.cards-view').style.display !== 'none')) {
+                    setInitialView();
                 }
             });
         });

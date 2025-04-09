@@ -108,34 +108,20 @@
                 <button class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded text-sm" id="btn-exportar">
                     <i class="fas fa-file-excel mr-1"></i> Exportar
                 </button>
-                <a href="/" class="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded text-sm inline-flex items-center">
+                <a href="{% url 'autenticacion:home' %}" class="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded text-sm inline-flex items-center">
                     <i class="fas fa-home mr-1"></i> Home
                 </a>
             </div>
         </div>
 
         <!-- Tarjetas de resumen -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="card bg-white p-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-gray-500 text-sm">Utilidad Total</p>
-                        <h3 class="text-2xl font-bold text-gray-800" id="utilidad-total">{{ totales.utilidad_total|format_currency_eur }}</h3>
-                        <div class="flex items-center mt-1">
-                            <span class="trend-up text-sm font-semibold"><i class="fas fa-arrow-up mr-1"></i>--.--%</span>
-                            <span class="text-xs text-gray-500 ml-2">vs periodo anterior</span>
-                        </div>
-                    </div>
-                    <div class="bg-blue-100 p-3 rounded-full">
-                        <i class="fas fa-euro-sign text-blue-600 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="card bg-white p-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+            <!-- Ventas Netas -->
+            <div class="card bg-white p-3">
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="text-gray-500 text-sm">Ventas Netas</p>
-                        <h3 class="text-2xl font-bold text-gray-800" id="ventas-netas">{{ totales.ventas_netas|format_currency_eur }}</h3>
+                        <h3 class="text-xl font-bold text-gray-800" id="ventas-netas">{{ totales.ventas_netas|format_currency_eur }}</h3>
                         <div class="flex items-center mt-1">
                             <span class="trend-up text-sm font-semibold"><i class="fas fa-arrow-up mr-1"></i>--.--%</span>
                             <span class="text-xs text-gray-500 ml-2">vs periodo anterior</span>
@@ -146,11 +132,47 @@
                     </div>
                 </div>
             </div>
-            <div class="card bg-white p-4">
+
+            <!-- Utilidad Total -->
+            <div class="card bg-white p-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-gray-500 text-sm">Utilidad Total</p>
+                        <h3 class="text-xl font-bold {% if totales.utilidad_total < 0 %}text-red-600{% else %}text-green-600{% endif %}" id="utilidad-total">{{ totales.utilidad_total|format_currency_eur }}</h3>
+                        <div class="flex items-center mt-1">
+                            <span class="trend-up text-sm font-semibold"><i class="fas fa-arrow-up mr-1"></i>--.--%</span>
+                            <span class="text-xs text-gray-500 ml-2">vs periodo anterior</span>
+                        </div>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-euro-sign text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pérdidas Totales -->
+            <div class="card bg-white p-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-gray-500 text-sm">Pérdidas Totales</p>
+                        <h3 class="text-xl font-bold text-red-600" id="perdidas-totales">{{ totales.perdidas_totales|format_currency_eur }}</h3>
+                        <div class="flex items-center mt-1">
+                            <span class="trend-down text-sm font-semibold"><i class="fas fa-arrow-down mr-1"></i>--.--%</span>
+                            <span class="text-xs text-gray-500 ml-2">vs periodo anterior</span>
+                        </div>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <i class="fas fa-arrow-trend-down text-red-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Costo Total -->
+            <div class="card bg-white p-3">
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="text-gray-500 text-sm">Costo Total</p>
-                        <h3 class="text-2xl font-bold text-gray-800" id="costo-total">{{ totales.costo_total|format_currency_eur }}</h3>
+                        <h3 class="text-xl font-bold text-gray-800" id="costo-total">{{ totales.costo_total|format_currency_eur }}</h3>
                         <div class="flex items-center mt-1">
                             <span class="trend-up text-sm font-semibold"><i class="fas fa-arrow-up mr-1"></i>--.--%</span>
                             <span class="text-xs text-gray-500 ml-2">vs periodo anterior</span>
@@ -161,11 +183,13 @@
                     </div>
                 </div>
             </div>
-            <div class="card bg-white p-4">
+
+            <!-- Margen Promedio -->
+            <div class="card bg-white p-3">
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="text-gray-500 text-sm">Margen Promedio</p>
-                        <h3 class="text-2xl font-bold text-gray-800" id="margen-promedio">{{ totales.margen_promedio|floatformat:2 }}%</h3>
+                        <h3 class="text-xl font-bold {% if totales.margen_promedio < 0 %}text-red-600{% else %}text-green-600{% endif %}" id="margen-promedio">{{ totales.margen_promedio|floatformat:2 }}%</h3>
                         <div class="flex items-center mt-1">
                             <span class="trend-up text-sm font-semibold"><i class="fas fa-arrow-up mr-1"></i>--.--%</span>
                             <span class="text-xs text-gray-500 ml-2">vs periodo anterior</span>
@@ -241,7 +265,7 @@
                 </div>
             </div>
             <div class="card bg-white p-4">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Productos Más Rentables</h3>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Productos Más Rentables (Utilidad Positiva)</h3>
                 <div class="h-64 chart-container">
                     <canvas id="grafico-productos-rentables"></canvas>
                 </div>
@@ -354,11 +378,23 @@
         
         // Funciones de formateo
         function formatoEuro(valor) {
-            return new Intl.NumberFormat('es-ES', { 
-                style: 'currency', 
-                currency: 'EUR',
-                minimumFractionDigits: 2
-            }).format(valor);
+            // Replicar exactamente el comportamiento del filtro Django format_currency_eur
+            try {
+                // Formatear con 2 decimales y separador de miles como ','
+                let valorFormateado = valor.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                
+                // Aplicar los mismos reemplazos que en el filtro Django
+                // 1. Reemplazar ',' por '@'
+                // 2. Reemplazar '.' por ','
+                // 3. Reemplazar '@' por '.'
+                valorFormateado = valorFormateado.replace(/,/g, '@').replace(/\./g, ',').replace(/@/g, '.');
+                
+                // Agregar el símbolo € con espacio
+                return `${valorFormateado} €`;
+            } catch (error) {
+                console.error("Error al formatear valor como euro:", error);
+                return `${valor} €`;
+            }
         }
         
         function formatoPorcentaje(valor) {
@@ -530,6 +566,7 @@
             mostrarCarga('ventas-netas');
             mostrarCarga('costo-total');
             mostrarCarga('margen-promedio');
+            mostrarCarga('perdidas-totales');
             
             const url = construirURLFiltro('/comercial/api/dashboard/totales-globales/');
             
@@ -537,10 +574,35 @@
                 .then(response => response.json())
                 .then(data => {
                     // Actualizar las tarjetas de resumen
-                    document.getElementById('utilidad-total').textContent = formatoEuro(data.utilidad_total);
                     document.getElementById('ventas-netas').textContent = formatoEuro(data.ventas_netas);
                     document.getElementById('costo-total').textContent = formatoEuro(data.costo_total);
-                    document.getElementById('margen-promedio').textContent = formatoPorcentaje(data.margen_promedio);
+                    document.getElementById('perdidas-totales').textContent = formatoEuro(data.perdidas_totales);
+                    
+                    // Actualizar utilidad total con formato condicional
+                    const utilidadElement = document.getElementById('utilidad-total');
+                    utilidadElement.textContent = formatoEuro(data.utilidad_total);
+                    
+                    // Aplicar clase de color según el valor de utilidad
+                    if (data.utilidad_total < 0) {
+                        utilidadElement.classList.remove('text-green-600');
+                        utilidadElement.classList.add('text-red-600');
+                    } else {
+                        utilidadElement.classList.remove('text-red-600');
+                        utilidadElement.classList.add('text-green-600');
+                    }
+                    
+                    // Actualizar el margen promedio con formato condicional
+                    const margenElement = document.getElementById('margen-promedio');
+                    margenElement.textContent = formatoPorcentaje(data.margen_promedio);
+                    
+                    // Aplicar clase de color según el valor
+                    if (data.margen_promedio < 0) {
+                        margenElement.classList.remove('text-green-600');
+                        margenElement.classList.add('text-red-600');
+                    } else {
+                        margenElement.classList.remove('text-red-600');
+                        margenElement.classList.add('text-green-600');
+                    }
                 })
                 .catch(error => console.error('Error al cargar totales:', error))
                 .finally(() => {
@@ -548,6 +610,7 @@
                     ocultarCarga('ventas-netas');
                     ocultarCarga('costo-total');
                     ocultarCarga('margen-promedio');
+                    ocultarCarga('perdidas-totales');
                 });
         }
         
@@ -934,6 +997,19 @@
                     if (window.graficoProductosRentables) {
                         window.graficoProductosRentables.destroy();
                     }
+                    
+                    // Verificar si hay datos para mostrar
+                    if (!data.labels || data.labels.length === 0) {
+                        // No hay productos rentables, mostrar mensaje
+                        const container = document.getElementById('grafico-productos-rentables').parentNode;
+                        container.innerHTML = `<div class="flex items-center justify-center h-64 text-gray-500">
+                            <div class="text-center">
+                                <i class="fas fa-chart-pie text-gray-400 text-4xl mb-3"></i>
+                                <p>No hay productos con utilidad positiva para mostrar</p>
+                            </div>
+                        </div>`;
+                        return;
+                    }
                             
                     window.graficoProductosRentables = new Chart(ctx, {
                         type: 'doughnut',
@@ -967,7 +1043,16 @@
                         }
                     });
                 })
-                .catch(error => console.error('Error al cargar gráfico de productos rentables:', error))
+                .catch(error => {
+                    console.error('Error al cargar gráfico de productos rentables:', error);
+                    const container = document.getElementById('grafico-productos-rentables').parentNode;
+                    container.innerHTML = `<div class="flex items-center justify-center h-64 text-red-500">
+                        <div class="text-center">
+                            <i class="fas fa-exclamation-triangle text-red-400 text-4xl mb-3"></i>
+                            <p>Error al cargar datos: ${error.message}</p>
+                        </div>
+                    </div>`;
+                })
                 .finally(() => {
                     ocultarCarga('grafico-productos-rentables');
                 });
@@ -1060,7 +1145,7 @@
         // Función para cargar todos los gráficos
         function cargarTodosGraficos() {
             const elements = [
-                'utilidad-total', 'ventas-netas', 'costo-total', 'margen-promedio',
+                'utilidad-total', 'ventas-netas', 'costo-total', 'margen-promedio', 'perdidas-totales',
                 'tabla-resumen', 'grafico-utilidad-producto', 'grafico-tendencia-utilidad',
                 'grafico-distribucion-costos', 'grafico-margen-producto', 'grafico-productos-rentables'
             ];
