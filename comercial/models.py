@@ -99,7 +99,7 @@ class Venta(models.Model):
                 last_consecutive = int(last_venta.numero_factura.split('/')[-1])
                 new_consecutive = last_consecutive + 1
             else:
-                new_consecutive = 1101
+                new_consecutive = 1088
             self.numero_factura = f'{current_year}/{new_consecutive}'
         super(Venta, self).save(*args, **kwargs)
 
