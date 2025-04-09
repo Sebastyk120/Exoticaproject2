@@ -4,14 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Lanzamiento de APP">
-      <change afterPath="$PROJECT_DIR$/comercial/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/comercial/migrations/0002_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0002_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/migrations/0001_initial.py" afterDir="false" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Lanzamiento de APP 2">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/home.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -187,7 +182,7 @@
       <workItem from="1744202009004" duration="320000" />
       <workItem from="1744202973810" duration="180000" />
       <workItem from="1744204917770" duration="13413000" />
-      <workItem from="1744219257056" duration="2588000" />
+      <workItem from="1744219257056" duration="3314000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -533,7 +528,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744217413084</updated>
     </task>
-    <option name="localTasksCounter" value="44" />
+    <task id="LOCAL-00044" summary="Lanzamiento de APP 2">
+      <option name="closed" value="true" />
+      <created>1744227238333</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1744227238333</updated>
+    </task>
+    <option name="localTasksCounter" value="45" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -551,7 +554,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Punto de control funcional 3. 7 AM" />
     <MESSAGE value="Punto de control funcional 4. Capas de inventario corregidas." />
     <MESSAGE value="Punto de control completo. Login, home." />
     <MESSAGE value="Commit Final" />
@@ -576,6 +578,7 @@
     <MESSAGE value="Mac compatible" />
     <MESSAGE value="Correo." />
     <MESSAGE value="Lanzamiento de APP" />
-    <option name="LAST_COMMIT_MESSAGE" value="Lanzamiento de APP" />
+    <MESSAGE value="Lanzamiento de APP 2" />
+    <option name="LAST_COMMIT_MESSAGE" value="Lanzamiento de APP 2" />
   </component>
 </project>
