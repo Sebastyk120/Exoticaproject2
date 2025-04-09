@@ -26,7 +26,7 @@ def process_pdf(request):
             # Convertir el contenido a un objeto de archivo binario
             pdf_content = pdf_file.read()
             text = extract_text(BytesIO(pdf_content))
-
+            
             # Extract agencia_aduana (fixed value from the PDF content)
             agencia_aduana_name = "Arola Aduanas y Consignaciones, S.L."
 
@@ -97,16 +97,49 @@ def process_pdf(request):
                     'error': f'Error al buscar pedidos: {str(e)}'
                 })
 
-            # Create GastosAduana instance
+            # Extraer IVA de Importación - método dinámico
+            iva_importacion = Decimal('0.00')
+            
+            # Método 1: Buscar "IVA (Importación)" seguido por el valor
+            pattern1 = r'IVA\s*\(\s*Importación\s*\).*?(\d+[.,]\d+)'
+            iva_match1 = re.search(pattern1, text)
+            if iva_match1:
+                iva_importacion = Decimal(iva_match1.group(1).replace(',', '.'))
+            else:
+                # Método 2: Buscar "54 IVA" seguido por el valor
+                pattern2 = r'54\s+IVA.*?(\d+[.,]\d+)'
+                iva_match2 = re.search(pattern2, text)
+                if iva_match2:
+                    iva_importacion = Decimal(iva_match2.group(1).replace(',', '.'))
+                else:
+                    # Método 3: Buscar en la tabla, después de No IVA y antes de Total sujeto
+                    pattern3 = r'No IVA.*?(\d+[.,]\d+)\s+Total sujeto'
+                    iva_match3 = re.search(pattern3, text, re.DOTALL)
+                    if iva_match3:
+                        iva_importacion = Decimal(iva_match3.group(1).replace(',', '.'))
+
+                
+            # Extraer iva_sobre_base: buscar la línea que sigue a "IVA21" y comienza con "0"
+            iva_sobre_base_pattern = r'IVA21\s*.*\n0\s+(\d{1,3}(?:\.\d{3})*,\d+)'
+            iva_sobre_base_match = re.search(iva_sobre_base_pattern, text, re.DOTALL)
+            if iva_sobre_base_match:
+                iva_sobre_base_str = iva_sobre_base_match.group(1).replace('.', '').replace(',', '.')
+                iva_sobre_base = Decimal(iva_sobre_base_str)
+            else:
+                iva_sobre_base = Decimal('0.00')
+
+            # Crear instancia de GastosAduana
             try:
                 gastos = GastosAduana(
                     agencia_aduana=agencia,
                     numero_factura=numero_factura,
                     valor_gastos_aduana=valor_gastos_aduana,
                     conceptos=conceptos_text,
+                    iva_importacion=iva_importacion,
+                    iva_sobre_base=iva_sobre_base
                 )
                 gastos.save()
-                
+
                 # Agregar todos los pedidos encontrados
                 for pedido in pedidos:
                     gastos.pedidos.add(pedido)
@@ -150,6 +183,8 @@ def get_gasto(request, gasto_id):
         'valor_nota_credito': str(gasto.valor_nota_credito) if gasto.valor_nota_credito else "",
         'monto_pendiente': str(gasto.monto_pendiente) if gasto.monto_pendiente else "",
         'pagado': gasto.pagado,
+        'iva_importacion': str(gasto.iva_importacion) if gasto.iva_importacion else "0.00",
+        'iva_sobre_base': str(gasto.iva_sobre_base) if gasto.iva_sobre_base else "0.00",
         'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()]
     }
     return JsonResponse(data)
@@ -169,6 +204,15 @@ def update_gasto(request, gasto_id):
             gasto.valor_nota_credito = Decimal(valor_nota_credito)
         else:
             gasto.valor_nota_credito = None
+            
+        # Add IVA fields to update process
+        iva_importacion = request.POST.get('iva_importacion')
+        if iva_importacion and iva_importacion.strip():
+            gasto.iva_importacion = Decimal(iva_importacion)
+        
+        iva_sobre_base = request.POST.get('iva_sobre_base')
+        if iva_sobre_base and iva_sobre_base.strip():
+            gasto.iva_sobre_base = Decimal(iva_sobre_base)
             
         gasto.save()
         return JsonResponse({'success': True})

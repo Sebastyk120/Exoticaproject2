@@ -149,7 +149,7 @@ class GastosAduanaAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
     list_display = ('id', 'agencia_aduana', 'numero_factura', 'valor_gastos_aduana_moneda', 'pagado',
-                   'numero_nota_credito', 'valor_nota_credito', 'monto_pendiente', 'conceptos')
+                   'numero_nota_credito', 'valor_nota_credito', 'monto_pendiente', 'iva_importacion', 'iva_sobre_base')
     search_fields = ('agencia_aduana__nombre', 'numero_factura')
     search_help_text = "Buscar por: nombre de la agencia, número de factura."
     list_filter = ('agencia_aduana', 'pagado')

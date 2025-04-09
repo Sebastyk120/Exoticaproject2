@@ -49,6 +49,8 @@
                         <th>Número Factura</th>
                         <th>Agencia Aduana</th>
                         <th>Valor (EUR)</th>
+                        <th>IVA Importación</th>
+                        <th>IVA Sobre Base</th>
                         <th>Número Abono</th>
                         <th>Valor Abono</th>
                         <th>Monto Pendiente</th>
@@ -63,6 +65,8 @@
                         <td>{{ gasto.numero_factura }}</td>
                         <td>{{ gasto.agencia_aduana.nombre }}</td>
                         <td>{{ gasto.valor_gastos_aduana|format_currency_eur }}</td>
+                        <td>{{ gasto.iva_importacion|format_currency_eur|default:"0,00 €" }}</td>
+                        <td>{{ gasto.iva_sobre_base|format_currency_eur|default:"0,00 €" }}</td>
                         <td>{{ gasto.numero_nota_credito|default:"-" }}</td>
                         <td>{{ gasto.valor_nota_credito|format_currency_eur|default:"-" }}</td>
                         <td>{{ gasto.monto_pendiente|format_currency_eur|default:"-" }}</td>
@@ -88,7 +92,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="9" class="text-center">No hay gastos registrados</td>
+                        <td colspan="11" class="text-center">No hay gastos registrados</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -116,7 +120,7 @@
 
     <!-- Edit Modal -->
     <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Editar Gasto</h5>
@@ -125,21 +129,35 @@
                 <div class="modal-body">
                     <form id="editForm">
                         {% csrf_token %}
-                        <div class="form-group">
-                            <label class="form-label">Número Factura</label>
-                            <input type="text" name="numero_factura" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Valor (EUR)</label>
-                            <input type="number" name="valor_gastos_aduana" class="form-control" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Número Abono</label>
-                            <input type="text" name="numero_nota_credito" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Valor Abono (EUR)</label>
-                            <input type="number" name="valor_nota_credito" class="form-control" step="0.01">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Número Factura</label>
+                                    <input type="text" name="numero_factura" class="form-control" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Valor (EUR)</label>
+                                    <input type="number" name="valor_gastos_aduana" class="form-control" step="0.01" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="form-label">IVA Importación (EUR)</label>
+                                    <input type="number" name="iva_importacion" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">IVA Sobre Base (EUR)</label>
+                                    <input type="number" name="iva_sobre_base" class="form-control" step="0.01">
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Número Abono</label>
+                                    <input type="text" name="numero_nota_credito" class="form-control">
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Valor Abono (EUR)</label>
+                                    <input type="number" name="valor_nota_credito" class="form-control" step="0.01">
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -294,6 +312,22 @@
                     }).format(parseFloat(data.monto_pendiente));
                 }
                 
+                let ivaImportacionFormatted = '0,00 €';
+                if (data.iva_importacion && data.iva_importacion !== '' && data.iva_importacion !== '0.00') {
+                    ivaImportacionFormatted = new Intl.NumberFormat('es-ES', { 
+                        style: 'currency', 
+                        currency: 'EUR' 
+                    }).format(parseFloat(data.iva_importacion));
+                }
+                
+                let ivaBasesFormatted = '0,00 €';
+                if (data.iva_sobre_base && data.iva_sobre_base !== '' && data.iva_sobre_base !== '0.00') {
+                    ivaBasesFormatted = new Intl.NumberFormat('es-ES', { 
+                        style: 'currency', 
+                        currency: 'EUR' 
+                    }).format(parseFloat(data.iva_sobre_base));
+                }
+                
                 // Modificado para incluir enlaces clickeables a los pedidos
                 const pedidosHTML = data.pedidos.map(pedido => {
                     const pedidoId = pedido.split(' - ')[0];
@@ -306,6 +340,8 @@
                             <p><strong>Número Factura:</strong> ${data.numero_factura}</p>
                             <p><strong>Agencia Aduana:</strong> ${data.agencia_aduana}</p>
                             <p><strong>Valor Gastos Aduana:</strong> ${valorGastosFormatted}</p>
+                            <p><strong>IVA Importación:</strong> ${ivaImportacionFormatted}</p>
+                            <p><strong>IVA Sobre Base:</strong> ${ivaBasesFormatted}</p>
                             <p><strong>Estado:</strong> <span class="status-badge ${data.pagado ? 'status-paid' : 'status-unpaid'}">${data.pagado ? 'Pagado' : 'Pendiente'}</span></p>
                         </div>
                         <div class="col-md-6">
@@ -339,6 +375,8 @@
                 form.valor_gastos_aduana.value = data.valor_gastos_aduana;
                 form.numero_nota_credito.value = data.numero_nota_credito || '';
                 form.valor_nota_credito.value = data.valor_nota_credito || '';
+                form.iva_importacion.value = data.iva_importacion || '0.00';
+                form.iva_sobre_base.value = data.iva_sobre_base || '0.00';
                 new bootstrap.Modal(document.getElementById('editModal')).show();
             })
             .catch(error => showAlert('Error al cargar los datos', 'danger'));

@@ -469,6 +469,8 @@ class GastosAduana(models.Model):
     numero_factura = models.CharField(max_length=100, verbose_name="Número Factura", unique=True)
     valor_gastos_aduana = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Gastos Aduana Eur",
                                               validators=[MinValueValidator(0.0)])
+    iva_importacion = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="IVA Importación EUR", null=True, blank=True)
+    iva_sobre_base = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="IVA Sobre Base EUR", null=True, blank=True)
     pagado = models.BooleanField(verbose_name="Pagado", default=False, editable=False)
     numero_nota_credito = models.CharField(max_length=100, verbose_name="# Abono/Reclamación", null=True, blank=True)
     valor_nota_credito = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Abono/Reclamación",

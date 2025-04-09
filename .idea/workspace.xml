@@ -5,31 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Correo.">
+      <change afterPath="$PROJECT_DIR$/autenticacion/static/css/index2.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/autenticacion/templates/index2.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/importacion/migrations/0003_gastosaduana_iva_importacion_and_more.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/static/css/clientes/clientes.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/clientes/clientes.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/static/css/ventas/factura_venta.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/ventas/factura_venta.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/static/css/ventas/lista_ventas.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/ventas/lista_ventas.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/static/css/ventas/ventas.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/ventas/ventas.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/clientes/clientes.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/clientes/clientes.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/dashboard/utilidades.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/dashboard/utilidades.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran_cliente.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_factura.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_factura.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_rectificativa.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_rectificativa.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/lista_ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/lista_ventas.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/ventas.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/views_dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_dashboard.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/views_enviar_correos.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_enviar_correos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/static/css/pedidos/lista_pedidos.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/pedidos/lista_pedidos.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/static/css/pedidos/pedidos.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/pedidos/pedidos.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/static/css/transferencias/transferencias.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/transferencias/transferencias.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/templates/pedidos/lista_pedidos.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/pedidos/lista_pedidos.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/templates/pedidos/pedidos.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/pedidos/pedidos.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/templates/transferencias/transferencias.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/transferencias/transferencias.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/views_pedidos.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_pedidos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/static/css/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/static/css/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf_aduana.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf_aduana.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/views_aduana.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_aduana.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -201,7 +185,10 @@
       <workItem from="1744109370016" duration="5228000" />
       <workItem from="1744124501090" duration="7440000" />
       <workItem from="1744137302652" duration="5162000" />
-      <workItem from="1744160904473" duration="4890000" />
+      <workItem from="1744160904473" duration="5479000" />
+      <workItem from="1744202009004" duration="320000" />
+      <workItem from="1744202973810" duration="180000" />
+      <workItem from="1744204917770" duration="11965000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -531,7 +518,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744145760254</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary="Correo.">
+      <option name="closed" value="true" />
+      <created>1744176705354</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1744176705354</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
