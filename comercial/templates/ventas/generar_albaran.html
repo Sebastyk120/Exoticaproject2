@@ -257,7 +257,7 @@
                     <div class="mb-3">
                         <label class="form-label" for="emailSubject">Asunto del correo:</label>
                         <input type="text" class="form-control" id="emailSubject" 
-                               value="Albaranes para trámites de aduana - L&M Exotic Fruit">
+                               value="Datos de reparto - L&M Exotic Fruit">
                     </div>
                     
                     <div class="mb-3">
@@ -420,10 +420,10 @@
                     const semanaValue = selectedAwb.dataset.semana || '-';
                     
                     // Actualizar el asunto incluyendo AWB y semana
-                    subjectField.value = `Albaranes para trámites de aduana - AWB: ${awbValue} - Semana: ${semanaValue}`;
+                    subjectField.value = `Datos de reparto:- AWB: ${awbValue} - Semana: ${semanaValue}`;
                 } else {
                     // Restaurar el asunto original si no hay AWB seleccionado
-                    subjectField.value = `Albaranes para trámites de aduana - L&M Exotic Fruit`;
+                    subjectField.value = `Datos de reparto - Semana: ${semanaValue}`;
                 }
             }
             
