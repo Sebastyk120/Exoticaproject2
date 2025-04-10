@@ -56,7 +56,8 @@ def calcular_ventas_netas_por_producto_semana(anio=None, semana=None, trimestre=
     for venta in ventas_netas:
         producto = venta['presentacion__fruta__nombre']
         semana = venta['venta__semana']
-        valor = float(venta['ventas_netas'])
+        # Use 0 if venta['ventas_netas'] is None
+        valor = float(venta['ventas_netas'] or 0)
         
         if producto not in resultado:
             resultado[producto] = {}
