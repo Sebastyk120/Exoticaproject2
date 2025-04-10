@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Utilidades Vacio">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Utilidades Abono">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/dashboard/utilidades.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/dashboard/utilidades.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/views_dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_dashboard.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -184,7 +182,8 @@
       <workItem from="1744202973810" duration="180000" />
       <workItem from="1744204917770" duration="13413000" />
       <workItem from="1744219257056" duration="7116000" />
-      <workItem from="1744239300983" duration="2977000" />
+      <workItem from="1744239300983" duration="3614000" />
+      <workItem from="1744292350807" duration="1012000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -562,7 +561,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744240253602</updated>
     </task>
-    <option name="localTasksCounter" value="48" />
+    <task id="LOCAL-00048" summary="Utilidades Abono">
+      <option name="closed" value="true" />
+      <created>1744260306460</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1744260306460</updated>
+    </task>
+    <option name="localTasksCounter" value="49" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -580,7 +587,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Commit Final" />
     <MESSAGE value="Commit Final 2" />
     <MESSAGE value="Commit Final 3" />
     <MESSAGE value="Commit Final 4" />
@@ -605,6 +611,7 @@
     <MESSAGE value="Lanzamiento de APP 2" />
     <MESSAGE value="Consecutivo Factura." />
     <MESSAGE value="Utilidades Vacio" />
-    <option name="LAST_COMMIT_MESSAGE" value="Utilidades Vacio" />
+    <MESSAGE value="Utilidades Abono" />
+    <option name="LAST_COMMIT_MESSAGE" value="Utilidades Abono" />
   </component>
 </project>
