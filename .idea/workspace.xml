@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Consecutivo Factura.">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Utilidades Vacio">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/dashboard/utilidades.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/dashboard/utilidades.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/views_dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_dashboard.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -183,7 +184,7 @@
       <workItem from="1744202973810" duration="180000" />
       <workItem from="1744204917770" duration="13413000" />
       <workItem from="1744219257056" duration="7116000" />
-      <workItem from="1744239300983" duration="38000" />
+      <workItem from="1744239300983" duration="2977000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -553,7 +554,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744232138926</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="Utilidades Vacio">
+      <option name="closed" value="true" />
+      <created>1744240253602</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1744240253602</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -571,7 +580,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Punto de control completo. Login, home." />
     <MESSAGE value="Commit Final" />
     <MESSAGE value="Commit Final 2" />
     <MESSAGE value="Commit Final 3" />
@@ -596,6 +604,7 @@
     <MESSAGE value="Lanzamiento de APP" />
     <MESSAGE value="Lanzamiento de APP 2" />
     <MESSAGE value="Consecutivo Factura." />
-    <option name="LAST_COMMIT_MESSAGE" value="Consecutivo Factura." />
+    <MESSAGE value="Utilidades Vacio" />
+    <option name="LAST_COMMIT_MESSAGE" value="Utilidades Vacio" />
   </component>
 </project>

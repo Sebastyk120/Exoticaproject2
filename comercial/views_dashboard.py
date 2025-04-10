@@ -278,6 +278,47 @@ def calcular_utilidad_por_producto_semana(anio=None, semana=None):
     
     return resultado
 
+def calcular_abono_por_producto_semana(anio=None, semana=None):
+    """
+    Calcula el valor de los abonos por producto y semana.
+    Devuelve los datos como un diccionario por producto y semana.
+    """
+    # Filtrar por año si se proporciona
+    ventas_query = Venta.objects.all()
+    if anio:
+        ventas_query = ventas_query.filter(fecha_entrega__year=anio)
+    
+    # Filtrar por semana si se proporciona
+    if semana:
+        # Modificar para buscar con el patrón "semana-año"
+        patron_semana = f"{semana}-{anio}" if anio else f"{semana}-"
+        ventas_query = ventas_query.filter(semana__startswith=patron_semana)
+    
+    # Agrupar los abonos por producto y semana
+    abonos = DetalleVenta.objects.filter(
+        venta__in=ventas_query,
+        valor_abono_euro__gt=0  # Solo incluir registros con valor de abono
+    ).values(
+        'presentacion__fruta__nombre',
+        'venta__semana'
+    ).annotate(
+        valor_abono=Sum('valor_abono_euro')
+    )
+    
+    # Convertir a un diccionario para fácil acceso
+    resultado = {}
+    for abono in abonos:
+        producto = abono['presentacion__fruta__nombre']
+        semana = abono['venta__semana']
+        valor = float(abono['valor_abono'])
+        
+        if producto not in resultado:
+            resultado[producto] = {}
+        
+        resultado[producto][semana] = valor
+    
+    return resultado
+
 def calcular_resumen_utilidad(anio=None, semana=None):
     """
     Calcula un resumen de utilidades totalizando los datos por producto.
@@ -287,10 +328,11 @@ def calcular_resumen_utilidad(anio=None, semana=None):
     costos_compra = calcular_costos_compra_por_producto_semana(anio, semana)
     gastos_aduana = calcular_gastos_aduana_por_producto_semana(anio, semana)
     gastos_carga = calcular_gastos_carga_por_producto_semana(anio, semana)
+    abonos = calcular_abono_por_producto_semana(anio, semana)  # Obtener datos de abono
     
     # Obtener todos los productos únicos
     productos = set()
-    for diccionario in [ventas_netas, costos_compra, gastos_aduana, gastos_carga]:
+    for diccionario in [ventas_netas, costos_compra, gastos_aduana, gastos_carga, abonos]:
         for producto in diccionario:
             productos.add(producto)
     
@@ -303,6 +345,7 @@ def calcular_resumen_utilidad(anio=None, semana=None):
         total_compra = sum(costos_compra.get(producto, {}).values())
         total_aduana = sum(gastos_aduana.get(producto, {}).values())
         total_carga = sum(gastos_carga.get(producto, {}).values())
+        total_abono = sum(abonos.get(producto, {}).values())  # Sumar abonos
         
         # Calcular utilidad y margen
         total_costos = total_compra + total_aduana + total_carga
@@ -316,6 +359,7 @@ def calcular_resumen_utilidad(anio=None, semana=None):
             'costo_compra': round(total_compra, 2),
             'gastos_aduana': round(total_aduana, 2),
             'gastos_carga': round(total_carga, 2),
+            'valor_abono': round(total_abono, 2),  # Nuevo campo de abono
             'utilidad': round(utilidad, 2),
             'margen': round(margen, 2),
             'total_costos': round(total_costos, 2)
@@ -339,13 +383,15 @@ def calcular_totales_globales(anio=None, semana=None):
             'ventas_netas': 0,
             'costo_total': 0,
             'margen_promedio': 0,
-            'perdidas_totales': 0
+            'perdidas_totales': 0,
+            'valor_abono_total': 0  # Nuevo campo
         }
     
     # Calcular los totales
     utilidad_total = sum(item['utilidad'] for item in resumen)
     ventas_netas = sum(item['ventas_netas'] for item in resumen)
     costo_total = sum(item['total_costos'] for item in resumen)
+    valor_abono_total = sum(item['valor_abono'] for item in resumen)  # Nuevo cálculo
     
     # Calcular total de pérdidas (solo utilidades negativas)
     perdidas_totales = abs(sum(item['utilidad'] for item in resumen if item['utilidad'] < 0))
@@ -361,7 +407,8 @@ def calcular_totales_globales(anio=None, semana=None):
         'ventas_netas': round(ventas_netas, 2),
         'costo_total': round(costo_total, 2),
         'margen_promedio': round(margen_promedio, 2),
-        'perdidas_totales': round(perdidas_totales, 2)
+        'perdidas_totales': round(perdidas_totales, 2),
+        'valor_abono_total': round(valor_abono_total, 2)  # Nuevo campo
     }
 
 # Función auxiliar para procesar el parámetro de semana
@@ -516,40 +563,42 @@ def exportar_resumen_excel(resumen, anio, semana=None):
     worksheet.merge_range('A1:H1', titulo, title_format)
     worksheet.set_row(0, 30)
     
-    # Encabezados
+    # Encabezados - Actualizado para incluir facturas abono
     headers = [
-        'Producto', 'Ventas Netas', 'Costo Compra', 'Gastos Aduana', 
+        'Producto', 'Ventas Netas', 'Facturas Abono', 'Costo Compra', 'Gastos Aduana', 
         'Gastos Carga', 'Utilidad', 'Margen', 'Costos Totales'
     ]
     
     for col, header in enumerate(headers):
         worksheet.write(2, col, header, header_format)
     
-    # Datos
+    # Datos - Actualizado para incluir facturas abono
     for row, item in enumerate(resumen):
         worksheet.write(row + 3, 0, item['producto'], text_format)
         worksheet.write(row + 3, 1, item['ventas_netas'], money_format)
-        worksheet.write(row + 3, 2, item['costo_compra'], money_format)
-        worksheet.write(row + 3, 3, item['gastos_aduana'], money_format)
-        worksheet.write(row + 3, 4, item['gastos_carga'], money_format)
-        worksheet.write(row + 3, 5, item['utilidad'], money_format)
-        worksheet.write(row + 3, 6, item['margen'] / 100, percent_format)
-        worksheet.write(row + 3, 7, item['total_costos'], money_format)
+        worksheet.write(row + 3, 2, item['valor_abono'], money_format)  # Nueva columna
+        worksheet.write(row + 3, 3, item['costo_compra'], money_format)
+        worksheet.write(row + 3, 4, item['gastos_aduana'], money_format)
+        worksheet.write(row + 3, 5, item['gastos_carga'], money_format)
+        worksheet.write(row + 3, 6, item['utilidad'], money_format)
+        worksheet.write(row + 3, 7, item['margen'] / 100, percent_format)
+        worksheet.write(row + 3, 8, item['total_costos'], money_format)
     
     # Ajustar anchos de columna
     worksheet.set_column('A:A', 25)
-    worksheet.set_column('B:H', 15)
+    worksheet.set_column('B:I', 15)  # Actualizado para incluir la nueva columna
     
     # Calcular totales
     totales = calcular_totales_globales(anio, semana)
     
-    # Agregar totales al final
+    # Agregar totales al final - Actualizado para incluir valor abono
     total_row = len(resumen) + 4
     worksheet.write(total_row, 0, 'TOTALES', header_format)
     worksheet.write(total_row, 1, totales['ventas_netas'], money_format)
+    worksheet.write(total_row, 2, totales['valor_abono_total'], money_format)  # Nuevo valor
     worksheet.write(total_row, 5, totales['utilidad_total'], money_format)
     worksheet.write(total_row, 6, totales['margen_promedio'] / 100, percent_format)
-    worksheet.write(total_row, 7, totales['costo_total'], money_format)
+    worksheet.write(total_row, 8, totales['costo_total'], money_format)
     
     # Agregar pérdidas totales
     worksheet.write(total_row + 1, 0, 'PÉRDIDAS TOTALES', header_format)

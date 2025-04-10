@@ -115,7 +115,7 @@
         </div>
 
         <!-- Tarjetas de resumen -->
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
             <!-- Ventas Netas -->
             <div class="card bg-white p-3">
                 <div class="flex justify-between items-center">
@@ -129,6 +129,23 @@
                     </div>
                     <div class="bg-green-100 p-3 rounded-full">
                         <i class="fas fa-shopping-cart text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Facturas Abono (NUEVA TARJETA) -->
+            <div class="card bg-white p-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-gray-500 text-sm">Facturas Abono</p>
+                        <h3 class="text-xl font-bold text-orange-600" id="facturas-abono">{{ totales.valor_abono_total|format_currency_eur }}</h3>
+                        <div class="flex items-center mt-1">
+                            <span class="trend-up text-sm font-semibold"><i class="fas fa-arrow-up mr-1"></i>--.--%</span>
+                            <span class="text-xs text-gray-500 ml-2">vs periodo anterior</span>
+                        </div>
+                    </div>
+                    <div class="bg-orange-100 p-3 rounded-full">
+                        <i class="fas fa-receipt text-orange-600 text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -289,6 +306,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ventas Netas</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Facturas Abono</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo Compra</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gastos Aduana</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gastos Carga</th>
@@ -311,6 +329,7 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.ventas_netas|format_currency_eur }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-orange-600 font-medium">{{ item.valor_abono|format_currency_eur }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.costo_compra|format_currency_eur }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.gastos_aduana|format_currency_eur }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.gastos_carga|format_currency_eur }}</td>
@@ -567,6 +586,7 @@
             mostrarCarga('costo-total');
             mostrarCarga('margen-promedio');
             mostrarCarga('perdidas-totales');
+            mostrarCarga('facturas-abono'); // Nuevo elemento
             
             const url = construirURLFiltro('/comercial/api/dashboard/totales-globales/');
             
@@ -577,6 +597,7 @@
                     document.getElementById('ventas-netas').textContent = formatoEuro(data.ventas_netas);
                     document.getElementById('costo-total').textContent = formatoEuro(data.costo_total);
                     document.getElementById('perdidas-totales').textContent = formatoEuro(data.perdidas_totales);
+                    document.getElementById('facturas-abono').textContent = formatoEuro(data.valor_abono_total); // Nuevo valor
                     
                     // Actualizar utilidad total con formato condicional
                     const utilidadElement = document.getElementById('utilidad-total');
@@ -611,6 +632,7 @@
                     ocultarCarga('costo-total');
                     ocultarCarga('margen-promedio');
                     ocultarCarga('perdidas-totales');
+                    ocultarCarga('facturas-abono'); // Nuevo elemento
                 });
         }
         
@@ -681,6 +703,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatoEuro(item.ventas_netas)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-orange-600 font-medium">${formatoEuro(item.valor_abono)}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatoEuro(item.costo_compra)}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatoEuro(item.gastos_aduana)}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatoEuro(item.gastos_carga)}</td>
