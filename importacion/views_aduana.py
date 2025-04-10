@@ -6,9 +6,13 @@ from django.core.validators import MinValueValidator
 from decimal import Decimal
 from pdfminer.high_level import extract_text
 import re
+import logging
 from .models import GastosAduana, AgenciaAduana, Pedido
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+
+# Setup logging
+logger = logging.getLogger(__name__)
 
 
 class PDFUploadForm(forms.Form):
@@ -164,9 +168,18 @@ def process_pdf(request):
 
     # Get all gastos for the table
     gastos = GastosAduana.objects.all().order_by('-id')
+    # Get all agencias and pedidos for the create form
+    agencias = AgenciaAduana.objects.all()
+    pedidos_disponibles = Pedido.objects.all()
+    
+    # Log the number of pedidos for debugging
+    logger.info(f"Cantidad de pedidos disponibles para aduana: {pedidos_disponibles.count()}")
+    
     return render(request, 'aduana/upload_pdf_aduana.html', {
         'form': form,
-        'gastos': gastos
+        'gastos': gastos,
+        'agencias': agencias,
+        'pedidos_disponibles': pedidos_disponibles
     })
 
 
@@ -228,4 +241,66 @@ def delete_gasto(request, gasto_id):
         gasto.delete()
         return JsonResponse({'success': True})
     except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@require_http_methods(["POST"])
+def create_gasto(request):
+    try:
+        # Extract form data
+        agencia_id = request.POST.get('agencia_aduana')
+        numero_factura = request.POST.get('numero_factura')
+        valor_gastos_aduana = Decimal(request.POST.get('valor_gastos_aduana'))
+        iva_importacion_str = request.POST.get('iva_importacion', '')
+        iva_sobre_base_str = request.POST.get('iva_sobre_base', '')
+        numero_nota_credito = request.POST.get('numero_nota_credito', '')
+        valor_nota_credito_str = request.POST.get('valor_nota_credito', '')
+        
+        # Validate numero_factura is unique
+        if GastosAduana.objects.filter(numero_factura=numero_factura).exists():
+            return JsonResponse({
+                'success': False,
+                'error': f'Ya existe un gasto con el número de factura {numero_factura}'
+            })
+        
+        # Get agencia
+        agencia = get_object_or_404(AgenciaAduana, id=agencia_id)
+        
+        # Create gasto with required fields
+        gasto = GastosAduana(
+            agencia_aduana=agencia,
+            numero_factura=numero_factura,
+            valor_gastos_aduana=valor_gastos_aduana,
+        )
+        
+        # Process optional fields if provided
+        if iva_importacion_str and iva_importacion_str.strip():
+            gasto.iva_importacion = Decimal(iva_importacion_str)
+            
+        if iva_sobre_base_str and iva_sobre_base_str.strip():
+            gasto.iva_sobre_base = Decimal(iva_sobre_base_str)
+            
+        if numero_nota_credito and numero_nota_credito.strip():
+            gasto.numero_nota_credito = numero_nota_credito
+            
+        if valor_nota_credito_str and valor_nota_credito_str.strip():
+            gasto.valor_nota_credito = Decimal(valor_nota_credito_str)
+            # Calculate monto_pendiente if nota de crédito exists
+            gasto.monto_pendiente = valor_gastos_aduana - Decimal(valor_nota_credito_str)
+        else:
+            gasto.monto_pendiente = valor_gastos_aduana
+        
+        # Save the gasto
+        gasto.save()
+        
+        # Add pedidos
+        pedidos_ids = request.POST.getlist('pedidos')
+        for pedido_id in pedidos_ids:
+            pedido = get_object_or_404(Pedido, id=pedido_id)
+            gasto.pedidos.add(pedido)
+        
+        return JsonResponse({'success': True})
+    except Exception as e:
+        logger.error(f"Error al crear gasto manual: {str(e)}", exc_info=True)
         return JsonResponse({'success': False, 'error': str(e)})

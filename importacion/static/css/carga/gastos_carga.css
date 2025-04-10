@@ -142,6 +142,31 @@ body {
     font-size: 1.1rem;
 }
 
+/* Botón de Crear Gasto Manual */
+.btn-create {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-create:hover {
+    background-color: #4A4CD8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(93, 95, 239, 0.2);
+}
+
+.btn-create i {
+    font-size: 1rem;
+}
+
 /* Table Styles */
 .gastos-table {
     width: 100%;
@@ -305,6 +330,55 @@ body {
     box-shadow: 0 0 0 3px rgba(93, 95, 239, 0.08);
     outline: none;
     background-color: white;
+}
+
+/* Select2 customization - updated for better compatibility */
+.select2-container--default .select2-selection--multiple {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(222, 226, 230, 0.8);
+    border-radius: 12px;
+    min-height: 46px;
+    padding: 6px 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(93, 95, 239, 0.08);
+    outline: none;
+    background-color: white;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: rgba(93, 95, 239, 0.1);
+    border: 1px solid rgba(93, 95, 239, 0.2);
+    border-radius: 20px;
+    padding: 4px 10px;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+/* Fix for Select2 dropdown in modal */
+.select2-container--open {
+    z-index: 9999;
+}
+
+/* Making sure the dropdown is visible */
+.select2-dropdown {
+    border: 1px solid rgba(222, 226, 230, 0.8);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+.select2-results__option {
+    padding: 10px 15px;
+    transition: all 0.2s ease;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--primary-color);
+    color: white;
 }
 
 /* Enhanced Gasto Details */

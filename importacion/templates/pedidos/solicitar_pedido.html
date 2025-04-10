@@ -339,8 +339,8 @@
                     // Encode the message for URL
                     const encodedMessage = encodeURIComponent(message);
                     
-                    // Open WhatsApp with the formatted message
-                    window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+                    // Open WhatsApp Business with the formatted message
+                    window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`, '_blank');
                     
                     // Hide the dropdown
                     whatsappOptions.style.display = 'none';

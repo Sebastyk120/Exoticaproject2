@@ -110,6 +110,12 @@ def guardar_venta(request, venta_id=None):
     venta.numero_nc = request.POST.get('numero_nc', '')
     venta.observaciones = request.POST.get('observaciones', '')
     
+    # Capturar el porcentaje de IVA del formulario
+    try:
+        venta.porcentaje_iva = Decimal(request.POST.get('porcentaje_iva', '4.00'))
+    except (ValueError, decimal.InvalidOperation):
+        venta.porcentaje_iva = Decimal('4.00')  # Valor predeterminado si hay un error
+    
     # Save the sale
     venta.save()
     
@@ -367,17 +373,21 @@ def generar_rectificativa(request, venta_id):
     
     detalles = DetalleVenta.objects.filter(venta=venta).select_related('presentacion', 'presentacion__fruta')
     
+    # Get the IVA percentage and calculate the factor for removing IVA
+    iva_percentage = venta.porcentaje_iva
+    iva_factor = 1 + (iva_percentage / 100)
+    
     # Calculate base_imponible for each detail
     for detalle in detalles:
         if detalle.valor_abono_euro:
-            detalle.base_imponible = detalle.valor_abono_euro / Decimal('1.04')
+            detalle.base_imponible = detalle.valor_abono_euro / Decimal(str(iva_factor))
         else:
             detalle.base_imponible = Decimal('0')
     
     # If iva_abono doesn't exist as a model field, calculate it
     if not hasattr(venta, 'iva_abono'):
-        venta.iva_abono = (venta.valor_total_abono_euro / Decimal('1.04')) * Decimal('0.04')
-        venta.total_base_imponible = (venta.valor_total_abono_euro / Decimal('1.04'))
+        venta.total_base_imponible = venta.valor_total_abono_euro / Decimal(str(iva_factor))
+        venta.iva_abono = venta.total_base_imponible * (iva_percentage / 100)
     
     # If valor_total_abono_euro_con_iva doesn't exist as a model field, calculate it
     if not hasattr(venta, 'valor_total_abono_euro_con_iva'):
@@ -507,17 +517,21 @@ def rectificativa_cliente_token(request, venta_id, token):
     
     detalles = DetalleVenta.objects.filter(venta=venta).select_related('presentacion', 'presentacion__fruta')
     
+    # Get the IVA percentage and calculate the factor for removing IVA
+    iva_percentage = venta.porcentaje_iva
+    iva_factor = 1 + (iva_percentage / 100)
+    
     # Calculate base_imponible for each detail
     for detalle in detalles:
         if detalle.valor_abono_euro:
-            detalle.base_imponible = detalle.valor_abono_euro / Decimal('1.04')
+            detalle.base_imponible = detalle.valor_abono_euro / Decimal(str(iva_factor))
         else:
             detalle.base_imponible = Decimal('0')
     
     # If iva_abono doesn't exist as a model field, calculate it
     if not hasattr(venta, 'iva_abono'):
-        venta.iva_abono = (venta.valor_total_abono_euro / Decimal('1.04')) * Decimal('0.04')
-        venta.total_base_imponible = (venta.valor_total_abono_euro / Decimal('1.04'))
+        venta.total_base_imponible = venta.valor_total_abono_euro / Decimal(str(iva_factor))
+        venta.iva_abono = venta.total_base_imponible * (iva_percentage / 100)
     
     # If valor_total_abono_euro_con_iva doesn't exist as a model field, calculate it
     if not hasattr(venta, 'valor_total_abono_euro_con_iva'):

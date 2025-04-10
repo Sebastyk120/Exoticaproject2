@@ -276,10 +276,14 @@ def enviar_rectificativa_email(request, venta_id):
         pdf_bytes = base64.b64decode(pdf_base64)
         venta = get_object_or_404(Venta, pk=venta_id)
         
+        # Get the IVA percentage and calculate the factor for removing IVA
+        iva_percentage = venta.porcentaje_iva
+        iva_factor = 1 + (iva_percentage / 100)
+        
         # Calculate the same values as in generar_rectificativa view
         if not hasattr(venta, 'iva_abono'):
-            venta.iva_abono = (venta.valor_total_abono_euro / Decimal('1.04')) * Decimal('0.04')
-            venta.total_base_imponible = (venta.valor_total_abono_euro / Decimal('1.04'))
+            venta.total_base_imponible = venta.valor_total_abono_euro / Decimal(str(iva_factor))
+            venta.iva_abono = venta.total_base_imponible * (iva_percentage / 100)
         
         if not hasattr(venta, 'valor_total_abono_euro_con_iva'):
             venta.valor_total_abono_euro_con_iva = venta.valor_total_abono_euro

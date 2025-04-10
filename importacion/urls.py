@@ -20,11 +20,13 @@ urlpatterns = [
     path('aduana/gasto/<int:gasto_id>/', views_aduana.get_gasto, name='get_gasto'),
     path('aduana/gasto/<int:gasto_id>/update/', views_aduana.update_gasto, name='update_gasto'),
     path('aduana/gasto/<int:gasto_id>/delete/', views_aduana.delete_gasto, name='delete_gasto'),
+    path('aduana/gasto/create/', views_aduana.create_gasto, name='create_gasto_aduana'),
     
     # Gastos Carga CRUD URLs
     path('carga/gasto/<int:gasto_id>/', views_carga.get_gasto, name='get_gasto_carga'),
     path('carga/gasto/<int:gasto_id>/update/', views_carga.update_gasto, name='update_gasto_carga'),
     path('carga/gasto/<int:gasto_id>/delete/', views_carga.delete_gasto, name='delete_gasto_carga'),
+    path('carga/gasto/create/', views_carga.create_gasto, name='create_gasto'),
     
     # URLs for orders
     path('pedidos/', views_pedidos.lista_pedidos, name='lista_pedidos'),

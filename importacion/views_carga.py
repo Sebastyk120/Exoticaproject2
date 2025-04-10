@@ -39,8 +39,10 @@ def process_pdf(request):
             numero_factura_match = re.search(r'N\.º VVL (\d+)', text)
             numero_factura = numero_factura_match.group(1) if numero_factura_match else None
 
-            # Extract pedidos (AWB numbers)
-            pedidos_matches = re.findall(r'MAWB: (\d+-\d+)', text)
+            # Extract pedidos (AWB numbers) with optional spaces after the dash
+            pedidos_matches = re.findall(r'MAWB:\s*(\d+-\s*\d+)', text)
+            # Normalize AWB values by removing spaces
+            pedidos_matches = [awb.replace(" ", "") for awb in pedidos_matches]
             
             # Extract valor_gastos_carga
             valor_pattern = r'Total a Pagar USD[\s\S]*?([\d.,]+)'
@@ -170,9 +172,18 @@ def process_pdf(request):
 
     # Get all gastos for the table
     gastos = GastosCarga.objects.all().order_by('-id')
+    # Get all agencias and pedidos for the create form
+    agencias = AgenciaCarga.objects.all()
+    pedidos_disponibles = Pedido.objects.all()
+    
+    # Log the number of pedidos for debugging
+    logger.info(f"Cantidad de pedidos disponibles: {pedidos_disponibles.count()}")
+    
     return render(request, 'carga/upload_pdf_carga.html', {
         'form': form,
-        'gastos': gastos
+        'gastos': gastos,
+        'agencias': agencias,
+        'pedidos_disponibles': pedidos_disponibles
     })
 
 
@@ -241,4 +252,48 @@ def delete_gasto(request, gasto_id):
         gasto.delete()
         return JsonResponse({'success': True})
     except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@require_http_methods(["POST"])
+def create_gasto(request):
+    try:
+        # Extract form data
+        agencia_id = request.POST.get('agencia_carga')
+        numero_factura = request.POST.get('numero_factura')
+        valor_gastos_carga = Decimal(request.POST.get('valor_gastos_carga'))
+        numero_nota_credito = request.POST.get('numero_nota_credito', None)
+        valor_nota_credito_str = request.POST.get('valor_nota_credito', '')
+        
+        # Get agencia
+        agencia = get_object_or_404(AgenciaCarga, id=agencia_id)
+        
+        # Create gasto
+        gasto = GastosCarga(
+            agencia_carga=agencia,
+            numero_factura=numero_factura,
+            valor_gastos_carga=valor_gastos_carga,
+            numero_nota_credito=numero_nota_credito if numero_nota_credito else None
+        )
+        
+        # Process nota credito if provided
+        if valor_nota_credito_str and valor_nota_credito_str.strip():
+            valor_nota_credito = Decimal(valor_nota_credito_str)
+            gasto.valor_nota_credito = valor_nota_credito
+            gasto.monto_pendiente = valor_gastos_carga - valor_nota_credito
+        else:
+            gasto.monto_pendiente = valor_gastos_carga
+        
+        gasto.save()
+        
+        # Add pedidos
+        pedidos_ids = request.POST.getlist('pedidos')
+        for pedido_id in pedidos_ids:
+            pedido = get_object_or_404(Pedido, id=pedido_id)
+            gasto.pedidos.add(pedido)
+        
+        return JsonResponse({'success': True})
+    except Exception as e:
+        logger.error(f"Error al crear gasto manual: {str(e)}", exc_info=True)
         return JsonResponse({'success': False, 'error': str(e)})

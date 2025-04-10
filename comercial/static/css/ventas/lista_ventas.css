@@ -429,8 +429,14 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-bottom: 1px solid var(--border-color);
-    white-space: nowrap;
+    white-space: normal; /* Permitir saltos de línea */
+    word-wrap: break-word; /* Asegurar que el texto se envuelva correctamente */
+    min-height: 45px; /* Altura mínima para acomodar múltiples líneas */
+    line-height: 1.3; /* Ajustar el interlineado para mejor legibilidad */
+    vertical-align: middle; /* Centrar el contenido verticalmente */
     z-index: 10;
+    max-width: 150px; /* Limitar el ancho máximo de cada columna */
+    hyphens: auto; /* Añadir guiones automáticos si es necesario */
 }
 
 #ventas-table td {

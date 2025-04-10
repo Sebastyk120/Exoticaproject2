@@ -11,40 +11,43 @@ from datetime import datetime
 import xlsxwriter
 from io import BytesIO
 
-def calcular_ventas_netas_por_producto_semana(anio=None, semana=None):
+def calcular_ventas_netas_por_producto_semana(anio=None, semana=None, trimestre=None):
     """
-    Calcula las ventas netas por producto y semana.
+    Calcula las ventas netas por producto y semana/trimestre.
     Ventas Netas = (valor_x_producto - valor_abono_euro) de DetalleVenta
+    Actualizada para usar el formato completo de semana y el porcentaje de IVA dinámico.
     """
     # Filtrar por año si se proporciona
     ventas_query = Venta.objects.all()
     if anio:
         ventas_query = ventas_query.filter(fecha_entrega__year=anio)
     
-    # Filtrar por semana si se proporciona
+    # Filtrar por semana o trimestre si se proporciona
     if semana:
-        # Modificar para buscar con el patrón "semana-año"
-        patron_semana = f"{semana}-{anio}" if anio else f"{semana}-"
-        ventas_query = ventas_query.filter(semana__startswith=patron_semana)
+        # Si semana ya tiene formato completo "13-2025", usarlo directamente
+        ventas_query = ventas_query.filter(semana=semana)
+    elif trimestre:
+        ventas_query = filtrar_por_trimestre(ventas_query, anio, trimestre)
     
     # Agrupar las ventas por producto y semana
     ventas_netas = DetalleVenta.objects.filter(
         venta__in=ventas_query
     ).values(
         'presentacion__fruta__nombre',
-        'venta__semana'
+        'venta__semana',
+        'venta__porcentaje_iva'  # Include IVA percentage for calculations
     ).annotate(
-        ventas_netas=Coalesce(
-            Sum(F('valor_x_producto') - 
-                Coalesce(
-                    ExpressionWrapper(
-                        F('valor_abono_euro') / Value(Decimal('1.04')),
+        ventas_netas=Sum(F('valor_x_producto') - 
+            Case(
+                When(
+                    valor_abono_euro__gt=0,
+                    then=ExpressionWrapper(
+                        F('valor_abono_euro') / (1 + F('venta__porcentaje_iva') / 100),
                         output_field=DecimalField()
-                    ),
-                    Value(0, output_field=DecimalField())
-                )
-            ),
-            Value(0, output_field=DecimalField())
+                    )
+                ),
+                default=Value(0, output_field=DecimalField())
+            )
         )
     )
     
@@ -62,21 +65,23 @@ def calcular_ventas_netas_por_producto_semana(anio=None, semana=None):
     
     return resultado
 
-def calcular_costos_compra_por_producto_semana(anio=None, semana=None):
+def calcular_costos_compra_por_producto_semana(anio=None, semana=None, trimestre=None):
     """
-    Calcula los costos de compra por producto y semana.
+    Calcula los costos de compra por producto y semana/trimestre.
     Costos de Compra = valor_x_producto_eur de DetallePedido (ya ajustado por NC)
+    Actualizada para usar el formato completo de semana.
     """
     # Filtrar por año si se proporciona
     pedidos_query = Pedido.objects.all()
     if anio:
         pedidos_query = pedidos_query.filter(fecha_entrega__year=anio)
     
-    # Filtrar por semana si se proporciona
+    # Filtrar por semana o trimestre si se proporciona
     if semana:
-        # Modificar para buscar con el patrón "semana-año"
-        patron_semana = f"{semana}-{anio}" if anio else f"{semana}-"
-        pedidos_query = pedidos_query.filter(semana__startswith=patron_semana)
+        # Si semana ya tiene formato completo "13-2025", usarlo directamente
+        pedidos_query = pedidos_query.filter(semana=semana)
+    elif trimestre:
+        pedidos_query = filtrar_por_trimestre(pedidos_query, anio, trimestre)
     
     # Agrupar los costos por producto y semana
     costos_compra = DetallePedido.objects.filter(
@@ -103,9 +108,10 @@ def calcular_costos_compra_por_producto_semana(anio=None, semana=None):
     
     return resultado
 
-def calcular_gastos_aduana_por_producto_semana(anio=None, semana=None):
+def calcular_gastos_aduana_por_producto_semana(anio=None, semana=None, trimestre=None):
     """
     Distribuye los gastos de aduana proporcionalmente a las cajas recibidas y kilos de cada producto.
+    Actualizada para usar el formato completo de semana.
     """
     # Filtrar por año si se proporciona
     if anio:
@@ -113,11 +119,12 @@ def calcular_gastos_aduana_por_producto_semana(anio=None, semana=None):
     else:
         pedidos_año = Pedido.objects.all()
     
-    # Filtrar por semana si se proporciona
+    # Filtrar por semana o trimestre si se proporciona
     if semana:
-        # Modificar para buscar con el patrón "semana-año"
-        patron_semana = f"{semana}-{anio}" if anio else f"{semana}-"
-        pedidos_año = pedidos_año.filter(semana__startswith=patron_semana)
+        # Si semana ya tiene formato completo "13-2025", usarlo directamente
+        pedidos_año = pedidos_año.filter(semana=semana)
+    elif trimestre:
+        pedidos_año = filtrar_por_trimestre(pedidos_año, anio, trimestre)
     
     resultado = {}
     
@@ -170,9 +177,10 @@ def calcular_gastos_aduana_por_producto_semana(anio=None, semana=None):
     
     return resultado
 
-def calcular_gastos_carga_por_producto_semana(anio=None, semana=None):
+def calcular_gastos_carga_por_producto_semana(anio=None, semana=None, trimestre=None):
     """
     Distribuye los gastos de carga proporcionalmente a las cajas recibidas y kilos de cada producto.
+    Actualizada para usar el formato completo de semana.
     """
     # Filtrar por año si se proporciona
     if anio:
@@ -180,11 +188,12 @@ def calcular_gastos_carga_por_producto_semana(anio=None, semana=None):
     else:
         pedidos_año = Pedido.objects.all()
     
-    # Filtrar por semana si se proporciona
+    # Filtrar por semana o trimestre si se proporciona
     if semana:
-        # Modificar para buscar con el patrón "semana-año"
-        patron_semana = f"{semana}-{anio}" if anio else f"{semana}-"
-        pedidos_año = pedidos_año.filter(semana__startswith=patron_semana)
+        # Si semana ya tiene formato completo "13-2025", usarlo directamente
+        pedidos_año = pedidos_año.filter(semana=semana)
+    elif trimestre:
+        pedidos_año = filtrar_por_trimestre(pedidos_año, anio, trimestre)
     
     resultado = {}
     
@@ -235,16 +244,16 @@ def calcular_gastos_carga_por_producto_semana(anio=None, semana=None):
     
     return resultado
 
-def calcular_utilidad_por_producto_semana(anio=None, semana=None):
+def calcular_utilidad_por_producto_semana(anio=None, semana=None, trimestre=None):
     """
-    Calcula la utilidad por producto y semana según la fórmula:
+    Calcula la utilidad por producto y semana/trimestre según la fórmula:
     Utilidad = (Ventas Netas) - (Costos de Compra + Gastos de Aduana + Gastos de Carga)
     """
     # Obtener todos los componentes
-    ventas_netas = calcular_ventas_netas_por_producto_semana(anio, semana)
-    costos_compra = calcular_costos_compra_por_producto_semana(anio, semana)
-    gastos_aduana = calcular_gastos_aduana_por_producto_semana(anio, semana)
-    gastos_carga = calcular_gastos_carga_por_producto_semana(anio, semana)
+    ventas_netas = calcular_ventas_netas_por_producto_semana(anio, semana, trimestre)
+    costos_compra = calcular_costos_compra_por_producto_semana(anio, semana, trimestre)
+    gastos_aduana = calcular_gastos_aduana_por_producto_semana(anio, semana, trimestre)
+    gastos_carga = calcular_gastos_carga_por_producto_semana(anio, semana, trimestre)
     
     # Obtener todos los productos y semanas únicos
     productos = set()
@@ -278,21 +287,23 @@ def calcular_utilidad_por_producto_semana(anio=None, semana=None):
     
     return resultado
 
-def calcular_abono_por_producto_semana(anio=None, semana=None):
+def calcular_abono_por_producto_semana(anio=None, semana=None, trimestre=None):
     """
-    Calcula el valor de los abonos por producto y semana.
+    Calcula el valor de los abonos por producto y semana/trimestre.
     Devuelve los datos como un diccionario por producto y semana.
+    Actualizada para usar el formato completo de semana y el porcentaje de IVA dinámico.
     """
     # Filtrar por año si se proporciona
     ventas_query = Venta.objects.all()
     if anio:
         ventas_query = ventas_query.filter(fecha_entrega__year=anio)
     
-    # Filtrar por semana si se proporciona
+    # Filtrar por semana o trimestre si se proporciona
     if semana:
-        # Modificar para buscar con el patrón "semana-año"
-        patron_semana = f"{semana}-{anio}" if anio else f"{semana}-"
-        ventas_query = ventas_query.filter(semana__startswith=patron_semana)
+        # Si semana ya tiene formato completo "13-2025", usarlo directamente
+        ventas_query = ventas_query.filter(semana=semana)
+    elif trimestre:
+        ventas_query = filtrar_por_trimestre(ventas_query, anio, trimestre)
     
     # Agrupar los abonos por producto y semana
     abonos = DetalleVenta.objects.filter(
@@ -300,9 +311,15 @@ def calcular_abono_por_producto_semana(anio=None, semana=None):
         valor_abono_euro__gt=0  # Solo incluir registros con valor de abono
     ).values(
         'presentacion__fruta__nombre',
-        'venta__semana'
+        'venta__semana',
+        'venta__porcentaje_iva'  # Include IVA percentage for calculations
     ).annotate(
-        valor_abono=Sum('valor_abono_euro')
+        valor_abono=Sum(
+            ExpressionWrapper(
+                F('valor_abono_euro') / (1 + F('venta__porcentaje_iva') / 100),
+                output_field=DecimalField()
+            )
+        )
     )
     
     # Convertir a un diccionario para fácil acceso
@@ -319,16 +336,16 @@ def calcular_abono_por_producto_semana(anio=None, semana=None):
     
     return resultado
 
-def calcular_resumen_utilidad(anio=None, semana=None):
+def calcular_resumen_utilidad(anio=None, semana=None, trimestre=None):
     """
     Calcula un resumen de utilidades totalizando los datos por producto.
     """
-    # Obtener datos por producto y semana
-    ventas_netas = calcular_ventas_netas_por_producto_semana(anio, semana)
-    costos_compra = calcular_costos_compra_por_producto_semana(anio, semana)
-    gastos_aduana = calcular_gastos_aduana_por_producto_semana(anio, semana)
-    gastos_carga = calcular_gastos_carga_por_producto_semana(anio, semana)
-    abonos = calcular_abono_por_producto_semana(anio, semana)  # Obtener datos de abono
+    # Obtener datos por producto y semana/trimestre
+    ventas_netas = calcular_ventas_netas_por_producto_semana(anio, semana, trimestre)
+    costos_compra = calcular_costos_compra_por_producto_semana(anio, semana, trimestre)
+    gastos_aduana = calcular_gastos_aduana_por_producto_semana(anio, semana, trimestre)
+    gastos_carga = calcular_gastos_carga_por_producto_semana(anio, semana, trimestre)
+    abonos = calcular_abono_por_producto_semana(anio, semana, trimestre)  # Obtener datos de abono
     
     # Obtener todos los productos únicos
     productos = set()
@@ -370,12 +387,12 @@ def calcular_resumen_utilidad(anio=None, semana=None):
     
     return resultado
 
-def calcular_totales_globales(anio=None, semana=None):
+def calcular_totales_globales(anio=None, semana=None, trimestre=None):
     """
     Calcula los totales globales para mostrar en las tarjetas resumen.
     """
     # Usar el resumen de utilidad para obtener los totales
-    resumen = calcular_resumen_utilidad(anio, semana)
+    resumen = calcular_resumen_utilidad(anio, semana, trimestre)
     
     if not resumen:
         return {
@@ -411,55 +428,79 @@ def calcular_totales_globales(anio=None, semana=None):
         'valor_abono_total': round(valor_abono_total, 2)  # Nuevo campo
     }
 
-# Función auxiliar para procesar el parámetro de semana
-def procesar_parametro_semana(semana_str):
+# Función auxiliar para procesar el parámetro de semana - actualizada
+def procesar_parametro_semana(semana_str, anio=None):
     """
-    Procesa el parámetro de semana del request y devuelve el número de semana.
-    El formato esperado puede ser "13" o "13-2025".
+    Procesa el parámetro de semana del request.
+    Ahora simplemente devuelve el valor de semana_str tal cual viene,
+    ya que se espera que incluya el año directamente.
     """
-    if not semana_str:
+    if not semana_str or semana_str == 'cargando' or semana_str == 'todas':
         return None
+        
+    # Devolver la semana tal cual viene, ya con el formato "semana-año"
+    return semana_str
+
+# Función auxiliar para filtrar por trimestre - corregida
+def filtrar_por_trimestre(query, anio, trimestre):
+    """
+    Filtra un queryset por trimestre del año.
+    """
+    if not trimestre:
+        return query
     
-    # Si el formato es "13-2025", extraer sólo el número de semana
-    if '-' in semana_str:
-        try:
-            semana_num = int(semana_str.split('-')[0])
-            return semana_num
-        except (ValueError, IndexError):
-            return None
+    # Si no se proporciona el año, usar el año actual
+    if not anio:
+        anio = datetime.now().year
     
-    # Si el formato es sólo un número
     try:
-        return int(semana_str)
-    except ValueError:
-        return None
+        anio = int(anio)
+        trimestre = int(trimestre)
+        
+        # Definir los rangos de meses para cada trimestre
+        if trimestre == 1:  # Enero a Marzo
+            filtered_query = query.filter(fecha_entrega__year=anio, fecha_entrega__month__range=(1, 3))
+        elif trimestre == 2:  # Abril a Junio
+            filtered_query = query.filter(fecha_entrega__year=anio, fecha_entrega__month__range=(4, 6))
+        elif trimestre == 3:  # Julio a Septiembre
+            filtered_query = query.filter(fecha_entrega__year=anio, fecha_entrega__month__range=(7, 9))
+        elif trimestre == 4:  # Octubre a Diciembre
+            filtered_query = query.filter(fecha_entrega__year=anio, fecha_entrega__month__range=(10, 12))
+        else:
+            return query
+        
+        return filtered_query
+    except (ValueError, TypeError):
+        return query
 
 @login_required
 def dashboard_utilidades(request):
     """
     Vista principal para el dashboard de utilidades.
     """
-    # Obtener el año y semana seleccionados o usar valores por defecto
+    # Obtener el año, semana y trimestre seleccionados
     anio = request.GET.get('anio', datetime.now().year)
     semana_str = request.GET.get('semana')
+    trimestre = request.GET.get('trimestre')
     
     try:
         anio = int(anio)
     except ValueError:
         anio = datetime.now().year
     
-    # Usar la nueva función para procesar la semana
-    semana = procesar_parametro_semana(semana_str)
+    # Usar la función para procesar la semana pasando también el anio
+    semana = procesar_parametro_semana(semana_str, anio)
     
     # Calcular los datos para las tarjetas de resumen
-    totales = calcular_totales_globales(anio, semana)
+    totales = calcular_totales_globales(anio, semana, trimestre)
     
     # Obtener el resumen de utilidad por producto
-    resumen_utilidad = calcular_resumen_utilidad(anio, semana)
+    resumen_utilidad = calcular_resumen_utilidad(anio, semana, trimestre)
     
     return render(request, 'dashboard/utilidades.html', {
         'anio': anio,
         'semana': semana,
+        'trimestre': trimestre,
         'totales': totales,
         'resumen_utilidad': resumen_utilidad
     })
@@ -476,14 +517,12 @@ def api_semanas_disponibles(request):
     except ValueError:
         anio = None
     
-    # Obtener semanas únicas de Ventas y Pedidos
-    semanas_venta = set(Venta.objects.filter(
-        fecha_entrega__year=anio
-    ).values_list('semana', flat=True).distinct())
+    # No filtramos por año aquí para obtener todas las semanas de todos los años
+    # Esto permite que el selector muestre semanas de diferentes años
     
-    semanas_pedido = set(Pedido.objects.filter(
-        fecha_entrega__year=anio
-    ).values_list('semana', flat=True).distinct())
+    # Obtener semanas únicas de Ventas y Pedidos sin filtrar por año
+    semanas_venta = set(Venta.objects.values_list('semana', flat=True).distinct())
+    semanas_pedido = set(Pedido.objects.filter(semana__isnull=False).values_list('semana', flat=True).distinct())
     
     # Combinar y ordenar las semanas
     semanas = sorted(list(semanas_venta.union(semanas_pedido)))
@@ -495,25 +534,38 @@ def api_resumen_utilidad(request):
     """API para obtener el resumen de utilidad por producto."""
     anio = request.GET.get('anio')
     semana_str = request.GET.get('semana')
+    trimestre = request.GET.get('trimestre')
     formato = request.GET.get('format')
+    
+    # Ignorar semana="cargando"
+    if semana_str == 'cargando':
+        semana_str = None
     
     try:
         anio = int(anio) if anio else None
     except ValueError:
-        anio = None
+        anio = datetime.now().year
     
-    # Usar la nueva función para procesar la semana
-    semana = procesar_parametro_semana(semana_str)
+    # Usar la función para procesar la semana pasando también el anio
+    semana = procesar_parametro_semana(semana_str, anio)
     
-    resumen = calcular_resumen_utilidad(anio, semana)
+    # Procesar trimestre y asegurar que no se use con semana
+    try:
+        trimestre = int(trimestre) if trimestre else None
+        if trimestre and semana:
+            semana = None
+    except ValueError:
+        trimestre = None
+    
+    resumen = calcular_resumen_utilidad(anio, semana, trimestre)
     
     # Verificar si se solicitó formato Excel
     if formato == 'xlsx':
-        return exportar_resumen_excel(resumen, anio, semana)
+        return exportar_resumen_excel(resumen, anio, semana, trimestre)
     
     return JsonResponse({'data': resumen})
 
-def exportar_resumen_excel(resumen, anio, semana=None):
+def exportar_resumen_excel(resumen, anio, semana=None, trimestre=None):
     """Genera un archivo Excel con el resumen de utilidades."""
     output = BytesIO()
     workbook = xlsxwriter.Workbook(output)
@@ -559,6 +611,8 @@ def exportar_resumen_excel(resumen, anio, semana=None):
     titulo = f"Dashboard de Utilidades por Producto - Año {anio if anio else 'Todos'}"
     if semana:
         titulo += f" - Semana {semana}"
+    elif trimestre:
+        titulo += f" - Trimestre {trimestre}"
         
     worksheet.merge_range('A1:H1', titulo, title_format)
     worksheet.set_row(0, 30)
@@ -589,7 +643,7 @@ def exportar_resumen_excel(resumen, anio, semana=None):
     worksheet.set_column('B:I', 15)  # Actualizado para incluir la nueva columna
     
     # Calcular totales
-    totales = calcular_totales_globales(anio, semana)
+    totales = calcular_totales_globales(anio, semana, trimestre)
     
     # Agregar totales al final - Actualizado para incluir valor abono
     total_row = len(resumen) + 4
@@ -612,6 +666,8 @@ def exportar_resumen_excel(resumen, anio, semana=None):
         filename_parts.append(str(anio))
     if semana:
         filename_parts.append(f"semana_{semana}")
+    elif trimestre:
+        filename_parts.append(f"trimestre_{trimestre}")
     
     filename = "_".join(filename_parts) + ".xlsx"
     
@@ -625,9 +681,10 @@ def exportar_resumen_excel(resumen, anio, semana=None):
 
 @login_required
 def api_utilidad_por_semana(request):
-    """API para obtener la utilidad por producto y semana."""
+    """API para obtener la utilidad por producto y semana/trimestre."""
     anio = request.GET.get('anio')
     semana_str = request.GET.get('semana')
+    trimestre = request.GET.get('trimestre')
     producto = request.GET.get('producto')
     
     try:
@@ -635,11 +692,17 @@ def api_utilidad_por_semana(request):
     except ValueError:
         anio = None
     
-    # Usar la nueva función para procesar la semana
-    semana = procesar_parametro_semana(semana_str)
+    # Usar la función para procesar la semana pasando también el anio
+    semana = procesar_parametro_semana(semana_str, anio)
     
-    # Calcular la utilidad por producto y semana
-    utilidad_semana = calcular_utilidad_por_producto_semana(anio, semana)
+    # Procesar trimestre
+    try:
+        trimestre = int(trimestre) if trimestre else None
+    except ValueError:
+        trimestre = None
+    
+    # Calcular la utilidad por producto y periodo
+    utilidad_semana = calcular_utilidad_por_producto_semana(anio, semana, trimestre)
     
     # Si se especifica un producto, filtrar solo ese producto
     if producto and producto != 'todos':
@@ -672,17 +735,24 @@ def api_distribucion_costos(request):
     """API para obtener la distribución de costos por tipo."""
     anio = request.GET.get('anio')
     semana_str = request.GET.get('semana')
+    trimestre = request.GET.get('trimestre')
     
     try:
         anio = int(anio) if anio else None
     except ValueError:
         anio = None
     
-    # Usar la nueva función para procesar la semana
-    semana = procesar_parametro_semana(semana_str)
+    # Usar la función para procesar la semana pasando también el anio
+    semana = procesar_parametro_semana(semana_str, anio)
+    
+    # Procesar trimestre
+    try:
+        trimestre = int(trimestre) if trimestre else None
+    except ValueError:
+        trimestre = None
     
     # Obtener el resumen de costos del cálculo de utilidad
-    resumen = calcular_resumen_utilidad(anio, semana)
+    resumen = calcular_resumen_utilidad(anio, semana, trimestre)
     
     # Calcular los totales por tipo de costo
     total_compra = sum(item['costo_compra'] for item in resumen)
@@ -699,17 +769,24 @@ def api_margen_por_producto(request):
     """API para obtener el margen por producto."""
     anio = request.GET.get('anio')
     semana_str = request.GET.get('semana')
+    trimestre = request.GET.get('trimestre')
     
     try:
         anio = int(anio) if anio else None
     except ValueError:
         anio = None
     
-    # Usar la nueva función para procesar la semana
-    semana = procesar_parametro_semana(semana_str)
+    # Usar la función para procesar la semana pasando también el anio
+    semana = procesar_parametro_semana(semana_str, anio)
+    
+    # Procesar trimestre
+    try:
+        trimestre = int(trimestre) if trimestre else None
+    except ValueError:
+        trimestre = None
     
     # Obtener el resumen de utilidad por producto
-    resumen = calcular_resumen_utilidad(anio, semana)
+    resumen = calcular_resumen_utilidad(anio, semana, trimestre)
     
     # Extraer los datos para el gráfico
     productos = [item['producto'] for item in resumen]
@@ -725,17 +802,24 @@ def api_productos_rentables(request):
     """API para obtener los productos más rentables."""
     anio = request.GET.get('anio')
     semana_str = request.GET.get('semana')
+    trimestre = request.GET.get('trimestre')
     
     try:
         anio = int(anio) if anio else None
     except ValueError:
         anio = None
     
-    # Usar la nueva función para procesar la semana
-    semana = procesar_parametro_semana(semana_str)
+    # Usar la función para procesar la semana pasando también el anio
+    semana = procesar_parametro_semana(semana_str, anio)
+    
+    # Procesar trimestre
+    try:
+        trimestre = int(trimestre) if trimestre else None
+    except ValueError:
+        trimestre = None
     
     # Obtener el resumen de utilidad por producto
-    resumen = calcular_resumen_utilidad(anio, semana)
+    resumen = calcular_resumen_utilidad(anio, semana, trimestre)
     
     # Filtrar solo productos con utilidad positiva
     productos_rentables = [item for item in resumen if item['utilidad'] > 0]
@@ -757,16 +841,30 @@ def api_totales_globales(request):
     """API para obtener los totales globales."""
     anio = request.GET.get('anio')
     semana_str = request.GET.get('semana')
+    trimestre = request.GET.get('trimestre')
+    
+    # Ignorar semana="cargando"
+    if semana_str == 'cargando':
+        semana_str = None
     
     try:
-        anio = int(anio) if anio else None
+        anio = int(anio) if anio else datetime.now().year
     except ValueError:
-        anio = None
+        anio = datetime.now().year
     
-    # Usar la nueva función para procesar la semana
-    semana = procesar_parametro_semana(semana_str)
+    # Usar la función para procesar la semana pasando también el anio
+    semana = procesar_parametro_semana(semana_str, anio)
+    
+    # Procesar trimestre
+    try:
+        trimestre = int(trimestre) if trimestre else None
+        if trimestre and semana:
+            # Priorizar trimestre sobre semana
+            semana = None
+    except ValueError:
+        trimestre = None
     
     # Calcular los totales globales
-    totales = calcular_totales_globales(anio, semana)
+    totales = calcular_totales_globales(anio, semana, trimestre)
     
     return JsonResponse(totales)

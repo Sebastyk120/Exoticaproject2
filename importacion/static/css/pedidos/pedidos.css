@@ -664,3 +664,14 @@ input.error-field:focus {
 .highlight-field {
     animation: highlight-field 0.8s ease;
 }
+
+/* Estilo para resaltar cuando Cajas Recibidas difiere de Cajas Solicitadas */
+.cajas-diferentes {
+    background-color: #fff3cd;
+    border-color: #ffeeba !important;
+}
+
+.cajas-diferentes:focus {
+    background-color: #fff3cd;
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.25) !important;
+}

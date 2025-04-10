@@ -371,9 +371,12 @@ def asegurar_actualizacion_completa_venta(sender, instance, **kwargs):
                     total_cajas=Coalesce(Sum('cajas_enviadas'), 0)
                 )
                 
+                # Obtener la venta para conocer el porcentaje IVA
+                venta = Venta.objects.get(pk=venta_id)
+                
                 # Actualizar la venta directamente
                 subtotal = totales['total_producto']
-                iva_amount = subtotal * Decimal('0.04')  # 4% IVA
+                iva_amount = subtotal * (venta.porcentaje_iva / Decimal('100'))  # Usar porcentaje definido por usuario
                 
                 # Actualizar todos los campos relevantes
                 Venta.objects.filter(pk=venta_id).update(

@@ -4,6 +4,7 @@ from django import template
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from num2words import num2words
+from django.template.defaultfilters import floatformat
 
 register = template.Library()
 
@@ -189,3 +190,20 @@ def add_values(value, arg):
         return value + arg
     except (ValueError, TypeError):
         return 0
+
+@register.filter
+def decimal_point_format(value, decimal_places=2):
+    """
+    Format a decimal value with a point as decimal separator, ensuring browser compatibility
+    with input[type="number"] fields.
+    """
+    if value is None:
+        return ''
+    
+    try:
+        # Format with specified decimal places, then replace comma with point if needed
+        formatted = floatformat(value, decimal_places)
+        return formatted.replace(',', '.')
+    except (ValueError, TypeError):
+        # Return default value if conversion fails
+        return '0.00'

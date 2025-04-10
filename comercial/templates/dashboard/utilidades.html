@@ -82,25 +82,23 @@
                 <p class="text-gray-600">Análisis detallado de utilidades por producto y periodo</p>
             </div>
             <div class="flex flex-wrap gap-2 mt-4 md:mt-0">
-                <select id="periodo-select" class="border rounded py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                    <option value="semana" selected>Por Semana</option>
-                    <!-- Opciones comentadas hasta que se implementen -->
-                    <!-- 
-                    <option value="mes">Por Mes</option>
-                    <option value="trimestre">Por Trimestre</option>
-                    <option value="anio">Por Año</option>
-                    -->
+                <select id="anio-select" class="border rounded py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <option value="2025" selected>2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                </select>
+                <select id="trimestre-select" class="border rounded py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <option value="todos">Todos los trimestres</option>
+                    <option value="1">Primer Trimestre</option>
+                    <option value="2">Segundo Trimestre</option>
+                    <option value="3">Tercer Trimestre</option>
+                    <option value="4">Cuarto Trimestre</option>
                 </select>
                 <select id="semana-select" class="border rounded py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                     <option value="todas">Todas las semanas</option>
                     <!-- Las semanas se cargarán dinámicamente -->
-                </select>
-                <select id="anio-select" class="border rounded py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                    {% now "Y" as current_year %}
-                    <option value="{{ current_year|add:"1" }}" {% if current_year|add:"1" == anio|stringformat:"i" %}selected{% endif %}>{{ current_year|add:"1" }}</option>
-                    <option value="{{ current_year }}" {% if current_year == anio|stringformat:"i" %}selected{% endif %}>{{ current_year }}</option>
-                    <option value="{{ current_year|add:"-1" }}" {% if current_year|add:"-1" == anio|stringformat:"i" %}selected{% endif %}>{{ current_year|add:"-1" }}</option>
-                    <option value="{{ current_year|add:"-2" }}" {% if current_year|add:"-2" == anio|stringformat:"i" %}selected{% endif %}>{{ current_year|add:"-2" }}</option>
                 </select>
                 <button class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-sm" id="btn-actualizar">
                     <i class="fas fa-sync-alt mr-1"></i> Actualizar
@@ -429,36 +427,30 @@
             return document.getElementById('anio-select').value;
         }
         
-        // Función para obtener la semana seleccionada (sin logs)
+        // Función para obtener el trimestre seleccionado
+        function obtenerTrimestreSeleccionado() {
+            const trimestreSelect = document.getElementById('trimestre-select');
+            
+            // Verificar si hay un trimestre seleccionado y no es "todos"
+            if (trimestreSelect && trimestreSelect.value && trimestreSelect.value !== 'todos') {
+                return trimestreSelect.value;
+            }
+            return null;
+        }
+        
+        // Función para obtener la semana seleccionada - modificada para mantener el formato original
         function obtenerSemanaSeleccionada() {
             const semanaSelect = document.getElementById('semana-select');
             
             // Verificar si hay una semana seleccionada y no es "todas"
             if (semanaSelect && semanaSelect.value && semanaSelect.value !== 'todas') {
-                // Validar formato - si contiene guion, enviar solo el número de semana
-                if (semanaSelect.value.includes('-')) {
-                    const semanaNum = semanaSelect.value.split('-')[0];
-                    return semanaNum;
-                }
-                
+                // Devolver la semana completa sin separar el año, ya que viene del backend en formato correcto
                 return semanaSelect.value;
             }
             return null;
         }
         
-        // Función para construir la URL con parámetros de filtro (sin logs)
-        function construirURLFiltro(baseURL) {
-            let url = `${baseURL}?anio=${obtenerAnioSeleccionado()}`;
-            const semana = obtenerSemanaSeleccionada();
-            
-            if (semana) {
-                url += `&semana=${semana}`;
-            }
-            
-            return url;
-        }
-        
-        // Función para cargar las semanas disponibles (sin logs innecesarios)
+        // Modificar la presentación de las semanas para mostrar el año
         function cargarSemanasDisponibles() {
             const semanaSelect = document.getElementById('semana-select');
             const anio = obtenerAnioSeleccionado();
@@ -476,13 +468,29 @@
                     // Limpiar select y agregar opción por defecto
                     semanaSelect.innerHTML = '<option value="todas">Todas las semanas</option>';
                     
-                    // Agregar cada semana disponible
+                    // Agregar cada semana disponible (ordenadas de la más reciente a la más antigua)
                     if (data.semanas && data.semanas.length > 0) {
+                        // Ordenar semanas numéricamente de forma descendente (más reciente primero)
+                        data.semanas.sort((a, b) => {
+                            // Extraer el número de semana para comparar
+                            const numA = parseInt(String(a).split('-')[0]);
+                            const numB = parseInt(String(b).split('-')[0]);
+                            return numB - numA;
+                        });
+                        
                         data.semanas.forEach(semana => {
                             const option = document.createElement('option');
-                            // Incluir año en el valor para mayor claridad
-                            option.value = `${semana}-${anio}`;
-                            option.textContent = `Semana ${semana}`;
+                            option.value = semana; // Mantener el valor completo (ej. "15-2025")
+                            
+                            // Mostrar tanto la semana como el año
+                            if (typeof semana === 'string' && semana.includes('-')) {
+                                // Extraer semana y año para presentación
+                                const [semanaNum, anio] = semana.split('-');
+                                option.textContent = `Semana ${semanaNum} (${anio})`;
+                            } else {
+                                option.textContent = `Semana ${semana}`;
+                            }
+                            
                             semanaSelect.appendChild(option);
                         });
                         
@@ -495,7 +503,6 @@
                             }
                         }
                     } else {
-                        // Agregar mensaje indicativo
                         const option = document.createElement('option');
                         option.value = "no-data";
                         option.textContent = `No hay datos para ${anio}`;
@@ -517,11 +524,46 @@
                 });
         }
         
-        // Función para mostrar u ocultar el selector de semana (sin logs)
-        function actualizarVisibilidadSelectorSemana() {
-            // Ya no dependemos del tipo de periodo, el selector de semana siempre es visible
+        // Modificar la lógica de filtrado para que el año solo afecte a trimestres
+        function construirURLFiltro(baseURL) {
+            // El año siempre se pasa para mantener consistencia en la API
+            let url = `${baseURL}?anio=${obtenerAnioSeleccionado()}`;
+            
+            // Agregar trimestre si está seleccionado
+            const trimestre = obtenerTrimestreSeleccionado();
+            if (trimestre) {
+                url += `&trimestre=${trimestre}`;
+            } else {
+                // Si no hay trimestre seleccionado, usar semana directamente
+                // sin filtrar por año (ya que la semana incluye su propio año)
+                const semana = obtenerSemanaSeleccionada();
+                if (semana && semana !== 'todas') {
+                    url += `&semana=${semana}`;
+                }
+            }
+            
+            return url;
+        }
+        
+        // Función para manejar la lógica de filtros dependientes (trimestre y semana)
+        function manejarFiltrosDependientes() {
+            const trimestreSelect = document.getElementById('trimestre-select');
             const semanaSelect = document.getElementById('semana-select');
-            semanaSelect.classList.remove('hidden-select');
+            
+            // Si se selecciona un trimestre, deshabilitar la selección de semana
+            if (obtenerTrimestreSeleccionado()) {
+                semanaSelect.disabled = true;
+                semanaSelect.classList.add('opacity-50');
+                semanaSelect.value = 'todas';
+            } else {
+                semanaSelect.disabled = false;
+                semanaSelect.classList.remove('opacity-50');
+            }
+            
+            // Si se selecciona una semana específica, desmarcar el trimestre
+            if (obtenerSemanaSeleccionada()) {
+                trimestreSelect.value = 'todos';
+            }
         }
         
         // Función para mostrar indicador de carga - versión mejorada
@@ -1151,17 +1193,21 @@
             document.querySelector('.flex.justify-between .text-sm').textContent = `Mostrando ${filasVisibles} productos`;
         }
         
-        // Función para exportar a Excel (simplificada)
+        // Función para exportar a Excel (actualizada para incluir el trimestre)
         function exportarAExcel() {
             const anio = obtenerAnioSeleccionado();
             let url = `/comercial/api/dashboard/resumen-utilidad/?anio=${anio}&format=xlsx`;
             
-            const semana = obtenerSemanaSeleccionada();
-            if (semana) {
-                url += `&semana=${semana}`;
+            const trimestre = obtenerTrimestreSeleccionado();
+            if (trimestre) {
+                url += `&trimestre=${trimestre}`;
+            } else {
+                const semana = obtenerSemanaSeleccionada();
+                if (semana) {
+                    url += `&semana=${semana}`;
+                }
             }
             
-            // Redirigir a la URL de descarga
             window.open(url, '_blank');
         }
         
@@ -1206,31 +1252,38 @@
             actualizarSelectorProductos();
         }
         
-        // Inicialización cuando el DOM está listo (sin logs de depuración)
+        // Inicialización cuando el DOM está listo
         document.addEventListener('DOMContentLoaded', function() {
-            // Configuración inicial del selector de semana
-            actualizarVisibilidadSelectorSemana();
-            cargarSemanasDisponibles();
-            
-            // Configurar eventos para los selectores de periodo y semana - MODIFICADO
-            document.getElementById('periodo-select').addEventListener('change', function() {
-                actualizarVisibilidadSelectorSemana();
-                // Actualizar datos cuando cambia el periodo
-                cargarTodosGraficos();
+            // Añadir estilos explícitos para asegurar que los selectores se muestren correctamente
+            const selectores = document.querySelectorAll('select');
+            selectores.forEach(selector => {
+                selector.style.display = 'block';
+                selector.style.visibility = 'visible';
+                selector.style.minWidth = '140px'; // Asegurar ancho mínimo
             });
+
+            // Configuración inicial
+            cargarSemanasDisponibles();
+            manejarFiltrosDependientes();
             
+            // Cargar gráficos iniciales
+            cargarTodosGraficos();
+            
+            // Configurar eventos para los selectores
             document.getElementById('anio-select').addEventListener('change', function() {
                 cargarSemanasDisponibles();
                 cargarTodosGraficos();
             });
             
-            // Modificado: Asegurarse de recargar los datos cuando cambia la semana seleccionada
-            document.getElementById('semana-select').addEventListener('change', function() {
+            document.getElementById('trimestre-select').addEventListener('change', function() {
+                manejarFiltrosDependientes();
                 cargarTodosGraficos();
             });
             
-            // Cargar gráficos iniciales
-            cargarTodosGraficos();
+            document.getElementById('semana-select').addEventListener('change', function() {
+                manejarFiltrosDependientes();
+                cargarTodosGraficos();
+            });
             
             // Configurar eventos
             document.getElementById('btn-actualizar').addEventListener('click', cargarTodosGraficos);
@@ -1248,6 +1301,12 @@
             // Exportar a Excel
             document.getElementById('btn-exportar').addEventListener('click', exportarAExcel);
         });
+
+        // Función específica para manejar el cambio de año
+        function cambiarAnio() {
+            cargarSemanasDisponibles();
+            cargarTodosGraficos();
+        }
     </script>
 </body>
 </html>

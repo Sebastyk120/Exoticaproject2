@@ -4,8 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Utilidades Abono">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Cambio de lista de compras 10.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/static/css/dashboard/utilidades.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/dashboard/utilidades.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/dashboard/utilidades.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/dashboard/utilidades.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/views_dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_dashboard.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/static/css/aduana/gastos_aduana.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/aduana/gastos_aduana.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/static/css/carga/gastos_carga.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/carga/gastos_carga.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf_aduana.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf_aduana.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/templates/carga/upload_pdf_carga.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/carga/upload_pdf_carga.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/templates/pedidos/solicitar_pedido.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/pedidos/solicitar_pedido.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/views_aduana.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_aduana.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/views_carga.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_carga.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -183,7 +195,7 @@
       <workItem from="1744204917770" duration="13413000" />
       <workItem from="1744219257056" duration="7116000" />
       <workItem from="1744239300983" duration="3614000" />
-      <workItem from="1744292350807" duration="1012000" />
+      <workItem from="1744292350807" duration="10697000" />
     </task>
     <task id="LOCAL-00001" summary="Modelado Completo.">
       <option name="closed" value="true" />
@@ -569,7 +581,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744260306460</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="Cambio de lista de compras 10.">
+      <option name="closed" value="true" />
+      <created>1744295353551</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1744295353551</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -587,7 +607,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Commit Final 2" />
     <MESSAGE value="Commit Final 3" />
     <MESSAGE value="Commit Final 4" />
     <MESSAGE value="Commit Final 5" />
@@ -612,6 +631,7 @@
     <MESSAGE value="Consecutivo Factura." />
     <MESSAGE value="Utilidades Vacio" />
     <MESSAGE value="Utilidades Abono" />
-    <option name="LAST_COMMIT_MESSAGE" value="Utilidades Abono" />
+    <MESSAGE value="Cambio de lista de compras 10." />
+    <option name="LAST_COMMIT_MESSAGE" value="Cambio de lista de compras 10." />
   </component>
 </project>

@@ -630,6 +630,9 @@
                 setTimeout(() => {
                     cajasRecibidasInput.classList.remove('highlight-field');
                 }, 800);
+                
+                // Comparar valores para actualizar el resaltado
+                compareCajasValues(row);
             }
         }
         
@@ -663,6 +666,10 @@
                             this.value = '0';
                         }
                     }
+                    const name = this.name;
+                    if (name && (name.includes('cajas_solicitadas') || name.includes('cajas_recibidas'))) {
+                        compareCajasValues(this.closest('tr'));
+                    }
                 });
             });
         }
@@ -677,11 +684,33 @@
             }
         }
 
+        // Función para comparar valores entre Cajas Solicitadas y Cajas Recibidas
+        function compareCajasValues(row) {
+            const cajasSolicitadasInput = row.querySelector('[name$="_cajas_solicitadas"]');
+            const cajasRecibidasInput = row.querySelector('[name$="_cajas_recibidas"]');
+            
+            if (cajasSolicitadasInput && cajasRecibidasInput) {
+                const cajasSolicitadas = parseInt(cajasSolicitadasInput.value) || 0;
+                const cajasRecibidas = parseInt(cajasRecibidasInput.value) || 0;
+                
+                if (cajasSolicitadas !== cajasRecibidas) {
+                    cajasRecibidasInput.classList.add('cajas-diferentes');
+                } else {
+                    cajasRecibidasInput.classList.remove('cajas-diferentes');
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Add event to add detail button
             const addDetailBtn = document.getElementById('add-detail-btn');
             if (addDetailBtn) {
-                addDetailBtn.addEventListener('click', addNewDetailRow);
+                addDetailBtn.addEventListener('click', function() {
+                    addNewDetailRow();
+                    document.querySelectorAll('#details-table tbody tr').forEach(function(row) {
+                        compareCajasValues(row);
+                    });
+                });
             }
 
             // Manejar el botón "Enviar solicitud"
@@ -751,6 +780,9 @@
                                 // Disparar evento input para actualizar cálculos
                                 const inputEvent = new Event('input', { bubbles: true });
                                 cajasRecibidasInput.dispatchEvent(inputEvent);
+                                
+                                // Comparar valores para actualizar el resaltado
+                                compareCajasValues(row);
                             }
                         });
                         
@@ -786,6 +818,9 @@
                 
                 // Initial calculation of product values
                 updateProductValue(row);
+                
+                // Comparar valores para actualizar el resaltado
+                compareCajasValues(row);
             });
 
             // Add listener to numero_nc field

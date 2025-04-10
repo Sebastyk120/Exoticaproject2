@@ -66,7 +66,8 @@ class Venta(models.Model):
     semana = models.CharField(max_length=20, verbose_name="Semana", null=True, blank=True, editable=False)
     total_cajas_pedido = models.IntegerField(verbose_name="Total Cajas", null=True, blank=True, editable=False)
     numero_factura = models.CharField(max_length=100, verbose_name="Número Factura", null=True, blank=True, editable=False)
-    iva = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="IVA 4%", validators=[MinValueValidator(0)], editable=False, default=0)
+    porcentaje_iva = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Porcentaje IVA", validators=[MinValueValidator(0)], default=4)
+    iva = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="IVA", validators=[MinValueValidator(0)], editable=False, default=0)
     subtotal_factura = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Subtotal Factura", editable=False, default=0)
     valor_total_factura_euro = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total Factura Euro", null=True, blank=True, editable=False, default=0)
     valor_total_abono_euro = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total Abono/Reclamacion Euro", null=True, blank=True, default=0, editable=False)
@@ -78,8 +79,8 @@ class Venta(models.Model):
     def save(self, *args, **kwargs):
 
         if self.subtotal_factura:
-            self.iva = self.subtotal_factura * 4 / 100
-            self.valor_total_factura_euro = self.subtotal_factura + (self.subtotal_factura * 4 / 100)
+            self.iva = self.subtotal_factura * self.porcentaje_iva / 100
+            self.valor_total_factura_euro = self.subtotal_factura + self.iva
         if self.fecha_entrega is not None:
             semana_numero = self.fecha_entrega.isocalendar()[1]
             ano = self.fecha_entrega.year
@@ -162,8 +163,14 @@ class DetalleVenta(models.Model):
 
         # Check if no_cajas_abono is not None rather than truthy/falsy
         if self.no_cajas_abono is not None and self.valor_x_caja_euro:
-            # Calculate the value
-            calculated_value = self.no_cajas_abono * self.valor_x_caja_euro * Decimal('1.04')
+            # Calculate the value with dynamic IVA percentage
+            if hasattr(self, 'venta') and self.venta and hasattr(self.venta, 'porcentaje_iva'):
+                iva_factor = 1 + (self.venta.porcentaje_iva / 100)
+            else:
+                # Default to 4% if venta is not available yet
+                iva_factor = Decimal('1.04')
+                
+            calculated_value = self.no_cajas_abono * self.valor_x_caja_euro * iva_factor
             # Round to 2 decimal places to ensure it fits within the field constraints
             self.valor_abono_euro = calculated_value.quantize(Decimal('0.01'))
         else:
@@ -215,8 +222,16 @@ class DetalleVenta(models.Model):
             total_abono = totales['total_abono']
             total_cajas = totales['total_cajas']
             
-            # Calcular IVA (4% del subtotal)
-            iva_amount = subtotal * Decimal('0.04')
+            # Obtener el porcentaje de IVA de la venta
+            try:
+                venta = Venta.objects.get(pk=venta_id)
+                porcentaje_iva = venta.porcentaje_iva
+            except Venta.DoesNotExist:
+                # Default to 4% if venta doesn't exist (shouldn't happen)
+                porcentaje_iva = Decimal('4')
+            
+            # Calcular IVA usando el porcentaje definido por el usuario
+            iva_amount = subtotal * (porcentaje_iva / 100)
             total_factura = subtotal + iva_amount
             
             # Actualizar la venta sin llamar a signals (evitando recursión)
@@ -247,8 +262,15 @@ class DetalleVenta(models.Model):
             
         # Calculate valor_abono_euro from no_cajas_abono and valor_x_caja_euro
         if self.no_cajas_abono is not None and self.valor_x_caja_euro:
+            # Use dynamic IVA percentage from venta
+            if hasattr(self, 'venta') and self.venta and hasattr(self.venta, 'porcentaje_iva'):
+                iva_factor = 1 + (self.venta.porcentaje_iva / 100)
+            else:
+                # Default to 4% if venta is not available yet
+                iva_factor = Decimal('1.04')
+                
             # Calculate the value
-            calculated_value = self.no_cajas_abono * self.valor_x_caja_euro * Decimal('1.04')
+            calculated_value = self.no_cajas_abono * self.valor_x_caja_euro * iva_factor
             # Round to 2 decimal places to ensure it fits within the field constraints
             self.valor_abono_euro = calculated_value.quantize(Decimal('0.01'))
         else:
