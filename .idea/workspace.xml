@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Retoques">
-      <change afterPath="$PROJECT_DIR$/comercial/migrations/0003_venta_porcentaje_iva_alter_venta_iva.py" afterDir="false" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Utilidades.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/views_dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_dashboard.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -185,15 +183,7 @@
       <workItem from="1744204917770" duration="13413000" />
       <workItem from="1744219257056" duration="7116000" />
       <workItem from="1744239300983" duration="3614000" />
-      <workItem from="1744292350807" duration="19202000" />
-    </task>
-    <task id="LOCAL-00002" summary="2">
-      <option name="closed" value="true" />
-      <created>1742520905575</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1742520905575</updated>
+      <workItem from="1744292350807" duration="21255000" />
     </task>
     <task id="LOCAL-00003" summary="Finalizacion de logicas.">
       <option name="closed" value="true" />
@@ -579,7 +569,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744318928111</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="Utilidades.">
+      <option name="closed" value="true" />
+      <created>1744328024073</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1744328024073</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -597,7 +595,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Commit Final 4" />
     <MESSAGE value="Commit Final 5" />
     <MESSAGE value="Commit Final 6" />
     <MESSAGE value="Commit Final 7" />
@@ -622,6 +619,7 @@
     <MESSAGE value="Utilidades Abono" />
     <MESSAGE value="Cambio de lista de compras 10." />
     <MESSAGE value="Retoques" />
-    <option name="LAST_COMMIT_MESSAGE" value="Retoques" />
+    <MESSAGE value="Utilidades." />
+    <option name="LAST_COMMIT_MESSAGE" value="Utilidades." />
   </component>
 </project>

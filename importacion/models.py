@@ -420,7 +420,7 @@ class TranferenciasExportador(models.Model):
     valor_transferencia_eur = models.DecimalField(max_digits=10, decimal_places=2,
                                                   verbose_name="Valor Transferencia EUR",
                                                   validators=[MinValueValidator(0.0)])
-    trm = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="TRM", editable=False, blank=True,
+    trm = models.DecimalField(max_digits=13, decimal_places=5, verbose_name="TRM", editable=False, blank=True,
                               null=True)
     concepto = models.CharField(max_length=255, verbose_name="Concepto", null=True, blank=True)
 
@@ -542,7 +542,7 @@ class TranferenciasCarga(models.Model):
     valor_transferencia_eur = models.DecimalField(max_digits=10, decimal_places=2,
                                                   verbose_name="Valor Transferencia EUR",
                                                   validators=[MinValueValidator(0.0)])
-    trm = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="TRM", editable=False, blank=True,
+    trm = models.DecimalField(max_digits=13, decimal_places=5, verbose_name="TRM", editable=False, blank=True,
                               null=True)
     concepto = models.CharField(max_length=255, verbose_name="Concepto", null=True, blank=True)
 
