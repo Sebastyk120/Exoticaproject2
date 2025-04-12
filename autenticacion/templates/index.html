@@ -4,11 +4,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L&M Exotic Fruits - Frutas Exóticas Premium</title>
-    <link rel="icon" href="{% static 'img/favicon_dos.ico' %}" type="image/x-icon">
+    <title>L&M Exotic Fruits - Importador Mayorista de Frutas Exóticas Premium en España</title>
+    <meta name="description" content="Importadores y distribuidores mayoristas de frutas exóticas premium desde 2017. Mangostino, pitahaya, gulupa y más con la mejor calidad y servicio en toda España y Europa.">
+    <meta name="keywords" content="frutas exóticas, mangostino, pitahaya, gulupa, granadilla, uchuva, importador frutas, mayorista frutas, frutas tropicales España, frutas premium, distribución frutas exóticas">
+    <meta name="author" content="L&M Exotic Fruits">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://luzmeloexoticfruits.com/">
+    <meta property="og:title" content="L&M Exotic Fruits - Importador de Frutas Exóticas Premium">
+    <meta property="og:description" content="Frutas exóticas de la más alta calidad importadas directamente para el mercado español y europeo. Descubre nuestros productos premium.">
+    <meta property="og:image" content="{% static 'img/logo_sin_fondo.png' %}">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="L&M Exotic Fruits - Importador de Frutas Exóticas">
+    <meta name="twitter:description" content="Frutas exóticas premium para el mercado español y europeo. Calidad garantizada y distribución mayorista.">
+    <meta name="twitter:image" content="{% static 'img/logo_sin_fondo.png' %}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.ico' %}">
+    
+    <!-- Canonical URL to prevent duplicate content issues -->
+    <link rel="canonical" href="https://luzmeloexoticfruits.com/">
+    
+    <!-- CSS -->
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Schema.org structured data markup for organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "L&M Exotic Fruits",
+      "url": "https://luzmeloexoticfruits.com",
+      "logo": "{% static 'img/logo_sin_fondo.png' %}",
+      "description": "Importadores y distribuidores mayoristas de frutas exóticas premium desde 2017.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Barcelona",
+        "addressRegion": "Catalunya",
+        "addressCountry": "España"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+34633494242",
+        "contactType": "customer service",
+        "email": "import@luzmeloexoticfruits.com"
+      },
+      "sameAs": [
+        "https://www.facebook.com/luzmeloexoticfruits/",
+        "https://www.instagram.com/luzmeloexoticfruits/",
+        "https://twitter.com/lmexoticfruits",
+        "https://www.linkedin.com/company/luzmeloexoticfruits"
+      ]
+    }
+    </script>
+    
+    <!-- Schema.org structured data markup for local business -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "L&M Exotic Fruits",
+      "image": "{% static 'img/logo_sin_fondo.png' %}",
+      "telephone": "+34633494242",
+      "email": "import@luzmeloexoticfruits.com",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "",
+        "addressLocality": "Barcelona",
+        "addressRegion": "Catalunya",
+        "postalCode": "",
+        "addressCountry": "ES"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "41.3851",
+        "longitude": "2.1734"
+      },
+      "url": "https://luzmeloexoticfruits.com",
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday"
+          ],
+          "opens": "09:00",
+          "closes": "18:00"
+        }
+      ],
+      "priceRange": "$$"
+    }
+    </script>
+    
+    <!-- Schema.org for products -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "item": {
+            "@type": "Product",
+            "name": "Mangostino",
+            "description": "La reina de las frutas, con pulpa blanca delicada y sabor agridulce único en el mundo",
+            "image": "{% static 'img/mangostino2.png' %}"
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "item": {
+            "@type": "Product",
+            "name": "Pitahaya",
+            "description": "Fruta de pulpa blanca con semillas negras, intenso sabor dulce y rica en antioxidantes",
+            "image": "{% static 'img/pitahaya.jpg' %}"
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "item": {
+            "@type": "Product",
+            "name": "Gulupa",
+            "description": "Fruto aromático de la pasión con pulpa gelatinosa y sabor agridulce refrescante",
+            "image": "{% static 'img/gulupa.png' %}"
+          }
+        }
+      ]
+    }
+    </script>
+    
     <!-- Agregar estilos para las notificaciones toast -->
     <style>
         /* Estilos para las notificaciones toast */
@@ -207,13 +345,15 @@
     </style>
 </head>
 <body>
-    <!-- Header Section -->
-    <header class="header">
+    <!-- Header Section with semantic navigation -->
+    <header class="header" role="banner">
         <div class="container">
             <div class="logo">
-                <img src="{% static 'img/logo_sin_fondo.png' %}" alt="L&M Exotic Fruits Logo">
+                <a href="#home" aria-label="L&M Exotic Fruits - Ir al inicio">
+                    <img src="{% static 'img/logo_sin_fondo.png' %}" alt="L&M Exotic Fruits Logo" width="70" height="70">
+                </a>
             </div>
-            <nav class="nav">
+            <nav class="nav" role="navigation" aria-label="Navegación principal">
                 <ul>
                     <li><a href="#home">Inicio</a></li>
                     <li><a href="#about">Nosotros</a></li>
@@ -222,302 +362,309 @@
                     <li class="login-item"><a href="/app/login" class="login-btn"><i class="fas fa-user"></i> Ingresar</a></li>
                 </ul>
             </nav>
-            <div class="menu-toggle">
+            <button class="menu-toggle" aria-label="Abrir menú de navegación" aria-expanded="false">
                 <i class="fas fa-bars"></i>
-            </div>
+            </button>
         </div>
     </header>
 
-    <!-- Hero Section - Enhanced -->
-    <section id="home" class="hero">
-        <div class="container">
-            <div class="hero-flex-container">
-                <div class="hero-content fade-in">
-                    <span class="hero-tagline"><i class="fas fa-globe-americas"></i> Importadores desde 2017</span>
-                    <div class="hero-title-container">
-                        <h1 class="typewriter-text">Descubre el<br><span class="text-highlight">Sabor</span> de lo Exótico</h1>
+    <main>
+        <!-- Hero Section - Enhanced with semantic elements -->
+        <section id="home" class="hero" aria-labelledby="hero-heading">
+            <div class="container">
+                <div class="hero-flex-container">
+                    <div class="hero-content fade-in">
+                        <span class="hero-tagline"><i class="fas fa-globe-americas" aria-hidden="true"></i> Importadores desde 2017</span>
+                        <div class="hero-title-container">
+                            <h1 id="hero-heading" class="typewriter-text">Descubre el<br><span class="text-highlight">Sabor</span> de lo Exótico</h1>
+                        </div>
+                        
+                        <p>Conectamos a España y Europa con los sabores más exclusivos del mundo. Frutas exóticas seleccionadas con pasión, importadas con excelencia y distribuidas con compromiso.</p>
+                        
+                        <div class="benefit-list">
+                            <div class="benefit-item">
+                                <i class="fas fa-medal" aria-hidden="true"></i> Calidad Premium
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-truck" aria-hidden="true"></i> Distribución Mayorista
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-leaf" aria-hidden="true"></i> 100% Natural
+                            </div>
+                        </div>
+                        
+                        <div class="hero-buttons">
+                            <a href="#products" class="btn-secondary"><i class="fas fa-apple-alt" aria-hidden="true"></i> Ver Productos</a>
+                            <a href="#contact" class="btn-primary"><i class="fas fa-paper-plane" aria-hidden="true"></i> Contáctanos</a>
+                        </div>
+                        
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <span class="stat-number" id="yearsCounter">6+</span>
+                                <span class="stat-text">Años de experiencia</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="fruitsCounter">20+</span>
+                                <span class="stat-text">Frutas exóticas</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="citiesCounter">30+</span>
+                                <span class="stat-text">Ciudades servidas</span>
+                            </div>
+                        </div>
                     </div>
                     
-                    <p>Conectamos a España y Europa con los sabores más exclusivos del mundo. Frutas exóticas seleccionadas con pasión, importadas con excelencia y distribuidas con compromiso.</p>
-                    
-                    <div class="benefit-list">
-                        <div class="benefit-item">
-                            <i class="fas fa-medal"></i> Calidad Premium
-                        </div>
-                        <div class="benefit-item">
-                            <i class="fas fa-truck"></i> Distribución Mayorista
-                        </div>
-                        <div class="benefit-item">
-                            <i class="fas fa-leaf"></i> 100% Natural
-                        </div>
-                    </div>
-                    
-                    <div class="hero-buttons">
-                        <a href="#products" class="btn-secondary"><i class="fas fa-apple-alt"></i> Ver Productos</a>
-                        <a href="#contact" class="btn-primary"><i class="fas fa-paper-plane"></i> Contáctanos</a>
-                    </div>
-                    
-                    <div class="hero-stats">
-                        <div class="stat-item">
-                            <span class="stat-number" id="yearsCounter">6+</span>
-                            <span class="stat-text">Años de experiencia</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number" id="fruitsCounter">20+</span>
-                            <span class="stat-text">Frutas exóticas</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number" id="citiesCounter">30+</span>
-                            <span class="stat-text">Ciudades servidas</span>
+                    <div class="hero-image fade-in">
+                        <div class="circle circle-1" aria-hidden="true"></div>
+                        <div class="circle circle-2" aria-hidden="true"></div>
+                        <div class="circle circle-3" aria-hidden="true"></div>
+                        <img src="{% static 'img/mangostino.jpg' %}" alt="Mangostino - Fruta exótica premium importada por L&M" width="400" height="400">
+                        <div class="image-badge">
+                            <span>Calidad</span>
+                            <strong>Premium</strong>
                         </div>
                     </div>
                 </div>
                 
-                <div class="hero-image fade-in">
-                    <div class="circle circle-1"></div>
-                    <div class="circle circle-2"></div>
-                    <div class="circle circle-3"></div>
-                    <img src="{% static 'img/mangostino.jpg' %}" alt="Frutas Exóticas Premium">
-                    <div class="image-badge">
-                        <span>Calidad</span>
-                        <strong>Premium</strong>
+                <div class="hero-fruit-showcase" aria-hidden="true">
+                    <div class="hero-fruit-item">
+                        <img src="{% static 'img/pitahaya.jpg' %}" alt="Pitahaya" width="70" height="70">
+                    </div>
+                    <div class="hero-fruit-item">
+                        <img src="{% static 'img/mangostino2.png' %}" alt="Mangostino" width="70" height="70">
+                    </div>
+                    <div class="hero-fruit-item">
+                        <img src="{% static 'img/gulupa.png' %}" alt="Gulupa" width="70" height="70">
+                    </div>
+                    <div class="hero-fruit-item">
+                        <img src="{% static 'img/granadilla.jpg' %}" alt="Granadilla" width="70" height="70">
+                    </div>
+                    <div class="hero-fruit-item">
+                        <img src="{% static 'img/Baby_Mango.png' %}" alt="Baby Mango" width="70" height="70">
                     </div>
                 </div>
             </div>
             
-            <div class="hero-fruit-showcase">
-                <div class="hero-fruit-item">
-                    <img src="{% static 'img/pitahaya.jpg' %}" alt="Pitahaya">
-                </div>
-                <div class="hero-fruit-item">
-                    <img src="{% static 'img/mangostino2.png' %}" alt="Mangostino">
-                </div>
-                <div class="hero-fruit-item">
-                    <img src="{% static 'img/gulupa.png' %}" alt="Gulupa">
-                </div>
-                <div class="hero-fruit-item">
-                    <img src="{% static 'img/granadilla.jpg' %}" alt="Granadilla">
-                </div>
-                <div class="hero-fruit-item">
-                    <img src="{% static 'img/Baby_Mango.png' %}" alt="Baby Mango">
+            <div class="scroll-indicator">
+                <a href="#about">
+                    <span>Descubre más</span>
+                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- About Section with semantic article -->
+        <article id="about" class="about" aria-labelledby="about-heading">
+            <div class="container">
+                <header class="section-header fade-in">
+                    <h2 id="about-heading">Sobre Nosotros</h2>
+                    <div class="divider" aria-hidden="true"></div>
+                </header>
+                <div class="about-content">
+                    <div class="about-img fade-in">
+                        <img src="{% static 'img/historia.jpeg' %}" alt="L&M Exotic Fruits - Historia de nuestra empresa de importación de frutas exóticas" width="600" height="400">
+                    </div>
+                    <div class="about-text fade-in">
+                        <h3>Desde 2017 trayendo lo mejor del mundo a tu mesa</h3>
+                        <p>En L&M Exotic Fruits, nos especializamos en la importación y distribución de frutas exóticas de la más alta calidad. Nuestra pasión por los sabores únicos nos ha llevado a explorar los rincones más remotos del planeta para traerte experiencias gustativas incomparables.</p>
+                        <p>Trabajamos directamente con productores certificados que comparten nuestra visión de calidad, sostenibilidad y comercio justo, garantizando que cada fruta que llega a tus manos sea excepcional.</p>
+                        <a href="#products" class="btn-secondary">Conoce nuestros productos</a>
+                    </div>
                 </div>
             </div>
-        </div>
+        </article>
+
+        <!-- Products Gallery Section with semantic elements -->
+        <section id="products" class="products" aria-labelledby="products-heading">
+            <div class="container">
+                <header class="section-header fade-in">
+                    <h2 id="products-heading">Nuestras Frutas Exóticas</h2>
+                    <div class="divider" aria-hidden="true"></div>
+                    <p>Descubre nuestra selección premium de frutas traídas de los más exóticos lugares del mundo</p>
+                </header>
+                <div class="product-gallery fade-in">
+                    <div class="products-container">
+                        <!-- Products with improved accessibility -->
+                        <article class="product-item" data-product="pitahaya">
+                            <img src="{% static 'img/pitahaya.jpg' %}" alt="Pitahaya - Fruta exótica con pulpa blanca y semillas negras" width="300" height="250">
+                            <div class="product-info">
+                                <h3>Pitahaya</h3>
+                                <p>Fruta de pulpa blanca con semillas negras, intenso sabor dulce y rica en antioxidantes</p>
+                            </div>
+                        </article>
+                        <article class="product-item" data-product="mangostino">
+                            <img src="{% static 'img/mangostino2.png' %}" alt="Mangostino - La reina de las frutas exóticas" width="300" height="250">
+                            <div class="product-info">
+                                <h3>Mangostino</h3>
+                                <p>La reina de las frutas, con pulpa blanca delicada y sabor agridulce único en el mundo</p>
+                            </div>
+                        </article>
+                        
+                        <div class="product-item" data-product="uchuva">
+                            <img src="{% static 'img/uchuvas.jpeg' %}" alt="Uchuva">
+                            <div class="product-info">
+                                <h3>Uchuva</h3>
+                                <p>Pequeña fruta dorada de sabor agridulce, rica en vitaminas y propiedades antioxidantes</p>
+                            </div>
+                        </div>
+                        <div class="product-item" data-product="guanabana">
+                            <img src="{% static 'img/guanabana.jpeg' %}" alt="Guanabana">
+                            <div class="product-info">
+                                <h3>Guanabana</h3>
+                                <p>Fruta tropical de gran tamaño con pulpa blanca, jugosa y sabor dulce con toques ácidos</p>
+                            </div>
+                        </div>
+                        <div class="product-item" data-product="granadilla">
+                            <img src="{% static 'img/granadilla.jpg' %}" alt="Granadilla">
+                            <div class="product-info">
+                                <h3>Granadilla</h3>
+                                <p>Fruta de la pasión con pulpa gelatinosa y semillas comestibles de sabor dulce y refrescante</p>
+                            </div>
+                        </div>
+                        <div class="product-item" data-product="lulo">
+                            <img src="{% static 'img/lulo.jpg' %}" alt="Lulo">
+                            <div class="product-info">
+                                <h3>Lulo</h3>
+                                <p>Fruta cítrica de pulpa verde, sabor único entre limón y piña ideal para jugos refrescantes</p>
+                            </div>
+                        </div>
+                        <div class="product-item" data-product="gulupa">
+                            <img src="{% static 'img/gulupa.png' %}" alt="Gulupa">
+                            <div class="product-info">
+                                <h3>Gulupa</h3>
+                                <p>Fruta de la pasión púrpura con pulpa aromática y sabor intenso, perfecta para postres y bebidas</p>
+                            </div>
+                        </div>
+                        <div class="product-item" data-product="tamarillo">
+                            <img src="{% static 'img/tomate_arbol.png' %}" alt="Tamarillo">
+                            <div class="product-info">
+                                <h3>Tamarillo</h3>
+                                <p>Tomate de árbol con sabor agridulce, rico en vitaminas y antioxidantes naturales</p>
+                            </div>
+                        </div>
+                        <div class="product-item" data-product="bananito">
+                            <img src="{% static 'img/baby_bananito.png' %}" alt="Bananito">
+                            <div class="product-info">
+                                <h3>Bananito</h3>
+                                <p>Pequeño plátano dulce con intenso aroma y sabor, ideal como snack saludable</p>
+                            </div>
+                        </div>
+                        <div class="product-item" data-product="babymango">
+                            <img src="{% static 'img/Baby_Mango.png' %}" alt="Baby Mango">
+                            <div class="product-info">
+                                <h3>Baby Mango</h3>
+                                <p>Versión pequeña y dulce del mango tradicional, con pulpa cremosa sin fibras</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation buttons with accessibility improvements -->
+                    <div class="product-navigation fade-in">
+                        <button class="product-nav-btn" id="scrollLeft" aria-label="Desplazar productos a la izquierda"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
+                        <button class="product-nav-btn" id="scrollRight" aria-label="Desplazar productos a la derecha"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
         
-        <div class="scroll-indicator">
-            <a href="#about">
-                <span>Descubre más</span>
-                <i class="fas fa-chevron-down"></i>
-            </a>
+        <!-- Modal for product details improved with ARIA attributes -->
+        <div id="productModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
+            <div class="modal-content">
+                <button class="modal-close" aria-label="Cerrar">&times;</button>
+                <header class="modal-header">
+                    <h2 id="modalTitle">Nombre de la Fruta</h2>
+                </header>
+                <div class="modal-body">
+                    <div class="modal-img">
+                        <img id="modalImage" src="" alt="Fruta exótica">
+                    </div>
+                    <div class="modal-info">
+                        <h3>Descripción</h3>
+                        <p id="modalDescription"></p>
+                        <h3>Características</h3>
+                        <p id="modalFeatures"></p>
+                        <h3>Origen</h3>
+                        <p id="modalOrigin"></p>
+                        <div id="modalTags"></div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </section>
 
-    <!-- About Section -->
-    <section id="about" class="about">
-        <div class="container">
-            <div class="section-header fade-in">
-                <h2>Sobre Nosotros</h2>
-                <div class="divider"></div>
-            </div>
-            <div class="about-content">
-                <div class="about-img fade-in">
-                    <img src="{% static 'img/historia.jpeg' %}" alt="L&M Exotic Fruits - Nuestra Historia">
-                </div>
-                <div class="about-text fade-in">
-                    <h3>Desde 2017 trayendo lo mejor del mundo a tu mesa</h3>
-                    <p>En L&M Exotic Fruits, nos especializamos en la importación y distribución de frutas exóticas de la más alta calidad. Nuestra pasión por los sabores únicos nos ha llevado a explorar los rincones más remotos del planeta para traerte experiencias gustativas incomparables.</p>
-                    <p>Trabajamos directamente con productores certificados que comparten nuestra visión de calidad, sostenibilidad y comercio justo, garantizando que cada fruta que llega a tus manos sea excepcional.</p>
-                    <a href="#products" class="btn-secondary">Conoce nuestros productos</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Products Gallery Section -->
-    <section id="products" class="products">
-        <div class="container">
-            <div class="section-header fade-in">
-                <h2>Nuestras Frutas Exóticas</h2>
-                <div class="divider"></div>
-                <p>Descubre nuestra selección premium de frutas traídas de los más exóticos lugares del mundo</p>
-            </div>
-            <div class="product-gallery fade-in">
-                <div class="products-container">
-                    <!-- Aquí irán todos los productos en una sola fila horizontal scrollable -->
-                    <div class="product-item" data-product="pitahaya">
-                        <img src="{% static 'img/pitahaya.jpg' %}" alt="Pitahaya">
-                        <div class="product-info">
-                            <h3>Pitahaya</h3>
-                            <p>Fruta de pulpa blanca con semillas negras, intenso sabor dulce y rica en antioxidantes</p>
-                        </div>
+        <!-- Contact Section with structured content -->
+        <section id="contact" class="contact" aria-labelledby="contact-heading">
+            <div class="container">
+                <header class="section-header fade-in">
+                    <h2 id="contact-heading">Contáctanos</h2>
+                    <div class="divider" aria-hidden="true"></div>
+                    <p>¿Interesado en distribuir nuestros productos o realizar una consulta? ¡Estamos aquí para ayudarte!</p>
+                </header>
+                <div class="contact-content">
+                    <div class="contact-info fade-in">
+                        <article class="info-item">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                            <h3>Ubicación</h3>
+                            <p>Barcelona, España</p>
+                        </article>
+                        <article class="info-item">
+                            <i class="fas fa-phone" aria-hidden="true"></i>
+                            <h3>Teléfono</h3>
+                            <p><a href="tel:+34633494242">+34 633 49 42 42</a></p>
+                        </article>
+                        <article class="info-item">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                            <h3>Email</h3>
+                            <p><a href="mailto:import@luzmeloexoticfruits.com">import@luzmeloexoticfruits.com</a></p>
+                        </article>
                     </div>
-                    <div class="product-item" data-product="mangostino">
-                        <img src="{% static 'img/mangostino2.png' %}" alt="Mangostino">
-                        <div class="product-info">
-                            <h3>Mangostino</h3>
-                            <p>La reina de las frutas, con pulpa blanca delicada y sabor agridulce único en el mundo</p>
-                        </div>
-                    </div>
-                    <div class="product-item" data-product="uchuva">
-                        <img src="{% static 'img/uchuvas.jpeg' %}" alt="Uchuva">
-                        <div class="product-info">
-                            <h3>Uchuva</h3>
-                            <p>Pequeña fruta dorada de sabor agridulce, rica en vitaminas y propiedades antioxidantes</p>
-                        </div>
-                    </div>
-                    <div class="product-item" data-product="guanabana">
-                        <img src="{% static 'img/guanabana.jpeg' %}" alt="Guanabana">
-                        <div class="product-info">
-                            <h3>Guanabana</h3>
-                            <p>Fruta tropical de gran tamaño con pulpa blanca, jugosa y sabor dulce con toques ácidos</p>
-                        </div>
-                    </div>
-                    <div class="product-item" data-product="granadilla">
-                        <img src="{% static 'img/granadilla.jpg' %}" alt="Granadilla">
-                        <div class="product-info">
-                            <h3>Granadilla</h3>
-                            <p>Fruta de la pasión con pulpa gelatinosa y semillas comestibles de sabor dulce y refrescante</p>
-                        </div>
-                    </div>
-                    <div class="product-item" data-product="lulo">
-                        <img src="{% static 'img/lulo.jpg' %}" alt="Lulo">
-                        <div class="product-info">
-                            <h3>Lulo</h3>
-                            <p>Fruta cítrica de pulpa verde, sabor único entre limón y piña ideal para jugos refrescantes</p>
-                        </div>
-                    </div>
-                    <div class="product-item" data-product="gulupa">
-                        <img src="{% static 'img/gulupa.png' %}" alt="Gulupa">
-                        <div class="product-info">
-                            <h3>Gulupa</h3>
-                            <p>Fruta de la pasión púrpura con pulpa aromática y sabor intenso, perfecta para postres y bebidas</p>
-                        </div>
-                    </div>
-                    <div class="product-item" data-product="tamarillo">
-                        <img src="{% static 'img/tomate_arbol.png' %}" alt="Tamarillo">
-                        <div class="product-info">
-                            <h3>Tamarillo</h3>
-                            <p>Tomate de árbol con sabor agridulce, rico en vitaminas y antioxidantes naturales</p>
-                        </div>
-                    </div>
-                    <div class="product-item" data-product="bananito">
-                        <img src="{% static 'img/baby_bananito.png' %}" alt="Bananito">
-                        <div class="product-info">
-                            <h3>Bananito</h3>
-                            <p>Pequeño plátano dulce con intenso aroma y sabor, ideal como snack saludable</p>
-                        </div>
-                    </div>
-                    <div class="product-item" data-product="babymango">
-                        <img src="{% static 'img/Baby_Mango.png' %}" alt="Baby Mango">
-                        <div class="product-info">
-                            <h3>Baby Mango</h3>
-                            <p>Versión pequeña y dulce del mango tradicional, con pulpa cremosa sin fibras</p>
-                        </div>
+                    <div class="contact-form fade-in">
+                        <form action="{% url 'landing_page' %}" method="post" aria-label="Formulario de contacto">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="name" class="sr-only">Nombre</label>
+                                <input type="text" id="name" name="name" placeholder="Nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email" class="sr-only">Email</label>
+                                <input type="email" id="email" name="email" placeholder="Email" required
+                                       pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                                       title="Por favor ingresa un email válido">
+                            </div>
+                            <div class="form-group">
+                                <label for="subject" class="sr-only">Asunto</label>
+                                <input type="text" id="subject" name="subject" placeholder="Asunto">
+                            </div>
+                            <div class="form-group">
+                                <label for="message" class="sr-only">Mensaje</label>
+                                <textarea id="message" name="message" placeholder="Mensaje" required></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary submit-btn"><i class="fas fa-paper-plane" aria-hidden="true"></i> Enviar Mensaje</button>
+                        </form>
                     </div>
                 </div>
-                
-                <!-- Botones de navegación -->
-                <div class="product-navigation fade-in">
-                    <button class="product-nav-btn" id="scrollLeft"><i class="fas fa-chevron-left"></i></button>
-                    <button class="product-nav-btn" id="scrollRight"><i class="fas fa-chevron-right"></i></button>
-                </div>
             </div>
-        </div>
-    </section>
-    
-    <!-- Modal para mostrar detalles del producto -->
-    <div id="productModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close">&times;</span>
-            <div class="modal-header">
-                <h2 id="modalTitle">Nombre de la Fruta</h2>
-            </div>
-            <div class="modal-body">
-                <div class="modal-img">
-                    <img id="modalImage" src="" alt="Fruta exótica">
-                </div>
-                <div class="modal-info">
-                    <h3>Descripción</h3>
-                    <p id="modalDescription"></p>
-                    <h3>Características</h3>
-                    <p id="modalFeatures"></p>
-                    <h3>Origen</h3>
-                    <p id="modalOrigin"></p>
-                    <div id="modalTags"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <div class="container">
-            <div class="section-header fade-in">
-                <h2>Contáctanos</h2>
-                <div class="divider"></div>
-                <p>¿Interesado en distribuir nuestros productos o realizar una consulta? ¡Estamos aquí para ayudarte!</p>
-            </div>
-            <div class="contact-content">
-                <div class="contact-info fade-in">
-                    <div class="info-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <h3>Ubicación</h3>
-                        <p>Barcelona, España</p>
-                    </div>
-                    <div class="info-item">
-                        <i class="fas fa-phone"></i>
-                        <h3>Teléfono</h3>
-                        <p>+34 633 49 42 42</p>
-                    </div>
-                    <div class="info-item">
-                        <i class="fas fa-envelope"></i>
-                        <h3>Email</h3>
-                        <p>import@luzmeloexoticfruits.com</p>
-                    </div>
-                </div>
-                <div class="contact-form fade-in">
-                    <form action="{% url 'landing_page' %}" method="post">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <input type="text" name="name" placeholder="Nombre" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="email" name="email" placeholder="Email" required
-                                   pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                                   title="Por favor ingresa un email válido">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="subject" placeholder="Asunto">
-                        </div>
-                        <div class="form-group">
-                            <textarea name="message" placeholder="Mensaje" required></textarea>
-                        </div>
-                        <button type="submit" class="btn-primary submit-btn"><i class="fas fa-paper-plane"></i> Enviar Mensaje</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
     <!-- Toast Notifications Container -->
-    <div class="toast-container" id="toastContainer">
+    <div class="toast-container" id="toastContainer" aria-live="polite">
         <!-- Toasts will be inserted here via JavaScript -->
     </div>
 
     <!-- WhatsApp Floating Button -->
-    <a href="https://wa.me/34633494228" class="whatsapp-btn" target="_blank" rel="noopener noreferrer" title="Contáctanos por WhatsApp">
-        <i class="fab fa-whatsapp"></i>
+    <a href="https://wa.me/34633494228" class="whatsapp-btn" target="_blank" rel="noopener noreferrer" title="Contáctanos por WhatsApp" aria-label="Contactar por WhatsApp">
+        <i class="fab fa-whatsapp" aria-hidden="true"></i>
     </a>
 
-    <!-- Footer Section -->
-    <footer class="footer">
+    <!-- Footer with semantic structure -->
+    <footer class="footer" role="contentinfo">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-logo">
-                    <img src="{% static 'img/logo_sin_fondo.png' %}" alt="L&M Exotic Fruits Logo">
+                    <img src="{% static 'img/logo_sin_fondo.png' %}" alt="L&M Exotic Fruits Logo" width="50" height="50">
                     <p>L&M Exotic Fruits es una empresa especializada en la importación y distribución de frutas exóticas de la más alta calidad desde 2017, llevando sabores únicos a toda Europa.</p>
                 </div>
-                <div class="footer-links">
+                <nav class="footer-links" aria-label="Enlaces del pie de página">
                     <h3>Enlaces Rápidos</h3>
                     <ul>
                         <li><a href="#home">Inicio</a></li>
@@ -525,14 +672,14 @@
                         <li><a href="#products">Productos</a></li>
                         <li><a href="#contact">Contacto</a></li>
                     </ul>
-                </div>
+                </nav>
                 <div class="footer-social">
                     <h3>Síguenos</h3>
                     <div class="social-icons">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
                     </div>
                 </div>
             </div>
@@ -558,15 +705,6 @@
             fadeElements.forEach(element => {
                 fadeObserver.observe(element);
             });
-            
-            // Mobile menu toggle
-            const menuToggle = document.querySelector('.menu-toggle');
-            const nav = document.querySelector('.nav');
-            
-            menuToggle.addEventListener('click', () => {
-                nav.classList.toggle('active');
-            });
-            
             // Close mobile menu when clicking on a link
             const navLinks = document.querySelectorAll('.nav ul li a');
             navLinks.forEach(link => {

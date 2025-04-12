@@ -4,10 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Utilidades.">
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0003_alter_tranferenciascarga_trm_and_more.py" afterDir="false" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Ubicacion Single page.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exoticaproject/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/static/css/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/static/css/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -186,14 +188,8 @@
       <workItem from="1744219257056" duration="7116000" />
       <workItem from="1744239300983" duration="3614000" />
       <workItem from="1744292350807" duration="22001000" />
-    </task>
-    <task id="LOCAL-00004" summary="Automatizacion de PDF Aduana.">
-      <option name="closed" value="true" />
-      <created>1742703721501</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1742703721501</updated>
+      <workItem from="1744412905105" duration="104000" />
+      <workItem from="1744495960096" duration="3097000" />
     </task>
     <task id="LOCAL-00005" summary="Nuevas vistas">
       <option name="closed" value="true" />
@@ -579,7 +575,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744334616838</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="Ubicacion Single page.">
+      <option name="closed" value="true" />
+      <created>1744413002360</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1744413002360</updated>
+    </task>
+    <option name="localTasksCounter" value="54" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -597,7 +601,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Commit Final 5" />
     <MESSAGE value="Commit Final 6" />
     <MESSAGE value="Commit Final 7" />
     <MESSAGE value="Cambio de URL Database." />
@@ -622,6 +625,7 @@
     <MESSAGE value="Cambio de lista de compras 10." />
     <MESSAGE value="Retoques" />
     <MESSAGE value="Utilidades." />
-    <option name="LAST_COMMIT_MESSAGE" value="Utilidades." />
+    <MESSAGE value="Ubicacion Single page." />
+    <option name="LAST_COMMIT_MESSAGE" value="Ubicacion Single page." />
   </component>
 </project>

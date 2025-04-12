@@ -1191,14 +1191,14 @@ input:valid, textarea:valid {
 .modal-content {
     background: linear-gradient(135deg, #fff, #FFF0F5);
     margin: 5% auto;
-    padding: 40px;
-    border-radius: 20px;
-    width: 75%;
-    max-width: 1000px;
-    box-shadow: 0 10px 50px rgba(216, 27, 96, 0.3);
+    padding: 30px; /* Reduced padding */
+    border-radius: 15px; /* Slightly smaller radius */
+    width: 70%; /* Reduced width */
+    max-width: 900px; /* Reduced max-width */
+    box-shadow: 0 8px 40px rgba(216, 27, 96, 0.25); /* Adjusted shadow */
     position: relative;
     animation: slideIn 0.5s ease;
-    border: 1px solid rgba(216, 27, 96, 0.2);
+    border: 1px solid rgba(216, 27, 96, 0.15); /* Adjusted border */
 }
 
 .modal-close {
@@ -1234,59 +1234,58 @@ input:valid, textarea:valid {
 .modal-header h2 {
     color: #D81B60;
     font-family: 'Playfair Display', serif;
-    border-bottom: 3px solid;
+    border-bottom: 2px solid; /* Thinner border */
     border-image: linear-gradient(to right, #D81B60, #9C27B0) 1;
-    padding-bottom: 15px;
-    font-size: 2.5rem;
+    padding-bottom: 10px; /* Reduced padding */
+    font-size: 2.2rem; /* Slightly smaller font size */
     width: 90%;
 }
 
 .modal-body {
     display: flex;
     flex-wrap: wrap;
-    gap: 40px;
+    gap: 30px; /* Reduced gap */
+    align-items: flex-start; /* Align items to the top */
 }
 
 .modal-img {
-    flex: 1;
-    min-width: 320px;
-    border-radius: 15px;
+    flex: 1 1 300px; /* Adjusted flex basis */
+    min-width: 280px; /* Adjusted min-width */
+    border-radius: 10px; /* Smaller radius */
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    border: 3px solid #fff;
-    transform: scale(0.95);
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.modal.open .modal-img {
-    transform: scale(1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Adjusted shadow */
+    background-color: #f8f9fa; /* Subtle background for image container */
+    display: flex; /* Center image */
+    align-items: center; /* Center image */
+    justify-content: center; /* Center image */
+    max-height: 400px; /* Limit max height */
 }
 
 .modal-img img {
     width: 100%;
-    height: auto;
-    object-fit: cover;
+    height: 100%; /* Allow height to adjust */
+    max-height: 400px; /* Ensure image doesn't exceed container height */
+    object-fit: contain; /* Contain image within bounds, preserving aspect ratio */
     display: block;
-    transform: scale(1);
-    transition: transform 0.5s ease;
+    transition: transform 0.3s ease; /* Keep hover effect */
 }
 
 .modal-img:hover img {
-    transform: scale(1.03);
+    transform: scale(1.03); /* Keep subtle hover zoom */
 }
 
 .modal-info {
-    flex: 1;
+    flex: 1 1 350px; /* Adjusted flex basis */
     min-width: 300px;
-    padding-right: 10px;
+    padding-right: 0; /* Removed padding */
 }
 
 .modal-info h3 {
     color: #9C27B0;
     margin-top: 0;
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
+    font-size: 1.4rem; /* Slightly smaller */
+    margin-bottom: 15px; /* Reduced margin */
+    padding-bottom: 8px; /* Reduced padding */
     position: relative;
 }
 
@@ -1302,10 +1301,10 @@ input:valid, textarea:valid {
 }
 
 .modal-info p {
-    line-height: 1.7;
+    line-height: 1.6; /* Adjusted line height */
     color: #555;
-    margin-bottom: 20px;
-    font-size: 1.05rem;
+    margin-bottom: 15px; /* Reduced margin */
+    font-size: 1rem; /* Adjusted font size */
 }
 
 .product-tag {
