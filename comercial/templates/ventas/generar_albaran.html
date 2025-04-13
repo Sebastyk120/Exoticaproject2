@@ -95,8 +95,7 @@
                     <h2>ALBARÁN</h2>
                     <div class="invoice-number">Nº: {{ venta.id }}</div>
                     <div class="invoice-date">
-                        <p><strong>Fecha Emisión:</strong> {% now "d/m/Y" %}</p>
-                        <p><strong>Fecha Entrega:</strong> {{ venta.fecha_entrega|date:"d/m/Y"|default:"-" }}</p>
+                        <p><strong>Fecha Entrega:</strong> {{ venta.fecha_entrega|date:"d/m/Y" }}</p>
                         <p><strong>Semana:</strong> {{ venta.semana|default:"-" }}</p>
                     </div>
                 </div>

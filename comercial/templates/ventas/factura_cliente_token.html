@@ -80,7 +80,7 @@
                     <h2>FACTURA</h2>
                     <div class="invoice-number">Nº: {% if venta.numero_factura %}{{ venta.numero_factura }}{% else %}{{ venta.id }}{% endif %}</div>
                     <div class="invoice-date">
-                        <p><strong>Fecha Emisión:</strong> {% now "d/m/Y" %}</p>
+                        <p><strong>Fecha Emisión:</strong> {{ venta.fecha_entrega|date:"d/m/Y" }}</p>
                         <p class="fecha-vencimiento"><strong>Fecha Vencimiento:</strong> {{ venta.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</p>
                         <p><strong>Semana:</strong> {{ venta.semana|default:"-" }}</p>
                     </div>

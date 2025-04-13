@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /app/admin/
+Disallow: /static/admin/
+Disallow: /__pycache__/
+
+Sitemap: https://luzmeloexoticfruits.com/sitemap.xml

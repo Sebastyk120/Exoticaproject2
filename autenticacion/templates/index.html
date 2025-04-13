@@ -431,16 +431,16 @@
                         <img src="{% static 'img/pitahaya.jpg' %}" alt="Pitahaya" width="70" height="70">
                     </div>
                     <div class="hero-fruit-item">
-                        <img src="{% static 'img/mangostino2.png' %}" alt="Mangostino" width="70" height="70">
+                        <img src="{% static 'img/mangostino2.webp' %}" alt="Mangostino" width="70" height="70">
                     </div>
                     <div class="hero-fruit-item">
-                        <img src="{% static 'img/gulupa.png' %}" alt="Gulupa" width="70" height="70">
+                        <img src="{% static 'img/gulupa.webp' %}" alt="Gulupa" width="70" height="70">
                     </div>
                     <div class="hero-fruit-item">
                         <img src="{% static 'img/granadilla.jpg' %}" alt="Granadilla" width="70" height="70">
                     </div>
                     <div class="hero-fruit-item">
-                        <img src="{% static 'img/Baby_Mango.png' %}" alt="Baby Mango" width="70" height="70">
+                        <img src="{% static 'img/Baby_Mango.webp' %}" alt="Baby Mango" width="70" height="70">
                     </div>
                 </div>
             </div>
@@ -493,7 +493,7 @@
                             </div>
                         </article>
                         <article class="product-item" data-product="mangostino">
-                            <img src="{% static 'img/mangostino2.png' %}" alt="Mangostino - La reina de las frutas exóticas" width="300" height="250">
+                            <img src="{% static 'img/mangostino2.webp' %}" alt="Mangostino - La reina de las frutas exóticas" width="300" height="250">
                             <div class="product-info">
                                 <h3>Mangostino</h3>
                                 <p>La reina de las frutas, con pulpa blanca delicada y sabor agridulce único en el mundo</p>
@@ -529,28 +529,28 @@
                             </div>
                         </div>
                         <div class="product-item" data-product="gulupa">
-                            <img src="{% static 'img/gulupa.png' %}" alt="Gulupa">
+                            <img src="{% static 'img/gulupa.webp' %}" alt="Gulupa">
                             <div class="product-info">
                                 <h3>Gulupa</h3>
                                 <p>Fruta de la pasión púrpura con pulpa aromática y sabor intenso, perfecta para postres y bebidas</p>
                             </div>
                         </div>
                         <div class="product-item" data-product="tamarillo">
-                            <img src="{% static 'img/tomate_arbol.png' %}" alt="Tamarillo">
+                            <img src="{% static 'img/tomate_arbol.webp' %}" alt="Tamarillo">
                             <div class="product-info">
                                 <h3>Tamarillo</h3>
                                 <p>Tomate de árbol con sabor agridulce, rico en vitaminas y antioxidantes naturales</p>
                             </div>
                         </div>
                         <div class="product-item" data-product="bananito">
-                            <img src="{% static 'img/baby_bananito.png' %}" alt="Bananito">
+                            <img src="{% static 'img/baby_bananito.jpeg' %}" alt="Bananito">
                             <div class="product-info">
                                 <h3>Bananito</h3>
                                 <p>Pequeño plátano dulce con intenso aroma y sabor, ideal como snack saludable</p>
                             </div>
                         </div>
                         <div class="product-item" data-product="babymango">
-                            <img src="{% static 'img/Baby_Mango.png' %}" alt="Baby Mango">
+                            <img src="{% static 'img/Baby_Mango.webp' %}" alt="Baby Mango">
                             <div class="product-info">
                                 <h3>Baby Mango</h3>
                                 <p>Versión pequeña y dulce del mango tradicional, con pulpa cremosa sin fibras</p>
@@ -691,6 +691,28 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Añadir funcionalidad para el menú móvil
+            const menuToggle = document.querySelector('.menu-toggle');
+            const nav = document.querySelector('.nav');
+            
+            // Toggle menu cuando se hace clic en el botón de menú
+            menuToggle.addEventListener('click', () => {
+                nav.classList.toggle('active');
+                // Actualizar atributo aria-expanded para accesibilidad
+                const isExpanded = nav.classList.contains('active');
+                menuToggle.setAttribute('aria-expanded', isExpanded);
+            });
+            
+            // Cerrar menú cuando se hace clic fuera de él
+            document.addEventListener('click', (e) => {
+                if (nav.classList.contains('active') && 
+                    !e.target.closest('.nav') && 
+                    !e.target.closest('.menu-toggle')) {
+                    nav.classList.remove('active');
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
             // Existing animation code
             const fadeElements = document.querySelectorAll('.fade-in');
             
