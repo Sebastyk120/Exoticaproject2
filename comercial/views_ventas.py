@@ -392,6 +392,13 @@ def generar_rectificativa(request, venta_id):
     # If valor_total_abono_euro_con_iva doesn't exist as a model field, calculate it
     if not hasattr(venta, 'valor_total_abono_euro_con_iva'):
         venta.valor_total_abono_euro_con_iva = venta.valor_total_abono_euro
+        
+    # Calculate the total number of boxes in the credit note
+    if not hasattr(venta, 'total_cajas_abono') or venta.total_cajas_abono is None:
+        venta.total_cajas_abono = sum(
+            detalle.no_cajas_abono for detalle in detalles 
+            if detalle.no_cajas_abono is not None
+        )
     
     return render(request, 'ventas/generar_rectificativa.html', {
         'venta': venta,
@@ -536,6 +543,13 @@ def rectificativa_cliente_token(request, venta_id, token):
     # If valor_total_abono_euro_con_iva doesn't exist as a model field, calculate it
     if not hasattr(venta, 'valor_total_abono_euro_con_iva'):
         venta.valor_total_abono_euro_con_iva = venta.valor_total_abono_euro
+        
+    # Calculate the total number of boxes in the credit note
+    if not hasattr(venta, 'total_cajas_abono') or venta.total_cajas_abono is None:
+        venta.total_cajas_abono = sum(
+            detalle.no_cajas_abono for detalle in detalles 
+            if detalle.no_cajas_abono is not None
+        )
         
     return render(request, 'ventas/rectificativa_cliente_token.html', {
         'venta': venta,

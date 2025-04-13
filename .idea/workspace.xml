@@ -4,24 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Ubicacion Single page.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/static/css/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/static/css/index.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/static/img/Baby_Mango.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/static/img/baby_bananito.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/static/img/gulupa.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/static/img/mangostino2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/static/img/rama-baby-mango.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/static/img/tomate_arbol.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/factura_cliente_token.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/factura_cliente_token.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran_cliente.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_factura.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_factura.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_rectificativa.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_rectificativa.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/rectificativa_cliente_token.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/rectificativa_cliente_token.html" afterDir="false" />
-    </list>
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Cambios en fechas de factura y albaranes." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -201,15 +184,7 @@
       <workItem from="1744292350807" duration="22001000" />
       <workItem from="1744412905105" duration="104000" />
       <workItem from="1744495960096" duration="3744000" />
-      <workItem from="1744546020534" duration="1160000" />
-    </task>
-    <task id="LOCAL-00006" summary="Checkpoint 28/03/2024 1pm">
-      <option name="closed" value="true" />
-      <created>1743165661589</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1743165661589</updated>
+      <workItem from="1744546020534" duration="1556000" />
     </task>
     <task id="LOCAL-00007" summary="finalizacion de generar_factura">
       <option name="closed" value="true" />
@@ -595,7 +570,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744501673922</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="Cambios en fechas de factura y albaranes.">
+      <option name="closed" value="true" />
+      <created>1744547249659</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1744547249660</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -613,7 +596,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Commit Final 6" />
     <MESSAGE value="Commit Final 7" />
     <MESSAGE value="Cambio de URL Database." />
     <MESSAGE value="Cambio de URL Database 2" />
@@ -638,6 +620,7 @@
     <MESSAGE value="Retoques" />
     <MESSAGE value="Utilidades." />
     <MESSAGE value="Ubicacion Single page." />
-    <option name="LAST_COMMIT_MESSAGE" value="Ubicacion Single page." />
+    <MESSAGE value="Cambios en fechas de factura y albaranes." />
+    <option name="LAST_COMMIT_MESSAGE" value="Cambios en fechas de factura y albaranes." />
   </component>
 </project>

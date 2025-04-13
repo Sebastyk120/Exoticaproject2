@@ -516,6 +516,56 @@ body .invoice-container:has(.invoice-info h2:contains("FACTURA RECTIFICATIVA")) 
     font-size: 12px;
 }
 
+/* Estilos para destacar el Total de Cajas */
+.highlight-total-boxes {
+    background-color: #ffefd5; /* Color durazno claro de fondo */
+    border-radius: 4px;
+    padding: 6px 8px !important;
+    margin: 5px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-left: 4px solid #ff9800; /* Borde naranja a la izquierda */
+    position: relative;
+    overflow: hidden;
+}
+
+.highlight-total-boxes .summary-label {
+    font-weight: 700;
+    color: #d35400; /* Naranja más oscuro para el texto */
+    font-size: 14px;
+    position: relative;
+    z-index: 2;
+}
+
+.highlight-total-boxes .summary-value {
+    font-weight: 700;
+    color: #d35400;
+    font-size: 14px;
+    position: relative;
+    z-index: 2;
+}
+
+.highlight-total-boxes::before {
+    content: "\f4ce"; /* Icono de cajas (de Font Awesome) */
+    font-family: "Font Awesome 6 Free";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    opacity: 0.2;
+    color: #ff9800;
+    z-index: 1;
+}
+
+/* Asegúrate de que el elemento destacado se vea bien en la impresión */
+@media print {
+    .highlight-total-boxes {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
+
 /* Page break controls */
 @media print {
     .invoice-header, 

@@ -80,7 +80,7 @@
                     <h2>FACTURA RECTIFICATIVA</h2>
                     <div class="invoice-number">Nº: {{ venta.numero_nc }}</div>
                     <div class="invoice-date">
-                        <p><strong>Fecha Emisión:</strong> {% venta.fecha_entrega %}</p>
+                        <p><strong>Fecha Emisión:</strong> {{ venta.fecha_entrega }}</p>
                         <p><strong>Referencia a Factura:</strong> {% if venta.numero_factura %}{{ venta.numero_factura }}{% else %}{{ venta.id }}{% endif %}</p>
                         <p><strong>Semana:</strong> {{ venta.semana|default:"-" }}</p>
                     </div>
@@ -137,6 +137,10 @@
 
                 <div class="invoice-summary">
                     <div class="summary-table">
+                        <div class="summary-row highlight-total-boxes">
+                            <div class="summary-label">Total Cajas Abonadas:</div>
+                            <div class="summary-value">{{ venta.total_cajas_abono|format_integer }}</div>
+                        </div>
                         <div class="summary-row">
                             <div class="summary-label">Base Imponible:</div>
                             <div class="summary-value">{{ venta.total_base_imponible|format_currency_eur }}</div>

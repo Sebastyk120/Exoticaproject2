@@ -160,6 +160,10 @@
 
                 <div class="invoice-summary">
                     <div class="summary-table">
+                        <div class="summary-row highlight-total-boxes">
+                            <div class="summary-label">Total Cajas:</div>
+                            <div class="summary-value">{{ venta.total_cajas_pedido|format_integer }}</div>
+                        </div>
                         <div class="summary-row">
                             <div class="summary-label">Base Imponible:</div>
                             <div class="summary-value">{{ venta.subtotal_factura|format_currency_eur }}</div>
