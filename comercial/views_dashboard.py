@@ -20,6 +20,7 @@ def calcular_ventas_netas_por_producto_semana(anio=None, semana=None, trimestre=
     ventas_query = Venta.objects.all()
     if semana:
         ventas_query = ventas_query.filter(semana=semana)
+        print(f"[DEBUG] Filtro por semana: {semana}")
     elif trimestre:
         ventas_query = filtrar_por_trimestre(ventas_query, anio, trimestre)
     elif anio:
@@ -53,12 +54,23 @@ def calcular_ventas_netas_por_producto_semana(anio=None, semana=None, trimestre=
     resultado = {}
     for venta in ventas_netas:
         producto = venta['presentacion__fruta__nombre']
-        semana = venta['venta__semana']
-        # Mantener como Decimal hasta el final
+        semana_val = venta['venta__semana']
         valor = venta['ventas_netas'] if venta['ventas_netas'] is not None else Decimal('0')
+        if semana:
+            print(f"[DEBUG] Producto: {producto}, Semana: {semana_val}, Ventas Netas: {valor}")
         if producto not in resultado:
             resultado[producto] = {}
-        resultado[producto][semana] = float(valor)
+        # Sumar si ya existe (por si hay varios grupos de IVA)
+        if semana_val in resultado[producto]:
+            resultado[producto][semana_val] += float(valor)
+        else:
+            resultado[producto][semana_val] = float(valor)
+    # Print del valor final sumado por producto y semana
+    if semana:
+        print("[DEBUG] === SUMA FINAL POR PRODUCTO Y SEMANA ===")
+        for producto, semanas in resultado.items():
+            for semana_val, total in semanas.items():
+                print(f"[DEBUG] TOTAL Producto: {producto}, Semana: {semana_val}, Ventas Netas SUMADAS: {total}")
     return resultado
 
 def calcular_costos_compra_por_producto_semana(anio=None, semana=None, trimestre=None):
