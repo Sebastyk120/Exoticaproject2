@@ -20,7 +20,6 @@ def calcular_ventas_netas_por_producto_semana(anio=None, semana=None, trimestre=
     ventas_query = Venta.objects.all()
     if semana:
         ventas_query = ventas_query.filter(semana=semana)
-        print(f"[DEBUG] Filtro por semana: {semana}")
     elif trimestre:
         ventas_query = filtrar_por_trimestre(ventas_query, anio, trimestre)
     elif anio:
@@ -34,7 +33,6 @@ def calcular_ventas_netas_por_producto_semana(anio=None, semana=None, trimestre=
         'venta__semana',
         'venta__porcentaje_iva'
     ).annotate(
-        # Restar el abono neto (sin IVA) del valor_x_producto
         ventas_netas=Sum(
             ExpressionWrapper(
                 F('valor_x_producto') - 
@@ -56,8 +54,6 @@ def calcular_ventas_netas_por_producto_semana(anio=None, semana=None, trimestre=
         producto = venta['presentacion__fruta__nombre']
         semana_val = venta['venta__semana']
         valor = venta['ventas_netas'] if venta['ventas_netas'] is not None else Decimal('0')
-        if semana:
-            print(f"[DEBUG] Producto: {producto}, Semana: {semana_val}, Ventas Netas: {valor}")
         if producto not in resultado:
             resultado[producto] = {}
         # Sumar si ya existe (por si hay varios grupos de IVA)
@@ -65,12 +61,6 @@ def calcular_ventas_netas_por_producto_semana(anio=None, semana=None, trimestre=
             resultado[producto][semana_val] += float(valor)
         else:
             resultado[producto][semana_val] = float(valor)
-    # Print del valor final sumado por producto y semana
-    if semana:
-        print("[DEBUG] === SUMA FINAL POR PRODUCTO Y SEMANA ===")
-        for producto, semanas in resultado.items():
-            for semana_val, total in semanas.items():
-                print(f"[DEBUG] TOTAL Producto: {producto}, Semana: {semana_val}, Ventas Netas SUMADAS: {total}")
     return resultado
 
 def calcular_costos_compra_por_producto_semana(anio=None, semana=None, trimestre=None):
@@ -115,7 +105,7 @@ def calcular_costos_compra_por_producto_semana(anio=None, semana=None, trimestre
 def calcular_gastos_aduana_por_producto_semana(anio=None, semana=None, trimestre=None):
     """
     Distribuye los gastos de aduana proporcionalmente a las cajas recibidas y kilos de cada producto.
-    Actualizada para usar el formato completo de semana.
+    Ahora también descuenta proporcionalmente iva_importacion e iva_sobre_base.
     """
     if semana:
         pedidos_año = Pedido.objects.filter(semana=semana)
@@ -140,6 +130,12 @@ def calcular_gastos_aduana_por_producto_semana(anio=None, semana=None, trimestre
         gasto_neto = gasto_aduana.valor_gastos_aduana
         if gasto_aduana.valor_nota_credito:
             gasto_neto -= gasto_aduana.valor_nota_credito
+
+        # Restar iva_importacion e iva_sobre_base si existen
+        iva_importacion = gasto_aduana.iva_importacion or 0
+        iva_sobre_base = gasto_aduana.iva_sobre_base or 0
+        gasto_neto -= iva_importacion
+        gasto_neto -= iva_sobre_base
             
         # Si el gasto neto es cero o negativo, continuamos con el siguiente gasto
         if gasto_neto <= 0:

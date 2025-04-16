@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Utlimo cambio del dashboard.">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Revision de Utilidades.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/comercial/views_dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_dashboard.py" afterDir="false" />
@@ -190,15 +190,7 @@
       <workItem from="1744546020534" duration="1556000" />
       <workItem from="1744557261687" duration="1666000" />
       <workItem from="1744840609282" duration="2799000" />
-      <workItem from="1744844412083" duration="1106000" />
-    </task>
-    <task id="LOCAL-00011" summary="Punto de control funcional 3. 7 AM">
-      <option name="closed" value="true" />
-      <created>1743482239688</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1743482239688</updated>
+      <workItem from="1744844412083" duration="2509000" />
     </task>
     <task id="LOCAL-00012" summary="Punto de control funcional 4. Capas de inventario corregidas.">
       <option name="closed" value="true" />
@@ -584,7 +576,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744842814130</updated>
     </task>
-    <option name="localTasksCounter" value="60" />
+    <task id="LOCAL-00060" summary="Revision de Utilidades.">
+      <option name="closed" value="true" />
+      <created>1744846026756</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1744846026756</updated>
+    </task>
+    <option name="localTasksCounter" value="61" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -602,7 +602,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Cambio de URL Database 4" />
     <MESSAGE value="Cambios en documentos." />
     <MESSAGE value="Cabeceras de dominio." />
     <MESSAGE value="Cabeceras de dominio 2" />
@@ -627,6 +626,7 @@
     <MESSAGE value="Calculo de dash utilidades." />
     <MESSAGE value="Calculo de dash utilidades 2, para semanas 1" />
     <MESSAGE value="Utlimo cambio del dashboard." />
-    <option name="LAST_COMMIT_MESSAGE" value="Utlimo cambio del dashboard." />
+    <MESSAGE value="Revision de Utilidades." />
+    <option name="LAST_COMMIT_MESSAGE" value="Revision de Utilidades." />
   </component>
 </project>
