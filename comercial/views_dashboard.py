@@ -14,56 +14,51 @@ from io import BytesIO
 def calcular_ventas_netas_por_producto_semana(anio=None, semana=None, trimestre=None):
     """
     Calcula las ventas netas por producto y semana/trimestre.
-    Ventas Netas = (valor_x_producto - valor_abono_euro) de DetalleVenta
-    Actualizada para usar el formato completo de semana y el porcentaje de IVA dinámico.
+    Ventas Netas = (valor_x_producto - valor_abono_euro_sin_iva) de DetalleVenta
+    Se asegura que ambos valores estén en la misma base (netos, sin IVA).
     """
-    # Filtrar por año si se proporciona
     ventas_query = Venta.objects.all()
     if anio:
         ventas_query = ventas_query.filter(fecha_entrega__year=anio)
-    
-    # Filtrar por semana o trimestre si se proporciona
     if semana:
-        # Si semana ya tiene formato completo "13-2025", usarlo directamente
         ventas_query = ventas_query.filter(semana=semana)
     elif trimestre:
         ventas_query = filtrar_por_trimestre(ventas_query, anio, trimestre)
-    
+
     # Agrupar las ventas por producto y semana
     ventas_netas = DetalleVenta.objects.filter(
         venta__in=ventas_query
     ).values(
         'presentacion__fruta__nombre',
         'venta__semana',
-        'venta__porcentaje_iva'  # Include IVA percentage for calculations
+        'venta__porcentaje_iva'
     ).annotate(
-        ventas_netas=Sum(F('valor_x_producto') - 
-            Case(
-                When(
-                    valor_abono_euro__gt=0,
-                    then=ExpressionWrapper(
-                        F('valor_abono_euro') / (1 + F('venta__porcentaje_iva') / 100),
-                        output_field=DecimalField()
-                    )
+        # Restar el abono neto (sin IVA) del valor_x_producto
+        ventas_netas=Sum(
+            ExpressionWrapper(
+                F('valor_x_producto') - 
+                Case(
+                    When(
+                        valor_abono_euro__gt=0,
+                        then=F('valor_abono_euro') / (1 + F('venta__porcentaje_iva') / 100)
+                    ),
+                    default=Value(0),
+                    output_field=DecimalField()
                 ),
-                default=Value(0, output_field=DecimalField())
+                output_field=DecimalField()
             )
         )
     )
-    
-    # Convertir a un diccionario para fácil acceso
+
     resultado = {}
     for venta in ventas_netas:
         producto = venta['presentacion__fruta__nombre']
         semana = venta['venta__semana']
-        # Use 0 if venta['ventas_netas'] is None
-        valor = float(venta['ventas_netas'] or 0)
-        
+        # Mantener como Decimal hasta el final
+        valor = venta['ventas_netas'] if venta['ventas_netas'] is not None else Decimal('0')
         if producto not in resultado:
             resultado[producto] = {}
-        
-        resultado[producto][semana] = valor
-    
+        resultado[producto][semana] = float(valor)
     return resultado
 
 def calcular_costos_compra_por_producto_semana(anio=None, semana=None, trimestre=None):
@@ -292,28 +287,23 @@ def calcular_abono_por_producto_semana(anio=None, semana=None, trimestre=None):
     """
     Calcula el valor de los abonos por producto y semana/trimestre.
     Devuelve los datos como un diccionario por producto y semana.
-    Actualizada para usar el formato completo de semana y el porcentaje de IVA dinámico.
+    Se asegura de usar Decimal hasta el final.
     """
-    # Filtrar por año si se proporciona
     ventas_query = Venta.objects.all()
     if anio:
         ventas_query = ventas_query.filter(fecha_entrega__year=anio)
-    
-    # Filtrar por semana o trimestre si se proporciona
     if semana:
-        # Si semana ya tiene formato completo "13-2025", usarlo directamente
         ventas_query = ventas_query.filter(semana=semana)
     elif trimestre:
         ventas_query = filtrar_por_trimestre(ventas_query, anio, trimestre)
-    
-    # Agrupar los abonos por producto y semana
+
     abonos = DetalleVenta.objects.filter(
         venta__in=ventas_query,
-        valor_abono_euro__gt=0  # Solo incluir registros con valor de abono
+        valor_abono_euro__gt=0
     ).values(
         'presentacion__fruta__nombre',
         'venta__semana',
-        'venta__porcentaje_iva'  # Include IVA percentage for calculations
+        'venta__porcentaje_iva'
     ).annotate(
         valor_abono=Sum(
             ExpressionWrapper(
@@ -322,19 +312,15 @@ def calcular_abono_por_producto_semana(anio=None, semana=None, trimestre=None):
             )
         )
     )
-    
-    # Convertir a un diccionario para fácil acceso
+
     resultado = {}
     for abono in abonos:
         producto = abono['presentacion__fruta__nombre']
         semana = abono['venta__semana']
-        valor = float(abono['valor_abono'])
-        
+        valor = abono['valor_abono'] if abono['valor_abono'] is not None else Decimal('0')
         if producto not in resultado:
             resultado[producto] = {}
-        
-        resultado[producto][semana] = valor
-    
+        resultado[producto][semana] = float(valor)
     return resultado
 
 def calcular_resumen_utilidad(anio=None, semana=None, trimestre=None):
