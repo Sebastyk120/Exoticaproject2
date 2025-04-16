@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Calculo de dash utilidades.">
-      <change beforePath="$PROJECT_DIR$/comercial/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/models.py" afterDir="false" />
-    </list>
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Calculo de dash utilidades 2, para semanas 1" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -188,15 +186,7 @@
       <workItem from="1744495960096" duration="3744000" />
       <workItem from="1744546020534" duration="1556000" />
       <workItem from="1744557261687" duration="1666000" />
-      <workItem from="1744840609282" duration="630000" />
-    </task>
-    <task id="LOCAL-00009" summary="Punto de control funcional.">
-      <option name="closed" value="true" />
-      <created>1743471347093</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1743471347093</updated>
+      <workItem from="1744840609282" duration="934000" />
     </task>
     <task id="LOCAL-00010" summary="Punto de control funcional 2. OK">
       <option name="closed" value="true" />
@@ -582,7 +572,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744840642018</updated>
     </task>
-    <option name="localTasksCounter" value="58" />
+    <task id="LOCAL-00058" summary="Calculo de dash utilidades 2, para semanas 1">
+      <option name="closed" value="true" />
+      <created>1744841828171</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1744841828171</updated>
+    </task>
+    <option name="localTasksCounter" value="59" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -600,7 +598,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Cambio de URL Database 2" />
     <MESSAGE value="Cambio de URL Database 3" />
     <MESSAGE value="Cambio de URL Database 4" />
     <MESSAGE value="Cambios en documentos." />
@@ -625,6 +622,7 @@
     <MESSAGE value="Cambios en fechas de factura y albaranes." />
     <MESSAGE value="Total cajas y esto de cuenta." />
     <MESSAGE value="Calculo de dash utilidades." />
-    <option name="LAST_COMMIT_MESSAGE" value="Calculo de dash utilidades." />
+    <MESSAGE value="Calculo de dash utilidades 2, para semanas 1" />
+    <option name="LAST_COMMIT_MESSAGE" value="Calculo de dash utilidades 2, para semanas 1" />
   </component>
 </project>

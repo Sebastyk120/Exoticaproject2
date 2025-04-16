@@ -343,19 +343,27 @@ def calcular_resumen_utilidad(anio=None, semana=None, trimestre=None):
         total_costos = total_compra + total_aduana + total_carga
         utilidad = total_ventas - total_costos
         margen = (utilidad / total_ventas * 100) if total_ventas > 0 else 0
-        
-        # Agregar al resultado
-        resultado.append({
-            'producto': producto,
-            'ventas_netas': round(total_ventas, 2),
-            'costo_compra': round(total_compra, 2),
-            'gastos_aduana': round(total_aduana, 2),
-            'gastos_carga': round(total_carga, 2),
-            'valor_abono': round(total_abono, 2),  # Nuevo campo de abono
-            'utilidad': round(utilidad, 2),
-            'margen': round(margen, 2),
-            'total_costos': round(total_costos, 2)
-        })
+
+        # Solo agregar si hay algún valor distinto de cero
+        if any([
+            total_ventas != 0,
+            total_compra != 0,
+            total_aduana != 0,
+            total_carga != 0,
+            total_abono != 0,
+            utilidad != 0
+        ]):
+            resultado.append({
+                'producto': producto,
+                'ventas_netas': round(total_ventas, 2),
+                'costo_compra': round(total_compra, 2),
+                'gastos_aduana': round(total_aduana, 2),
+                'gastos_carga': round(total_carga, 2),
+                'valor_abono': round(total_abono, 2),  # Nuevo campo de abono
+                'utilidad': round(utilidad, 2),
+                'margen': round(margen, 2),
+                'total_costos': round(total_costos, 2)
+            })
     
     # Ordenar por utilidad descendente
     resultado.sort(key=lambda x: x['utilidad'], reverse=True)
