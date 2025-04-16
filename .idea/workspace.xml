@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Total cajas y esto de cuenta.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Calculo de dash utilidades.">
+      <change beforePath="$PROJECT_DIR$/comercial/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -188,14 +188,7 @@
       <workItem from="1744495960096" duration="3744000" />
       <workItem from="1744546020534" duration="1556000" />
       <workItem from="1744557261687" duration="1666000" />
-    </task>
-    <task id="LOCAL-00008" summary="Actualizaciones.">
-      <option name="closed" value="true" />
-      <created>1743347432182</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1743347432182</updated>
+      <workItem from="1744840609282" duration="630000" />
     </task>
     <task id="LOCAL-00009" summary="Punto de control funcional.">
       <option name="closed" value="true" />
@@ -581,7 +574,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744559434568</updated>
     </task>
-    <option name="localTasksCounter" value="57" />
+    <task id="LOCAL-00057" summary="Calculo de dash utilidades.">
+      <option name="closed" value="true" />
+      <created>1744840642018</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1744840642018</updated>
+    </task>
+    <option name="localTasksCounter" value="58" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -599,7 +600,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Cambio de URL Database." />
     <MESSAGE value="Cambio de URL Database 2" />
     <MESSAGE value="Cambio de URL Database 3" />
     <MESSAGE value="Cambio de URL Database 4" />
@@ -624,6 +624,7 @@
     <MESSAGE value="Ubicacion Single page." />
     <MESSAGE value="Cambios en fechas de factura y albaranes." />
     <MESSAGE value="Total cajas y esto de cuenta." />
-    <option name="LAST_COMMIT_MESSAGE" value="Total cajas y esto de cuenta." />
+    <MESSAGE value="Calculo de dash utilidades." />
+    <option name="LAST_COMMIT_MESSAGE" value="Calculo de dash utilidades." />
   </component>
 </project>

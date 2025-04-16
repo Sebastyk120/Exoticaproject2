@@ -18,12 +18,12 @@ def calcular_ventas_netas_por_producto_semana(anio=None, semana=None, trimestre=
     Se asegura que ambos valores estén en la misma base (netos, sin IVA).
     """
     ventas_query = Venta.objects.all()
-    if anio:
-        ventas_query = ventas_query.filter(fecha_entrega__year=anio)
     if semana:
         ventas_query = ventas_query.filter(semana=semana)
     elif trimestre:
         ventas_query = filtrar_por_trimestre(ventas_query, anio, trimestre)
+    elif anio:
+        ventas_query = ventas_query.filter(fecha_entrega__year=anio)
 
     # Agrupar las ventas por producto y semana
     ventas_netas = DetalleVenta.objects.filter(
@@ -67,17 +67,13 @@ def calcular_costos_compra_por_producto_semana(anio=None, semana=None, trimestre
     Costos de Compra = valor_x_producto_eur de DetallePedido (ya ajustado por NC)
     Actualizada para usar el formato completo de semana.
     """
-    # Filtrar por año si se proporciona
     pedidos_query = Pedido.objects.all()
-    if anio:
-        pedidos_query = pedidos_query.filter(fecha_entrega__year=anio)
-    
-    # Filtrar por semana o trimestre si se proporciona
     if semana:
-        # Si semana ya tiene formato completo "13-2025", usarlo directamente
         pedidos_query = pedidos_query.filter(semana=semana)
     elif trimestre:
         pedidos_query = filtrar_por_trimestre(pedidos_query, anio, trimestre)
+    elif anio:
+        pedidos_query = pedidos_query.filter(fecha_entrega__year=anio)
     
     # Agrupar los costos por producto y semana
     costos_compra = DetallePedido.objects.filter(
@@ -109,18 +105,14 @@ def calcular_gastos_aduana_por_producto_semana(anio=None, semana=None, trimestre
     Distribuye los gastos de aduana proporcionalmente a las cajas recibidas y kilos de cada producto.
     Actualizada para usar el formato completo de semana.
     """
-    # Filtrar por año si se proporciona
-    if anio:
+    if semana:
+        pedidos_año = Pedido.objects.filter(semana=semana)
+    elif trimestre:
+        pedidos_año = filtrar_por_trimestre(Pedido.objects.all(), anio, trimestre)
+    elif anio:
         pedidos_año = Pedido.objects.filter(fecha_entrega__year=anio)
     else:
         pedidos_año = Pedido.objects.all()
-    
-    # Filtrar por semana o trimestre si se proporciona
-    if semana:
-        # Si semana ya tiene formato completo "13-2025", usarlo directamente
-        pedidos_año = pedidos_año.filter(semana=semana)
-    elif trimestre:
-        pedidos_año = filtrar_por_trimestre(pedidos_año, anio, trimestre)
     
     resultado = {}
     
@@ -178,18 +170,14 @@ def calcular_gastos_carga_por_producto_semana(anio=None, semana=None, trimestre=
     Distribuye los gastos de carga proporcionalmente a las cajas recibidas y kilos de cada producto.
     Actualizada para usar el formato completo de semana.
     """
-    # Filtrar por año si se proporciona
-    if anio:
+    if semana:
+        pedidos_año = Pedido.objects.filter(semana=semana)
+    elif trimestre:
+        pedidos_año = filtrar_por_trimestre(Pedido.objects.all(), anio, trimestre)
+    elif anio:
         pedidos_año = Pedido.objects.filter(fecha_entrega__year=anio)
     else:
         pedidos_año = Pedido.objects.all()
-    
-    # Filtrar por semana o trimestre si se proporciona
-    if semana:
-        # Si semana ya tiene formato completo "13-2025", usarlo directamente
-        pedidos_año = pedidos_año.filter(semana=semana)
-    elif trimestre:
-        pedidos_año = filtrar_por_trimestre(pedidos_año, anio, trimestre)
     
     resultado = {}
     
@@ -290,12 +278,12 @@ def calcular_abono_por_producto_semana(anio=None, semana=None, trimestre=None):
     Se asegura de usar Decimal hasta el final.
     """
     ventas_query = Venta.objects.all()
-    if anio:
-        ventas_query = ventas_query.filter(fecha_entrega__year=anio)
     if semana:
         ventas_query = ventas_query.filter(semana=semana)
     elif trimestre:
         ventas_query = filtrar_por_trimestre(ventas_query, anio, trimestre)
+    elif anio:
+        ventas_query = ventas_query.filter(fecha_entrega__year=anio)
 
     abonos = DetalleVenta.objects.filter(
         venta__in=ventas_query,
