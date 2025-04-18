@@ -12,7 +12,7 @@
 {% block content %}
     <!-- Alert Container - Nuevo sistema de alertas -->
     <div class="alert-container" id="alertContainer"></div>
-    
+
     <div class="container">
         <div class="page-header">
             <h1 class="page-title">
@@ -45,63 +45,125 @@
             </div>
         </div>
 
-        <!-- Gastos Table -->
-        <div class="table-responsive">
-            <table class="gastos-table">
-                <thead>
-                    <tr>
-                        <th>Número Factura</th>
-                        <th>Agencia Aduana</th>
-                        <th>Valor (EUR)</th>
-                        <th>IVA Importación</th>
-                        <th>IVA Sobre Base</th>
-                        <th>Número Abono</th>
-                        <th>Valor Abono</th>
-                        <th>Monto Pendiente</th>
-                        <th>Estado</th>
-                        <th>Fecha</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for gasto in gastos %}
-                    <tr>
-                        <td>{{ gasto.numero_factura }}</td>
-                        <td>{{ gasto.agencia_aduana.nombre }}</td>
-                        <td>{{ gasto.valor_gastos_aduana|format_currency_eur }}</td>
-                        <td>{{ gasto.iva_importacion|format_currency_eur|default:"0,00 €" }}</td>
-                        <td>{{ gasto.iva_sobre_base|format_currency_eur|default:"0,00 €" }}</td>
-                        <td>{{ gasto.numero_nota_credito|default:"-" }}</td>
-                        <td>{{ gasto.valor_nota_credito|format_currency_eur|default:"-" }}</td>
-                        <td>{{ gasto.monto_pendiente|format_currency_eur|default:"-" }}</td>
-                        <td>
-                            <span class="status-badge {% if gasto.pagado %}status-paid{% else %}status-unpaid{% endif %}">
-                                {% if gasto.pagado %}Pagado{% else %}Pendiente{% endif %}
-                            </span>
-                        </td>
-                        <td>{{ gasto.fecha_creacion|date:"d/m/Y" }}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-action btn-view" onclick="viewGasto({{ gasto.id }})" title="Ver detalles">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn-action btn-edit" onclick="editGasto({{ gasto.id }})" title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-action btn-delete" onclick="deleteGasto({{ gasto.id }})" title="Eliminar">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="11" class="text-center">No hay gastos registrados</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <!-- Filtros y Tabla -->
+        <div class="content-section">
+            <!-- Filtros: búsqueda por factura y semana -->
+            <form method="get" id="filterForm" class="filter-form mb-4">
+                <div class="filter-controls">
+                    <input type="text" name="numero_factura" value="{{ numero_factura_query }}" placeholder="Buscar por Factura" class="form-control filter-input">
+                    <select name="semana" class="form-control filter-select">
+                        <option value="">Todas las Semanas</option>
+                        {% for sem in semanas %}
+                            <option value="{{ sem }}" {% if sem|stringformat:"s" == semana_query %}selected{% endif %}>Semana {{ sem }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary filter-button">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+
+            <!-- Gastos Table -->
+            <div class="table-responsive">
+                <table class="gastos-table">
+                    <thead>
+                        <tr>
+                            <th>Número Factura</th>
+                            <th>Agencia Aduana</th>
+                            <th>Valor (EUR)</th>
+                            <th>IVA Importación</th>
+                            <th>IVA Sobre Base</th>
+                            <th>Número Abono</th>
+                            <th>Valor Abono</th>
+                            <th>Monto Pendiente</th>
+                            <th>Estado</th>
+                            <th>Semana</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for gasto in page_obj %}
+                        <tr>
+                            <td>{{ gasto.numero_factura }}</td>
+                            <td>{{ gasto.agencia_aduana.nombre }}</td>
+                            <td>{{ gasto.valor_gastos_aduana|format_currency_eur }}</td>
+                            <td>{{ gasto.iva_importacion|format_currency_eur|default:"0,00 €" }}</td>
+                            <td>{{ gasto.iva_sobre_base|format_currency_eur|default:"0,00 €" }}</td>
+                            <td>{{ gasto.numero_nota_credito|default:"-" }}</td>
+                            <td>{{ gasto.valor_nota_credito|format_currency_eur|default:"-" }}</td>
+                            <td>{{ gasto.monto_pendiente|format_currency_eur|default:"-" }}</td>
+                            <td>
+                                <span class="status-badge {% if gasto.pagado %}status-paid{% else %}status-unpaid{% endif %}">
+                                    {% if gasto.pagado %}Pagado{% else %}Pendiente{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% with primer_pedido=gasto.pedidos.first %}
+                                    {{ primer_pedido.semana|default:"-" }}
+                                {% endwith %}
+                            </td>
+                            <td>{{ gasto.fecha_creacion|date:"d/m/Y" }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-view" onclick="viewGasto({{ gasto.id }})" title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-action btn-edit" onclick="editGasto({{ gasto.id }})" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-action btn-delete" onclick="deleteGasto({{ gasto.id }})" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="12" class="text-center">No hay gastos registrados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        <!-- Paginación -->
+        <nav aria-label="Page navigation" class="pagination-container">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if numero_factura_query %}numero_factura={{ numero_factura_query }}&{% endif %}{% if semana_query %}semana={{ semana_query }}&{% endif %}page={{ page_obj.previous_page_number }}">&laquo;</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">&laquo;</span>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if numero_factura_query %}numero_factura={{ numero_factura_query }}&{% endif %}{% if semana_query %}semana={{ semana_query }}&{% endif %}page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% elif num == page_obj.paginator.page_range.0 or num == page_obj.paginator.page_range|last %}
+                         <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if numero_factura_query %}numero_factura={{ numero_factura_query }}&{% endif %}{% if semana_query %}semana={{ semana_query }}&{% endif %}page={{ page_obj.next_page_number }}">&raquo;</a>
+                    </li>
+                {% else %}
+                     <li class="page-item disabled">
+                        <span class="page-link">&raquo;</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
 
     <!-- View Modal -->
@@ -264,6 +326,7 @@
 
 {% block extra_js %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
     let currentGastoId = null;
@@ -273,22 +336,22 @@
     let deleteModal = null;
     let createModal = null;
 
-    // Initialize modals when document is ready
+    // Initialize modals and Select2 when document is ready
     document.addEventListener('DOMContentLoaded', function() {
         viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
         editModal = new bootstrap.Modal(document.getElementById('editModal'));
         deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
         createModal = new bootstrap.Modal(document.getElementById('createModal'));
-        
-        // Initialize Select2 for multiple select
+
+        // Initialize Select2 using jQuery
         try {
             $('.select2-multiple').select2({
+                dropdownParent: $('#createModal'),
                 width: '100%',
                 placeholder: 'Seleccione pedidos'
             });
             console.log('Select2 initialized successfully');
-            
-            // Debug: Check if pedidos are available
+
             const pedidosOptions = document.querySelectorAll('select[name="pedidos"] option');
             console.log(`Found ${pedidosOptions.length} pedidos options`);
         } catch (error) {
@@ -341,15 +404,14 @@
     // Form submission handling
     document.getElementById('uploadForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        
-        // Deshabilitar el botón y mostrar estado de carga
+
         const submitButton = this.querySelector('button[type="submit"]');
         const originalButtonText = submitButton.innerHTML;
         submitButton.disabled = true;
         submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-        
+
         const formData = new FormData(this);
-        
+
         fetch(window.location.pathname, {
             method: 'POST',
             body: formData,
@@ -359,7 +421,11 @@
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                return response.json().then(errData => {
+                    throw new Error(errData.error || 'Network response was not ok');
+                }).catch(() => {
+                    throw new Error('Network response was not ok');
+                });
             }
             return response.json();
         })
@@ -369,16 +435,15 @@
             } else {
                 showAlert(data.message, 'success');
                 setTimeout(() => {
-                    window.location.reload();
+                    window.location.search = window.location.search;
                 }, 1500);
             }
         })
         .catch(error => {
-            showAlert('Error al procesar el PDF', 'danger');
+            showAlert(`Error al procesar el PDF: ${error.message}`, 'danger');
             console.error("Error:", error);
         })
         .finally(() => {
-            // Restaurar el botón a su estado original
             submitButton.disabled = false;
             submitButton.innerHTML = originalButtonText;
         });
@@ -390,78 +455,60 @@
             .then(response => response.json())
             .then(data => {
                 const modalBody = document.getElementById('viewModalBody');
-                
-                // Format the currency values
-                const valorGastosFormatted = new Intl.NumberFormat('es-ES', { 
-                    style: 'currency', 
-                    currency: 'EUR' 
-                }).format(parseFloat(data.valor_gastos_aduana));
-                
+
+                const valorGastosFormatted = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(parseFloat(data.valor_gastos_aduana));
                 let valorNotaCreditoFormatted = '-';
                 if (data.valor_nota_credito && data.valor_nota_credito !== '') {
-                    valorNotaCreditoFormatted = new Intl.NumberFormat('es-ES', { 
-                        style: 'currency', 
-                        currency: 'EUR' 
-                    }).format(parseFloat(data.valor_nota_credito));
+                    valorNotaCreditoFormatted = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(parseFloat(data.valor_nota_credito));
                 }
-                
                 let montoPendienteFormatted = '-';
                 if (data.monto_pendiente && data.monto_pendiente !== '') {
-                    montoPendienteFormatted = new Intl.NumberFormat('es-ES', { 
-                        style: 'currency', 
-                        currency: 'EUR' 
-                    }).format(parseFloat(data.monto_pendiente));
+                    montoPendienteFormatted = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(parseFloat(data.monto_pendiente));
                 }
-                
                 let ivaImportacionFormatted = '0,00 €';
                 if (data.iva_importacion && data.iva_importacion !== '' && data.iva_importacion !== '0.00') {
-                    ivaImportacionFormatted = new Intl.NumberFormat('es-ES', { 
-                        style: 'currency', 
-                        currency: 'EUR' 
-                    }).format(parseFloat(data.iva_importacion));
+                    ivaImportacionFormatted = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(parseFloat(data.iva_importacion));
                 }
-                
                 let ivaBasesFormatted = '0,00 €';
                 if (data.iva_sobre_base && data.iva_sobre_base !== '' && data.iva_sobre_base !== '0.00') {
-                    ivaBasesFormatted = new Intl.NumberFormat('es-ES', { 
-                        style: 'currency', 
-                        currency: 'EUR' 
-                    }).format(parseFloat(data.iva_sobre_base));
+                    ivaBasesFormatted = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(parseFloat(data.iva_sobre_base));
                 }
-                
-                // Modificado para incluir enlaces clickeables a los pedidos
+
                 const pedidosHTML = data.pedidos.map(pedido => {
                     const pedidoId = pedido.split(' - ')[0];
                     return `<li><a href="/importacion/pedidos/${pedidoId}/" class="pedido-link">${pedido}</a></li>`;
                 }).join('');
-                
+
                 modalBody.innerHTML = `
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <p><strong>Número Factura:</strong> ${data.numero_factura}</p>
-                            <p><strong>Agencia Aduana:</strong> ${data.agencia_aduana}</p>
-                            <p><strong>Valor Gastos Aduana:</strong> ${valorGastosFormatted}</p>
-                            <p><strong>IVA Importación:</strong> ${ivaImportacionFormatted}</p>
-                            <p><strong>IVA Sobre Base:</strong> ${ivaBasesFormatted}</p>
-                            <p><strong>Estado:</strong> <span class="status-badge ${data.pagado ? 'status-paid' : 'status-unpaid'}">${data.pagado ? 'Pagado' : 'Pendiente'}</span></p>
+                    <div class="view-details">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p><strong>Número Factura:</strong> ${data.numero_factura}</p>
+                                <p><strong>Agencia Aduana:</strong> ${data.agencia_aduana}</p>
+                                <p><strong>Valor Gastos Aduana:</strong> ${valorGastosFormatted}</p>
+                                <p><strong>IVA Importación:</strong> ${ivaImportacionFormatted}</p>
+                                <p><strong>IVA Sobre Base:</strong> ${ivaBasesFormatted}</p>
+                                <p><strong>Estado:</strong> <span class="status-badge ${data.pagado ? 'status-paid' : 'status-unpaid'}">${data.pagado ? 'Pagado' : 'Pendiente'}</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Número Abono:</strong> ${data.numero_nota_credito || '-'}</p>
+                                <p><strong>Valor Abono:</strong> ${valorNotaCreditoFormatted}</p>
+                                <p><strong>Monto Pendiente:</strong> ${montoPendienteFormatted}</p>
+                                <p><strong>Semana:</strong> ${data.semana || '-'}</p>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <p><strong>Número Abono:</strong> ${data.numero_nota_credito || '-'}</p>
-                            <p><strong>Valor Abono:</strong> ${valorNotaCreditoFormatted}</p>
-                            <p><strong>Monto Pendiente:</strong> ${montoPendienteFormatted}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <h6>Pedidos Asociados:</h6>
-                            <ul class="pedidos-list">
-                                ${pedidosHTML || '<li>No hay pedidos asociados</li>'}
-                            </ul>
+                        <div class="row">
+                            <div class="col-12">
+                                <h6>Pedidos Asociados:</h6>
+                                <ul class="pedidos-list">
+                                    ${pedidosHTML || '<li>No hay pedidos asociados</li>'}
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 `;
-                
-                new bootstrap.Modal(document.getElementById('viewModal')).show();
+
+                viewModal.show();
             })
             .catch(error => showAlert('Error al cargar los datos', 'danger'));
     }
@@ -478,17 +525,17 @@
                 form.valor_nota_credito.value = data.valor_nota_credito || '';
                 form.iva_importacion.value = data.iva_importacion || '0.00';
                 form.iva_sobre_base.value = data.iva_sobre_base || '0.00';
-                new bootstrap.Modal(document.getElementById('editModal')).show();
+                editModal.show();
             })
             .catch(error => showAlert('Error al cargar los datos', 'danger'));
     }
 
     function saveGasto() {
         if (!currentGastoId) return;
-        
+
         const form = document.getElementById('editForm');
         const formData = new FormData(form);
-        
+
         fetch(`/importacion/aduana/gasto/${currentGastoId}/update/`, {
             method: 'POST',
             body: formData,
@@ -500,9 +547,12 @@
         .then(data => {
             if (data.success) {
                 showAlert('Gasto actualizado correctamente', 'success');
-                location.reload();
+                editModal.hide();
+                setTimeout(() => {
+                     window.location.search = window.location.search;
+                }, 1500);
             } else {
-                showAlert('Error al actualizar el gasto', 'danger');
+                showAlert(data.error || 'Error al actualizar el gasto', 'danger');
             }
         })
         .catch(error => showAlert('Error al actualizar el gasto', 'danger'));
@@ -510,12 +560,12 @@
 
     function deleteGasto(id) {
         deleteGastoId = id;
-        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        deleteModal.show();
     }
 
     function confirmDelete() {
         if (!deleteGastoId) return;
-        
+
         fetch(`/importacion/aduana/gasto/${deleteGastoId}/delete/`, {
             method: 'POST',
             headers: {
@@ -526,29 +576,30 @@
         .then(data => {
             if (data.success) {
                 showAlert('Gasto eliminado correctamente', 'success');
-                location.reload();
+                deleteModal.hide();
+                setTimeout(() => {
+                     window.location.search = window.location.search;
+                }, 1500);
             } else {
-                showAlert('Error al eliminar el gasto', 'danger');
+                showAlert(data.error || 'Error al eliminar el gasto', 'danger');
             }
         })
         .catch(error => showAlert('Error al eliminar el gasto', 'danger'));
     }
 
-    // Create new gasto function
     function saveNewGasto() {
         const form = document.getElementById('createForm');
         const formData = new FormData(form);
-        
-        // Get all selected options from the multiple select
-        const selectedPedidos = Array.from(document.querySelectorAll('select[name="pedidos"] option:checked'))
-            .map(option => option.value);
-        
-        // Remove the single pedidos entry and add each selected value separately
+
+        const selectedPedidos = $('.select2-multiple').val();
+
         formData.delete('pedidos');
-        selectedPedidos.forEach(pedidoId => {
-            formData.append('pedidos', pedidoId);
-        });
-        
+        if (selectedPedidos) {
+            selectedPedidos.forEach(pedidoId => {
+                formData.append('pedidos', pedidoId);
+            });
+        }
+
         fetch('/importacion/aduana/gasto/create/', {
             method: 'POST',
             body: formData,
@@ -558,7 +609,11 @@
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                return response.json().then(errData => {
+                    throw new Error(errData.error || 'Network response was not ok');
+                }).catch(() => {
+                    throw new Error('Network response was not ok');
+                });
             }
             return response.json();
         })
@@ -566,8 +621,10 @@
             if (data.success) {
                 showAlert('Gasto creado correctamente', 'success');
                 createModal.hide();
+                form.reset();
+                $('.select2-multiple').val(null).trigger('change');
                 setTimeout(() => {
-                    location.reload();
+                    window.location.search = '';
                 }, 1500);
             } else {
                 showAlert(data.error || 'Error al crear el gasto', 'danger');
@@ -578,52 +635,34 @@
         });
     }
 
-    // Nuevo sistema de alertas basado en Bootstrap
     function showAlert(message, type = 'info') {
         console.log("Showing alert:", message, type);
-        
-        // Crear el elemento de alerta
+
         const alertDiv = document.createElement('div');
-        
-        // Configurar estilos inline para asegurar visibilidad
+
         alertDiv.style.position = 'fixed';
         alertDiv.style.top = '20px';
         alertDiv.style.left = '50%';
         alertDiv.style.transform = 'translateX(-50%)';
-        alertDiv.style.zIndex = '99999';
+        alertDiv.style.zIndex = '1060';
         alertDiv.style.minWidth = '300px';
         alertDiv.style.maxWidth = '80%';
         alertDiv.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-        
-        // Agregar clases de Bootstrap
+
         alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
         alertDiv.role = 'alert';
-        
-        // Agregar contenido
+
         alertDiv.innerHTML = `
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         `;
-        
-        // Agregar al DOM (directamente al body)
+
         document.body.appendChild(alertDiv);
-        
-        // Eliminar después de un tiempo
+
+        const bsAlert = new bootstrap.Alert(alertDiv);
         setTimeout(() => {
-            alertDiv.classList.remove('show');
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    document.body.removeChild(alertDiv);
-                }
-            }, 500);
+            bsAlert.close();
         }, 3000);
     }
-    
-    // Prueba inmediata
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
-            showAlert('Página cargada correctamente', 'info');
-        }, 500);
-    });
     </script>
 {% endblock %}

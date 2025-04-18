@@ -10,6 +10,7 @@ import re
 import logging
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from .models import GastosCarga, AgenciaCarga, Pedido
 
 # Setup logging
@@ -170,18 +171,30 @@ def process_pdf(request):
     else:
         form = PDFUploadForm()
 
-    # Get all gastos for the table
-    gastos = GastosCarga.objects.all().order_by('-id')
-    # Get all agencias and pedidos for the create form
+    # --- Inicio: filtros y paginación de gastos ---
+    numero_factura_query = request.GET.get('numero_factura', '').strip()
+    semana_query = request.GET.get('semana', '').strip()
+    gastos_list = GastosCarga.objects.all().order_by('-id')
+    if numero_factura_query:
+        gastos_list = gastos_list.filter(numero_factura__icontains=numero_factura_query)
+    if semana_query:
+        gastos_list = gastos_list.filter(pedidos__semana=semana_query).distinct()
+    paginator = Paginator(gastos_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    semanas = Pedido.objects.values_list('semana', flat=True).distinct().order_by('semana')
+    # --- Fin: filtros y paginación ---
+
     agencias = AgenciaCarga.objects.all()
     pedidos_disponibles = Pedido.objects.all()
-    
-    # Log the number of pedidos for debugging
     logger.info(f"Cantidad de pedidos disponibles: {pedidos_disponibles.count()}")
-    
+
     return render(request, 'carga/upload_pdf_carga.html', {
         'form': form,
-        'gastos': gastos,
+        'page_obj': page_obj,
+        'numero_factura_query': numero_factura_query,
+        'semana_query': semana_query,
+        'semanas': semanas,
         'agencias': agencias,
         'pedidos_disponibles': pedidos_disponibles
     })

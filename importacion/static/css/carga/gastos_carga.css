@@ -11,6 +11,8 @@
     --border-radius: 8px;
     --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     --transition: all 0.3s ease;
+    --header-bg-color: #e9e9ff; /* Light primary for header */
+    --header-text-color: #3a3a5e; /* Darker text for header */
 }
 
 body {
@@ -22,12 +24,13 @@ body {
 }
 
 .container {
-    max-width: 1400px;
+    max-width: 1600px; /* Increased width */
     margin: 0 auto;
     background-color: white;
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
     overflow: hidden;
+    padding-bottom: 20px; /* Added padding */
 }
 
 .page-header {
@@ -170,27 +173,50 @@ body {
 /* Table Styles */
 .gastos-table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+    border-collapse: separate; /* Use separate for border-radius */
+    border-spacing: 0;
+    border: 1px solid var(--border-color); /* Add border around table */
+    border-radius: var(--border-radius); /* Add border-radius */
+    overflow: hidden; /* Ensure radius clips content */
 }
 
 .gastos-table th {
-    background-color: var(--light-color);
-    color: var(--primary-color);
+    background-color: var(--header-bg-color); /* Added background color */
+    color: var(--header-text-color); /* Added text color */
     font-weight: 600;
-    padding: 15px;
+    padding: 12px 15px;
     text-align: left;
     border-bottom: 2px solid var(--border-color);
+    white-space: inherit; /* Allow wrapping */
+    position: sticky; /* Optional: make header sticky */
+    top: 0; /* Optional: required for sticky */
+    z-index: 1; /* Optional: ensure header is above body */
 }
 
 .gastos-table td {
-    padding: 15px;
+    padding: 12px 15px;
     border-bottom: 1px solid var(--border-color);
     vertical-align: middle;
+    font-size: 0.95rem;
+    color: #495057;
+}
+
+.gastos-table tbody tr:last-child td {
+    border-bottom: none; /* Remove bottom border for last row */
+}
+
+.gastos-table tbody tr {
+    transition: background-color 0.2s ease;
 }
 
 .gastos-table tbody tr:hover {
-    background-color: rgba(93, 95, 239, 0.02);
+    background-color: rgba(93, 95, 239, 0.04);
+}
+
+.gastos-table td.text-center {
+    padding: 20px;
+    color: var(--secondary-color);
+    font-style: italic;
 }
 
 /* Action Buttons */
@@ -337,9 +363,11 @@ body {
     background-color: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(222, 226, 230, 0.8);
     border-radius: 12px;
-    min-height: 46px;
+    min-height: 46px; /* Match form-control height */
     padding: 6px 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    font-size: 0.95rem; /* Match form-control font-size */
+    line-height: 1.5; /* Adjust line height */
 }
 
 .select2-container--default.select2-container--focus .select2-selection--multiple {
@@ -356,11 +384,18 @@ body {
     padding: 4px 10px;
     color: var(--primary-color);
     font-weight: 500;
+    margin-top: 4px; /* Adjust vertical alignment */
+}
+
+.select2-container--default .select2-search--inline .select2-search__field {
+    margin-top: 6px; /* Adjust search field position */
+    height: auto; /* Allow natural height */
+    line-height: inherit; /* Inherit line height */
 }
 
 /* Fix for Select2 dropdown in modal */
 .select2-container--open {
-    z-index: 9999;
+    z-index: 1056; /* Ensure dropdown is above modal backdrop (1055) */
 }
 
 /* Making sure the dropdown is visible */
@@ -596,6 +631,74 @@ body {
     color: var(--danger-color);
 }
 
+/* Content Section for Filters and Table */
+.content-section {
+    padding: 30px;
+    background-color: white;
+    border-radius: var(--border-radius);
+    margin-top: 30px;
+    box-shadow: var(--box-shadow);
+}
+
+/* Enhanced Filter Form Styles */
+.filter-form {
+    margin-bottom: 25px;
+    padding: 20px;
+    background-color: var(--light-color);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+}
+
+.filter-input,
+.filter-select {
+    flex-grow: 1;
+    min-width: 180px;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(93, 95, 239, 0.25);
+    outline: 0;
+}
+
+.filter-button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.filter-button:hover {
+    background-color: #4A4CD8;
+    border-color: #4A4CD8;
+}
+
+.filter-button i {
+    font-size: 0.9rem;
+}
+
+/* Enhanced Table Styles */
+.table-responsive {
+    overflow-x: auto;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
@@ -607,6 +710,21 @@ body {
         align-items: flex-start;
     }
 
+    .content-section {
+        padding: 15px;
+    }
+
+    .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-input,
+    .filter-select,
+    .filter-button {
+        width: 100%;
+    }
+
     .upload-section {
         padding: 20px;
     }
@@ -615,13 +733,16 @@ body {
         padding: 20px;
     }
 
-    .gastos-table {
-        display: block;
-        overflow-x: auto;
+    .gastos-table th,
+    .gastos-table td {
+        padding: 10px;
+        font-size: 0.9rem;
     }
 
     .action-buttons {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 5px;
     }
 
     .btn-action {
@@ -709,4 +830,56 @@ body {
 
 .toast-info i {
     color: var(--info-color);
+}
+
+/* Filtros y Paginación */
+.search-filter-container {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.filter-input {
+    max-width: 250px;
+}
+.filter-select {
+    max-width: 180px;
+}
+.pagination-container {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+.pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+}
+.page-item .page-link {
+    padding: 8px 14px;
+    border-radius: 6px;
+    background-color: white;
+    color: var(--primary-color);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+    font-weight: 500;
+}
+.page-item.disabled .page-link {
+    color: var(--secondary-color);
+    background-color: var(--light-color);
+    border-color: var(--border-color);
+    pointer-events: none;
+}
+.page-item.active .page-link {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(93, 95, 239, 0.2);
+}
+.page-item:not(.active) .page-link:hover {
+    background-color: rgba(93, 95, 239, 0.1);
+    border-color: rgba(93, 95, 239, 0.3);
+    color: var(--primary-color);
 }

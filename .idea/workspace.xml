@@ -4,10 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Revision de Utilidades.">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Ultimos ajustes de gastos de aduana y Dashboard de Utilidades.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/views_dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_dashboard.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/static/css/aduana/gastos_aduana.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/aduana/gastos_aduana.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/static/css/carga/gastos_carga.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/carga/gastos_carga.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf_aduana.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf_aduana.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/templates/carga/upload_pdf_carga.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/carga/upload_pdf_carga.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/views_aduana.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_aduana.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/views_carga.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_carga.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,27 +56,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Django Server.Exoticaproject.executor": "Run",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/Legion 5 Pro/Downloads/exotic-fruit-bliss-landing-main",
-    "list.type.of.created.stylesheet": "CSS",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "ml.llm.LLMConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Django Server.Exoticaproject.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Legion 5 Pro/Downloads/exotic-fruit-bliss-landing-main&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.LLMConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Legion 5 Pro\Desktop\Exoticaproject\importacion\static" />
@@ -190,15 +195,12 @@
       <workItem from="1744546020534" duration="1556000" />
       <workItem from="1744557261687" duration="1666000" />
       <workItem from="1744840609282" duration="2799000" />
-      <workItem from="1744844412083" duration="2509000" />
-    </task>
-    <task id="LOCAL-00012" summary="Punto de control funcional 4. Capas de inventario corregidas.">
-      <option name="closed" value="true" />
-      <created>1743641426574</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1743641426574</updated>
+      <workItem from="1744844412083" duration="2918000" />
+      <workItem from="1744849296768" duration="16000" />
+      <workItem from="1744849321647" duration="375000" />
+      <workItem from="1744905675593" duration="318000" />
+      <workItem from="1744906008519" duration="603000" />
+      <workItem from="1744932013358" duration="667000" />
     </task>
     <task id="LOCAL-00013" summary="Punto de control completo. Login, home.">
       <option name="closed" value="true" />
@@ -584,7 +586,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744846026756</updated>
     </task>
-    <option name="localTasksCounter" value="61" />
+    <task id="LOCAL-00061" summary="Ultimos ajustes de gastos de aduana y Dashboard de Utilidades.">
+      <option name="closed" value="true" />
+      <created>1744847626136</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1744847626136</updated>
+    </task>
+    <option name="localTasksCounter" value="62" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -602,7 +612,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Cambios en documentos." />
     <MESSAGE value="Cabeceras de dominio." />
     <MESSAGE value="Cabeceras de dominio 2" />
     <MESSAGE value="Cabeceras de dominio 3" />
@@ -627,6 +636,7 @@
     <MESSAGE value="Calculo de dash utilidades 2, para semanas 1" />
     <MESSAGE value="Utlimo cambio del dashboard." />
     <MESSAGE value="Revision de Utilidades." />
-    <option name="LAST_COMMIT_MESSAGE" value="Revision de Utilidades." />
+    <MESSAGE value="Ultimos ajustes de gastos de aduana y Dashboard de Utilidades." />
+    <option name="LAST_COMMIT_MESSAGE" value="Ultimos ajustes de gastos de aduana y Dashboard de Utilidades." />
   </component>
 </project>

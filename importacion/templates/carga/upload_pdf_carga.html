@@ -45,61 +45,109 @@
             </div>
         </div>
 
-        <!-- Gastos Table -->
-        <div class="table-responsive">
-            <table class="gastos-table">
-                <thead>
-                    <tr>
-                        <th>Número Factura</th>
-                        <th>Agencia Carga</th>
-                        <th>Valor (USD)</th>
-                        <th>Valor (EUR)</th>
-                        <th>Número Nota Crédito</th>
-                        <th>Valor Nota Crédito</th>
-                        <th>Monto Pendiente</th>
-                        <th>Estado</th>
-                        <th>Fecha</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for gasto in gastos %}
-                    <tr>
-                        <td>{{ gasto.numero_factura }}</td>
-                        <td>{{ gasto.agencia_carga.nombre }}</td>
-                        <td>{{ gasto.valor_gastos_carga|format_currency }}</td>
-                        <td>{{ gasto.valor_gastos_carga_eur|format_currency_eur }}</td>
-                        <td>{{ gasto.numero_nota_credito|default:"-" }}</td>
-                        <td>{{ gasto.valor_nota_credito|format_currency|default:"-" }}</td>
-                        <td>{{ gasto.monto_pendiente|format_currency|default:"-" }}</td>
-                        <td>
-                            <span class="status-badge {% if gasto.pagado %}status-paid{% else %}status-unpaid{% endif %}">
-                                {% if gasto.pagado %}Pagado{% else %}Pendiente{% endif %}
-                            </span>
-                        </td>
-                        <td>{{ gasto.fecha_creacion|date:"d/m/Y" }}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-action btn-view" onclick="viewGasto({{ gasto.id }})" title="Ver detalles">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn-action btn-edit" onclick="editGasto({{ gasto.id }})" title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-action btn-delete" onclick="deleteGasto({{ gasto.id }})" title="Eliminar">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="10" class="text-center">No hay gastos registrados</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <!-- Filtros y Tabla -->
+        <div class="content-section">
+            <!-- Filtros: búsqueda por factura y semana -->
+            <form method="get" id="filterForm" class="filter-form mb-4">
+                <div class="filter-controls">
+                    <input type="text" name="numero_factura" value="{{ numero_factura_query }}" placeholder="Buscar por Factura" class="form-control filter-input">
+                    <select name="semana" class="form-control filter-select">
+                        <option value="">Todas las Semanas</option>
+                        {% for sem in semanas %}
+                            <option value="{{ sem }}" {% if sem|stringformat:"s" == semana_query %}selected{% endif %}>Semana {{ sem }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary filter-button">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+
+            <!-- Gastos Table -->
+            <div class="table-responsive">
+                <table class="gastos-table">
+                    <thead>
+                        <tr>
+                            <th>Número Factura</th>
+                            <th>Agencia Carga</th>
+                            <th>Valor (USD)</th>
+                            <th>Valor (EUR)</th>
+                            <th>Número Nota Crédito</th>
+                            <th>Valor Nota Crédito</th>
+                            <th>Monto Pendiente</th>
+                            <th>Estado</th>
+                            <th>Semana</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for gasto in page_obj %}
+                        <tr>
+                            <td>{{ gasto.numero_factura }}</td>
+                            <td>{{ gasto.agencia_carga.nombre }}</td>
+                            <td>{{ gasto.valor_gastos_carga|format_currency }}</td>
+                            <td>{{ gasto.valor_gastos_carga_eur|format_currency_eur }}</td>
+                            <td>{{ gasto.numero_nota_credito|default:"-" }}</td>
+                            <td>{{ gasto.valor_nota_credito|format_currency|default:"-" }}</td>
+                            <td>{{ gasto.monto_pendiente|format_currency|default:"-" }}</td>
+                            <td>
+                                <span class="status-badge {% if gasto.pagado %}status-paid{% else %}status-unpaid{% endif %}">
+                                    {% if gasto.pagado %}Pagado{% else %}Pendiente{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% with primer_pedido=gasto.pedidos.first %}
+                                    {{ primer_pedido.semana|default:"-" }}
+                                {% endwith %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-view" onclick="viewGasto({{ gasto.id }})" title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-action btn-edit" onclick="editGasto({{ gasto.id }})" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-action btn-delete" onclick="deleteGasto({{ gasto.id }})" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center">No hay gastos registrados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        <!-- Paginación -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if numero_factura_query %}numero_factura={{ numero_factura_query }}&{% endif %}{% if semana_query %}semana={{ semana_query }}&{% endif %}page={{ page_obj.previous_page_number }}">&laquo;</a>
+                    </li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if numero_factura_query %}numero_factura={{ numero_factura_query }}&{% endif %}{% if semana_query %}semana={{ semana_query }}&{% endif %}page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if numero_factura_query %}numero_factura={{ numero_factura_query }}&{% endif %}{% if semana_query %}semana={{ semana_query }}&{% endif %}page={{ page_obj.next_page_number }}">&raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
 
     <!-- View Modal -->

@@ -10,6 +10,7 @@ import logging
 from .models import GastosAduana, AgenciaAduana, Pedido
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -166,8 +167,24 @@ def process_pdf(request):
     else:
         form = PDFUploadForm()
 
-    # Get all gastos for the table
-    gastos = GastosAduana.objects.all().order_by('-id')
+    # --- Inicio: filtros y paginación de gastos ---
+    numero_factura_query = request.GET.get('numero_factura', '').strip()
+    semana_query = request.GET.get('semana', '').strip()
+    gastos_list = GastosAduana.objects.all().order_by('-id')
+    if numero_factura_query:
+        gastos_list = gastos_list.filter(numero_factura__icontains=numero_factura_query)
+    if semana_query:
+        # Filter based on the week of associated pedidos
+        gastos_list = gastos_list.filter(pedidos__semana=semana_query).distinct()
+
+    paginator = Paginator(gastos_list, 20) # Show 10 gastos per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Get distinct weeks from Pedido model for the filter dropdown
+    semanas = Pedido.objects.values_list('semana', flat=True).distinct().order_by('semana')
+    # --- Fin: filtros y paginación ---
+
     # Get all agencias and pedidos for the create form
     agencias = AgenciaAduana.objects.all()
     pedidos_disponibles = Pedido.objects.all()
@@ -177,7 +194,10 @@ def process_pdf(request):
     
     return render(request, 'aduana/upload_pdf_aduana.html', {
         'form': form,
-        'gastos': gastos,
+        'page_obj': page_obj, # Pass paginated object
+        'numero_factura_query': numero_factura_query, # Pass filter value
+        'semana_query': semana_query, # Pass filter value
+        'semanas': semanas, # Pass available weeks
         'agencias': agencias,
         'pedidos_disponibles': pedidos_disponibles
     })
@@ -187,6 +207,8 @@ def process_pdf(request):
 @require_http_methods(["GET"])
 def get_gasto(request, gasto_id):
     gasto = get_object_or_404(GastosAduana, id=gasto_id)
+    primer_pedido = gasto.pedidos.first()
+    semana = primer_pedido.semana if primer_pedido else None
     data = {
         'id': gasto.id,
         'numero_factura': gasto.numero_factura,
@@ -198,7 +220,8 @@ def get_gasto(request, gasto_id):
         'pagado': gasto.pagado,
         'iva_importacion': str(gasto.iva_importacion) if gasto.iva_importacion else "0.00",
         'iva_sobre_base': str(gasto.iva_sobre_base) if gasto.iva_sobre_base else "0.00",
-        'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()]
+        'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()],
+        'semana': semana
     }
     return JsonResponse(data)
 
