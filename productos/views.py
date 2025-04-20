@@ -92,7 +92,7 @@ def lista_precios_importacion(request):
         precios_queryset = precios_queryset.filter(fecha__lte=fecha_hasta)
     
     # Paginate results
-    paginator = Paginator(precios_queryset, 10)  # Show 10 items per page
+    paginator = Paginator(precios_queryset, 25)  # Show 10 items per page
     page_number = request.GET.get('page', 1)
     precios = paginator.get_page(page_number)
     
@@ -242,7 +242,7 @@ def lista_precios_ventas(request):
         precios_queryset = precios_queryset.filter(fecha__lte=fecha_hasta)
     
     # Paginate results
-    paginator = Paginator(precios_queryset, 10)  # Show 10 items per page
+    paginator = Paginator(precios_queryset, 25)  # Show 10 items per page
     page_number = request.GET.get('page', 1)
     precios = paginator.get_page(page_number)
     
