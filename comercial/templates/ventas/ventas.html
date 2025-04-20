@@ -68,6 +68,11 @@
                         </div>
                         
                         <div class="form-group">
+                            <label for="fecha_compra">Fecha de Compra:</label>
+                            <input type="date" id="fecha_compra" name="fecha_compra" value="{{ venta.fecha_compra|date:'Y-m-d' }}" required>
+                        </div>
+
+                        <div class="form-group">
                             <label for="fecha_entrega">Fecha de Entrega:</label>
                             <input type="date" id="fecha_entrega" name="fecha_entrega" value="{{ venta.fecha_entrega|date:'Y-m-d' }}" required>
                         </div>

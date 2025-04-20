@@ -57,6 +57,7 @@
                                 <!-- Columnas principales siempre visibles -->
                                 <label><input type="checkbox" data-column="id" checked disabled> ID</label>
                                 <label><input type="checkbox" data-column="cliente" checked disabled> Cliente</label>
+                                <label><input type="checkbox" data-column="fecha_compra" checked> Fecha Compra</label>
                                 <label><input type="checkbox" data-column="fecha_entrega" checked> Fecha Entrega</label>
                                 <label><input type="checkbox" data-column="fecha_vencimiento" checked> Fecha Vencimiento</label>
                                 <label><input type="checkbox" data-column="semana" checked> Semana</label>
@@ -102,6 +103,7 @@
                                 <tr>
                                     <th class="column-id">ID</th>
                                     <th class="column-cliente">Cliente</th>
+                                    <th class="column-fecha_compra">Fecha Compra</th>
                                     <th class="column-fecha_entrega">Fecha Entrega</th>
                                     <th class="column-fecha_vencimiento">Fecha Vencimiento</th>
                                     <th class="column-semana">Semana</th>
@@ -123,6 +125,7 @@
                                     <td class="column-cliente">
                                         <span class="cliente-nombre">{{ venta.cliente.nombre }}</span>
                                     </td>
+                                    <td class="column-fecha_compra">{{ venta.fecha_compra|date:"d/m/Y" }}</td>
                                     <td class="column-fecha_entrega">{{ venta.fecha_entrega|date:"d/m/Y" }}</td>
                                     <td class="column-fecha_vencimiento">{{ venta.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</td>
                                     <td class="column-semana">{{ venta.semana|default:"-" }}</td>
@@ -200,6 +203,10 @@
                             
                             <div class="card-body">
                                 <div class="info-grid">
+                                    <div class="info-item column-fecha_compra">
+                                        <span class="info-label">Fecha Compra</span>
+                                        <span class="info-value">{{ venta.fecha_compra|date:"d/m/Y" }}</span>
+                                    </div>
                                     <div class="info-item column-fecha_entrega">
                                         <span class="info-label">Fecha Entrega</span>
                                         <span class="info-value">{{ venta.fecha_entrega|date:"d/m/Y" }}</span>

@@ -63,6 +63,7 @@ class Venta(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, verbose_name="Cliente")
     fecha_entrega = models.DateField(verbose_name="Fecha Entrega")
     fecha_vencimiento = models.DateField(verbose_name="Fecha Vencimiento", editable=False)
+    fecha_compra = models.DateField(verbose_name="Fecha Compra")
     semana = models.CharField(max_length=20, verbose_name="Semana", null=True, blank=True, editable=False)
     total_cajas_pedido = models.IntegerField(verbose_name="Total Cajas", null=True, blank=True, editable=False)
     numero_factura = models.CharField(max_length=100, verbose_name="Número Factura", null=True, blank=True, editable=False)
@@ -81,15 +82,18 @@ class Venta(models.Model):
         if self.subtotal_factura:
             self.iva = self.subtotal_factura * self.porcentaje_iva / 100
             self.valor_total_factura_euro = self.subtotal_factura + self.iva
-        if self.fecha_entrega is not None:
-            semana_numero = self.fecha_entrega.isocalendar()[1]
-            ano = self.fecha_entrega.year
-            if semana_numero == 1 and self.fecha_entrega.month == 12:
+        # Cambiar el cálculo de semana y fecha_vencimiento para usar fecha_compra
+        if self.fecha_compra is not None:
+            semana_numero = self.fecha_compra.isocalendar()[1]
+            ano = self.fecha_compra.year
+            if semana_numero == 1 and self.fecha_compra.month == 12:
                 ano += 1
-            if semana_numero >= 52 and self.fecha_entrega.month == 1:
+            if semana_numero >= 52 and self.fecha_compra.month == 1:
                 ano -= 1
 
             self.semana = f"{semana_numero}-{ano}"
+        # El cálculo de fecha_vencimiento sigue dependiendo de fecha_entrega y dias_pago
+        if self.fecha_entrega is not None:
             self.fecha_vencimiento = self.fecha_entrega + datetime.timedelta(days=self.cliente.dias_pago)
         if not self.numero_factura:
             # Use the last two digits of the current year

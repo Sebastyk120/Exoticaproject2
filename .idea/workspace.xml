@@ -4,15 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Ultimos ajustes de gastos de aduana y Dashboard de Utilidades.">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Ajustes en Gastos de Aduana y carga, mejoras en table.">
+      <change afterPath="$PROJECT_DIR$/comercial/migrations/0004_venta_fecha_compra.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/static/css/aduana/gastos_aduana.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/aduana/gastos_aduana.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/static/css/carga/gastos_carga.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/carga/gastos_carga.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf_aduana.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/aduana/upload_pdf_aduana.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/templates/carga/upload_pdf_carga.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/carga/upload_pdf_carga.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/views_aduana.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_aduana.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/views_carga.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_carga.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/lista_ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/lista_ventas.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/ventas.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/views_ventas.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_ventas.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -200,15 +198,13 @@
       <workItem from="1744849321647" duration="375000" />
       <workItem from="1744905675593" duration="318000" />
       <workItem from="1744906008519" duration="603000" />
-      <workItem from="1744932013358" duration="667000" />
-    </task>
-    <task id="LOCAL-00013" summary="Punto de control completo. Login, home.">
-      <option name="closed" value="true" />
-      <created>1743879009239</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1743879009239</updated>
+      <workItem from="1744932013358" duration="1325000" />
+      <workItem from="1745002122293" duration="119000" />
+      <workItem from="1745002262785" duration="4844000" />
+      <workItem from="1745061133052" duration="600000" />
+      <workItem from="1745090655960" duration="2815000" />
+      <workItem from="1745104984832" duration="616000" />
+      <workItem from="1745155830385" duration="1201000" />
     </task>
     <task id="LOCAL-00014" summary="Commit Final">
       <option name="closed" value="true" />
@@ -594,7 +590,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744847626136</updated>
     </task>
-    <option name="localTasksCounter" value="62" />
+    <task id="LOCAL-00062" summary="Ajustes en Gastos de Aduana y carga, mejoras en table.">
+      <option name="closed" value="true" />
+      <created>1744935502322</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1744935502322</updated>
+    </task>
+    <option name="localTasksCounter" value="63" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -612,7 +616,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Cabeceras de dominio." />
     <MESSAGE value="Cabeceras de dominio 2" />
     <MESSAGE value="Cabeceras de dominio 3" />
     <MESSAGE value="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS" />
@@ -637,6 +640,7 @@
     <MESSAGE value="Utlimo cambio del dashboard." />
     <MESSAGE value="Revision de Utilidades." />
     <MESSAGE value="Ultimos ajustes de gastos de aduana y Dashboard de Utilidades." />
-    <option name="LAST_COMMIT_MESSAGE" value="Ultimos ajustes de gastos de aduana y Dashboard de Utilidades." />
+    <MESSAGE value="Ajustes en Gastos de Aduana y carga, mejoras en table." />
+    <option name="LAST_COMMIT_MESSAGE" value="Ajustes en Gastos de Aduana y carga, mejoras en table." />
   </component>
 </project>

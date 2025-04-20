@@ -106,6 +106,11 @@ def guardar_venta(request, venta_id=None):
     
     # Get form data
     venta.cliente_id = request.POST.get('cliente')
+    # Nuevo: fecha_compra obligatoria
+    fecha_compra = request.POST.get('fecha_compra')
+    if not fecha_compra:
+        return JsonResponse({'success': False, 'message': 'La fecha de compra es obligatoria.'}, status=400)
+    venta.fecha_compra = parse_date(fecha_compra)
     venta.fecha_entrega = parse_date(request.POST.get('fecha_entrega'))
     venta.numero_nc = request.POST.get('numero_nc', '')
     venta.observaciones = request.POST.get('observaciones', '')
