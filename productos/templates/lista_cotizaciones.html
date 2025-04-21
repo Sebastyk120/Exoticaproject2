@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block title %}Cotizaciones{% endblock %}
+
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/lista_cotizaciones.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <!-- Header Section -->
+        <header>
+            <h1>Gestión de Cotizaciones</h1>
+            <div>
+                <a href="#" class="btn btn-primary" id="showCustomerSelectionModal">
+                    <i class="fas fa-user"></i> Cotización Cliente
+                </a>
+                <a href="{% url 'cotizacion_prospecto' %}" class="btn btn-success">
+                    <i class="fas fa-user-plus"></i> Cotización Prospecto
+                </a>
+            </div>
+        </header>
+
+        <!-- Alerts Section -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="fas fa-exclamation-circle"></i>
+                    {% endif %}
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Filters Section -->
+        <div class="filters">
+            <form method="get" action="{% url 'lista_cotizaciones' %}">
+                <div class="filter-row">
+                    <div class="filter-item">
+                        <label for="cliente"><i class="fas fa-user"></i> Cliente:</label>
+                        <select name="cliente" id="cliente">
+                            <option value="">Todos los clientes</option>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente.id }}" {% if request.GET.cliente == cliente.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ cliente.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="estado"><i class="fas fa-flag"></i> Estado:</label>
+                        <select name="estado" id="estado">
+                            <option value="">Todos los estados</option>
+                            {% for estado_key, estado_value in estados %}
+                                <option value="{{ estado_key }}" {% if request.GET.estado == estado_key %}selected{% endif %}>
+                                    {{ estado_value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="fecha_desde"><i class="fas fa-calendar-alt"></i> Fecha desde:</label>
+                        <input type="date" name="fecha_desde" id="fecha_desde" value="{{ request.GET.fecha_desde|default:'' }}">
+                    </div>
+                    <div class="filter-item">
+                        <label for="fecha_hasta"><i class="fas fa-calendar-alt"></i> Fecha hasta:</label>
+                        <input type="date" name="fecha_hasta" id="fecha_hasta" value="{{ request.GET.fecha_hasta|default:'' }}">
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                    <a href="{% url 'lista_cotizaciones' %}" class="btn btn-secondary">
+                        <i class="fas fa-undo"></i> Limpiar filtros
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Section -->
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-hashtag"></i> Número</th>
+                    <th><i class="fas fa-user"></i> Cliente/Prospecto</th>
+                    <th><i class="fas fa-calendar-day"></i> Fecha Emisión</th>
+                    <th><i class="fas fa-calendar-check"></i> Validez</th>
+                    <th><i class="fas fa-flag"></i> Estado</th>
+                    <th><i class="fas fa-cog"></i> Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cotizacion in cotizaciones %}
+                <tr>
+                    <td>{{ cotizacion.numero }}</td>
+                    <td>
+                        {% if cotizacion.cliente %}
+                        {{ cotizacion.cliente.nombre }}
+                        {% else %}
+                        {{ cotizacion.prospect_nombre }}
+                        {% endif %}
+                    </td>
+                    <td>{{ cotizacion.fecha_emision|date:"d/m/Y" }}</td>
+                    <td>{{ cotizacion.fecha_validez|date:"d/m/Y" }}</td>
+                    <td>{{ cotizacion.get_estado_display }}</td>
+                    <td class="action-buttons">
+                        <a href="{% url 'ver_cotizacion' cotizacion.id %}" class="btn btn-sm btn-info">
+                            <i class="fas fa-eye"></i> Ver
+                        </a>
+                        <a href="#" class="btn btn-sm btn-primary send-email-btn" data-id="{{ cotizacion.id }}">
+                            <i class="fas fa-envelope"></i> Enviar
+                        </a>
+                        <a href="#" class="btn btn-sm btn-secondary change-status-btn" data-id="{{ cotizacion.id }}">
+                            <i class="fas fa-edit"></i> Estado
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 20px;">No hay cotizaciones registradas que coincidan con los criterios de búsqueda.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination if needed -->
+        {% if cotizaciones.has_other_pages %}
+        <div class="pagination">
+            {% if cotizaciones.has_previous %}
+                <a href="?{{ request.GET.urlencode }}&page={{ cotizaciones.previous_page_number }}">Anterior</a>
+            {% endif %}
+            
+            {% for i in cotizaciones.paginator.page_range %}
+                {% if cotizaciones.number == i %}
+                    <span class="active">{{ i }}</span>
+                {% else %}
+                    <a href="?{{ request.GET.urlencode }}&page={{ i }}">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if cotizaciones.has_next %}
+                <a href="?{{ request.GET.urlencode }}&page={{ cotizaciones.next_page_number }}">Siguiente</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Customer Selection Modal -->
+        <div class="modal" id="customerSelectionModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Seleccionar Cliente para Cotización</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="search-container">
+                        <input type="text" id="customerSearch" placeholder="Buscar cliente...">
+                    </div>
+                    <div class="customer-list">
+                        {% for cliente in clientes %}
+                        <div class="customer-item" data-id="{{ cliente.id }}">
+                            <strong>{{ cliente.nombre }}</strong>
+                            <p>{{ cliente.email }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-modal-btn">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Automatically hide alerts after 5 seconds
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    alert.style.transition = 'opacity 0.5s';
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 500);
+                }, 5000);
+            });
+
+            // Customer selection modal
+            const customerSelectionBtn = document.getElementById('showCustomerSelectionModal');
+            const customerSelectionModal = document.getElementById('customerSelectionModal');
+            const closeModalBtns = document.querySelectorAll('.close-modal, .close-modal-btn');
+            
+            if (customerSelectionBtn && customerSelectionModal) {
+                customerSelectionBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    customerSelectionModal.classList.add('show');
+                });
+                
+                // Close modal when clicking on close buttons
+                closeModalBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        customerSelectionModal.classList.remove('show');
+                    });
+                });
+                
+                // Close modal when clicking outside
+                window.addEventListener('click', function(event) {
+                    if (event.target === customerSelectionModal) {
+                        customerSelectionModal.classList.remove('show');
+                    }
+                });
+                
+                // Search functionality for customer selection
+                const customerSearch = document.getElementById('customerSearch');
+                const customerItems = document.querySelectorAll('.customer-item');
+                
+                if (customerSearch) {
+                    customerSearch.addEventListener('input', function() {
+                        const searchTerm = this.value.toLowerCase();
+                        
+                        customerItems.forEach(item => {
+                            const customerName = item.querySelector('strong').textContent.toLowerCase();
+                            const customerEmail = item.querySelector('p').textContent.toLowerCase();
+                            
+                            if (customerName.includes(searchTerm) || customerEmail.includes(searchTerm)) {
+                                item.style.display = 'block';
+                            } else {
+                                item.style.display = 'none';
+                            }
+                        });
+                    });
+                }
+                
+                // Customer selection functionality
+                customerItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        const clienteId = this.getAttribute('data-id');
+                        console.log(`Cliente seleccionado, ID: ${clienteId}`);
+                        window.location.href = `/productos/cotizaciones/cliente/${clienteId}/`;
+                    });
+                });
+            }
+        });
+    </script>
+{% endblock %}

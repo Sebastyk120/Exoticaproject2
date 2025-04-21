@@ -31,7 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-gywh)zrdwb8ohd$l97a2mj_+u^pa6@hnsu$=)!ud(3l27%fe-y'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 
 # Application definition
@@ -105,7 +105,7 @@ WSGI_APPLICATION = 'Exoticaproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-"""
+
 DATABASES = {
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
@@ -119,7 +119,7 @@ DATABASES = {
         'HOST': 'localhost',  # Deja esto como 'localhost' si estás ejecutando PostgreSQL localmente
         'PORT': '5433',  # Puerto de PostgreSQL (por defecto es 5432)
     }
-}
+}"""
 
 
 # Password validation
@@ -191,13 +191,13 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 
 # CONFIGURACIÓN MAIL:
-DEFAULT_FROM_EMAIL = "subgerencia@heavensfruit.com"
+DEFAULT_FROM_EMAIL = "import@luzmeloexoticfruits.com"
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.office365.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = DEFAULT_FROM_EMAIL
-EMAIL_HOST_PASSWORD = 'Isabella2025+'
+EMAIL_HOST_PASSWORD = 'Bogota1973'
 ADMIN_SITE_NAME = 'Administración L&M Exótica'
 
 # Aumentar límite para datos de upload (10MB)
