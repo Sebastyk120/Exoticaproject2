@@ -16,6 +16,7 @@ from productos.models import Fruta, Presentacion
 from importacion.models import Pedido
 import importlib
 import inspect
+from .forms import ContactForm  # Importar el nuevo formulario
 
 def index_view(request):
     if request.user.is_authenticated:
@@ -70,67 +71,6 @@ def home_view(request):
     
     return render(request, 'home.html', context)
 
-def collect_app_urls():
-    """Collect all URLs from installed apps and organize them by module."""
-    resolver = get_resolver()
-    app_urls = {}
-    
-    for app_name, patterns in resolver.reverse_dict.items():
-        if app_name and app_name not in app_urls:
-            app_urls[app_name] = {}
-            
-        for pattern_tuple, pattern_dict in patterns.items():
-            if isinstance(pattern_dict, dict):
-                for url_name, url_pattern in pattern_dict.items():
-                    # Extract module name from URL pattern
-                    module_name = extract_module_name(url_name)
-                    
-                    if module_name not in app_urls.get(app_name, {}):
-                        app_urls[app_name][module_name] = []
-                    
-                    # Get URL path and parameters
-                    try:
-                        url_path = reverse(f"{app_name}:{url_name}")
-                        requires_params = "<" in url_pattern[0][0]
-                        
-                        url_info = {
-                            'name': url_name,
-                            'path': url_path,
-                            'requires_params': requires_params,
-                            'display_name': format_display_name(url_name)
-                        }
-                        app_urls[app_name][module_name].append(url_info)
-                    except NoReverseMatch:
-                        # Skip URLs that can't be reversed
-                        continue
-    
-    # Sort the apps alphabetically
-    return dict(sorted(app_urls.items()))
-
-def extract_module_name(url_name):
-    """Extract module name from URL name based on common prefixes."""
-    common_modules = [
-        'clientes', 'ventas', 'dashboard', 'pedidos', 'aduana', 
-        'carga', 'transferencias', 'frutas', 'presentaciones'
-    ]
-    
-    for module in common_modules:
-        if module in url_name:
-            return module
-    
-    if 'precio' in url_name:
-        return 'precios'
-    
-    # Default module name for misc URLs
-    return 'general'
-
-def format_display_name(url_name):
-    """Format URL name to a more readable display name."""
-    name = url_name.replace('_', ' ')
-    words = name.split()
-    capitalized_words = [word.capitalize() for word in words]
-    return ' '.join(capitalized_words)
-
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'registration/password_reset_form.html'
     email_template_name = 'registration/password_reset_email.html'
@@ -158,36 +98,42 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     title = 'Contraseña Restablecida - L&M Exotic Fruit'
 
 def landing_page_view(request):
+    
     if request.method == 'POST':
-        name = request.POST.get('name', '')
-        email = request.POST.get('email', '')
-        subject = request.POST.get('subject', 'Consulta desde el sitio web')
-        message = request.POST.get('message', '')
-        
-        # Validación básica del email
-        if '@' not in email or '.' not in email:
-            messages.error(request, 'Por favor, introduce un correo electrónico válido.')
-            return redirect('autenticacion:landing_page') + '#contact'
-        
-        # Preparar el contenido del email
-        email_message = f"Nombre: {name}\nEmail: {email}\nAsunto: {subject}\n\nMensaje:\n{message}"
-        
-        # Enviar email
-        try:
-            send_mail(
-                f"Contacto sitio web: {subject}",
-                email_message,
-                settings.DEFAULT_FROM_EMAIL,
-                ['import@luzmeloexoticfruits.com'],
-                fail_silently=False,
-            )
-            messages.success(request, 'Tu mensaje ha sido enviado con éxito. Nos pondremos en contacto contigo pronto.')
-        except Exception as e:
-            messages.error(request, 'Ha ocurrido un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.')
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            subject = form.cleaned_data['subject'] or 'Consulta desde el sitio web'
+            message = form.cleaned_data['message']
+            
+            # Preparar el contenido del email
+            email_message = f"Nombre: {name}\nEmail: {email}\nAsunto: {subject}\n\nMensaje:\n{message}"
+            
+            # Enviar email
+            try:
+                send_mail(
+                    f"Contacto sitio web: {subject}",
+                    email_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    ['import@luzmeloexoticfruits.com'],
+                    fail_silently=False,
+                )
+                messages.success(request, 'Tu mensaje ha sido enviado con éxito. Nos pondremos en contacto contigo pronto.')
+            except Exception as e:
+                messages.error(request, 'Ha ocurrido un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.')
+        else:
+            # Si hay errores de validación (incluyendo el captcha)
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{error}")
         
         # Redireccionar a la misma página con el ancla del formulario
         return redirect(f"{request.path}#contact")
     
-    return render(request, 'index.html')
+    else:
+        form = ContactForm()  # Crear formulario vacío para GET
+    
+    return render(request, 'index.html', {'form': form})
 
 

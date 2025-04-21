@@ -6,8 +6,13 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from .models import Fruta, Presentacion, ListaPreciosImportacion, ListaPreciosVentas
 from importacion.models import Exportador
-from comercial.models import Cliente
+from comercial.models import Cliente, Cotizacion, DetalleCotizacion
 from decimal import Decimal
+import json
+import datetime
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
+import base64
 
 @login_required
 def frutas_view(request):
@@ -354,4 +359,243 @@ def editar_precio_ventas(request, precio_id):
         except Exception as e:
             messages.error(request, f'Error al actualizar el precio: {str(e)}')
             
+    return redirect('lista_precios_ventas')
+
+@login_required
+def lista_cotizaciones(request):
+    """
+    View to display a list of all quotations with filters
+    """
+    cotizaciones = Cotizacion.objects.all()
+    
+    # Apply filters
+    if 'cliente' in request.GET and request.GET['cliente']:
+        cliente_id = request.GET['cliente']
+        cotizaciones = cotizaciones.filter(cliente_id=cliente_id)
+    
+    if 'estado' in request.GET and request.GET['estado']:
+        estado = request.GET['estado']
+        cotizaciones = cotizaciones.filter(estado=estado)
+    
+    if 'fecha_desde' in request.GET and request.GET['fecha_desde']:
+        fecha_desde = request.GET['fecha_desde']
+        cotizaciones = cotizaciones.filter(fecha_emision__gte=fecha_desde)
+    
+    if 'fecha_hasta' in request.GET and request.GET['fecha_hasta']:
+        fecha_hasta = request.GET['fecha_hasta']
+        cotizaciones = cotizaciones.filter(fecha_emision__lte=fecha_hasta)
+    
+    # Paginate results
+    paginator = Paginator(cotizaciones, 25)
+    page_number = request.GET.get('page', 1)
+    cotizaciones_page = paginator.get_page(page_number)
+    
+    clientes = Cliente.objects.all().order_by('nombre')
+    
+    context = {
+        'cotizaciones': cotizaciones_page,
+        'clientes': clientes,
+        'estados': Cotizacion.ESTADO_CHOICES,
+    }
+    
+    return render(request, 'lista_cotizaciones.html', context)
+
+@login_required
+def cotizacion_cliente(request, cliente_id):
+    """
+    View to create a quotation for an existing customer
+    """
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    
+    # Get all prices for this customer
+    precios = ListaPreciosVentas.objects.filter(
+        cliente=cliente
+    ).select_related('presentacion', 'presentacion__fruta')
+    
+    # Generate unique quote number
+    year = datetime.datetime.now().year
+    month = datetime.datetime.now().month
+    last_quote = Cotizacion.objects.order_by('-id').first()
+    if last_quote:
+        last_number = int(last_quote.numero.split('-')[-1])
+        new_number = last_number + 1
+    else:
+        new_number = 1
+    quotation_number = f"COT-{year}{month:02d}-{new_number:04d}"
+    
+    # Calculate validity date (15 days from now)
+    quotation_date = datetime.date.today()
+    valid_until = quotation_date + datetime.timedelta(days=15)
+    
+    context = {
+        'customer': cliente,
+        'precios': precios,
+        'quotation_number': quotation_number,
+        'quotation_date': quotation_date,
+        'valid_until': valid_until,
+        'tax_rate': 4,  # Default tax rate
+        'current_year': datetime.datetime.now().year,
+        'is_new_customer': False,
+    }
+    
+    return render(request, 'cotizacion_precios_ventas.html', context)
+
+@login_required
+def cotizacion_prospecto(request):
+    """
+    View to create a quotation for a new prospect
+    """
+    # Get all presentations for pricing
+    presentaciones = Presentacion.objects.all().select_related('fruta').order_by('fruta__nombre', 'kilos')
+    
+    # Generate unique quote number
+    year = datetime.datetime.now().year
+    month = datetime.datetime.now().month
+    last_quote = Cotizacion.objects.order_by('-id').first()
+    if last_quote:
+        last_number = int(last_quote.numero.split('-')[-1])
+        new_number = last_number + 1
+    else:
+        new_number = 1
+    quotation_number = f"COT-{year}{month:02d}-{new_number:04d}"
+    
+    # Set prospect data if provided
+    prospect_name = request.GET.get('nombre', '')
+    prospect_email = request.GET.get('email', '')
+    prospect_address = request.GET.get('direccion', '')
+    prospect_phone = request.GET.get('telefono', '')
+    
+    # Calculate validity date (15 days from now)
+    quotation_date = datetime.date.today()
+    valid_until = quotation_date + datetime.timedelta(days=15)
+    
+    context = {
+        'presentaciones': presentaciones,
+        'quotation_number': quotation_number,
+        'quotation_date': quotation_date,
+        'valid_until': valid_until,
+        'tax_rate': 4,  # Default tax rate
+        'current_year': datetime.datetime.now().year,
+        'is_new_customer': True,
+        'prospect_name': prospect_name,
+        'prospect_email': prospect_email,
+        'prospect_address': prospect_address,
+        'prospect_phone': prospect_phone,
+    }
+    
+    return render(request, 'cotizacion_precios_ventas.html', context)
+
+@login_required
+def ver_cotizacion(request, cotizacion_id):
+    """
+    View to display a saved quotation
+    """
+    cotizacion = get_object_or_404(Cotizacion, id=cotizacion_id)
+    detalles = DetalleCotizacion.objects.filter(cotizacion=cotizacion).select_related('presentacion', 'presentacion__fruta')
+
+    context = {
+        'cotizacion': cotizacion,
+        'detalles': detalles,
+        'current_year': datetime.datetime.now().year,
+    }
+
+    return render(request, 'cotizacion_precios_ventas.html', context)
+
+@login_required
+def enviar_cotizacion(request):
+    """
+    View to send a quotation by email
+    """
+    if request.method != 'POST':
+        return redirect('lista_precios_ventas')
+
+    # Get form data
+    quotation_data = json.loads(request.POST.get('quotation_data', '{}'))
+    recipients = request.POST.getlist('recipients')
+    if not recipients and 'recipient_email' in request.POST:
+        recipients = [request.POST.get('recipient_email')]
+
+    email_subject = request.POST.get('email_subject', 'Cotización - L&M Exotic Fruits')
+    email_message = request.POST.get('email_message', '')
+
+    # Get PDF data URL
+    pdf_data = request.POST.get('pdf_data', '')
+    if not pdf_data or not pdf_data.startswith('data:application/pdf;base64,'):
+        messages.error(request, 'No se ha generado correctamente el archivo PDF de la cotización.')
+        return redirect('lista_precios_ventas')
+
+    # Extract base64 data
+    pdf_content = base64.b64decode(pdf_data.replace('data:application/pdf;base64,', ''))
+
+    # Save quotation data if needed
+    if 'save_quotation' in request.POST and request.POST.get('save_quotation') == 'true':
+        try:
+            # Create new quotation
+            cotizacion = Cotizacion()
+
+            # Set customer or prospect info
+            if quotation_data.get('client'):
+                cotizacion.cliente_id = quotation_data['client'].get('id')
+            else:
+                cotizacion.prospect_nombre = quotation_data.get('prospect', {}).get('name', '')
+                cotizacion.prospect_email = quotation_data.get('prospect', {}).get('email', '')
+                cotizacion.prospect_direccion = quotation_data.get('prospect', {}).get('address', '')
+                cotizacion.prospect_telefono = quotation_data.get('prospect', {}).get('phone', '')
+
+            # Set quotation number if provided
+            if quotation_data.get('quotation_number'):
+                cotizacion.numero = quotation_data.get('quotation_number')
+
+            # Set dates
+            cotizacion.fecha_validez = datetime.datetime.now() + datetime.timedelta(days=15)
+
+            # Set terms and notes if available in the data
+            if 'terms' in quotation_data:
+                cotizacion.terminos = quotation_data['terms']
+            if 'notes' in quotation_data:
+                cotizacion.notas = quotation_data['notes']
+
+            # Set estado to 'enviada' since we're sending it by email
+            cotizacion.estado = 'enviada'
+
+            # Save main record
+            cotizacion.save()
+
+            # Add items - with simplified structure
+            for item in quotation_data.get('items', []):
+                detalle = DetalleCotizacion(
+                    cotizacion=cotizacion,
+                    presentacion_id=item.get('presentation_id'),
+                    precio_unitario=item.get('unit_price', 0),
+                )
+                detalle.save()
+
+            messages.success(request, f'Cotización guardada con número {cotizacion.numero}')
+
+        except Exception as e:
+            messages.error(request, f'Error al guardar la cotización: {str(e)}')
+
+    try:
+        # Send email with PDF
+        from_email = settings.DEFAULT_FROM_EMAIL
+        email = EmailMultiAlternatives(
+            subject=email_subject,
+            body=email_message,
+            from_email=from_email,
+            to=recipients
+        )
+
+        # Attach the PDF data
+        email.attach(
+            f'Cotizacion_{quotation_data.get("quotation_number", "")}.pdf', 
+            pdf_content, 
+            'application/pdf'
+        )
+
+        email.send()
+
+        messages.success(request, f'Cotización enviada a {", ".join(recipients)}')
+    except Exception as e:
+        messages.error(request, f'Error al enviar la cotización: {str(e)}')
+
     return redirect('lista_precios_ventas')

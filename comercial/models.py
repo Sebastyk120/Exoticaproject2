@@ -327,3 +327,60 @@ class BalanceCliente(models.Model):
         verbose_name_plural = "Balances Clientes"
         ordering = ['cliente', 'ultima_actualizacion']
 
+
+class Cotizacion(models.Model):
+    ESTADO_CHOICES = [
+        ('borrador', 'Borrador'),
+        ('enviada', 'Enviada'),
+        ('aceptada', 'Aceptada'),
+        ('rechazada', 'Rechazada'),
+        ('vencida', 'Vencida'),
+    ]
+    
+    numero = models.CharField(max_length=20, unique=True)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)
+    prospect_nombre = models.CharField(max_length=100, null=True, blank=True)
+    prospect_email = models.EmailField(null=True, blank=True)
+    prospect_direccion = models.CharField(max_length=255, null=True, blank=True)
+    prospect_telefono = models.CharField(max_length=20, null=True, blank=True)
+    fecha_emision = models.DateField(auto_now_add=True)
+    fecha_validez = models.DateField()
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='borrador')
+    terminos = models.TextField(null=True, blank=True)
+    notas = models.TextField(null=True, blank=True)
+    
+    def save(self, *args, **kwargs):
+        # Generate unique quote number if not set
+        if not self.numero:
+            year = datetime.datetime.now().year
+            month = datetime.datetime.now().month
+            last_quote = Cotizacion.objects.order_by('-id').first()
+            if last_quote:
+                last_number = int(last_quote.numero.split('-')[-1])
+                new_number = last_number + 1
+            else:
+                new_number = 1
+            self.numero = f"COT-{year}{month:02d}-{new_number:04d}"
+            
+        super().save(*args, **kwargs)
+        
+    class Meta:
+        verbose_name = "Cotización"
+        verbose_name_plural = "Cotizaciones"
+        ordering = ['-fecha_emision']
+
+class DetalleCotizacion(models.Model):
+    cotizacion = models.ForeignKey(Cotizacion, related_name='detalles', on_delete=models.CASCADE)
+    presentacion = models.ForeignKey(Presentacion, on_delete=models.CASCADE)
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+    
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+    
+    class Meta:
+        verbose_name = "Detalle de Cotización"
+        verbose_name_plural = "Detalles de Cotizaciones"
+

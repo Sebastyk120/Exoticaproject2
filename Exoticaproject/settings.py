@@ -31,7 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-gywh)zrdwb8ohd$l97a2mj_+u^pa6@hnsu$=)!ud(3l27%fe-y'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 
 # Application definition
@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'comercial.apps.ComercialConfig',
     'productos.apps.ProductosConfig',
     'importacion.apps.ImportacionConfig',
+    'captcha',  # Agregar captcha aquí
 ]
 
 MIDDLEWARE = [
@@ -82,6 +83,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
             os.path.join(BASE_DIR, 'autenticacion', 'templates'),
             os.path.join(BASE_DIR, 'autenticacion', 'templates', 'registration'),
         ],
@@ -103,7 +105,7 @@ WSGI_APPLICATION = 'Exoticaproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-
+"""
 DATABASES = {
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
@@ -117,7 +119,7 @@ DATABASES = {
         'HOST': 'localhost',  # Deja esto como 'localhost' si estás ejecutando PostgreSQL localmente
         'PORT': '5433',  # Puerto de PostgreSQL (por defecto es 5432)
     }
-}"""
+}
 
 
 # Password validation
@@ -189,15 +191,23 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 
 # CONFIGURACIÓN MAIL:
-DEFAULT_FROM_EMAIL = "import@luzmeloexoticfruits.com"
+DEFAULT_FROM_EMAIL = "subgerencia@heavensfruit.com"
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.office365.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = DEFAULT_FROM_EMAIL
-EMAIL_HOST_PASSWORD = 'Bogota1973'
+EMAIL_HOST_PASSWORD = 'Isabella2025+'
 ADMIN_SITE_NAME = 'Administración L&M Exótica'
 
 # Aumentar límite para datos de upload (10MB)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB en bytes
+
+# Configuración de CAPTCHA
+CAPTCHA_LENGTH = 5  # Longitud del captcha
+CAPTCHA_FONT_SIZE = 50  # Tamaño de la fuente
+CAPTCHA_LETTER_ROTATION = (-15, 15)  # Rotación de letras
+CAPTCHA_BACKGROUND_COLOR = '#ffffff'  # Color de fondo
+CAPTCHA_FOREGROUND_COLOR = '#001100'  # Color de las letras
+CAPTCHA_TIMEOUT = 5  # Tiempo de validez en minutos
 

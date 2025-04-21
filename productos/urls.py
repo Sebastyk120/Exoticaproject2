@@ -18,4 +18,11 @@ urlpatterns = [
     path('precios-ventas/', views.lista_precios_ventas, name='lista_precios_ventas'),
     path('precios-ventas/crear/', views.crear_precio_ventas, name='crear_precio_ventas'),
     path('precios-ventas/editar/<int:precio_id>/', views.editar_precio_ventas, name='editar_precio_ventas'),
+    
+    # Rutas para cotizaciones
+    path('cotizaciones/', views.lista_cotizaciones, name='lista_cotizaciones'),
+    path('cotizaciones/cliente/<int:cliente_id>/', views.cotizacion_cliente, name='cotizacion_cliente'),
+    path('cotizaciones/nuevo-prospecto/', views.cotizacion_prospecto, name='cotizacion_prospecto'),
+    path('cotizaciones/enviar/', views.enviar_cotizacion, name='enviar_cotizacion'),
+    path('cotizaciones/<int:cotizacion_id>/', views.ver_cotizacion, name='ver_cotizacion'),
 ]

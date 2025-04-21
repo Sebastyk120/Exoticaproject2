@@ -300,6 +300,56 @@ section {
     transform: translateX(4px);
 }
 
+/* Estilos para el captcha */
+.captcha-group {
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(216, 27, 96, 0.1);
+}
+
+.captcha-label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.captcha-group img {
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.captcha-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+.captcha-group a {
+    display: inline-block;
+    margin-left: 10px;
+    color: var(--primary);
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+.captcha-group a:hover {
+    text-decoration: underline;
+}
+
+.captcha-help {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 5px;
+}
+
 /* Hero Section */
 .hero {
     min-height: 100vh;

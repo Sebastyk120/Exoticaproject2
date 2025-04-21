@@ -4,13 +4,28 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Ajustes en Gastos de Aduana y carga, mejoras en table.">
-      <change afterPath="$PROJECT_DIR$/comercial/migrations/0004_venta_fecha_compra.py" afterDir="false" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Cambio queryset listas de precio importacion y venta.">
+      <change afterPath="$PROJECT_DIR$/comercial/migrations/0005_cotizacion_detallecotizacion.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/comercial/migrations/0006_cotizacion_tipo_cotizacion.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/comercial/migrations/0007_remove_cotizacion_iva_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/productos/static/css/cotizacion_precios_ventas.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/productos/templates/cotizacion_precios_ventas.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_13_04_2025_17_51_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_13_04_2025_17_51__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exoticaproject/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/static/css/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/static/css/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/static/css/index2.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/templates/index2.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/migrations/0004_venta_fecha_compra.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/migrations/0004_venta_fecha_compra.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/comercial/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/lista_ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/lista_ventas.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/ventas.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/views_ventas.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_ventas.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/productos/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/productos/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/robots.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sitemap.xml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -204,23 +219,11 @@
       <workItem from="1745061133052" duration="600000" />
       <workItem from="1745090655960" duration="2815000" />
       <workItem from="1745104984832" duration="616000" />
-      <workItem from="1745155830385" duration="1201000" />
-    </task>
-    <task id="LOCAL-00014" summary="Commit Final">
-      <option name="closed" value="true" />
-      <created>1744026208946</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1744026208946</updated>
-    </task>
-    <task id="LOCAL-00015" summary="Commit Final 2">
-      <option name="closed" value="true" />
-      <created>1744026389315</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1744026389315</updated>
+      <workItem from="1745155830385" duration="4668000" />
+      <workItem from="1745189342317" duration="123000" />
+      <workItem from="1745196040296" duration="1409000" />
+      <workItem from="1745256030582" duration="3521000" />
+      <workItem from="1745273179667" duration="818000" />
     </task>
     <task id="LOCAL-00016" summary="Commit Final 3">
       <option name="closed" value="true" />
@@ -598,7 +601,23 @@
       <option name="project" value="LOCAL" />
       <updated>1744935502322</updated>
     </task>
-    <option name="localTasksCounter" value="63" />
+    <task id="LOCAL-00063" summary="Implementacion de Fecha de compra.">
+      <option name="closed" value="true" />
+      <created>1745157166003</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1745157166003</updated>
+    </task>
+    <task id="LOCAL-00064" summary="Cambio queryset listas de precio importacion y venta.">
+      <option name="closed" value="true" />
+      <created>1745158814578</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1745158814578</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -616,8 +635,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Cabeceras de dominio 2" />
-    <MESSAGE value="Cabeceras de dominio 3" />
     <MESSAGE value="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS" />
     <MESSAGE value="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS 2" />
     <MESSAGE value="Cambio Ema Back" />
@@ -641,6 +658,8 @@
     <MESSAGE value="Revision de Utilidades." />
     <MESSAGE value="Ultimos ajustes de gastos de aduana y Dashboard de Utilidades." />
     <MESSAGE value="Ajustes en Gastos de Aduana y carga, mejoras en table." />
-    <option name="LAST_COMMIT_MESSAGE" value="Ajustes en Gastos de Aduana y carga, mejoras en table." />
+    <MESSAGE value="Implementacion de Fecha de compra." />
+    <MESSAGE value="Cambio queryset listas de precio importacion y venta." />
+    <option name="LAST_COMMIT_MESSAGE" value="Cambio queryset listas de precio importacion y venta." />
   </component>
 </project>

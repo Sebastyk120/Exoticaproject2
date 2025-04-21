@@ -39,9 +39,10 @@ urlpatterns = [
     path('importacion/', include('importacion.urls')),
     path('productos/', include('productos.urls')),
     path('comercial/', include('comercial.urls', namespace='comercial')),
+    path('captcha/', include('captcha.urls')),  # Agregar esta línea
 
     # SEO Routes
-    path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
+    path('Robots.txt', TemplateView.as_view(template_name="Robots.txt", content_type="text/plain")),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

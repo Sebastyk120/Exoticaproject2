@@ -1,0 +1,460 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cotización de Precios{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/cotizacion_precios_ventas.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button id="downloadPdfBtn" class="btn btn-primary">
+            <i class="fas fa-file-pdf"></i> Descargar PDF
+        </button>
+        <button id="sendEmailBtn" class="btn btn-success">
+            <i class="fas fa-envelope"></i> Enviar por Correo
+        </button>
+        {% if is_new_customer %}
+        <button id="saveQuoteBtn" class="btn btn-info">
+            <i class="fas fa-save"></i> Guardar Cotización
+        </button>
+        {% endif %}
+        <a href="{% url 'lista_precios_ventas' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <!-- Quotation Document -->
+    <div id="quotationDocument" class="quotation-document">
+        <!-- Company Header -->
+        <div class="company-header">
+            <div class="company-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo de la empresa">
+            </div>
+            <div class="company-info">
+                <h1>L&M Exotic Fruits</h1>
+                <p>Calle Principal 123, Madrid</p>
+                <p>Tel: +34 91 123 4567</p>
+                <p>Email: info@lmexoticfruits.com</p>
+            </div>
+        </div>
+
+        <!-- Quotation Info -->
+        <div class="quotation-info">
+            <div class="quotation-number">
+                <h2>COTIZACIÓN #{{ quotation_number }}</h2>
+                <p>Fecha: {{ quotation_date }}</p>
+                <p>Válido hasta: {{ valid_until }}</p>
+            </div>
+        </div>
+
+        <!-- Client Info -->
+        <div class="client-info">
+            <h3>CLIENTE</h3>
+            {% if customer %}
+                <!-- Existing customer -->
+                <p><strong>{{ customer.nombre }}</strong></p>
+                <p>{{ customer.domicilio }}</p>
+                {% if customer.ciudad %}<p>{{ customer.ciudad }}</p>{% endif %}
+                {% if customer.cif %}<p>CIF: {{ customer.cif }}</p>{% endif %}
+                <p>Email: {{ customer.email }}</p>
+                {% if customer.telefono %}<p>Tel: {{ customer.telefono }}</p>{% endif %}
+            {% else %}
+                <!-- New prospect - editable fields -->
+                <div class="editable-client-info">
+                    <div class="editable-field">
+                        <label for="prospect-name">Nombre:</label>
+                        <input type="text" id="prospect-name" value="{{ prospect_name|default:"" }}" placeholder="Nombre del Prospecto">
+                    </div>
+                    <div class="editable-field">
+                        <label for="prospect-address">Dirección:</label>
+                        <input type="text" id="prospect-address" value="{{ prospect_address|default:"" }}" placeholder="Dirección del Prospecto">
+                    </div>
+                    <div class="editable-field">
+                        <label for="prospect-email">Email:</label>
+                        <input type="email" id="prospect-email" value="{{ prospect_email|default:"" }}" placeholder="Email del Prospecto">
+                    </div>
+                    <div class="editable-field">
+                        <label for="prospect-phone">Teléfono:</label>
+                        <input type="text" id="prospect-phone" value="{{ prospect_phone|default:"" }}" placeholder="Teléfono del Prospecto">
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Products Table -->
+        <div class="products-section">
+            <h3>DETALLE DE PRODUCTOS</h3>
+            <table class="products-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Presentación</th>
+                        <th>Precio Unitario (€)</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if is_new_customer %}
+                        <!-- For new prospects, show all presentations with editable prices -->
+                        {% for presentacion in presentaciones %}
+                        <tr class="product-row" data-id="{{ presentacion.id }}">
+                            <td>{{ presentacion.fruta.nombre }}</td>
+                            <td>{{ presentacion.kilos }} kg</td>
+                            <td>
+                                <input type="number" class="price-input" min="0.01" step="0.01" placeholder="0.00" value="">
+                            </td>
+                            <td class="action-column">
+                                <button type="button" class="btn btn-sm btn-danger remove-row-btn">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <!-- For existing customers, show presentations with their actual prices but make them editable -->
+                        {% for precio in precios %}
+                        <tr class="product-row" data-id="{{ precio.presentacion.id }}">
+                            <td>{{ precio.presentacion.fruta.nombre }}</td>
+                            <td>{{ precio.presentacion.kilos }} kg</td>
+                            <td>
+                                <input type="number" class="price-input" min="0.01" step="0.01" value="{{ precio.get_precio_euro }}">
+                            </td>
+                            <td class="action-column">
+                                <button type="button" class="btn btn-sm btn-danger remove-row-btn">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="no-products">No hay precios establecidos para este cliente.</td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Terms and Notes -->
+        <div class="terms-section">
+            <h3>TÉRMINOS Y CONDICIONES</h3>
+            <div class="editable-terms" contenteditable="true">
+                <p>1. Los precios están sujetos a disponibilidad y pueden cambiar sin previo aviso.</p>
+                <p>2. Forma de pago: Transferencia bancaria.</p>
+                <p>3. Tiempo de entrega: 3-5 días hábiles después de confirmado el pedido.</p>
+                <p>4. Esta cotización tiene una validez de 15 días a partir de la fecha de emisión.</p>
+            </div>
+            
+            <h3>NOTAS ADICIONALES</h3>
+            <div class="editable-notes" contenteditable="true">
+                <p>Gracias por su interés en nuestros productos. Para cualquier consulta adicional, no dude en contactarnos.</p>
+            </div>
+        </div>
+
+        <!-- Company Footer -->
+        <div class="company-footer">
+            <p>L&M Exotic Fruits - Todos los derechos reservados © {{ current_year }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Email Modal -->
+<div id="emailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Enviar Cotización por Correo</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <form id="emailForm" method="post" action="{% url 'enviar_cotizacion' %}">
+            {% csrf_token %}
+            
+            {% if customer %}
+            <div class="form-group recipient-checkboxes">
+                <label>Destinatarios:</label>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="main_email" name="recipients" value="{{ customer.email }}" checked>
+                    <label for="main_email">{{ customer.email }} (Principal)</label>
+                </div>
+                
+                {% if customer.correos_adicionales %}
+                    {% for email in customer.correos_adicionales.split|stringformat:","|cut:" " %}
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="additional_email_{{ forloop.counter }}" name="recipients" value="{{ email }}">
+                        <label for="additional_email_{{ forloop.counter }}">{{ email }}</label>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="form-group">
+                <label for="recipient_email">Correo electrónico del destinatario:</label>
+                <input type="email" id="recipient_email" name="recipient_email" required>
+            </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="email_subject">Asunto:</label>
+                <input type="text" id="email_subject" name="email_subject" value="Cotización de Precios - L&M Exotic Fruits" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email_message">Mensaje:</label>
+                <textarea id="email_message" name="email_message" rows="6" required>Estimado/a {% if customer %}{{ customer.nombre }}{% else %}cliente{% endif %},
+
+Adjuntamos nuestra cotización de precios para los productos de su interés. Por favor, no dude en contactarnos si tiene alguna pregunta.
+
+Saludos cordiales,
+L&M Exotic Fruits
+</textarea>
+            </div>
+            
+            <input type="hidden" id="quotation_data" name="quotation_data">
+            <input type="hidden" id="pdf_data" name="pdf_data">
+            <input type="hidden" id="save_quotation" name="save_quotation" value="true">
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary close-modal-btn">Cancelar</button>
+                <button type="submit" class="btn btn-success">Enviar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- HTML2PDF library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Download PDF functionality
+    document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+        const element = document.getElementById('quotationDocument');
+        const opt = {
+            margin: [10, 10],
+            filename: `Cotizacion_${quotationNumber}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        html2pdf().from(element).set(opt).save();
+    });
+    
+    // Variables
+    const quotationNumber = "{{ quotation_number }}";
+    
+    // Remove row functionality
+    document.querySelectorAll('.remove-row-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const row = this.closest('tr');
+            row.remove();
+        });
+    });
+    
+    // Email Modal functionality
+    const emailModal = document.getElementById('emailModal');
+    const sendEmailBtn = document.getElementById('sendEmailBtn');
+    const closeBtns = document.querySelectorAll('.close-modal, .close-modal-btn');
+    
+    sendEmailBtn.addEventListener('click', async function() {
+        // First, generate the PDF
+        const element = document.getElementById('quotationDocument');
+        const opt = {
+            margin: [10, 10],
+            filename: `Cotizacion_${quotationNumber}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        try {
+            // Generate PDF and get it as data URL
+            const pdfBlob = await html2pdf().from(element).set(opt).outputPdf('blob');
+            
+            // Convert blob to base64 data URL
+            const reader = new FileReader();
+            reader.readAsDataURL(pdfBlob);
+            reader.onloadend = function() {
+                // Set the PDF data in the hidden input
+                const base64data = reader.result;
+                document.getElementById('pdf_data').value = base64data;
+                
+                // Prepare the quotation data to be sent in the form
+                const quotationData = {
+                    quotation_number: quotationNumber,
+                    client: {% if customer %}{
+                        id: {{ customer.id }},
+                        name: "{{ customer.nombre }}",
+                        email: "{{ customer.email }}"
+                    }{% else %}null{% endif %},
+                    prospect: {% if is_new_customer %}{
+                        name: document.getElementById('prospect-name').value,
+                        email: document.getElementById('prospect-email').value,
+                        address: document.getElementById('prospect-address').value,
+                        phone: document.getElementById('prospect-phone').value
+                    }{% else %}null{% endif %},
+                    items: [],
+                    // Add terms and notes from the editable fields
+                    terms: document.querySelector('.editable-terms').innerHTML,
+                    notes: document.querySelector('.editable-notes').innerHTML
+                };
+                
+                // Collect items data - only those that remain in the table
+                document.querySelectorAll('.product-row').forEach(row => {
+                    const presentationId = row.getAttribute('data-id');
+                    const priceInput = row.querySelector('.price-input');
+                    const unitPrice = parseFloat(priceInput.value) || 0;
+                    
+                    if (unitPrice > 0) {
+                        quotationData.items.push({
+                            presentation_id: presentationId,
+                            unit_price: unitPrice
+                        });
+                    }
+                });
+                
+                // Set the data in the hidden input
+                document.getElementById('quotation_data').value = JSON.stringify(quotationData);
+                
+                // If prospect, set the email from the form
+                if ({% if is_new_customer %}true{% else %}false{% endif %}) {
+                    const prospectEmail = document.getElementById('prospect-email').value;
+                    if (prospectEmail) {
+                        document.getElementById('recipient_email').value = prospectEmail;
+                    }
+                }
+                
+                // Show the modal
+                emailModal.classList.add('show');
+            };
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            alert('Error al generar el PDF. Por favor, inténtelo de nuevo.');
+        }
+    });
+    
+    // Close the modal
+    closeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            emailModal.classList.remove('show');
+        });
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === emailModal) {
+            emailModal.classList.remove('show');
+        }
+    });
+    
+    // For new customers: save button functionality
+    const saveQuoteBtn = document.getElementById('saveQuoteBtn');
+    if (saveQuoteBtn) {
+        saveQuoteBtn.addEventListener('click', async function() {
+            // Collect all the data needed to save the quotation
+            const quotationData = {
+                quotation_number: quotationNumber,
+                prospect: {
+                    name: document.getElementById('prospect-name').value,
+                    email: document.getElementById('prospect-email').value,
+                    address: document.getElementById('prospect-address').value,
+                    phone: document.getElementById('prospect-phone').value
+                },
+                items: [],
+                terms: document.querySelector('.editable-terms').innerHTML,
+                notes: document.querySelector('.editable-notes').innerHTML
+            };
+            
+            // Collect items data - only those that remain in the table
+            document.querySelectorAll('.product-row').forEach(row => {
+                const presentationId = row.getAttribute('data-id');
+                const priceInput = row.querySelector('.price-input');
+                const unitPrice = parseFloat(priceInput.value) || 0;
+                
+                if (unitPrice > 0) {
+                    quotationData.items.push({
+                        presentation_id: presentationId,
+                        unit_price: unitPrice
+                    });
+                }
+            });
+            
+            // First, generate the PDF for saving with the quotation
+            try {
+                const element = document.getElementById('quotationDocument');
+                const opt = {
+                    margin: [10, 10],
+                    filename: `Cotizacion_${quotationNumber}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                
+                // Generate PDF and get it as data URL
+                const pdfBlob = await html2pdf().from(element).set(opt).outputPdf('blob');
+                
+                // Convert blob to base64 data URL
+                const reader = new FileReader();
+                reader.readAsDataURL(pdfBlob);
+                reader.onloadend = function() {
+                    // Create a form to submit the data
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = "{% url 'enviar_cotizacion' %}";
+                    form.style.display = 'none';
+                    
+                    // Add CSRF token
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = 'csrfmiddlewaretoken';
+                    csrfToken.value = '{{ csrf_token }}';
+                    form.appendChild(csrfToken);
+                    
+                    // Add quotation data
+                    const quotationDataInput = document.createElement('input');
+                    quotationDataInput.type = 'hidden';
+                    quotationDataInput.name = 'quotation_data';
+                    quotationDataInput.value = JSON.stringify(quotationData);
+                    form.appendChild(quotationDataInput);
+                    
+                    // Add PDF data
+                    const pdfDataInput = document.createElement('input');
+                    pdfDataInput.type = 'hidden';
+                    pdfDataInput.name = 'pdf_data';
+                    pdfDataInput.value = reader.result;
+                    form.appendChild(pdfDataInput);
+                    
+                    // Add save flag
+                    const saveInput = document.createElement('input');
+                    saveInput.type = 'hidden';
+                    saveInput.name = 'save_quotation';
+                    saveInput.value = 'true';
+                    form.appendChild(saveInput);
+                    
+                    // Add recipient email for prospect
+                    const emailInput = document.createElement('input');
+                    emailInput.type = 'hidden';
+                    emailInput.name = 'recipient_email';
+                    emailInput.value = document.getElementById('prospect-email').value;
+                    form.appendChild(emailInput);
+                    
+                    // Submit the form
+                    document.body.appendChild(form);
+                    form.submit();
+                };
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error al generar el PDF. Por favor, inténtelo de nuevo.');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

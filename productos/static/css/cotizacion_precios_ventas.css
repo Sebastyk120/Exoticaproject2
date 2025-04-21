@@ -1,0 +1,380 @@
+/* Main Container */
+.main-container {
+    font-family: 'Arial', sans-serif;
+    max-width: 1000px;
+    margin: 20px auto;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    justify-content: flex-end;
+}
+
+.action-buttons button, .action-buttons a {
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.action-buttons .btn-primary {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.action-buttons .btn-success {
+    background-color: #198754;
+    color: white;
+}
+
+.action-buttons .btn-info {
+    background-color: #0dcaf0;
+    color: #212529;
+}
+
+.action-buttons .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    text-decoration: none;
+}
+
+/* Quotation Document */
+.quotation-document {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 30px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Company Header */
+.company-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #3f51b5;
+    padding-bottom: 15px;
+}
+
+.company-logo img {
+    max-height: 100px;
+    max-width: 200px;
+}
+
+.company-info {
+    text-align: right;
+}
+
+.company-info h1 {
+    font-size: 24px;
+    color: #3f51b5;
+    margin: 0 0 10px 0;
+}
+
+.company-info p {
+    margin: 3px 0;
+    color: #555;
+}
+
+/* Quotation Info */
+.quotation-info {
+    text-align: right;
+    margin-bottom: 30px;
+}
+
+.quotation-number h2 {
+    font-size: 20px;
+    color: #3f51b5;
+    margin: 0 0 10px 0;
+}
+
+.quotation-number p {
+    margin: 5px 0;
+    color: #555;
+}
+
+/* Client Info */
+.client-info {
+    margin-bottom: 30px;
+}
+
+.client-info h3 {
+    font-size: 16px;
+    color: #3f51b5;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.client-info p {
+    margin: 3px 0;
+    color: #333;
+}
+
+/* Editable Client Info */
+.editable-client-info {
+    margin-top: 10px;
+}
+
+.editable-field {
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.editable-field label {
+    font-weight: bold;
+    margin-bottom: 3px;
+    color: #555;
+}
+
+.editable-field input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+}
+
+/* Products Section */
+.products-section {
+    margin-bottom: 30px;
+}
+
+.products-section h3 {
+    font-size: 16px;
+    color: #3f51b5;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+/* Products Table */
+.products-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.products-table th {
+    background-color: #f8f9fa;
+    color: #3f51b5;
+    padding: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.products-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.products-table .row-total {
+    font-weight: bold;
+}
+
+/* Table Inputs */
+.products-table input {
+    width: 80px;
+    padding: 5px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.products-table .action-column {
+    width: 80px;
+}
+
+.products-table .btn-danger {
+    background-color: #dc3545;
+    color: white;
+    padding: 5px 8px;
+    border: none;
+    border-radius: 3px;
+}
+
+.products-table tfoot {
+    font-weight: bold;
+}
+
+.products-table tfoot td {
+    border: none;
+    padding: 5px 10px;
+}
+
+.products-table .total-label {
+    text-align: right;
+}
+
+.products-table .grand-total {
+    font-size: 16px;
+    color: #3f51b5;
+}
+
+.products-table .no-products {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    font-style: italic;
+}
+
+/* Terms Section */
+.terms-section {
+    margin-bottom: 30px;
+}
+
+.terms-section h3 {
+    font-size: 16px;
+    color: #3f51b5;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.editable-terms, .editable-notes {
+    padding: 10px;
+    border: 1px dotted #ddd;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.editable-terms p, .editable-notes p {
+    margin: 5px 0;
+    color: #555;
+}
+
+/* Company Footer */
+.company-footer {
+    text-align: center;
+    margin-top: 50px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+    color: #777;
+    font-size: 12px;
+}
+
+/* Email Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+}
+
+.modal.show {
+    display: block;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 0;
+    width: 60%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    max-width: 700px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+}
+
+.modal-title {
+    font-size: 18px;
+    color: #3f51b5;
+    margin: 0;
+}
+
+.close-modal {
+    font-size: 24px;
+    font-weight: bold;
+    color: #aaa;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: #555;
+}
+
+.modal form {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Recipient Checkboxes */
+.recipient-checkboxes {
+    margin-bottom: 20px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.checkbox-container input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+}
+
+/* Media Print Styles */
+@media print {
+    .action-buttons {
+        display: none;
+    }
+    
+    .quotation-document {
+        box-shadow: none;
+        border: none;
+    }
+    
+    body {
+        background-color: white;
+    }
+}
