@@ -197,7 +197,7 @@ EMAIL_HOST = 'smtp.office365.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = DEFAULT_FROM_EMAIL
-EMAIL_HOST_PASSWORD = 'Bogota1974'
+EMAIL_HOST_PASSWORD = 'Bogota1973'
 ADMIN_SITE_NAME = 'Administración L&M Exótica'
 
 # Aumentar límite para datos de upload (10MB)
