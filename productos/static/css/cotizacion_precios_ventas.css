@@ -1,8 +1,9 @@
 /* Main Container */
 .main-container {
-    font-family: 'Arial', sans-serif;
-    max-width: 1000px;
+    font-family: 'Roboto', 'Arial', sans-serif;
+    max-width: 800px;
     margin: 20px auto;
+    background-color: #ffffff;
 }
 
 /* Action Buttons */
@@ -53,41 +54,58 @@
     padding: 30px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     position: relative;
+    border-radius: 8px;
+}
+
+/* Document Header Layout */
+.document-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+    margin-bottom: 30px;
 }
 
 /* Company Header */
 .company-header {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
-    border-bottom: 2px solid #3f51b5;
-    padding-bottom: 15px;
+    align-items: center;
+    gap: 20px;
+    max-width: 60%;
 }
 
 .company-logo img {
-    max-height: 100px;
-    max-width: 200px;
+    max-height: 80px;
+    max-width: 180px;
+    object-fit: contain;
 }
 
 .company-info {
-    text-align: right;
+    flex-grow: 1;
 }
 
 .company-info h1 {
-    font-size: 24px;
+    font-size: 26px;
     color: #3f51b5;
-    margin: 0 0 10px 0;
+    margin: 0 0 6px 0;
+    font-weight: 600;
+    letter-spacing: -0.5px;
 }
 
 .company-info p {
-    margin: 3px 0;
-    color: #555;
+    margin: 2px 0;
+    color: #666;
+    font-size: 13px;
+    line-height: 1.4;
 }
 
-/* Quotation Info */
-.quotation-info {
-    text-align: right;
-    margin-bottom: 30px;
+/* Quotation Block */
+.quotation-block {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #3f51b5;
+    min-width: 200px;
 }
 
 .quotation-number h2 {
@@ -99,48 +117,113 @@
 .quotation-number p {
     margin: 5px 0;
     color: #555;
+    font-size: 13px;
 }
 
-/* Client Info */
-.client-info {
+/* Client Container and Column Layout */
+.client-container {
     margin-bottom: 30px;
+    background-color: transparent;
+    border-radius: 6px;
+    padding: 15px;
+    border: 1px solid #eee;
 }
 
-.client-info h3 {
+.client-container h3 {
     font-size: 16px;
     color: #3f51b5;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #ddd;
+    margin-bottom: 15px;
     padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
 }
 
-.client-info p {
-    margin: 3px 0;
-    color: #333;
-}
-
-/* Editable Client Info */
-.editable-client-info {
-    margin-top: 10px;
-}
-
-.editable-field {
-    margin-bottom: 8px;
+.client-info-columns {
     display: flex;
-    flex-direction: column;
+    gap: 30px;
+}
+
+.client-column {
+    flex: 1;
+}
+
+.info-group {
+    margin-bottom: 10px;
+}
+
+.info-label {
+    font-weight: bold;
+    color: #555;
+    display: block;
+    margin-bottom: 3px;
+    font-size: 12px;
+}
+
+.info-value {
+    color: #333;
+    display: block;
+    font-size: 14px;
+}
+
+/* Soft Inputs - for editable fields */
+.soft-input {
+    border: 1px solid rgba(224, 224, 224, 0.3);
+    border-radius: 4px;
+    padding: 8px 10px;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+    transition: all 0.2s ease;
+}
+
+.soft-input:focus {
+    outline: none;
+    border-color: rgba(63, 81, 181, 0.2);
+    background-color: white;
+}
+
+/* Price input specific styling */
+.price-input {
+    text-align: right;
+    width: 90px !important;
+    font-family: 'Roboto Mono', monospace;
+}
+
+/* Price display for PDF */
+.price-display {
+    font-family: 'Roboto Mono', monospace;
+    text-align: right;
+    display: block;
+    color: #333;
+    font-weight: 500;
+    padding-right: 10px;
+}
+
+/* For PDF export - apply with JS before generating PDF */
+.pdf-export .soft-input,
+.pdf-export input,
+.pdf-export .price-input {
+    border: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+}
+
+.pdf-export .price-input {
+    text-align: right !important;
+    font-family: inherit !important;
+}
+
+/* Editable Fields */
+.editable-field {
+    margin-bottom: 15px;
 }
 
 .editable-field label {
     font-weight: bold;
     margin-bottom: 3px;
     color: #555;
-}
-
-.editable-field input {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    width: 100%;
+    display: block;
+    font-size: 12px;
 }
 
 /* Products Section */
@@ -151,42 +234,43 @@
 .products-section h3 {
     font-size: 16px;
     color: #3f51b5;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #ddd;
+    margin-bottom: 12px;
     padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
 }
 
 /* Products Table */
 .products-table {
+    border-collapse: separate;
+    border-spacing: 0;
     width: 100%;
-    border-collapse: collapse;
+    margin: 10px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px #eee;
 }
 
 .products-table th {
-    background-color: #f8f9fa;
+    background-color: #f0f2f5;
     color: #3f51b5;
-    padding: 10px;
-    border: 1px solid #ddd;
+    padding: 12px 15px;
+    border: none;
     font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .products-table td {
-    padding: 10px;
-    border: 1px solid #ddd;
+    padding: 12px 15px;
+    border: none;
+    border-top: 1px solid #eee;
     text-align: center;
+    color: #333;
 }
 
-.products-table .row-total {
-    font-weight: bold;
-}
-
-/* Table Inputs */
-.products-table input {
-    width: 80px;
-    padding: 5px;
-    text-align: center;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.products-table tbody tr:hover {
+    background-color: #f8f9fa;
 }
 
 .products-table .action-column {
@@ -199,24 +283,6 @@
     padding: 5px 8px;
     border: none;
     border-radius: 3px;
-}
-
-.products-table tfoot {
-    font-weight: bold;
-}
-
-.products-table tfoot td {
-    border: none;
-    padding: 5px 10px;
-}
-
-.products-table .total-label {
-    text-align: right;
-}
-
-.products-table .grand-total {
-    font-size: 16px;
-    color: #3f51b5;
 }
 
 .products-table .no-products {
@@ -235,26 +301,28 @@
     font-size: 16px;
     color: #3f51b5;
     margin-bottom: 8px;
-    border-bottom: 1px solid #ddd;
     padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
 }
 
 .editable-terms, .editable-notes {
-    padding: 10px;
-    border: 1px dotted #ddd;
+    padding: 15px;
+    border: 1px solid #eee;
     border-radius: 5px;
     margin-bottom: 20px;
+    background-color: #fafafa;
 }
 
 .editable-terms p, .editable-notes p {
     margin: 5px 0;
     color: #555;
+    font-size: 13px;
 }
 
 /* Company Footer */
 .company-footer {
     text-align: center;
-    margin-top: 50px;
+    margin-top: 40px;
     padding-top: 10px;
     border-top: 1px solid #ddd;
     color: #777;
@@ -279,65 +347,70 @@
 }
 
 .modal-content {
-    background-color: #fff;
-    margin: 10% auto;
-    padding: 0;
-    width: 60%;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    border-radius: 5px;
-    max-width: 700px;
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #ddd;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
 }
 
 .modal-title {
-    font-size: 18px;
-    color: #3f51b5;
     margin: 0;
+    color: #3f51b5;
+    font-size: 20px;
 }
 
 .close-modal {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: bold;
     color: #aaa;
-    background: none;
     border: none;
+    background: none;
     cursor: pointer;
 }
 
 .close-modal:hover {
-    color: #555;
-}
-
-.modal form {
-    padding: 20px;
+    color: #333;
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 5px;
-    font-weight: bold;
+    font-weight: 500;
     color: #555;
 }
 
 .form-group input,
 .form-group textarea {
     width: 100%;
-    padding: 10px;
+    padding: 8px 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-family: inherit;
+    font-size: 14px;
+}
+
+.recipient-checkboxes {
+    margin-top: 10px;
+}
+
+.checkbox-container {
+    margin-bottom: 8px;
 }
 
 .form-actions {
@@ -347,20 +420,14 @@
     margin-top: 20px;
 }
 
-/* Recipient Checkboxes */
-.recipient-checkboxes {
-    margin-bottom: 20px;
+.btn-success {
+    background-color: #198754;
+    color: white;
 }
 
-.checkbox-container {
-    display: flex;
-    align-items: center;
-    margin: 5px 0;
-}
-
-.checkbox-container input[type="checkbox"] {
-    width: auto;
-    margin-right: 10px;
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
 }
 
 /* Media Print Styles */
@@ -372,9 +439,65 @@
     .quotation-document {
         box-shadow: none;
         border: none;
+        padding: 15px;
     }
     
     body {
         background-color: white;
+    }
+
+    /* Hide the action column when printing */
+    .action-column,
+    .products-table th:last-child,
+    .products-table td:last-child {
+        display: none !important;
+    }
+
+    .company-header {
+        margin-bottom: 20px;
+    }
+
+    .document-header {
+        margin-bottom: 25px;
+    }
+
+    .client-container,
+    .products-section,
+    .terms-section {
+        margin-bottom: 20px;
+    }
+
+    /* Make soft inputs look clean in PDF */
+    .soft-input,
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    .price-input {
+        border: none !important;
+        padding: 0 !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        font-size: inherit !important;
+        color: #333 !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+    
+    .price-input {
+        width: auto !important;
+        text-align: right !important;
+    }
+
+    .editable-terms, .editable-notes {
+        border: none;
+        background-color: transparent;
+        padding: 5px 0;
+    }
+    
+    /* Remove all input styling */
+    input {
+        border: 0 !important;
+        outline: 0 !important;
+        background: transparent !important;
     }
 }

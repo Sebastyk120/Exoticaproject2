@@ -99,33 +99,37 @@
         </div>
     </div>
 
-    <!-- Tabs Navigation with Pills style -->
+    <!-- Enhanced Tabs Navigation -->
     <div class="tabs-container">
         <ul class="nav nav-pills mb-4 custom-tabs" id="transferenciasTab" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link {% if active_tab == 'exportador' %}active{% endif %}" id="exportador-tab" data-bs-toggle="tab" data-bs-target="#exportador" type="button" role="tab" aria-controls="exportador" aria-selected="{% if active_tab == 'exportador' %}true{% else %}false{% endif %}">
                     <i class="bi bi-truck"></i> <span class="tab-label">Exportadores</span>
+                    <span class="badge bg-primary ms-2">{{ transferencias_exportador|length }}</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link {% if active_tab == 'aduana' %}active{% endif %}" id="aduana-tab" data-bs-toggle="tab" data-bs-target="#aduana" type="button" role="tab" aria-controls="aduana" aria-selected="{% if active_tab == 'aduana' %}true{% else %}false{% endif %}">
                     <i class="bi bi-building"></i> <span class="tab-label">Aduanas</span>
+                    <span class="badge bg-warning ms-2">{{ transferencias_aduana|length }}</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link {% if active_tab == 'carga' %}active{% endif %}" id="carga-tab" data-bs-toggle="tab" data-bs-target="#carga" type="button" role="tab" aria-controls="carga" aria-selected="{% if active_tab == 'carga' %}true{% else %}false{% endif %}">
                     <i class="bi bi-box-seam"></i> <span class="tab-label">Agencias de Carga</span>
+                    <span class="badge bg-info ms-2">{{ transferencias_carga|length }}</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link {% if active_tab == 'cliente' %}active{% endif %}" id="cliente-tab" data-bs-toggle="tab" data-bs-target="#cliente" type="button" role="tab" aria-controls="cliente" aria-selected="{% if active_tab == 'cliente' %}true{% else %}false{% endif %}">
                     <i class="bi bi-people"></i> <span class="tab-label">Clientes</span>
+                    <span class="badge bg-success ms-2">{{ transferencias_cliente|length }}</span>
                 </button>
             </li>
         </ul>
     </div>
 
-    <!-- Tab Content with enhanced styling -->
+    <!-- Tab Content -->
     <div class="tab-content" id="transferenciasTabContent">
         <!-- Exportador Tab -->
         <div class="tab-pane fade {% if active_tab == 'exportador' %}show active{% endif %}" id="exportador" role="tabpanel" aria-labelledby="exportador-tab">
@@ -141,25 +145,35 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-filters d-flex flex-column flex-md-row justify-content-between mb-3">
-                        <div class="d-flex flex-wrap gap-2 mb-2 mb-md-0">
+                    <!-- Enhanced Filters -->
+                    <div class="table-filters">
+                        <div class="d-flex">
                             <div class="input-group search-box">
                                 <span class="input-group-text"><i class="bi bi-search"></i></span>
                                 <input type="text" class="form-control" id="searchExportador" placeholder="Buscar...">
                             </div>
-                        </div>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-funnel"></i> Filtrar
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                <li><a class="dropdown-item" href="#" data-filter="all">Todas</a></li>
-                                <li><a class="dropdown-item" href="#" data-filter="month">Último mes</a></li>
-                                <li><a class="dropdown-item" href="#" data-filter="week">Última semana</a></li>
-                            </ul>
+                            
+                            <!-- Exportador Filter -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterExportador" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-building"></i> Exportador
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="filterExportador">
+                                    <li><a class="dropdown-item" href="?tab=exportador">Todos</a></li>
+                                    {% for exportador in exportadores %}
+                                    <li>
+                                        <a class="dropdown-item {% if exportador_filter == exportador.id|stringformat:'i' %}active{% endif %}" 
+                                           href="?tab=exportador&exportador_filter={{ exportador.id }}">
+                                            {{ exportador.nombre }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Enhanced Table -->
                     <div class="table-responsive table-container">
                         <table class="table table-striped table-hover data-table" id="tablaExportador">
                             <thead>
@@ -179,103 +193,66 @@
                             <tbody>
                                 {% for transferencia in transferencias_exportador %}
                                 <tr>
-                                    <td class="text-center id-column">{{ transferencia.id }}</td>
+                                    <td class="text-center">{{ transferencia.id }}</td>
                                     <td>{{ transferencia.exportador.nombre }}</td>
-                                    <td>
-                                        <span class="badge bg-light text-dark">{{ transferencia.referencia }}</span>
-                                    </td>
+                                    <td>{{ transferencia.referencia }}</td>
                                     <td>{{ transferencia.fecha_transferencia|date:"d/m/Y" }}</td>
-                                    <td class="text-end">
-                                        <span class="currency-value">{{ transferencia.valor_transferencia|format_currency }}</span>
-                                    </td>
-                                    <td class="text-end">
-                                        <span class="currency-value">{{ transferencia.valor_transferencia_eur|format_currency_eur }}</span>
-                                    </td>
+                                    <td class="text-end">{{ transferencia.valor_transferencia|format_currency }}</td>
+                                    <td class="text-end">{{ transferencia.valor_transferencia_eur|format_currency_eur }}</td>
                                     <td class="text-end">{{ transferencia.trm|floatformat:2 }}</td>
-                                    <td>
-                                        <span class="truncate-text" data-bs-toggle="tooltip" title="{{ transferencia.concepto }}">
-                                            {{ transferencia.concepto|truncatechars:20 }}
-                                        </span>
-                                    </td>
-                                    <td class="text-end">
-                                        <span class="currency-value fw-bold">{{ transferencia.saldo_transferencia|format_currency }}</span>
-                                    </td>
+                                    <td>{{ transferencia.concepto }}</td>
+                                    <td class="text-end">{{ transferencia.saldo_disponible|format_currency }}</td>
                                     <td class="text-center">
-                                        <div class="action-buttons">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEditarExportador{{ transferencia.id }}" data-bs-toggle="tooltip" title="Editar">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#modalEditarExportador{{ transferencia.id }}">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarExportador{{ transferencia.id }}" data-bs-toggle="tooltip" title="Eliminar">
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#modalEliminarExportador{{ transferencia.id }}">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
                                     </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="10" class="text-center">No hay transferencias registradas</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
 
-                    {% if active_tab == 'exportador' and is_paginated %}
-                    <div class="pagination-container mt-4">
-                        <nav aria-label="Navegación de transferencias">
-                            <ul class="pagination justify-content-center">
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=exportador&page=1" aria-label="Primera">
-                                            <span aria-hidden="true">&laquo;&laquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=exportador&page={{ page_obj.previous_page_number }}" aria-label="Anterior">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Primera">
-                                            <span aria-hidden="true">&laquo;&laquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Anterior">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                {% endif %}
-
-                                <li class="page-item active" aria-current="page">
-                                    <span class="page-link">
-                                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-                                    </span>
-                                </li>
-
-                                {% if page_obj.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=exportador&page={{ page_obj.next_page_number }}" aria-label="Siguiente">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=exportador&page={{ page_obj.paginator.num_pages }}" aria-label="Última">
-                                            <span aria-hidden="true">&raquo;&raquo;</span>
-                                        </a>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Siguiente">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Última">
-                                            <span aria-hidden="true">&raquo;&raquo;</span>
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                    </div>
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?tab=exportador&page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                <a class="page-link" href="?tab=exportador&page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?tab=exportador&page={{ page_obj.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
                     {% endif %}
                 </div>
             </div>
@@ -286,7 +263,7 @@
             <div class="card content-card">
                 <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
                     <h5 class="card-title mb-2 mb-md-0">
-                        <i class="bi bi-building me-2"></i>Transferencias a Agencias de Aduana
+                        <i class="bi bi-building me-2"></i>Transferencias a Aduanas
                     </h5>
                     <div class="actions">
                         <button type="button" class="btn btn-primary btn-with-icon" data-bs-toggle="modal" data-bs-target="#modalCrearAduana">
@@ -295,131 +272,110 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-filters d-flex flex-column flex-md-row justify-content-between mb-3">
-                        <div class="d-flex flex-wrap gap-2 mb-2 mb-md-0">
+                    <!-- Enhanced Filters -->
+                    <div class="table-filters">
+                        <div class="d-flex">
                             <div class="input-group search-box">
                                 <span class="input-group-text"><i class="bi bi-search"></i></span>
                                 <input type="text" class="form-control" id="searchAduana" placeholder="Buscar...">
                             </div>
-                        </div>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-funnel"></i> Filtrar
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
-                                <li><a class="dropdown-item" href="#" data-filter="all">Todas</a></li>
-                                <li><a class="dropdown-item" href="#" data-filter="month">Último mes</a></li>
-                                <li><a class="dropdown-item" href="#" data-filter="week">Última semana</a></li>
-                            </ul>
+                            
+                            <!-- Aduana Filter -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterAduana" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-building"></i> Aduana
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="filterAduana">
+                                    <li><a class="dropdown-item" href="?tab=aduana">Todas</a></li>
+                                    {% for aduana in agencias_aduana %}
+                                    <li>
+                                        <a class="dropdown-item {% if aduana_filter == aduana.id|stringformat:'i' %}active{% endif %}" 
+                                           href="?tab=aduana&aduana_filter={{ aduana.id }}">
+                                            {{ aduana.nombre }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Enhanced Table -->
                     <div class="table-responsive table-container">
                         <table class="table table-striped table-hover data-table" id="tablaAduana">
                             <thead>
                                 <tr>
                                     <th class="text-center">#</th>
-                                    <th>Agencia Aduana</th>
+                                    <th>Aduana</th>
                                     <th>Referencia</th>
                                     <th>Fecha</th>
                                     <th class="text-end">Valor EUR</th>
                                     <th>Concepto</th>
+                                    <th class="text-end">Saldo</th>
                                     <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for transferencia in transferencias_aduana %}
                                 <tr>
-                                    <td class="text-center id-column">{{ transferencia.id }}</td>
+                                    <td class="text-center">{{ transferencia.id }}</td>
                                     <td>{{ transferencia.agencia_aduana.nombre }}</td>
-                                    <td>
-                                        <span class="badge bg-light text-dark">{{ transferencia.referencia }}</span>
-                                    </td>
+                                    <td>{{ transferencia.referencia }}</td>
                                     <td>{{ transferencia.fecha_transferencia|date:"d/m/Y" }}</td>
-                                    <td class="text-end">
-                                        <span class="currency-value">{{ transferencia.valor_transferencia|format_currency_eur }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="truncate-text" data-bs-toggle="tooltip" title="{{ transferencia.concepto }}">
-                                            {{ transferencia.concepto|truncatechars:20 }}
-                                        </span>
-                                    </td>
+                                    <td class="text-end">{{ transferencia.valor_transferencia|format_currency_eur }}</td>
+                                    <td>{{ transferencia.concepto }}</td>
+                                    <td class="text-end">{{ transferencia.saldo_disponible|format_currency_eur }}</td>
                                     <td class="text-center">
-                                        <div class="action-buttons">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEditarAduana{{ transferencia.id }}" data-bs-toggle="tooltip" title="Editar">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#modalEditarAduana{{ transferencia.id }}">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarAduana{{ transferencia.id }}" data-bs-toggle="tooltip" title="Eliminar">
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#modalEliminarAduana{{ transferencia.id }}">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
                                     </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No hay transferencias registradas</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
 
-                    {% if active_tab == 'aduana' and is_paginated %}
-                    <div class="pagination-container mt-4">
-                        <nav aria-label="Navegación de transferencias">
-                            <ul class="pagination justify-content-center">
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=aduana&page=1" aria-label="Primera">
-                                            <span aria-hidden="true">&laquo;&laquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=aduana&page={{ page_obj.previous_page_number }}" aria-label="Anterior">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Primera">
-                                            <span aria-hidden="true">&laquo;&laquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Anterior">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                {% endif %}
-
-                                <li class="page-item active" aria-current="page">
-                                    <span class="page-link">
-                                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-                                    </span>
-                                </li>
-
-                                {% if page_obj.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=aduana&page={{ page_obj.next_page_number }}" aria-label="Siguiente">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=aduana&page={{ page_obj.paginator.num_pages }}" aria-label="Última">
-                                            <span aria-hidden="true">&raquo;&raquo;</span>
-                                        </a>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Siguiente">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Última">
-                                            <span aria-hidden="true">&raquo;&raquo;</span>
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                    </div>
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?tab=aduana&page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                <a class="page-link" href="?tab=aduana&page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?tab=aduana&page={{ page_obj.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
                     {% endif %}
                 </div>
             </div>
@@ -439,137 +395,114 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-filters d-flex flex-column flex-md-row justify-content-between mb-3">
-                        <div class="d-flex flex-wrap gap-2 mb-2 mb-md-0">
+                    <!-- Enhanced Filters -->
+                    <div class="table-filters">
+                        <div class="d-flex">
                             <div class="input-group search-box">
                                 <span class="input-group-text"><i class="bi bi-search"></i></span>
                                 <input type="text" class="form-control" id="searchCarga" placeholder="Buscar...">
                             </div>
-                        </div>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-funnel"></i> Filtrar
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
-                                <li><a class="dropdown-item" href="#" data-filter="all">Todas</a></li>
-                                <li><a class="dropdown-item" href="#" data-filter="month">Último mes</a></li>
-                                <li><a class="dropdown-item" href="#" data-filter="week">Última semana</a></li>
-                            </ul>
+                            
+                            <!-- Carga Filter -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterCarga" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-box-seam"></i> Agencia de Carga
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="filterCarga">
+                                    <li><a class="dropdown-item" href="?tab=carga">Todas</a></li>
+                                    {% for carga in agencias_carga %}
+                                    <li>
+                                        <a class="dropdown-item {% if carga_filter == carga.id|stringformat:'i' %}active{% endif %}" 
+                                           href="?tab=carga&carga_filter={{ carga.id }}">
+                                            {{ carga.nombre }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Enhanced Table -->
                     <div class="table-responsive table-container">
                         <table class="table table-striped table-hover data-table" id="tablaCarga">
                             <thead>
                                 <tr>
                                     <th class="text-center">#</th>
-                                    <th>Agencia Carga</th>
+                                    <th>Agencia de Carga</th>
                                     <th>Referencia</th>
                                     <th>Fecha</th>
                                     <th class="text-end">Valor USD</th>
                                     <th class="text-end">Valor EUR</th>
                                     <th class="text-end">TRM</th>
                                     <th>Concepto</th>
+                                    <th class="text-end">Saldo</th>
                                     <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for transferencia in transferencias_carga %}
                                 <tr>
-                                    <td class="text-center id-column">{{ transferencia.id }}</td>
+                                    <td class="text-center">{{ transferencia.id }}</td>
                                     <td>{{ transferencia.agencia_carga.nombre }}</td>
-                                    <td>
-                                        <span class="badge bg-light text-dark">{{ transferencia.referencia }}</span>
-                                    </td>
+                                    <td>{{ transferencia.referencia }}</td>
                                     <td>{{ transferencia.fecha_transferencia|date:"d/m/Y" }}</td>
-                                    <td class="text-end">
-                                        <span class="currency-value">{{ transferencia.valor_transferencia|format_currency }}</span>
-                                    </td>
-                                    <td class="text-end">
-                                        <span class="currency-value">{{ transferencia.valor_transferencia_eur|format_currency_eur }}</span>
-                                    </td>
+                                    <td class="text-end">{{ transferencia.valor_transferencia|format_currency }}</td>
+                                    <td class="text-end">{{ transferencia.valor_transferencia_eur|format_currency_eur }}</td>
                                     <td class="text-end">{{ transferencia.trm|floatformat:2 }}</td>
-                                    <td>
-                                        <span class="truncate-text" data-bs-toggle="tooltip" title="{{ transferencia.concepto }}">
-                                            {{ transferencia.concepto|truncatechars:20 }}
-                                        </span>
-                                    </td>
+                                    <td>{{ transferencia.concepto }}</td>
+                                    <td class="text-end">{{ transferencia.saldo_disponible|format_currency }}</td>
                                     <td class="text-center">
-                                        <div class="action-buttons">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEditarCarga{{ transferencia.id }}" data-bs-toggle="tooltip" title="Editar">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#modalEditarCarga{{ transferencia.id }}">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarCarga{{ transferencia.id }}" data-bs-toggle="tooltip" title="Eliminar">
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#modalEliminarCarga{{ transferencia.id }}">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
                                     </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="10" class="text-center">No hay transferencias registradas</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
 
-                    {% if active_tab == 'carga' and is_paginated %}
-                    <div class="pagination-container mt-4">
-                        <nav aria-label="Navegación de transferencias">
-                            <ul class="pagination justify-content-center">
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=carga&page=1" aria-label="Primera">
-                                            <span aria-hidden="true">&laquo;&laquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=carga&page={{ page_obj.previous_page_number }}" aria-label="Anterior">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Primera">
-                                            <span aria-hidden="true">&laquo;&laquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Anterior">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                {% endif %}
-
-                                <li class="page-item active" aria-current="page">
-                                    <span class="page-link">
-                                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-                                    </span>
-                                </li>
-
-                                {% if page_obj.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=carga&page={{ page_obj.next_page_number }}" aria-label="Siguiente">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=carga&page={{ page_obj.paginator.num_pages }}" aria-label="Última">
-                                            <span aria-hidden="true">&raquo;&raquo;</span>
-                                        </a>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Siguiente">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Última">
-                                            <span aria-hidden="true">&raquo;&raquo;</span>
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                    </div>
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?tab=carga&page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                <a class="page-link" href="?tab=carga&page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?tab=carga&page={{ page_obj.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
                     {% endif %}
                 </div>
             </div>
@@ -580,7 +513,7 @@
             <div class="card content-card">
                 <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
                     <h5 class="card-title mb-2 mb-md-0">
-                        <i class="bi bi-people me-2"></i>Pagos de Clientes
+                        <i class="bi bi-people me-2"></i>Transferencias de Clientes
                     </h5>
                     <div class="actions">
                         <button type="button" class="btn btn-primary btn-with-icon" data-bs-toggle="modal" data-bs-target="#modalCrearCliente">
@@ -589,25 +522,35 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-filters d-flex flex-column flex-md-row justify-content-between mb-3">
-                        <div class="d-flex flex-wrap gap-2 mb-2 mb-md-0">
+                    <!-- Enhanced Filters -->
+                    <div class="table-filters">
+                        <div class="d-flex">
                             <div class="input-group search-box">
                                 <span class="input-group-text"><i class="bi bi-search"></i></span>
                                 <input type="text" class="form-control" id="searchCliente" placeholder="Buscar...">
                             </div>
-                        </div>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton4" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-funnel"></i> Filtrar
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton4">
-                                <li><a class="dropdown-item" href="#" data-filter="all">Todas</a></li>
-                                <li><a class="dropdown-item" href="#" data-filter="month">Último mes</a></li>
-                                <li><a class="dropdown-item" href="#" data-filter="week">Última semana</a></li>
-                            </ul>
+                            
+                            <!-- Cliente Filter -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterCliente" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-people"></i> Cliente
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="filterCliente">
+                                    <li><a class="dropdown-item" href="?tab=cliente">Todos</a></li>
+                                    {% for cliente in clientes %}
+                                    <li>
+                                        <a class="dropdown-item {% if cliente_filter == cliente.id|stringformat:'i' %}active{% endif %}" 
+                                           href="?tab=cliente&cliente_filter={{ cliente.id }}">
+                                            {{ cliente.nombre }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Enhanced Table -->
                     <div class="table-responsive table-container">
                         <table class="table table-striped table-hover data-table" id="tablaCliente">
                             <thead>
@@ -618,102 +561,71 @@
                                     <th>Fecha</th>
                                     <th class="text-end">Valor EUR</th>
                                     <th>Concepto</th>
+                                    <th class="text-end">Saldo</th>
                                     <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for transferencia in transferencias_cliente %}
                                 <tr>
-                                    <td class="text-center id-column">{{ transferencia.id }}</td>
+                                    <td class="text-center">{{ transferencia.id }}</td>
                                     <td>{{ transferencia.cliente.nombre }}</td>
-                                    <td>
-                                        <span class="badge bg-light text-dark">{{ transferencia.referencia }}</span>
-                                    </td>
+                                    <td>{{ transferencia.referencia }}</td>
                                     <td>{{ transferencia.fecha_transferencia|date:"d/m/Y" }}</td>
-                                    <td class="text-end">
-                                        <span class="currency-value">{{ transferencia.valor_transferencia|format_currency_eur }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="truncate-text" data-bs-toggle="tooltip" title="{{ transferencia.concepto }}">
-                                            {{ transferencia.concepto|truncatechars:20 }}
-                                        </span>
-                                    </td>
+                                    <td class="text-end">{{ transferencia.valor_transferencia|format_currency_eur }}</td>
+                                    <td>{{ transferencia.concepto }}</td>
+                                    <td class="text-end">{{ transferencia.saldo_disponible|format_currency_eur }}</td>
                                     <td class="text-center">
-                                        <div class="action-buttons">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEditarCliente{{ transferencia.id }}" data-bs-toggle="tooltip" title="Editar">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#modalEditarCliente{{ transferencia.id }}">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarCliente{{ transferencia.id }}" data-bs-toggle="tooltip" title="Eliminar">
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#modalEliminarCliente{{ transferencia.id }}">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
                                     </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No hay transferencias registradas</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
 
-                    {% if active_tab == 'cliente' and is_paginated %}
-                    <div class="pagination-container mt-4">
-                        <nav aria-label="Navegación de transferencias">
-                            <ul class="pagination justify-content-center">
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=cliente&page=1" aria-label="Primera">
-                                            <span aria-hidden="true">&laquo;&laquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=cliente&page={{ page_obj.previous_page_number }}" aria-label="Anterior">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Primera">
-                                            <span aria-hidden="true">&laquo;&laquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Anterior">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                {% endif %}
-
-                                <li class="page-item active" aria-current="page">
-                                    <span class="page-link">
-                                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-                                    </span>
-                                </li>
-
-                                {% if page_obj.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=cliente&page={{ page_obj.next_page_number }}" aria-label="Siguiente">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?tab=cliente&page={{ page_obj.paginator.num_pages }}" aria-label="Última">
-                                            <span aria-hidden="true">&raquo;&raquo;</span>
-                                        </a>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Siguiente">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Última">
-                                            <span aria-hidden="true">&raquo;&raquo;</span>
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                    </div>
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?tab=cliente&page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                <a class="page-link" href="?tab=cliente&page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?tab=cliente&page={{ page_obj.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
                     {% endif %}
                 </div>
             </div>
@@ -758,21 +670,21 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="valor_transferencia" class="form-label">Valor USD <span class="text-danger">*</span></label>
+                            <label for="valor_transferencia_exportador_create" class="form-label">Valor USD <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia" name="valor_transferencia" required>
+                                <span class="input-group-text currency-symbol">$</span>
+                                <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia_exportador_create" name="valor_transferencia" required>
                                 <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="valor_transferencia_eur" class="form-label">Valor EUR <span class="text-danger">*</span></label>
+                            <label for="valor_transferencia_eur_exportador_create" class="form-label">Valor EUR <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text">€</span>
-                                <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia_eur" name="valor_transferencia_eur" required>
+                                <span class="input-group-text currency-symbol">€</span>
+                                <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia_eur_exportador_create" name="valor_transferencia_eur" required>
                                 <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
                             </div>
-                            <div class="form-text trm-calculation"></div>
+                            <div class="form-text trm-calculation-exportador-create"></div>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -885,21 +797,21 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="valor_transferencia" class="form-label">Valor USD <span class="text-danger">*</span></label>
+                            <label for="valor_transferencia_carga_create" class="form-label">Valor USD <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia" name="valor_transferencia" required>
+                                <span class="input-group-text currency-symbol">$</span>
+                                <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia_carga_create" name="valor_transferencia" required>
                                 <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="valor_transferencia_eur" class="form-label">Valor EUR <span class="text-danger">*</span></label>
+                            <label for="valor_transferencia_eur_carga_create" class="form-label">Valor EUR <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text">€</span>
-                                <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia_eur" name="valor_transferencia_eur" required>
+                                <span class="input-group-text currency-symbol">€</span>
+                                <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia_eur_carga_create" name="valor_transferencia_eur" required>
                                 <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
                             </div>
-                            <div class="form-text trm-calculation"></div>
+                            <div class="form-text trm-calculation-carga-create"></div>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -957,7 +869,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="valor_transferencia{{ transferencia.id }}" class="form-label">Valor USD <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text">$</span>
+                                <span class="input-group-text currency-symbol">$</span>
                                 <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia{{ transferencia.id }}" name="valor_transferencia" value="{{ transferencia.valor_transferencia|stringformat:'g' }}" required>
                                 <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
                             </div>
@@ -965,7 +877,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="valor_transferencia_eur{{ transferencia.id }}" class="form-label">Valor EUR <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text">€</span>
+                                <span class="input-group-text currency-symbol">€</span>
                                 <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia_eur{{ transferencia.id }}" name="valor_transferencia_eur" value="{{ transferencia.valor_transferencia_eur|stringformat:'g' }}" required>
                                 <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
                             </div>
@@ -1138,7 +1050,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="valor_transferencia{{ transferencia.id }}" class="form-label">Valor USD <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text">$</span>
+                                <span class="input-group-text currency-symbol">$</span>
                                 <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia{{ transferencia.id }}" name="valor_transferencia" value="{{ transferencia.valor_transferencia|stringformat:'g' }}" required>
                                 <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
                             </div>
@@ -1146,7 +1058,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="valor_transferencia_eur{{ transferencia.id }}" class="form-label">Valor EUR <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text">€</span>
+                                <span class="input-group-text currency-symbol">€</span>
                                 <input type="number" step="0.01" min="0" class="form-control" id="valor_transferencia_eur{{ transferencia.id }}" name="valor_transferencia_eur" value="{{ transferencia.valor_transferencia_eur|stringformat:'g' }}" required>
                                 <div class="invalid-feedback">Por favor ingrese un valor válido.</div>
                             </div>
@@ -1542,168 +1454,426 @@
 
 {% block extra_js %}
 <script>
-    $(document).ready(function() {
-        // Initialize tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-        
-        // Set the active tab based on the URL parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const activeTab = urlParams.get('tab');
-        
-        if (activeTab) {
-            $(`#${activeTab}-tab`).tab('show');
-        }
-        
-        // Update tab parameter when changing tabs (server-side reload)
-        $('.nav-pills button').on('click', function (e) {
-            const targetId = $(this).attr('id').replace('-tab', '');
-            window.location.href = `?tab=${targetId}`;
-            e.preventDefault(); // Prevent the default tab switching behavior
-        });
-        
-        // Initialize DataTables with responsive configuration
-        function initDataTable(tableId, columnsConfig) {
-            return $(`#${tableId}`).DataTable({
-                paging: false, // Disable DataTables pagination (using Django's)
-                searching: true,
-                ordering: true,
-                info: true,
-                responsive: true,
-                language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Buscar...",
-                    info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                    infoEmpty: "Mostrando 0 a 0 de 0 registros",
-                    infoFiltered: "(filtrado de _MAX_ registros totales)",
-                    zeroRecords: "No se encontraron registros coincidentes",
-                    emptyTable: "No hay datos disponibles en la tabla"
-                },
-                columnDefs: columnsConfig,
-                responsive: {
-                    details: {
-                        type: 'column',
-                        target: 'tr'
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    // Table search functionality
+    function setupTableSearch(inputId, tableId) {
+        const searchInput = document.getElementById(inputId);
+        const table = document.getElementById(tableId);
+        const rows = table.getElementsByTagName('tr');
+
+        searchInput.addEventListener('keyup', function() {
+            const searchText = this.value.toLowerCase();
+            
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const cells = row.getElementsByTagName('td');
+                let found = false;
+
+                for (let j = 0; j < cells.length; j++) {
+                    const cell = cells[j];
+                    if (cell.textContent.toLowerCase().indexOf(searchText) > -1) {
+                        found = true;
+                        break;
                     }
                 }
-            });
+
+                row.style.display = found ? '' : 'none';
+            }
+        });
+    }
+
+    // Setup search for each table
+    setupTableSearch('searchExportador', 'tablaExportador');
+    setupTableSearch('searchAduana', 'tablaAduana');
+    setupTableSearch('searchCarga', 'tablaCarga');
+    setupTableSearch('searchCliente', 'tablaCliente');
+
+    // Filter functionality
+    function setupTableFilter(buttonId, tableId) {
+        const filterButton = document.getElementById(buttonId);
+        // Add null check for filter button
+        if (!filterButton) {
+            console.warn(`Filter button with ID ${buttonId} not found.`);
+            return;
         }
-        
-        // Initialize DataTables for each tab with specific column configurations
-        const tablaExportador = initDataTable('tablaExportador', [
-            { targets: [0, 9], orderable: false },
-            { targets: [4, 5, 6, 8], className: 'text-end' }
-        ]);
-        
-        const tablaAduana = initDataTable('tablaAduana', [
-            { targets: [0, 6], orderable: false },
-            { targets: [4], className: 'text-end' }
-        ]);
-        
-        const tablaCarga = initDataTable('tablaCarga', [
-            { targets: [0, 8], orderable: false },
-            { targets: [4, 5, 6], className: 'text-end' }
-        ]);
-        
-        const tablaCliente = initDataTable('tablaCliente', [
-            { targets: [0, 6], orderable: false },
-            { targets: [4], className: 'text-end' }
-        ]);
-        
-        // Connect search boxes to DataTables
-        $('#searchExportador').on('keyup', function() {
-            tablaExportador.search(this.value).draw();
-        });
-        
-        $('#searchAduana').on('keyup', function() {
-            tablaAduana.search(this.value).draw();
-        });
-        
-        $('#searchCarga').on('keyup', function() {
-            tablaCarga.search(this.value).draw();
-        });
-        
-        $('#searchCliente').on('keyup', function() {
-            tablaCliente.search(this.value).draw();
-        });
-        
-        // TRM calculation for Exportador and Agencia de Carga forms
-        function setupTrmCalculation(usdSelector, eurSelector, trmDisplaySelector) {
-            const usdInput = $(usdSelector);
-            const eurInput = $(eurSelector);
-            const trmDisplay = $(trmDisplaySelector);
-            
-            function calculateTrm() {
-                const usdValue = parseFloat(usdInput.val()) || 0;
-                const eurValue = parseFloat(eurInput.val()) || 0;
+        const table = document.getElementById(tableId);
+        // Add null check for table
+        if (!table) {
+            console.warn(`Table with ID ${tableId} not found for filter button ${buttonId}.`);
+            return;
+        }
+        const rows = table.getElementsByTagName('tr');
+
+        filterButton.addEventListener('click', function(e) {
+            if (e.target.classList.contains('dropdown-item')) {
+                const filter = e.target.getAttribute('data-filter');
                 
-                if (usdValue > 0 && eurValue > 0) {
-                    const trm = usdValue / eurValue;
-                    trmDisplay.html(`TRM calculada: ${trm.toFixed(5)}`);
-                } else {
-                    trmDisplay.html('');
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    const dateCell = row.cells[3]; // Assuming date is in the 4th column
+                    const valueCell = row.cells[4]; // Assuming value is in the 5th column
+                    
+                    let show = true;
+                    
+                    if (filter === 'month') {
+                        const date = new Date(dateCell.textContent);
+                        const now = new Date();
+                        show = (now - date) <= 30 * 24 * 60 * 60 * 1000;
+                    } else if (filter === 'week') {
+                        const date = new Date(dateCell.textContent);
+                        const now = new Date();
+                        show = (now - date) <= 7 * 24 * 60 * 60 * 1000;
+                    } else if (filter === 'high') {
+                        const value = parseFloat(valueCell.textContent.replace(/[^0-9.-]+/g, ''));
+                        show = value > 1000; // Adjust threshold as needed
+                    } else if (filter === 'low') {
+                        const value = parseFloat(valueCell.textContent.replace(/[^0-9.-]+/g, ''));
+                        show = value <= 1000; // Adjust threshold as needed
+                    }
+                    
+                    row.style.display = show ? '' : 'none';
                 }
             }
-            
-            usdInput.on('input', calculateTrm);
-            eurInput.on('input', calculateTrm);
-            
-            // Initial calculation if values exist
+        });
+    }
+
+    // Setup filters for each table
+    setupTableFilter('filterExportador', 'tablaExportador');
+    setupTableFilter('filterAduana', 'tablaAduana');
+    setupTableFilter('filterCarga', 'tablaCarga');
+    setupTableFilter('filterCliente', 'tablaCliente');
+
+    // Sort functionality
+    function setupTableSort(buttonId, tableId) {
+        const sortButton = document.getElementById(buttonId);
+        // Add null check for sort button
+        if (!sortButton) {
+            console.warn(`Sort button with ID ${buttonId} not found.`);
+            return; // Exit if button doesn't exist
+        }
+        const table = document.getElementById(tableId);
+        // Add null check for table
+        if (!table) {
+            console.warn(`Table with ID ${tableId} not found for sort button ${buttonId}.`);
+            return;
+        }
+        const tbody = table.getElementsByTagName('tbody')[0];
+        // Add null check for tbody
+        if (!tbody) {
+            console.warn(`Tbody not found in table ${tableId} for sort button ${buttonId}.`);
+            return;
+        }
+        const rows = Array.from(tbody.getElementsByTagName('tr'));
+
+        sortButton.addEventListener('click', function(e) {
+            if (e.target.classList.contains('dropdown-item')) {
+                const sortType = e.target.getAttribute('data-sort');
+                
+                rows.sort((a, b) => {
+                    if (sortType === 'date-asc') {
+                        return new Date(a.cells[3].textContent) - new Date(b.cells[3].textContent);
+                    } else if (sortType === 'date-desc') {
+                        return new Date(b.cells[3].textContent) - new Date(a.cells[3].textContent);
+                    } else if (sortType === 'value-asc') {
+                        return parseFloat(a.cells[4].textContent.replace(/[^0-9.-]+/g, '')) - 
+                               parseFloat(b.cells[4].textContent.replace(/[^0-9.-]+/g, ''));
+                    } else if (sortType === 'value-desc') {
+                        return parseFloat(b.cells[4].textContent.replace(/[^0-9.-]+/g, '')) - 
+                               parseFloat(a.cells[4].textContent.replace(/[^0-9.-]+/g, ''));
+                    }
+                    return 0;
+                });
+
+                tbody.innerHTML = '';
+                rows.forEach(row => tbody.appendChild(row));
+            }
+        });
+    }
+
+    // Setup sort for each table
+    setupTableSort('sortExportador', 'tablaExportador');
+    setupTableSort('sortAduana', 'tablaAduana');
+    setupTableSort('sortCarga', 'tablaCarga');
+    setupTableSort('sortCliente', 'tablaCliente');
+
+    // Date range filter functionality
+    const fechaInicio = document.getElementById('fechaInicio');
+    const fechaFin = document.getElementById('fechaFin');
+    const aplicarFechas = document.getElementById('aplicarFechas');
+
+    function updateDateFilter() {
+        const params = new URLSearchParams(window.location.search);
+        params.set('fecha_inicio', fechaInicio.value);
+        params.set('fecha_fin', fechaFin.value);
+        window.location.href = window.location.pathname + '?' + params.toString();
+    }
+
+    aplicarFechas.addEventListener('click', updateDateFilter);
+
+    // Set current date values if they exist in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('fecha_inicio')) {
+        fechaInicio.value = urlParams.get('fecha_inicio');
+    }
+    if (urlParams.has('fecha_fin')) {
+        fechaFin.value = urlParams.get('fecha_fin');
+    }
+
+    // Date range filter functionality for each tab
+    function setupDateFilter(tabPrefix) {
+        const fechaInicio = document.getElementById(`fechaInicio${tabPrefix}`);
+        const fechaFin = document.getElementById(`fechaFin${tabPrefix}`);
+        const aplicarFechas = document.getElementById(`aplicarFechas${tabPrefix}`);
+
+        function updateDateFilter() {
+            const params = new URLSearchParams(window.location.search);
+            params.set('fecha_inicio', fechaInicio.value);
+            params.set('fecha_fin', fechaFin.value);
+            window.location.href = window.location.pathname + '?' + params.toString();
+        }
+
+        aplicarFechas.addEventListener('click', updateDateFilter);
+
+        // Set current date values if they exist in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('fecha_inicio')) {
+            fechaInicio.value = urlParams.get('fecha_inicio');
+        }
+        if (urlParams.has('fecha_fin')) {
+            fechaFin.value = urlParams.get('fecha_fin');
+        }
+    }
+
+    // Setup date filters for each tab
+    setupDateFilter(''); // Exportador
+    setupDateFilter('Aduana');
+    setupDateFilter('Carga');
+    setupDateFilter('Cliente');
+
+    // Fix modal input styles
+    document.querySelectorAll('.modal .input-group').forEach(group => {
+        group.style.maxWidth = '100%';
+    });
+
+    // Initialize TRM calculation
+    setupTrmCalculation();
+
+    // Load balance data
+    loadBalanceData();
+});
+
+// ... existing code ...
+function setupTrmCalculation() {
+    // --- Create Exportador Modal ---
+    const createExportadorModal = document.getElementById('modalCrearExportador');
+    if (createExportadorModal) {
+        const valorUsd = createExportadorModal.querySelector('#valor_transferencia_exportador_create');
+        const valorEur = createExportadorModal.querySelector('#valor_transferencia_eur_exportador_create');
+        const trmDisplay = createExportadorModal.querySelector('.trm-calculation-exportador-create');
+
+        function calculateTrm() {
+            if (valorUsd.value && valorEur.value && parseFloat(valorEur.value) > 0) {
+                const trm = (parseFloat(valorUsd.value) / parseFloat(valorEur.value)).toFixed(5);
+                trmDisplay.textContent = `TRM: ${trm}`;
+                trmDisplay.classList.add('trm-active');
+            } else {
+                trmDisplay.textContent = '';
+                trmDisplay.classList.remove('trm-active');
+            }
+        }
+        if (valorUsd && valorEur && trmDisplay) {
+            valorUsd.addEventListener('input', calculateTrm);
+            valorEur.addEventListener('input', calculateTrm);
+            createExportadorModal.addEventListener('shown.bs.modal', calculateTrm);
+            // Inicializar al cargar por si hay valores por defecto
             calculateTrm();
         }
-        
-        // Setup TRM calculation for create forms
-        setupTrmCalculation('#modalCrearExportador #valor_transferencia', 
-                           '#modalCrearExportador #valor_transferencia_eur', 
-                           '#modalCrearExportador .trm-calculation');
-        
-        setupTrmCalculation('#modalCrearCarga #valor_transferencia', 
-                           '#modalCrearCarga #valor_transferencia_eur', 
-                           '#modalCrearCarga .trm-calculation');
-        
-        // Setup TRM calculation for edit forms
-        {% for transferencia in transferencias_exportador %}
-            setupTrmCalculation('#valor_transferencia{{ transferencia.id }}', 
-                               '#valor_transferencia_eur{{ transferencia.id }}', 
-                               '#modalEditarExportador{{ transferencia.id }} .trm-calculation');
-        {% endfor %}
-        
-        {% for transferencia in transferencias_carga %}
-            setupTrmCalculation('#valor_transferencia{{ transferencia.id }}', 
-                               '#valor_transferencia_eur{{ transferencia.id }}', 
-                               '#modalEditarCarga{{ transferencia.id }} .trm-calculation');
-        {% endfor %}
-        
-        // Form validation
-        (function () {
-            'use strict'
-            
-            // Fetch all forms we want to apply validation styles to
-            const forms = document.querySelectorAll('.needs-validation')
-            
-            // Loop over them and prevent submission
-            Array.prototype.slice.call(forms)
-                .forEach(function (form) {
-                    form.addEventListener('submit', function (event) {
-                        if (!form.checkValidity()) {
-                            event.preventDefault()
-                            event.stopPropagation()
-                        } else {
-                            // Show spinner when form is valid and submitting
-                            const submitBtn = form.querySelector('button[type="submit"]');
-                            const spinner = submitBtn.querySelector('.spinner-border');
-                            if (spinner) {
-                                spinner.classList.remove('d-none');
-                                submitBtn.setAttribute('disabled', true);
-                            }
-                        }
-                        
-                        form.classList.add('was-validated')
-                    }, false)
-                })
-        })()
+    }
+
+    // --- Edit Exportador Modals ---
+    document.querySelectorAll('[id^="modalEditarExportador"]').forEach(modal => {
+        const id = modal.id.replace('modalEditarExportador', '');
+        const editValorUsd = modal.querySelector(`#valor_transferencia${id}`);
+        const editValorEur = modal.querySelector(`#valor_transferencia_eur${id}`);
+        const editTrmDisplay = modal.querySelector('.trm-calculation');
+
+        function calculateEditTrm() {
+            if (editValorUsd.value && editValorEur.value && parseFloat(editValorEur.value) > 0) {
+                const trm = (parseFloat(editValorUsd.value) / parseFloat(editValorEur.value)).toFixed(5);
+                editTrmDisplay.textContent = `TRM: ${trm}`;
+                editTrmDisplay.classList.add('trm-active');
+            } else {
+                editTrmDisplay.textContent = '';
+                editTrmDisplay.classList.remove('trm-active');
+            }
+        }
+        if (editValorUsd && editValorEur && editTrmDisplay) {
+            editValorUsd.addEventListener('input', calculateEditTrm);
+            editValorEur.addEventListener('input', calculateEditTrm);
+            modal.addEventListener('shown.bs.modal', calculateEditTrm);
+            // Inicializar al cargar por si hay valores por defecto
+            calculateEditTrm();
+        }
     });
+
+    // --- Create Carga Modal ---
+    const createCargaModal = document.getElementById('modalCrearCarga');
+    if (createCargaModal) {
+        const cargaValorUsd = createCargaModal.querySelector('#valor_transferencia_carga_create');
+        const cargaValorEur = createCargaModal.querySelector('#valor_transferencia_eur_carga_create');
+        const cargaTrmDisplay = createCargaModal.querySelector('.trm-calculation-carga-create');
+
+        function calculateCargaTrm() {
+            if (cargaValorUsd.value && cargaValorEur.value && parseFloat(cargaValorEur.value) > 0) {
+                const trm = (parseFloat(cargaValorUsd.value) / parseFloat(cargaValorEur.value)).toFixed(5);
+                cargaTrmDisplay.textContent = `TRM: ${trm}`;
+                cargaTrmDisplay.classList.add('trm-active');
+            } else {
+                cargaTrmDisplay.textContent = '';
+                cargaTrmDisplay.classList.remove('trm-active');
+            }
+        }
+        if (cargaValorUsd && cargaValorEur && cargaTrmDisplay) {
+            cargaValorUsd.addEventListener('input', calculateCargaTrm);
+            cargaValorEur.addEventListener('input', calculateCargaTrm);
+            createCargaModal.addEventListener('shown.bs.modal', calculateCargaTrm);
+            // Inicializar al cargar por si hay valores por defecto
+            calculateCargaTrm();
+        }
+    }
+
+    // --- Edit Carga Modals ---
+    document.querySelectorAll('[id^="modalEditarCarga"]').forEach(modal => {
+        const id = modal.id.replace('modalEditarCarga', '');
+        const editCargaValorUsd = modal.querySelector(`#valor_transferencia${id}`);
+        const editCargaValorEur = modal.querySelector(`#valor_transferencia_eur${id}`);
+        const editCargaTrmDisplay = modal.querySelector('.trm-calculation');
+
+        function calculateEditCargaTrm() {
+            if (editCargaValorUsd.value && editCargaValorEur.value && parseFloat(editCargaValorEur.value) > 0) {
+                const trm = (parseFloat(editCargaValorUsd.value) / parseFloat(editCargaValorEur.value)).toFixed(5);
+                editCargaTrmDisplay.textContent = `TRM: ${trm}`;
+                editCargaTrmDisplay.classList.add('trm-active');
+            } else {
+                editCargaTrmDisplay.textContent = '';
+                editCargaTrmDisplay.classList.remove('trm-active');
+            }
+        }
+        if (editCargaValorUsd && editCargaValorEur && editCargaTrmDisplay) {
+            editCargaValorUsd.addEventListener('input', calculateEditCargaTrm);
+            editCargaValorEur.addEventListener('input', calculateEditCargaTrm);
+            modal.addEventListener('shown.bs.modal', calculateEditCargaTrm);
+            // Inicializar al cargar por si hay valores por defecto
+            calculateEditCargaTrm();
+        }
+    });
+}
+
+// Load balances data via AJAX
+function loadBalanceData() {
+    fetch('{% url "importacion:get_balances_data" %}')
+        .then(response => response.json())
+        .then(data => {
+            // Update card amounts
+            document.querySelector('.balance-cards .card-title:nth-child(1)').textContent = data.total_exportadores;
+            document.querySelector('.balance-cards .card-title:nth-child(2)').textContent = data.total_aduanas;
+            document.querySelector('.balance-cards .card-title:nth-child(3)').textContent = data.total_cargas;
+            document.querySelector('.balance-cards .card-title:nth-child(4)').textContent = data.total_clientes;
+            
+            // Update modal tables
+            if (data.balances_exportador) {
+                const exportadorTable = document.querySelector('#modalBalanceExportador tbody');
+                exportadorTable.innerHTML = '';
+                data.balances_exportador.forEach(balance => {
+                    // Calcular TRM si existen tanto valor USD como EUR
+                    let trmDisplay = '';
+                    if (balance.valor_usd && balance.valor_eur && parseFloat(balance.valor_eur) > 0) {
+                        const trm = (parseFloat(balance.valor_usd) / parseFloat(balance.valor_eur)).toFixed(5);
+                        trmDisplay = `<div class="trm-value">TRM: ${trm}</div>`;
+                    }
+                    
+                    exportadorTable.innerHTML += `
+                        <tr>
+                            <td>${balance.exportador}</td>
+                            <td class="text-end">${balance.saldo_disponible}${trmDisplay}</td>
+                            <td class="text-center">${balance.ultima_actualizacion}</td>
+                        </tr>
+                    `;
+                });
+                document.querySelector('#modalBalanceExportador tfoot .text-end').textContent = data.total_exportadores;
+            }
+            
+            // Repetir para Carga
+            if (data.balances_carga) {
+                const cargaTable = document.querySelector('#modalBalanceCarga tbody');
+                cargaTable.innerHTML = '';
+                data.balances_carga.forEach(balance => {
+                    // Calcular TRM si existen tanto valor USD como EUR
+                    let trmDisplay = '';
+                    if (balance.valor_usd && balance.valor_eur && parseFloat(balance.valor_eur) > 0) {
+                        const trm = (parseFloat(balance.valor_usd) / parseFloat(balance.valor_eur)).toFixed(5);
+                        trmDisplay = `<div class="trm-value">TRM: ${trm}</div>`;
+                    }
+                    
+                    cargaTable.innerHTML += `
+                        <tr>
+                            <td>${balance.agencia_carga}</td>
+                            <td class="text-end">${balance.saldo_disponible}${trmDisplay}</td>
+                            <td class="text-center">${balance.ultima_actualizacion}</td>
+                        </tr>
+                    `;
+                });
+                document.querySelector('#modalBalanceCarga tfoot .text-end').textContent = data.total_cargas;
+            }
+            
+            // Repetir para otros tipos de balance si es necesario
+            if (data.balances_aduana) {
+                const aduanaTable = document.querySelector('#modalBalanceAduana tbody');
+                aduanaTable.innerHTML = '';
+                data.balances_aduana.forEach(balance => {
+                    aduanaTable.innerHTML += `
+                        <tr>
+                            <td>${balance.agencia_aduana}</td>
+                            <td class="text-end">${balance.saldo_disponible}</td>
+                            <td class="text-center">${balance.ultima_actualizacion}</td>
+                        </tr>
+                    `;
+                });
+                document.querySelector('#modalBalanceAduana tfoot .text-end').textContent = data.total_aduanas;
+            }
+            
+            if (data.balances_cliente) {
+                const clienteTable = document.querySelector('#modalBalanceCliente tbody');
+                clienteTable.innerHTML = '';
+                data.balances_cliente.forEach(balance => {
+                    clienteTable.innerHTML += `
+                        <tr>
+                            <td>${balance.cliente}</td>
+                            <td class="text-end">${balance.saldo_disponible}</td>
+                            <td class="text-center">${balance.ultima_actualizacion}</td>
+                        </tr>
+                    `;
+                });
+                document.querySelector('#modalBalanceCliente tfoot .text-end').textContent = data.total_clientes;
+            }
+        })
+        .catch(error => console.error('Error loading balances:', error));
+}
+// ... rest of the script ...
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar el cálculo de TRM
+    setupTrmCalculation();
+    
+    // Cargar datos de balance
+    loadBalanceData();
+});
 </script>
 {% endblock %}

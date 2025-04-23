@@ -18,7 +18,7 @@
                     <i class="fas fa-user"></i> Cotización Cliente
                 </a>
                 <a href="{% url 'cotizacion_prospecto' %}" class="btn btn-success">
-                    <i class="fas fa-user-plus"></i> Cotización Prospecto
+                    <i class="fas fa-user-plus"></i> Cotización Cliente Nuevo
                 </a>
             </div>
         </header>
@@ -113,12 +113,6 @@
                         <a href="{% url 'ver_cotizacion' cotizacion.id %}" class="btn btn-sm btn-info">
                             <i class="fas fa-eye"></i> Ver
                         </a>
-                        <a href="#" class="btn btn-sm btn-primary send-email-btn" data-id="{{ cotizacion.id }}">
-                            <i class="fas fa-envelope"></i> Enviar
-                        </a>
-                        <a href="#" class="btn btn-sm btn-secondary change-status-btn" data-id="{{ cotizacion.id }}">
-                            <i class="fas fa-edit"></i> Estado
-                        </a>
                     </td>
                 </tr>
                 {% empty %}
@@ -148,36 +142,69 @@
                 <a href="?{{ request.GET.urlencode }}&page={{ cotizaciones.next_page_number }}">Siguiente</a>
             {% endif %}
         </div>
-        {% endif %}
-
-        <!-- Customer Selection Modal -->
+        {% endif %}        <!-- Customer Selection Modal -->
         <div class="modal" id="customerSelectionModal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Seleccionar Cliente para Cotización</h3>
-                    <button class="close-modal">&times;</button>
+                    <h3 class="modal-title">
+                        <i class="fas fa-user-check"></i>
+                        Seleccionar Cliente para Cotización
+                    </h3>
+                    <button class="close-modal" aria-label="Cerrar">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="search-container">
-                        <input type="text" id="customerSearch" placeholder="Buscar cliente...">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search"></i>
+                            <input type="text" 
+                                   id="customerSearch" 
+                                   placeholder="Buscar por nombre o email..." 
+                                   autocomplete="off"
+                                   aria-label="Buscar cliente">
+                        </div>
                     </div>
                     <div class="customer-list">
                         {% for cliente in clientes %}
-                        <div class="customer-item" data-id="{{ cliente.id }}">
-                            <strong>{{ cliente.nombre }}</strong>
-                            <p>{{ cliente.email }}</p>
+                        <div class="customer-item" data-id="{{ cliente.id }}" tabindex="0">
+                            <div class="customer-info">
+                                <strong>
+                                    <i class="fas fa-building"></i>
+                                    {{ cliente.nombre }}
+                                </strong>
+                                <p>
+                                    <i class="fas fa-envelope"></i>
+                                    {{ cliente.email }}
+                                </p>
+                                {% if cliente.telefono %}
+                                <p>
+                                    <i class="fas fa-phone"></i>
+                                    {{ cliente.telefono }}
+                                </p>
+                                {% endif %}
+                            </div>
+                            <div class="customer-action">
+                                <span class="select-icon">
+                                    <i class="fas fa-chevron-right"></i>
+                                </span>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-customers">
+                            <i class="fas fa-users-slash"></i>
+                            <p>No hay clientes registrados</p>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary close-modal-btn">Cancelar</button>
+                    <button type="button" class="btn btn-secondary close-modal-btn">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- JavaScript -->
+    </div>    <!-- JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Automatically hide alerts after 5 seconds
@@ -192,60 +219,142 @@
                 }, 5000);
             });
 
-            // Customer selection modal
+            // Customer selection modal functionality
             const customerSelectionBtn = document.getElementById('showCustomerSelectionModal');
             const customerSelectionModal = document.getElementById('customerSelectionModal');
             const closeModalBtns = document.querySelectorAll('.close-modal, .close-modal-btn');
-            
+            const customerSearch = document.getElementById('customerSearch');
+            const customerItems = document.querySelectorAll('.customer-item');
+            let lastFocusedElement = null;
+
+            function openModal() {
+                lastFocusedElement = document.activeElement;
+                customerSelectionModal.classList.add('show');
+                customerSearch.focus();
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                customerSelectionModal.classList.remove('show');
+                document.body.style.overflow = '';
+                if (lastFocusedElement) {
+                    lastFocusedElement.focus();
+                }
+            }
+
+            function handleEscapeKey(event) {
+                if (event.key === 'Escape') {
+                    closeModal();
+                }
+            }
+
             if (customerSelectionBtn && customerSelectionModal) {
+                // Open modal
                 customerSelectionBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    customerSelectionModal.classList.add('show');
+                    openModal();
                 });
                 
-                // Close modal when clicking on close buttons
+                // Close modal with buttons
                 closeModalBtns.forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        customerSelectionModal.classList.remove('show');
-                    });
+                    btn.addEventListener('click', closeModal);
                 });
                 
                 // Close modal when clicking outside
-                window.addEventListener('click', function(event) {
+                customerSelectionModal.addEventListener('click', function(event) {
                     if (event.target === customerSelectionModal) {
-                        customerSelectionModal.classList.remove('show');
+                        closeModal();
                     }
                 });
-                
-                // Search functionality for customer selection
-                const customerSearch = document.getElementById('customerSearch');
-                const customerItems = document.querySelectorAll('.customer-item');
-                
+
+                // Keyboard navigation
+                document.addEventListener('keydown', handleEscapeKey);
+
+                // Enhanced search functionality
                 if (customerSearch) {
+                    let searchTimeout;
                     customerSearch.addEventListener('input', function() {
-                        const searchTerm = this.value.toLowerCase();
+                        clearTimeout(searchTimeout);
                         
-                        customerItems.forEach(item => {
-                            const customerName = item.querySelector('strong').textContent.toLowerCase();
-                            const customerEmail = item.querySelector('p').textContent.toLowerCase();
+                        searchTimeout = setTimeout(() => {
+                            const searchTerm = this.value.toLowerCase().trim();
+                            let hasResults = false;
                             
-                            if (customerName.includes(searchTerm) || customerEmail.includes(searchTerm)) {
-                                item.style.display = 'block';
-                            } else {
-                                item.style.display = 'none';
+                            customerItems.forEach(item => {
+                                const customerInfo = item.textContent.toLowerCase();
+                                
+                                if (customerInfo.includes(searchTerm)) {
+                                    item.style.display = 'flex';
+                                    hasResults = true;
+                                    
+                                    // Highlight matching text
+                                    if (searchTerm) {
+                                        const regex = new RegExp(`(${searchTerm})`, 'gi');
+                                        item.querySelectorAll('strong, p').forEach(element => {
+                                            const originalText = element.textContent;
+                                            element.innerHTML = originalText.replace(
+                                                regex, 
+                                                '<span class="highlight">$1</span>'
+                                            );
+                                        });
+                                    }
+                                } else {
+                                    item.style.display = 'none';
+                                }
+                            });
+
+                            // Show/hide no results message
+                            const noResults = customerSelectionModal.querySelector('.no-results');
+                            if (!hasResults) {
+                                if (!noResults) {
+                                    const message = document.createElement('div');
+                                    message.className = 'no-results';
+                                    message.innerHTML = `
+                                        <i class="fas fa-search"></i>
+                                        <p>No se encontraron clientes que coincidan con "${this.value}"</p>
+                                    `;
+                                    customerSelectionModal.querySelector('.customer-list').appendChild(message);
+                                }
+                            } else if (noResults) {
+                                noResults.remove();
                             }
-                        });
+                        }, 300);
                     });
                 }
                 
-                // Customer selection functionality
+                // Enhanced customer selection functionality
                 customerItems.forEach(item => {
+                    // Click handler
                     item.addEventListener('click', function() {
-                        const clienteId = this.getAttribute('data-id');
-                        console.log(`Cliente seleccionado, ID: ${clienteId}`);
-                        window.location.href = `/productos/cotizaciones/cliente/${clienteId}/`;
+                        selectCustomer(this);
+                    });
+
+                    // Keyboard handler
+                    item.addEventListener('keydown', function(event) {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            selectCustomer(this);
+                        }
                     });
                 });
+
+                function selectCustomer(item) {
+                    const clienteId = item.getAttribute('data-id');
+                    
+                    // Añadir efecto visual de selección
+                    item.classList.add('selected');
+                    
+                    // Animación de carga
+                    const loadingOverlay = document.createElement('div');
+                    loadingOverlay.className = 'loading-overlay';
+                    loadingOverlay.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    item.appendChild(loadingOverlay);
+                    
+                    // Redireccionar después de una breve animación
+                    setTimeout(() => {
+                        window.location.href = `/productos/cotizaciones/cliente/${clienteId}/`;
+                    }, 500);
+                }
             }
         });
     </script>

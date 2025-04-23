@@ -4,8 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Reparacion de SEO e implementacion de Captcha en formulario de contacto, implementacion inical de cotizaciones.">
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="requirements.txt">
+      <change afterPath="$PROJECT_DIR$/comercial/migrations/0005_cotizacion_detallecotizacion.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exoticaproject/unfold_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/unfold_config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/static/css/home.css" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/static/css/home.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/resources.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/resources.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/static/css/transferencias/transferencias.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/transferencias/transferencias.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/templates/transferencias/transferencias.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/transferencias/transferencias.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/views_transferencias.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_transferencias.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/static/css/cotizacion_precios_ventas.css" beforeDir="false" afterPath="$PROJECT_DIR$/productos/static/css/cotizacion_precios_ventas.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/static/css/lista_cotizaciones.css" beforeDir="false" afterPath="$PROJECT_DIR$/productos/static/css/lista_cotizaciones.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/templates/cotizacion_precios_ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/productos/templates/cotizacion_precios_ventas.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/templates/lista_cotizaciones.html" beforeDir="false" afterPath="$PROJECT_DIR$/productos/templates/lista_cotizaciones.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/productos/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,27 +64,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Django Server.Exoticaproject.executor": "Run",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/Legion 5 Pro/Downloads/exotic-fruit-bliss-landing-main",
-    "list.type.of.created.stylesheet": "CSS",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Django Server.Exoticaproject.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Legion 5 Pro/Downloads/exotic-fruit-bliss-landing-main&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Legion 5 Pro\Desktop\Exoticaproject\importacion\static" />
@@ -203,15 +218,10 @@
       <workItem from="1745189342317" duration="123000" />
       <workItem from="1745196040296" duration="1409000" />
       <workItem from="1745256030582" duration="3521000" />
-      <workItem from="1745273179667" duration="1247000" />
-    </task>
-    <task id="LOCAL-00018" summary="Commit Final 5">
-      <option name="closed" value="true" />
-      <created>1744028976382</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1744028976382</updated>
+      <workItem from="1745273179667" duration="2905000" />
+      <workItem from="1745340295442" duration="4887000" />
+      <workItem from="1745360956517" duration="621000" />
+      <workItem from="1745364334780" duration="4506000" />
     </task>
     <task id="LOCAL-00019" summary="Commit Final 6">
       <option name="closed" value="true" />
@@ -597,7 +607,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745274275802</updated>
     </task>
-    <option name="localTasksCounter" value="67" />
+    <task id="LOCAL-00067" summary="requirements.txt">
+      <option name="closed" value="true" />
+      <created>1745274453163</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1745274453163</updated>
+    </task>
+    <option name="localTasksCounter" value="68" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -615,7 +633,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS 2" />
     <MESSAGE value="Cambio Ema Back" />
     <MESSAGE value="Puntos de control" />
     <MESSAGE value="Mac compatible" />
@@ -640,6 +657,7 @@
     <MESSAGE value="Implementacion de Fecha de compra." />
     <MESSAGE value="Cambio queryset listas de precio importacion y venta." />
     <MESSAGE value="Reparacion de SEO e implementacion de Captcha en formulario de contacto, implementacion inical de cotizaciones." />
-    <option name="LAST_COMMIT_MESSAGE" value="Reparacion de SEO e implementacion de Captcha en formulario de contacto, implementacion inical de cotizaciones." />
+    <MESSAGE value="requirements.txt" />
+    <option name="LAST_COMMIT_MESSAGE" value="requirements.txt" />
   </component>
 </project>

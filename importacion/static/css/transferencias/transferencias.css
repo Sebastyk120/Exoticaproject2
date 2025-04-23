@@ -7,7 +7,7 @@ body {
 
 /* Layout and content wrapper */
 .content-wrapper {
-    padding: 1.5rem;
+    padding: 1rem;
     max-width: 1800px;
     margin: 0 auto;
 }
@@ -17,8 +17,8 @@ body {
     font-weight: 700;
     color: #5D5FEF;
     border-bottom: 2px solid #e9ecef;
-    padding-bottom: 0.75rem;
-    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
     font-size: calc(1.325rem + 0.9vw);
     display: flex;
     align-items: center;
@@ -75,14 +75,14 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     border: none;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     overflow: hidden;
 }
 
 .card-header {
     background-color: #fff;
     border-bottom: 1px solid rgba(0,0,0,.05);
-    padding: 1.25rem 1.5rem;
+    padding: 0.75rem 1rem;
 }
 
 .card-title {
@@ -99,10 +99,7 @@ body {
 
 /* Tabs container and navigation */
 .tabs-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 .custom-tabs {
@@ -111,6 +108,10 @@ body {
     margin-bottom: 1.5rem;
     flex-wrap: nowrap;
     min-width: max-content;
+    padding: 0.5rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .custom-tabs .nav-link {
@@ -145,7 +146,7 @@ body {
 .table-container {
     border-radius: 8px;
     overflow: hidden;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     width: 100%;
 }
 
@@ -153,6 +154,8 @@ body {
     width: 100%;
     margin-bottom: 0;
     font-size: 0.95rem;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 .data-table thead th {
@@ -161,23 +164,26 @@ body {
     color: #5D5FEF;
     border-top: none;
     border-bottom: 2px solid #e9ecef;
-    padding: 0.85rem 0.75rem;
+    padding: 0.75rem;
     white-space: nowrap;
     position: relative;
 }
 
 .data-table tbody td {
-    padding: 0.85rem 0.75rem;
+    padding: 0.75rem;
     vertical-align: middle;
     border-color: #f0f0f5;
+    transition: background-color 0.2s ease;
 }
 
 .data-table tbody tr {
-    transition: background-color 0.15s;
+    transition: all 0.2s ease;
 }
 
 .data-table tbody tr:hover {
     background-color: rgba(93, 95, 239, 0.03);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .id-column {
@@ -191,33 +197,96 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    cursor: help;
 }
 
 .currency-value {
     font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.currency-value.fw-bold {
+    color: #5D5FEF;
 }
 
 /* Table filters and search */
 .table-filters {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
+    background-color: #fff;
+    padding: 0.75rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.table-filters .d-flex {
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+    align-items: center;
 }
 
 .search-box {
-    width: 300px;
-    max-width: 100%;
+    width: 250px;
+    min-width: 200px;
 }
 
 .search-box .input-group-text {
-    background-color: white;
+    background-color: #f8f9fa;
     border-right: none;
+    color: #6c757d;
 }
 
 .search-box .form-control {
     border-left: none;
+    padding: 0.5rem 1rem;
 }
 
-.search-box .form-control:focus {
-    box-shadow: none;
+/* Enhanced filter buttons */
+.dropdown .btn-outline-secondary {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+    color: #495057;
+    padding: 0.5rem 1rem;
+    min-width: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.dropdown .btn-outline-secondary:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #495057;
+}
+
+.dropdown .btn-outline-secondary i {
+    color: #5D5FEF;
+}
+
+/* Date range filter */
+.input-group {
+    min-width: 300px;
+}
+
+.input-group .input-group-text {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+    color: #6c757d;
+}
+
+.input-group .form-control {
+    border-color: #e9ecef;
+}
+
+.input-group .btn-outline-secondary {
+    background-color: #5D5FEF;
+    border-color: #5D5FEF;
+    color: white;
+}
+
+.input-group .btn-outline-secondary:hover {
+    background-color: #4A4CD8;
+    border-color: #4A4CD8;
 }
 
 /* Action buttons */
@@ -362,13 +431,12 @@ body {
 .pagination-container {
     display: flex;
     justify-content: center;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
 }
 
 .pagination {
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    border-radius: 8px;
-    overflow: hidden;
+    margin-bottom: 0;
+    gap: 0.25rem;
 }
 
 .page-item {
@@ -379,7 +447,8 @@ body {
     border: none;
     color: #6c757d;
     padding: 0.5rem 1rem;
-    transition: all 0.2s;
+    border-radius: 4px;
+    transition: all 0.2s ease;
 }
 
 .page-item.active .page-link {
@@ -396,6 +465,7 @@ body {
 
 .page-item.disabled .page-link {
     color: #c6c6c6;
+    background-color: #f8f9fa;
 }
 
 /* Badge styling */
@@ -403,6 +473,7 @@ body {
     font-weight: 500;
     padding: 0.35em 0.65em;
     border-radius: 6px;
+    font-size: 0.75rem;
 }
 
 .badge.bg-light {
@@ -427,25 +498,15 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 992px) {
-    .content-wrapper {
-        padding: 1rem;
+    .table-filters .d-flex {
+        flex-wrap: wrap;
     }
     
-    .card-header {
-        padding: 1rem;
-    }
-    
-    .balance-card .card-title {
-        font-size: 1.5rem;
-    }
-    
-    .icon-box {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .icon-box i {
-        font-size: 1.25rem;
+    .search-box,
+    .dropdown,
+    .input-group {
+        width: 100%;
+        min-width: 100%;
     }
 }
 
@@ -493,7 +554,12 @@ body {
     }
     
     .truncate-text {
-        max-width: 80px;
+        max-width: 100px;
+    }
+    
+    .custom-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 }
 
@@ -513,12 +579,12 @@ body {
     }
     
     .data-table {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
     
     .data-table thead th,
     .data-table tbody td {
-        padding: 0.65rem 0.5rem;
+        padding: 0.5rem 0.35rem;
     }
     
     .truncate-text {
@@ -539,6 +605,15 @@ body {
     
     .balance-card .card-subtitle {
         font-size: 0.8rem;
+    }
+    
+    .custom-tabs .nav-link {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
     }
 }
 
@@ -562,6 +637,58 @@ body {
 .nav-link:focus-visible {
     outline: 2px solid #5D5FEF;
     outline-offset: 2px;
+}
+
+/* Currency input groups in modals */
+.modal .input-group {
+    max-width: 100%;
+    flex-wrap: nowrap;
+}
+
+.modal .input-group .form-control {
+    min-width: 0;
+    width: 1%;
+}
+
+.modal .input-group-text {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+    color: #6c757d;
+    font-weight: 500;
+    min-width: 40px;
+    justify-content: center;
+}
+
+.modal .input-group-text.currency-symbol {
+    font-size: 1rem;
+    padding: 0.65rem 0.75rem;
+}
+
+.modal .input-group .form-control {
+    border-color: #e9ecef;
+    padding: 0.65rem 1rem;
+}
+
+.modal .input-group .form-control:focus {
+    border-color: #5D5FEF;
+    box-shadow: 0 0 0 0.25rem rgba(93, 95, 239, 0.25);
+}
+
+/* TRM calculation display */
+.trm-calculation,
+.trm-calculation-carga-create,
+.trm-calculation-exportador-create {
+    color: #5D5FEF;
+    font-weight: 500;
+    margin-top: 4px;
+    font-size: 0.9rem;
+}
+
+.trm-calculation.trm-active,
+.trm-calculation-carga-create.trm-active,
+.trm-calculation-exportador-create.trm-active {
+    color: #5D5FEF;
+    font-weight: 600;
 }
 
 /* DataTables responsive styles */
@@ -606,5 +733,90 @@ body {
     
     .data-table tbody td.currency-value {
         font-weight: 600;
+    }
+}
+
+/* Animation for table rows */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.data-table tbody tr {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Loading state */
+.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #e9ecef;
+}
+
+.empty-state p {
+    margin-bottom: 0;
+}
+
+/* Modal form controls focus */
+.modal .form-control:focus,
+.modal .form-select:focus {
+    border-color: #5D5FEF;
+    box-shadow: none;
+    outline: none;
+}
+
+.modal .input-group:focus-within {
+    box-shadow: none;
+}
+
+.modal .input-group:focus-within .form-control {
+    border-color: #5D5FEF;
+}
+
+.modal .input-group:focus-within .input-group-text {
+    border-color: #5D5FEF;
+}
+
+/* Modal sizing */
+.modal-dialog {
+    max-width: 800px;
+    margin: 1.75rem auto;
+}
+
+@media (min-width: 992px) {
+    .modal-dialog {
+        max-width: 900px;
     }
 }

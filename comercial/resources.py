@@ -1,5 +1,5 @@
 from import_export import resources
-from .models import Cliente, Venta, DetalleVenta, TranferenciasCliente, BalanceCliente
+from .models import Cliente, Venta, DetalleVenta, TranferenciasCliente, BalanceCliente, Cotizacion, DetalleCotizacion
 
 class ClienteResource(resources.ModelResource):
     class Meta:
@@ -28,3 +28,16 @@ class BalanceClienteResource(resources.ModelResource):
     class Meta:
         model = BalanceCliente
         fields = ('id', 'cliente', 'saldo_disponible', 'ultima_actualizacion')
+
+class CotizacionResource(resources.ModelResource):
+    class Meta:
+        model = Cotizacion
+        fields = (
+            'id', 'numero', 'cliente', 'prospect_nombre', 'prospect_email', 'prospect_direccion',
+            'prospect_telefono', 'fecha_emision', 'fecha_validez', 'estado', 'terminos', 'notas'
+        )
+
+class DetalleCotizacionResource(resources.ModelResource):
+    class Meta:
+        model = DetalleCotizacion
+        fields = ('id', 'cotizacion', 'presentacion', 'precio_unitario')

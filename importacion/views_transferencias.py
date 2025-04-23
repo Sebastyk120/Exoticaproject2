@@ -7,6 +7,7 @@ from django.db import transaction
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
+from datetime import datetime
 
 from .models import (
     TranferenciasExportador, TranferenciasAduana, TranferenciasCarga,
@@ -17,103 +18,91 @@ from comercial.models import Cliente, TranferenciasCliente, BalanceCliente
 
 @login_required
 def transferencias_view(request):
-    """View to display all transfers in a tabbed interface with pagination"""
-    # Get active tab from request or default to 'exportador'
+    # Obtener el tab activo
     active_tab = request.GET.get('tab', 'exportador')
     
-    # Get all data
-    transferencias_exportador_list = TranferenciasExportador.objects.all().select_related('exportador').order_by('-id')
-    transferencias_aduana_list = TranferenciasAduana.objects.all().select_related('agencia_aduana').order_by('-id')
-    transferencias_carga_list = TranferenciasCarga.objects.all().select_related('agencia_carga').order_by('-id')
-    transferencias_cliente_list = TranferenciasCliente.objects.all().select_related('cliente').order_by('-id')
+    # Obtener filtros
+    exportador_filter = request.GET.get('exportador_filter')
+    aduana_filter = request.GET.get('aduana_filter')
+    carga_filter = request.GET.get('carga_filter')
+    cliente_filter = request.GET.get('cliente_filter')
     
-    # Get balance data
-    balances_exportador = BalanceExportador.objects.all().select_related('exportador')
-    balances_aduana = BalanceGastosAduana.objects.all().select_related('agencia_aduana')
-    balances_carga = BalanceGastosCarga.objects.all().select_related('agencia_carga')
-    balances_cliente = BalanceCliente.objects.all().select_related('cliente')
+    # Obtener todas las transferencias sin filtro de fecha
+    transferencias_exportador = TranferenciasExportador.objects.all()
+    transferencias_aduana = TranferenciasAduana.objects.all()
+    transferencias_carga = TranferenciasCarga.objects.all()
+    transferencias_cliente = TranferenciasCliente.objects.all()
     
-    # Calculate totals for balance cards
-    from decimal import Decimal
-    total_balance_exportadores = sum(balance.saldo_disponible or Decimal('0') for balance in balances_exportador)
-    total_balance_aduanas = sum(balance.saldo_disponible or Decimal('0') for balance in balances_aduana)
-    total_balance_cargas = sum(balance.saldo_disponible or Decimal('0') for balance in balances_carga)
-    total_balance_clientes = sum(balance.saldo_disponible or Decimal('0') for balance in balances_cliente)
+    # Aplicar filtros según el tab activo
+    if active_tab == 'exportador' and exportador_filter:
+        transferencias_exportador = transferencias_exportador.filter(exportador_id=exportador_filter)
+    elif active_tab == 'aduana' and aduana_filter:
+        transferencias_aduana = transferencias_aduana.filter(agencia_aduana_id=aduana_filter)
+    elif active_tab == 'carga' and carga_filter:
+        transferencias_carga = transferencias_carga.filter(agencia_carga_id=carga_filter)
+    elif active_tab == 'cliente' and cliente_filter:
+        transferencias_cliente = transferencias_cliente.filter(cliente_id=cliente_filter)
     
-    # Pagination for each tab
+    # Ordenar por fecha descendente
+    transferencias_exportador = transferencias_exportador.order_by('-fecha_transferencia')
+    transferencias_aduana = transferencias_aduana.order_by('-fecha_transferencia')
+    transferencias_carga = transferencias_carga.order_by('-fecha_transferencia')
+    transferencias_cliente = transferencias_cliente.order_by('-fecha_transferencia')
+    
+    # Paginación
     page = request.GET.get('page', 1)
-    items_per_page = 5  # Adjust as needed
-    
-    # Create paginators for each list
-    paginator_exportador = Paginator(transferencias_exportador_list, items_per_page)
-    paginator_aduana = Paginator(transferencias_aduana_list, items_per_page)
-    paginator_carga = Paginator(transferencias_carga_list, items_per_page)
-    paginator_cliente = Paginator(transferencias_cliente_list, items_per_page)
-    
-    # Get requested page for the active tab
+    paginator = Paginator(transferencias_exportador, 10)
     try:
-        if active_tab == 'exportador':
-            transferencias_exportador = paginator_exportador.page(page)
-            is_paginated = paginator_exportador.num_pages > 1
-        elif active_tab == 'aduana':
-            transferencias_aduana = paginator_aduana.page(page)
-            is_paginated = paginator_aduana.num_pages > 1
-        elif active_tab == 'carga':
-            transferencias_carga = paginator_carga.page(page)
-            is_paginated = paginator_carga.num_pages > 1
-        elif active_tab == 'cliente':
-            transferencias_cliente = paginator_cliente.page(page)
-            is_paginated = paginator_cliente.num_pages > 1
-        else:
-            active_tab = 'exportador'  # Default if invalid tab
-            transferencias_exportador = paginator_exportador.page(page)
-            is_paginated = paginator_exportador.num_pages > 1
+        transferencias_exportador = paginator.page(page)
     except PageNotAnInteger:
-        # If page is not an integer, deliver first page
-        if active_tab == 'exportador':
-            transferencias_exportador = paginator_exportador.page(1)
-            is_paginated = paginator_exportador.num_pages > 1
-        elif active_tab == 'aduana':
-            transferencias_aduana = paginator_aduana.page(1)
-            is_paginated = paginator_aduana.num_pages > 1
-        elif active_tab == 'carga':
-            transferencias_carga = paginator_carga.page(1)
-            is_paginated = paginator_carga.num_pages > 1
-        elif active_tab == 'cliente':
-            transferencias_cliente = paginator_cliente.page(1)
-            is_paginated = paginator_cliente.num_pages > 1
+        transferencias_exportador = paginator.page(1)
     except EmptyPage:
-        # If page is out of range, deliver last page of results
-        if active_tab == 'exportador':
-            transferencias_exportador = paginator_exportador.page(paginator_exportador.num_pages)
-            is_paginated = paginator_exportador.num_pages > 1
-        elif active_tab == 'aduana':
-            transferencias_aduana = paginator_aduana.page(paginator_aduana.num_pages)
-            is_paginated = paginator_aduana.num_pages > 1
-        elif active_tab == 'carga':
-            transferencias_carga = paginator_carga.page(paginator_carga.num_pages)
-            is_paginated = paginator_carga.num_pages > 1
-        elif active_tab == 'cliente':
-            transferencias_cliente = paginator_cliente.page(paginator_cliente.num_pages)
-            is_paginated = paginator_cliente.num_pages > 1
+        transferencias_exportador = paginator.page(paginator.num_pages)
     
-    # Set default empty values for non-active tabs
-    if active_tab != 'exportador':
-        transferencias_exportador = []
-    if active_tab != 'aduana':
-        transferencias_aduana = []
-    if active_tab != 'carga':
-        transferencias_carga = []
-    if active_tab != 'cliente':
-        transferencias_cliente = []
+    paginator = Paginator(transferencias_aduana, 10)
+    try:
+        transferencias_aduana = paginator.page(page)
+    except PageNotAnInteger:
+        transferencias_aduana = paginator.page(1)
+    except EmptyPage:
+        transferencias_aduana = paginator.page(paginator.num_pages)
     
-    # Get dropdown data
+    paginator = Paginator(transferencias_carga, 10)
+    try:
+        transferencias_carga = paginator.page(page)
+    except PageNotAnInteger:
+        transferencias_carga = paginator.page(1)
+    except EmptyPage:
+        transferencias_carga = paginator.page(paginator.num_pages)
+    
+    paginator = Paginator(transferencias_cliente, 10)
+    try:
+        transferencias_cliente = paginator.page(page)
+    except PageNotAnInteger:
+        transferencias_cliente = paginator.page(1)
+    except EmptyPage:
+        transferencias_cliente = paginator.page(paginator.num_pages)
+    
+    # Obtener datos para los dropdowns
     exportadores = Exportador.objects.all()
     agencias_aduana = AgenciaAduana.objects.all()
     agencias_carga = AgenciaCarga.objects.all()
     clientes = Cliente.objects.all()
     
+    # Obtener balances
+    balances_exportador = BalanceExportador.objects.select_related('exportador').all()
+    balances_aduana = BalanceGastosAduana.objects.select_related('agencia_aduana').all()
+    balances_carga = BalanceGastosCarga.objects.select_related('agencia_carga').all()
+    balances_cliente = BalanceCliente.objects.select_related('cliente').all()
+    
+    # Calcular totales de balances
+    total_balance_exportadores = sum(b.saldo_disponible for b in balances_exportador)
+    total_balance_aduanas = sum(b.saldo_disponible for b in balances_aduana)
+    total_balance_cargas = sum(b.saldo_disponible for b in balances_carga)
+    total_balance_clientes = sum(b.saldo_disponible for b in balances_cliente)
+    
     context = {
+        'active_tab': active_tab,
         'transferencias_exportador': transferencias_exportador,
         'transferencias_aduana': transferencias_aduana,
         'transferencias_carga': transferencias_carga,
@@ -122,10 +111,10 @@ def transferencias_view(request):
         'agencias_aduana': agencias_aduana,
         'agencias_carga': agencias_carga,
         'clientes': clientes,
-        'active_tab': active_tab,
-        'is_paginated': is_paginated,
-        'page_obj': locals().get(f'transferencias_{active_tab}'),  # Get the appropriate page object
-        # Balance data
+        'exportador_filter': exportador_filter,
+        'aduana_filter': aduana_filter,
+        'carga_filter': carga_filter,
+        'cliente_filter': cliente_filter,
         'balances_exportador': balances_exportador,
         'balances_aduana': balances_aduana,
         'balances_carga': balances_carga,
@@ -134,6 +123,11 @@ def transferencias_view(request):
         'total_balance_aduanas': total_balance_aduanas,
         'total_balance_cargas': total_balance_cargas,
         'total_balance_clientes': total_balance_clientes,
+        'is_paginated': True,
+        'page_obj': transferencias_exportador if active_tab == 'exportador' else 
+                    transferencias_aduana if active_tab == 'aduana' else
+                    transferencias_carga if active_tab == 'carga' else
+                    transferencias_cliente
     }
     
     return render(request, 'transferencias/transferencias.html', context)
@@ -407,3 +401,60 @@ def eliminar_transferencia_cliente(request, pk):
     
     # Use the explicit redirect with tab parameter
     return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=cliente')
+
+@login_required
+def get_balances_data(request):
+    """API endpoint to get all balance data in JSON format"""
+    # Get all balances
+    balances_exportador = BalanceExportador.objects.select_related('exportador').all()
+    balances_aduana = BalanceGastosAduana.objects.select_related('agencia_aduana').all()
+    balances_carga = BalanceGastosCarga.objects.select_related('agencia_carga').all()
+    balances_cliente = BalanceCliente.objects.select_related('cliente').all()
+    
+    # Calculate totals
+    total_exportadores = sum(b.saldo_disponible for b in balances_exportador)
+    total_aduanas = sum(b.saldo_disponible for b in balances_aduana)
+    total_cargas = sum(b.saldo_disponible for b in balances_carga)
+    total_clientes = sum(b.saldo_disponible for b in balances_cliente)
+    
+    # Format data for JSON
+    data = {
+        'total_exportadores': f"${total_exportadores:,.2f}",
+        'total_aduanas': f"€{total_aduanas:,.2f}",
+        'total_cargas': f"${total_cargas:,.2f}",
+        'total_clientes': f"€{total_clientes:,.2f}",
+        'balances_exportador': [
+            {
+                'exportador': b.exportador.nombre,
+                'saldo_disponible': f"${b.saldo_disponible:,.2f}",
+                'ultima_actualizacion': b.ultima_actualizacion.strftime('%d/%m/%Y %H:%M'),
+                'valor_usd': b.valor_transferencia if hasattr(b, 'valor_transferencia') else None,
+                'valor_eur': b.valor_transferencia_eur if hasattr(b, 'valor_transferencia_eur') else None
+            } for b in balances_exportador
+        ],
+        'balances_aduana': [
+            {
+                'agencia_aduana': b.agencia_aduana.nombre,
+                'saldo_disponible': f"€{b.saldo_disponible:,.2f}",
+                'ultima_actualizacion': b.ultima_actualizacion.strftime('%d/%m/%Y %H:%M')
+            } for b in balances_aduana
+        ],
+        'balances_carga': [
+            {
+                'agencia_carga': b.agencia_carga.nombre,
+                'saldo_disponible': f"${b.saldo_disponible:,.2f}",
+                'ultima_actualizacion': b.ultima_actualizacion.strftime('%d/%m/%Y %H:%M'),
+                'valor_usd': b.valor_transferencia if hasattr(b, 'valor_transferencia') else None,
+                'valor_eur': b.valor_transferencia_eur if hasattr(b, 'valor_transferencia_eur') else None
+            } for b in balances_carga
+        ],
+        'balances_cliente': [
+            {
+                'cliente': b.cliente.nombre,
+                'saldo_disponible': f"€{b.saldo_disponible:,.2f}",
+                'ultima_actualizacion': b.ultima_actualizacion.strftime('%d/%m/%Y %H:%M')
+            } for b in balances_cliente
+        ],
+    }
+    
+    return JsonResponse(data)

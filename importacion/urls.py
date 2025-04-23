@@ -65,4 +65,7 @@ urlpatterns = [
     path('transferencias/cliente/crear/', views_transferencias.crear_transferencia_cliente, name='crear_transferencia_cliente'),
     path('transferencias/cliente/<int:pk>/editar/', views_transferencias.editar_transferencia_cliente, name='editar_transferencia_cliente'),
     path('transferencias/cliente/<int:pk>/eliminar/', views_transferencias.eliminar_transferencia_cliente, name='eliminar_transferencia_cliente'),
+
+    # New path for balance data API
+    path('transferencias/get-balances-data/', views_transferencias.get_balances_data, name='get_balances_data'),
 ]

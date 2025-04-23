@@ -1,10 +1,11 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 from import_export.admin import ImportExportModelAdmin
-from .models import Cliente, Venta, DetalleVenta, TranferenciasCliente, BalanceCliente
+from .models import Cliente, Venta, DetalleVenta, TranferenciasCliente, BalanceCliente, Cotizacion, DetalleCotizacion
 from .resources import (
     ClienteResource, VentaResource, DetalleVentaResource, 
-    TranferenciasClienteResource, BalanceClienteResource
+    TranferenciasClienteResource, BalanceClienteResource,
+    CotizacionResource, DetalleCotizacionResource
 )
 from comercial.templatetags.custom_filters import format_currency
 from unfold.admin import ModelAdmin
@@ -93,3 +94,33 @@ class BalanceClienteAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin
     def has_add_permission(self, request):
         # Disable manual creation as balances are created by signals
         return False
+
+class DetalleCotizacionInline(TabularInline):
+    model = DetalleCotizacion
+    extra = 0
+    fields = ('presentacion', 'precio_unitario')
+    show_change_link = True
+    classes = ("collapse",)
+    verbose_name = "Detalle cotización"
+    verbose_name_plural = "Detalles cotización"
+
+@admin.register(Cotizacion)
+class CotizacionAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
+    import_form_class = ImportForm
+    export_form_class = SelectableFieldsExportForm
+    list_display = ('numero', 'cliente', 'prospect_nombre', 'fecha_emision', 'fecha_validez', 'estado')
+    search_fields = ('numero', 'cliente__nombre', 'prospect_nombre')
+    search_help_text = "Buscar por: número, cliente, prospecto."
+    list_filter = ('estado', 'fecha_emision', 'cliente')
+    resource_class = CotizacionResource
+    inlines = [DetalleCotizacionInline]
+
+@admin.register(DetalleCotizacion)
+class DetalleCotizacionAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
+    import_form_class = ImportForm
+    export_form_class = SelectableFieldsExportForm
+    list_display = ('cotizacion', 'presentacion', 'precio_unitario')
+    search_fields = ('cotizacion__numero', 'presentacion__fruta__nombre')
+    search_help_text = "Buscar por: número de cotización, nombre de la fruta."
+    list_filter = ('cotizacion', 'presentacion')
+    resource_class = DetalleCotizacionResource

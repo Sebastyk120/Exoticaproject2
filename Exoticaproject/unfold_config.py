@@ -175,7 +175,7 @@ UNFOLD = {
                         "link": reverse_lazy("admin:importacion_gastosaduana_changelist"),
                     },
                     {
-                        "title": _("Transferencias Aduana"),
+                        "title": _("Transferencias Aduna"),
                         "icon": "swap_horiz",
                         "link": reverse_lazy("admin:importacion_tranferenciasaduana_changelist"),
                     },
@@ -230,6 +230,16 @@ UNFOLD = {
                         "title": _("Detalle Ventas"),
                         "icon": "receipt",
                         "link": reverse_lazy("admin:comercial_detalleventa_changelist"),
+                    },
+                    {
+                        "title": _("Cotizaciones"),
+                        "icon": "request_quote",
+                        "link": reverse_lazy("admin:comercial_cotizacion_changelist"),
+                    },
+                    {
+                        "title": _("Detalles Cotizaciones"),
+                        "icon": "description",
+                        "link": reverse_lazy("admin:comercial_detallecotizacion_changelist"),
                     },
                     {
                         "title": _("Transferencias Cliente"),

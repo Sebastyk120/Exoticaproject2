@@ -79,7 +79,7 @@
                 <!-- Quick Stats -->
                 <div class="quick-stats">
                     <div class="row">
-                        <div class="col-md-3 col-sm-6 mb-4">
+                        <div class="col-md-2-4 col-sm-6 mb-4">
                             <a href="{% url 'comercial:clientes' %}" class="text-decoration-none">
                                 <div class="stat-card">
                                     <div class="stat-icon" style="background-color: var(--section-comercial);">
@@ -92,7 +92,7 @@
                                 </div>
                             </a>
                         </div>
-                        <div class="col-md-3 col-sm-6 mb-4">
+                        <div class="col-md-2-4 col-sm-6 mb-4">
                             <a href="{% url 'presentaciones_view' %}" class="text-decoration-none">
                                 <div class="stat-card">
                                     <div class="stat-icon" style="background-color: var(--section-productos);">
@@ -105,7 +105,7 @@
                                 </div>
                             </a>
                         </div>
-                        <div class="col-md-3 col-sm-6 mb-4">
+                        <div class="col-md-2-4 col-sm-6 mb-4">
                             <a href="{% url 'importacion:lista_pedidos' %}" class="text-decoration-none">
                                 <div class="stat-card">
                                     <div class="stat-icon" style="background-color: var(--section-importacion);">
@@ -118,7 +118,7 @@
                                 </div>
                             </a>
                         </div>
-                        <div class="col-md-3 col-sm-6 mb-4">
+                        <div class="col-md-2-4 col-sm-6 mb-4">
                             <a href="{% url 'comercial:lista_ventas' %}" class="text-decoration-none">
                                 <div class="stat-card">
                                     <div class="stat-icon" style="background-color: var(--section-comercial-alt);">
@@ -131,7 +131,38 @@
                                 </div>
                             </a>
                         </div>
+                        <div class="col-md-2-4 col-sm-6 mb-4">
+                            <a href="{% url 'lista_cotizaciones' %}" class="text-decoration-none">
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="background-color: var(--section-cotizaciones);">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                    </div>
+                                    <div class="stat-data">
+                                        <h3>Cotizaciones</h3>
+                                        <p class="stat-number">{{ quote_count|default:"0" }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
                     </div>
+                </div>
+
+                <!-- Utility Analysis Banner -->
+                <div class="utility-banner mb-4">
+                    <a href="{% url 'comercial:dashboard_utilidades' %}" class="text-decoration-none">
+                        <div class="utility-card">
+                            <div class="utility-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="utility-content">
+                                <h3>Análisis de Utilidades</h3>
+                                <p>Visualice reportes detallados de utilidades y rendimiento comercial</p>
+                            </div>
+                            <div class="utility-action">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </div>
+                    </a>
                 </div>
 
                 <!-- App Categories -->
