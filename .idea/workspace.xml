@@ -4,24 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="requirements.txt">
-      <change afterPath="$PROJECT_DIR$/comercial/migrations/0005_cotizacion_detallecotizacion.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Exoticaproject/unfold_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/unfold_config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/static/css/home.css" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/static/css/home.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/resources.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/resources.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/static/css/transferencias/transferencias.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/transferencias/transferencias.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/templates/transferencias/transferencias.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/transferencias/transferencias.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/views_transferencias.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/views_transferencias.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/productos/static/css/cotizacion_precios_ventas.css" beforeDir="false" afterPath="$PROJECT_DIR$/productos/static/css/cotizacion_precios_ventas.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/productos/static/css/lista_cotizaciones.css" beforeDir="false" afterPath="$PROJECT_DIR$/productos/static/css/lista_cotizaciones.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/productos/templates/cotizacion_precios_ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/productos/templates/cotizacion_precios_ventas.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/productos/templates/lista_cotizaciones.html" beforeDir="false" afterPath="$PROJECT_DIR$/productos/templates/lista_cotizaciones.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/productos/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/productos/views.py" afterDir="false" />
-    </list>
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Cotizaciones nuevo modulo, transferencias reparado. Mejoras en el home." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -221,15 +204,7 @@
       <workItem from="1745273179667" duration="2905000" />
       <workItem from="1745340295442" duration="4887000" />
       <workItem from="1745360956517" duration="621000" />
-      <workItem from="1745364334780" duration="4506000" />
-    </task>
-    <task id="LOCAL-00019" summary="Commit Final 6">
-      <option name="closed" value="true" />
-      <created>1744029154368</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1744029154368</updated>
+      <workItem from="1745364334780" duration="4615000" />
     </task>
     <task id="LOCAL-00020" summary="Commit Final 7">
       <option name="closed" value="true" />
@@ -615,7 +590,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745274453163</updated>
     </task>
-    <option name="localTasksCounter" value="68" />
+    <task id="LOCAL-00068" summary="Cotizaciones nuevo modulo, transferencias reparado. Mejoras en el home.">
+      <option name="closed" value="true" />
+      <created>1745373958286</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1745373958286</updated>
+    </task>
+    <option name="localTasksCounter" value="69" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -633,7 +616,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Cambio Ema Back" />
     <MESSAGE value="Puntos de control" />
     <MESSAGE value="Mac compatible" />
     <MESSAGE value="Correo." />
@@ -658,6 +640,7 @@
     <MESSAGE value="Cambio queryset listas de precio importacion y venta." />
     <MESSAGE value="Reparacion de SEO e implementacion de Captcha en formulario de contacto, implementacion inical de cotizaciones." />
     <MESSAGE value="requirements.txt" />
-    <option name="LAST_COMMIT_MESSAGE" value="requirements.txt" />
+    <MESSAGE value="Cotizaciones nuevo modulo, transferencias reparado. Mejoras en el home." />
+    <option name="LAST_COMMIT_MESSAGE" value="Cotizaciones nuevo modulo, transferencias reparado. Mejoras en el home." />
   </component>
 </project>
