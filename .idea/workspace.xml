@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Cotizaciones nuevo modulo, transferencias reparado. Mejoras en el home." />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Correccion Datos cotizacion_precios_ventas.html">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -205,14 +208,9 @@
       <workItem from="1745340295442" duration="4887000" />
       <workItem from="1745360956517" duration="621000" />
       <workItem from="1745364334780" duration="4615000" />
-    </task>
-    <task id="LOCAL-00020" summary="Commit Final 7">
-      <option name="closed" value="true" />
-      <created>1744029561058</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1744029561058</updated>
+      <workItem from="1745407623627" duration="145000" />
+      <workItem from="1745409360906" duration="50000" />
+      <workItem from="1745409803451" duration="1333000" />
     </task>
     <task id="LOCAL-00021" summary="Cambio de URL Database.">
       <option name="closed" value="true" />
@@ -598,7 +596,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745373958286</updated>
     </task>
-    <option name="localTasksCounter" value="69" />
+    <task id="LOCAL-00069" summary="Correccion Datos cotizacion_precios_ventas.html">
+      <option name="closed" value="true" />
+      <created>1745407748923</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1745407748923</updated>
+    </task>
+    <option name="localTasksCounter" value="70" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -616,7 +622,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Puntos de control" />
     <MESSAGE value="Mac compatible" />
     <MESSAGE value="Correo." />
     <MESSAGE value="Lanzamiento de APP" />
@@ -641,6 +646,7 @@
     <MESSAGE value="Reparacion de SEO e implementacion de Captcha en formulario de contacto, implementacion inical de cotizaciones." />
     <MESSAGE value="requirements.txt" />
     <MESSAGE value="Cotizaciones nuevo modulo, transferencias reparado. Mejoras en el home." />
-    <option name="LAST_COMMIT_MESSAGE" value="Cotizaciones nuevo modulo, transferencias reparado. Mejoras en el home." />
+    <MESSAGE value="Correccion Datos cotizacion_precios_ventas.html" />
+    <option name="LAST_COMMIT_MESSAGE" value="Correccion Datos cotizacion_precios_ventas.html" />
   </component>
 </project>

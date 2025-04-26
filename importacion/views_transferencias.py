@@ -50,10 +50,14 @@ def transferencias_view(request):
     transferencias_cliente = transferencias_cliente.order_by('-fecha_transferencia')
     
     # Paginación
-    page = request.GET.get('page', 1)
+    page_exportador = request.GET.get('page_exportador', 1)
+    page_aduana = request.GET.get('page_aduana', 1)
+    page_carga = request.GET.get('page_carga', 1)
+    page_cliente = request.GET.get('page_cliente', 1)
+    
     paginator = Paginator(transferencias_exportador, 10)
     try:
-        transferencias_exportador = paginator.page(page)
+        transferencias_exportador = paginator.page(page_exportador)
     except PageNotAnInteger:
         transferencias_exportador = paginator.page(1)
     except EmptyPage:
@@ -61,7 +65,7 @@ def transferencias_view(request):
     
     paginator = Paginator(transferencias_aduana, 10)
     try:
-        transferencias_aduana = paginator.page(page)
+        transferencias_aduana = paginator.page(page_aduana)
     except PageNotAnInteger:
         transferencias_aduana = paginator.page(1)
     except EmptyPage:
@@ -69,7 +73,7 @@ def transferencias_view(request):
     
     paginator = Paginator(transferencias_carga, 10)
     try:
-        transferencias_carga = paginator.page(page)
+        transferencias_carga = paginator.page(page_carga)
     except PageNotAnInteger:
         transferencias_carga = paginator.page(1)
     except EmptyPage:
@@ -77,7 +81,7 @@ def transferencias_view(request):
     
     paginator = Paginator(transferencias_cliente, 10)
     try:
-        transferencias_cliente = paginator.page(page)
+        transferencias_cliente = paginator.page(page_cliente)
     except PageNotAnInteger:
         transferencias_cliente = paginator.page(1)
     except EmptyPage:

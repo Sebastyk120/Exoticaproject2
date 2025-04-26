@@ -232,7 +232,7 @@
                         <ul class="pagination justify-content-center">
                             {% if page_obj.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=exportador&page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <a class="page-link" href="?tab=exportador&page_exportador={{ page_obj.previous_page_number }}" aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
@@ -240,13 +240,13 @@
                             
                             {% for num in page_obj.paginator.page_range %}
                             <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                                <a class="page-link" href="?tab=exportador&page={{ num }}">{{ num }}</a>
+                                <a class="page-link" href="?tab=exportador&page_exportador={{ num }}">{{ num }}</a>
                             </li>
                             {% endfor %}
                             
                             {% if page_obj.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=exportador&page={{ page_obj.next_page_number }}" aria-label="Next">
+                                <a class="page-link" href="?tab=exportador&page_exportador={{ page_obj.next_page_number }}" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -355,7 +355,7 @@
                         <ul class="pagination justify-content-center">
                             {% if page_obj.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=aduana&page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <a class="page-link" href="?tab=aduana&page_aduana={{ page_obj.previous_page_number }}" aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
@@ -363,13 +363,13 @@
                             
                             {% for num in page_obj.paginator.page_range %}
                             <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                                <a class="page-link" href="?tab=aduana&page={{ num }}">{{ num }}</a>
+                                <a class="page-link" href="?tab=aduana&page_aduana={{ num }}">{{ num }}</a>
                             </li>
                             {% endfor %}
                             
                             {% if page_obj.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=aduana&page={{ page_obj.next_page_number }}" aria-label="Next">
+                                <a class="page-link" href="?tab=aduana&page_aduana={{ page_obj.next_page_number }}" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -482,7 +482,7 @@
                         <ul class="pagination justify-content-center">
                             {% if page_obj.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=carga&page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <a class="page-link" href="?tab=carga&page_carga={{ page_obj.previous_page_number }}" aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
@@ -490,13 +490,13 @@
                             
                             {% for num in page_obj.paginator.page_range %}
                             <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                                <a class="page-link" href="?tab=carga&page={{ num }}">{{ num }}</a>
+                                <a class="page-link" href="?tab=carga&page_carga={{ num }}">{{ num }}</a>
                             </li>
                             {% endfor %}
                             
                             {% if page_obj.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=carga&page={{ page_obj.next_page_number }}" aria-label="Next">
+                                <a class="page-link" href="?tab=carga&page_carga={{ page_obj.next_page_number }}" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -605,7 +605,7 @@
                         <ul class="pagination justify-content-center">
                             {% if page_obj.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=cliente&page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <a class="page-link" href="?tab=cliente&page_cliente={{ page_obj.previous_page_number }}" aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
@@ -613,13 +613,13 @@
                             
                             {% for num in page_obj.paginator.page_range %}
                             <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                                <a class="page-link" href="?tab=cliente&page={{ num }}">{{ num }}</a>
+                                <a class="page-link" href="?tab=cliente&page_cliente={{ num }}">{{ num }}</a>
                             </li>
                             {% endfor %}
                             
                             {% if page_obj.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=cliente&page={{ page_obj.next_page_number }}" aria-label="Next">
+                                <a class="page-link" href="?tab=cliente&page_cliente={{ page_obj.next_page_number }}" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
