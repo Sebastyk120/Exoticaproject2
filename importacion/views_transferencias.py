@@ -128,10 +128,10 @@ def transferencias_view(request):
         'total_balance_cargas': total_balance_cargas,
         'total_balance_clientes': total_balance_clientes,
         'is_paginated': True,
-        'page_obj': transferencias_exportador if active_tab == 'exportador' else 
-                    transferencias_aduana if active_tab == 'aduana' else
-                    transferencias_carga if active_tab == 'carga' else
-                    transferencias_cliente
+        'page_obj_exportador': transferencias_exportador,
+        'page_obj_aduana': transferencias_aduana,
+        'page_obj_carga': transferencias_carga,
+        'page_obj_cliente': transferencias_cliente
     }
     
     return render(request, 'transferencias/transferencias.html', context)

@@ -230,23 +230,23 @@
                     {% if is_paginated %}
                     <nav aria-label="Page navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
-                            {% if page_obj.has_previous %}
+                            {% if page_obj_exportador.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=exportador&page_exportador={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <a class="page-link" href="?tab=exportador&page_exportador={{ page_obj_exportador.previous_page_number }}" aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
                             {% endif %}
                             
-                            {% for num in page_obj.paginator.page_range %}
-                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            {% for num in page_obj_exportador.paginator.page_range %}
+                            <li class="page-item {% if page_obj_exportador.number == num %}active{% endif %}">
                                 <a class="page-link" href="?tab=exportador&page_exportador={{ num }}">{{ num }}</a>
                             </li>
                             {% endfor %}
                             
-                            {% if page_obj.has_next %}
+                            {% if page_obj_exportador.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=exportador&page_exportador={{ page_obj.next_page_number }}" aria-label="Next">
+                                <a class="page-link" href="?tab=exportador&page_exportador={{ page_obj_exportador.next_page_number }}" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -353,23 +353,23 @@
                     {% if is_paginated %}
                     <nav aria-label="Page navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
-                            {% if page_obj.has_previous %}
+                            {% if page_obj_aduana.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=aduana&page_aduana={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <a class="page-link" href="?tab=aduana&page_aduana={{ page_obj_aduana.previous_page_number }}" aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
                             {% endif %}
                             
-                            {% for num in page_obj.paginator.page_range %}
-                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            {% for num in page_obj_aduana.paginator.page_range %}
+                            <li class="page-item {% if page_obj_aduana.number == num %}active{% endif %}">
                                 <a class="page-link" href="?tab=aduana&page_aduana={{ num }}">{{ num }}</a>
                             </li>
                             {% endfor %}
                             
-                            {% if page_obj.has_next %}
+                            {% if page_obj_aduana.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=aduana&page_aduana={{ page_obj.next_page_number }}" aria-label="Next">
+                                <a class="page-link" href="?tab=aduana&page_aduana={{ page_obj_aduana.next_page_number }}" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -480,23 +480,23 @@
                     {% if is_paginated %}
                     <nav aria-label="Page navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
-                            {% if page_obj.has_previous %}
+                            {% if page_obj_carga.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=carga&page_carga={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <a class="page-link" href="?tab=carga&page_carga={{ page_obj_carga.previous_page_number }}" aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
                             {% endif %}
                             
-                            {% for num in page_obj.paginator.page_range %}
-                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            {% for num in page_obj_carga.paginator.page_range %}
+                            <li class="page-item {% if page_obj_carga.number == num %}active{% endif %}">
                                 <a class="page-link" href="?tab=carga&page_carga={{ num }}">{{ num }}</a>
                             </li>
                             {% endfor %}
                             
-                            {% if page_obj.has_next %}
+                            {% if page_obj_carga.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=carga&page_carga={{ page_obj.next_page_number }}" aria-label="Next">
+                                <a class="page-link" href="?tab=carga&page_carga={{ page_obj_carga.next_page_number }}" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -603,23 +603,23 @@
                     {% if is_paginated %}
                     <nav aria-label="Page navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
-                            {% if page_obj.has_previous %}
+                            {% if page_obj_cliente.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=cliente&page_cliente={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <a class="page-link" href="?tab=cliente&page_cliente={{ page_obj_cliente.previous_page_number }}" aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
                             {% endif %}
                             
-                            {% for num in page_obj.paginator.page_range %}
-                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            {% for num in page_obj_cliente.paginator.page_range %}
+                            <li class="page-item {% if page_obj_cliente.number == num %}active{% endif %}">
                                 <a class="page-link" href="?tab=cliente&page_cliente={{ num }}">{{ num }}</a>
                             </li>
                             {% endfor %}
                             
-                            {% if page_obj.has_next %}
+                            {% if page_obj_cliente.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?tab=cliente&page_cliente={{ page_obj.next_page_number }}" aria-label="Next">
+                                <a class="page-link" href="?tab=cliente&page_cliente={{ page_obj_cliente.next_page_number }}" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
