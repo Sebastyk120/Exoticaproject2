@@ -5,10 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>L&M Exotic Fruits - Importador Mayorista de Frutas Exóticas Premium en España</title>
+    
+    <!-- Meta Tags Básicos -->
     <meta name="description" content="Importadores y distribuidores mayoristas de frutas exóticas premium desde 2017. Mangostino, pitahaya, gulupa y más con la mejor calidad y servicio en toda España y Europa.">
     <meta name="keywords" content="frutas exóticas, mangostino, pitahaya, gulupa, granadilla, uchuva, importador frutas, mayorista frutas, frutas tropicales España, frutas premium, distribución frutas exóticas">
     <meta name="author" content="L&M Exotic Fruits">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="revisit-after" content="7 days">
+    <meta name="language" content="Spanish">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -16,18 +20,30 @@
     <meta property="og:title" content="L&M Exotic Fruits - Importador de Frutas Exóticas Premium">
     <meta property="og:description" content="Frutas exóticas de la más alta calidad importadas directamente para el mercado español y europeo. Descubre nuestros productos premium.">
     <meta property="og:image" content="{% static 'img/logo_sin_fondo.png' %}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="L&M Exotic Fruits">
+    <meta property="og:locale" content="es_ES">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@lmexoticfruits">
+    <meta name="twitter:creator" content="@lmexoticfruits">
     <meta name="twitter:title" content="L&M Exotic Fruits - Importador de Frutas Exóticas">
     <meta name="twitter:description" content="Frutas exóticas premium para el mercado español y europeo. Calidad garantizada y distribución mayorista.">
     <meta name="twitter:image" content="{% static 'img/logo_sin_fondo.png' %}">
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{% static 'img/favicon.ico' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/logo_sin_fondo.png' %}">
     
-    <!-- Canonical URL to prevent duplicate content issues -->
+    <!-- Canonical URL -->
     <link rel="canonical" href="https://luzmeloexoticfruits.com/">
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     
     <!-- CSS -->
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
@@ -49,13 +65,15 @@
         "@type": "PostalAddress",
         "addressLocality": "Barcelona",
         "addressRegion": "Catalunya",
-        "addressCountry": "España"
+        "addressCountry": "ES"
       },
       "contactPoint": {
         "@type": "ContactPoint",
         "telephone": "+34633494242",
         "contactType": "customer service",
-        "email": "import@luzmeloexoticfruits.com"
+        "email": "import@luzmeloexoticfruits.com",
+        "areaServed": "ES",
+        "availableLanguage": ["Spanish", "English"]
       },
       "sameAs": [
         "https://www.facebook.com/luzmeloexoticfruits/",
@@ -77,10 +95,8 @@
       "email": "import@luzmeloexoticfruits.com",
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "",
         "addressLocality": "Barcelona",
         "addressRegion": "Catalunya",
-        "postalCode": "",
         "addressCountry": "ES"
       },
       "geo": {
@@ -89,6 +105,7 @@
         "longitude": "2.1734"
       },
       "url": "https://luzmeloexoticfruits.com",
+      "priceRange": "$$",
       "openingHoursSpecification": [
         {
           "@type": "OpeningHoursSpecification",
@@ -103,7 +120,8 @@
           "closes": "18:00"
         }
       ],
-      "priceRange": "$$"
+      "paymentAccepted": ["Cash", "Credit Card", "Bank Transfer"],
+      "currenciesAccepted": "EUR"
     }
     </script>
     
@@ -120,7 +138,12 @@
             "@type": "Product",
             "name": "Mangostino",
             "description": "La reina de las frutas, con pulpa blanca delicada y sabor agridulce único en el mundo",
-            "image": "{% static 'img/mangostino2.png' %}"
+            "image": "{% static 'img/mangostino2.png' %}",
+            "offers": {
+              "@type": "Offer",
+              "availability": "https://schema.org/InStock",
+              "priceCurrency": "EUR"
+            }
           }
         },
         {
@@ -130,7 +153,12 @@
             "@type": "Product",
             "name": "Pitahaya",
             "description": "Fruta de pulpa blanca con semillas negras, intenso sabor dulce y rica en antioxidantes",
-            "image": "{% static 'img/pitahaya.jpg' %}"
+            "image": "{% static 'img/pitahaya.jpg' %}",
+            "offers": {
+              "@type": "Offer",
+              "availability": "https://schema.org/InStock",
+              "priceCurrency": "EUR"
+            }
           }
         },
         {
@@ -140,7 +168,12 @@
             "@type": "Product",
             "name": "Gulupa",
             "description": "Fruto aromático de la pasión con pulpa gelatinosa y sabor agridulce refrescante",
-            "image": "{% static 'img/gulupa.png' %}"
+            "image": "{% static 'img/gulupa.png' %}",
+            "offers": {
+              "@type": "Offer",
+              "availability": "https://schema.org/InStock",
+              "priceCurrency": "EUR"
+            }
           }
         }
       ]

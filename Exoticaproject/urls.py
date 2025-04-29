@@ -7,17 +7,22 @@ from django.contrib.sitemaps.views import sitemap
 from django.contrib.sitemaps import Sitemap
 from django.shortcuts import reverse
 from autenticacion.views import login_view, logout_view, home_view, index_view, landing_page_view
+from datetime import datetime
 
 # Define sitemaps
 class StaticViewSitemap(Sitemap):
-    priority = 0.5
-    changefreq = 'monthly'
+    priority = 1.0
+    changefreq = 'weekly'
+    protocol = 'https'
 
     def items(self):
-        return ['landing_page']  # Use your actual view name for landing page
+        return ['landing_page']
 
     def location(self, item):
         return reverse(item)
+    
+    def lastmod(self, item):
+        return datetime.now()
 
 sitemaps = {
     'static': StaticViewSitemap,
@@ -39,10 +44,10 @@ urlpatterns = [
     path('importacion/', include('importacion.urls')),
     path('productos/', include('productos.urls')),
     path('comercial/', include('comercial.urls', namespace='comercial')),
-    path('captcha/', include('captcha.urls')),  # Agregar esta línea
+    path('captcha/', include('captcha.urls')),
 
     # SEO Routes
-    path('Robots.txt', TemplateView.as_view(template_name="Robots.txt", content_type="text/plain")),
+    path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
