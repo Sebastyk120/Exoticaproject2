@@ -326,7 +326,6 @@
             
             // Get the newly added row element
             const addedRow = tableBody.querySelector('tr:first-child');
-            console.log("New row added:", addedRow);
             
             // Apply handleZeroFields to the new row
             handleZeroFields(addedRow);
@@ -361,7 +360,6 @@
                     
                     // Acumular las cajas liberadas para esta presentación
                     deletedDetails[presentacionId] += cajas;
-                    console.log(`Stock liberado: ${cajas} cajas de presentación ${presentacionId}`);
                 }
             }
             
@@ -612,16 +610,41 @@
             }
         }
 
-        // Actualizar el manejo del formulario principal para guardar todo
+        // Función para validar el formulario antes de guardar
+        async function validarFormulario() {
+            const selectedPedidos = document.querySelectorAll('input[name="pedidos"]:checked');
+            const pedidosError = document.getElementById('pedidos-error');
+            const openModalBtn = document.getElementById('open-pedidos-modal');
+            
+            if (selectedPedidos.length === 0) {
+                pedidosError.style.display = 'block';
+                openModalBtn.classList.add('error');
+                openModalBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            } else {
+                pedidosError.style.display = 'none';
+                openModalBtn.classList.remove('error');
+                return true;
+            }
+        }
+
+        // Modificar la función guardarTodo para incluir la validación
         async function guardarTodo() {
             try {
+                // Validar el formulario antes de proceder
+                const isValid = await validarFormulario();
+                if (!isValid) {
+                    showNotification('Por favor, seleccione al menos un pedido', 'error');
+                    return;
+                }
+                
                 // Mostrar notificación de validación
                 showNotification('Validando datos...', 'info');
                 
                 // Validar todos los datos antes de proceder
-                const isValid = await validarTodosLosStocks();
+                const isValidStock = await validarTodosLosStocks();
                 
-                if (!isValid) {
+                if (!isValidStock) {
                     showNotification('Por favor, corrija los errores antes de guardar', 'error');
                     return;
                 }
@@ -633,67 +656,70 @@
                 const saleForm = document.getElementById('sale-form');
                 const saleFormData = new FormData(saleForm);
                 
-                const saleResponse = await fetch(saleForm.action, {
-                    method: 'POST',
-                    body: saleFormData,
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                        'X-Requested-With': 'XMLHttpRequest' // Añadir este encabezado para que Django reconozca que es AJAX
-                    }
-                });
-                
-                if (!saleResponse.ok) {
-                    throw new Error('Error al guardar la venta');
-                }
-                
-                // Intentar parsear la respuesta como JSON con manejo de errores
-                let saleData;
                 try {
-                    saleData = await saleResponse.json();
-                } catch (parseError) {
-                    console.error('Error al procesar la respuesta JSON:', parseError);
-                    throw new Error('La respuesta del servidor no tiene el formato esperado');
-                }
-                
-                if (!saleData || !saleData.success) {
-                    throw new Error(saleData?.message || 'Error al guardar la venta');
-                }
-                
-                // Si es una venta nueva, actualizar la URL
-                if (saleData.venta_id && !{{ venta.id|default:0 }}) {
-                    window.history.pushState({}, '', `/comercial/ventas/${saleData.venta_id}/`);
-                }
-                
-                // Si hay un formulario de detalles (ya existe la venta), guardarlos también
-                if (document.getElementById('batch-details-form')) {
-                    // Guardar los detalles
-                    const detailsForm = document.getElementById('batch-details-form');
-                    const detailsFormData = new FormData(detailsForm);
-                    
-                    const detailsResponse = await fetch(detailsForm.action, {
+                    const saleResponse = await fetch(saleForm.action, {
                         method: 'POST',
-                        body: detailsFormData,
+                        body: saleFormData,
                         headers: {
                             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                            'X-Requested-With': 'XMLHttpRequest' // También añadir aquí
+                            'X-Requested-With': 'XMLHttpRequest'
                         }
                     });
                     
-                    if (!detailsResponse.ok) {
-                        throw new Error('Error al guardar los detalles');
+                    if (!saleResponse.ok) {
+                        const errorText = await saleResponse.text();
+                        throw new Error(`Error al guardar la venta. Código: ${saleResponse.status}, Mensaje: ${errorText}`);
                     }
+                    
+                    // Intentar parsear la respuesta como JSON
+                    let saleData;
+                    try {
+                        saleData = await saleResponse.json();
+                    } catch (parseError) {
+                        throw new Error('La respuesta del servidor no tiene el formato esperado');
+                    }
+                    
+                    if (!saleData || !saleData.success) {
+                        throw new Error(saleData?.message || 'Error al guardar la venta');
+                    }
+                    
+                    // Si es una venta nueva, actualizar la URL
+                    if (saleData.venta_id && !{{ venta.id|default:0 }}) {
+                        window.history.pushState({}, '', `/comercial/ventas/${saleData.venta_id}/`);
+                    }
+                    
+                    // Si hay un formulario de detalles (ya existe la venta), guardarlos también
+                    if (document.getElementById('batch-details-form')) {
+                        // Guardar los detalles
+                        const detailsForm = document.getElementById('batch-details-form');
+                        const detailsFormData = new FormData(detailsForm);
+                        
+                        const detailsResponse = await fetch(detailsForm.action, {
+                            method: 'POST',
+                            body: detailsFormData,
+                            headers: {
+                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+                        
+                        if (!detailsResponse.ok) {
+                            throw new Error('Error al guardar los detalles');
+                        }
+                    }
+                    
+                    // Mostrar notificación de éxito
+                    showNotification('Cambios guardados correctamente', 'success');
+                    
+                    // Recargar la página para mostrar los cambios actualizados
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                    
+                } catch (fetchError) {
+                    throw fetchError;
                 }
-                
-                // Mostrar notificación de éxito
-                showNotification('Cambios guardados correctamente', 'success');
-                
-                // Recargar la página para mostrar los cambios actualizados
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
-                
             } catch (error) {
-                console.error('Error:', error);
                 showNotification('Error al guardar los cambios: ' + error.message, 'error');
             }
         }
@@ -717,7 +743,6 @@
 
             // Aplicar manejo de campos con valor cero a todos los campos numéricos existentes
             handleZeroFields(document);
-            console.log("Zero field handling has been applied to all existing numeric inputs");
 
             // Evento para agregar detalle
             const addDetailBtn = document.getElementById('add-detail-btn');
@@ -726,7 +751,10 @@
             }
             
             // Configurar el botón para guardar todo
-            document.getElementById('guardar-todo-btn').addEventListener('click', guardarTodo);
+            const guardarTodoBtn = document.getElementById('guardar-todo-btn');
+            if (guardarTodoBtn) {
+                guardarTodoBtn.addEventListener('click', guardarTodo);
+            }
             
             // Mostrar/ocultar tabla según si hay elementos
             const detailsTable = document.getElementById('details-table');
@@ -832,15 +860,18 @@
             confirmBtn.addEventListener('click', function() {
                 const selectedPedidos = document.querySelectorAll('input[name="pedidos"]:checked');
                 const selectedCount = selectedPedidos.length;
+                const pedidosError = document.getElementById('pedidos-error');
+                const openModalBtn = document.getElementById('open-pedidos-modal');
                 
                 if (selectedCount === 0) {
                     pedidosError.style.display = 'block';
-                    return;
+                    openModalBtn.classList.add('error');
+                } else {
+                    pedidosError.style.display = 'none';
+                    openModalBtn.classList.remove('error');
+                    updateSelectedPedidosText();
+                    modal.style.display = 'none';
                 }
-
-                pedidosError.style.display = 'none';
-                updateSelectedPedidosText();
-                modal.style.display = 'none';
             });
 
             // Validar antes de enviar el formulario
@@ -885,9 +916,6 @@
                     
                     // Si hay suficientes cajas liberadas + disponibles, permitir la operación
                     if (stockTotalDisponible >= cajasEnviadas) {
-                        // Hay suficiente stock considerando las eliminaciones pendientes
-                        console.log(`Validación exitosa usando stock liberado: ${cajasEnviadas} <= ${stockDisponible} + ${cajasLiberadas}`);
-                        
                         // Remover error si existe
                         const existingError = inputElement.parentElement.querySelector('.field-error');
                         if (existingError) {
@@ -923,7 +951,6 @@
                     return true;
                 }
             } catch (error) {
-                console.error('Error al validar stock:', error);
                 return false;
             }
         }
@@ -1080,27 +1107,30 @@
         });
         
         // Modificar el evento de envío del formulario de detalles
-        document.getElementById('batch-details-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Mostrar notificación de validación
-            showNotification('Validando datos...', 'info');
+        const batchDetailsForm = document.getElementById('batch-details-form');
+        if (batchDetailsForm) {
+            batchDetailsForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
                 
-            try {
-                const isValid = await validarTodosLosStocks();
-                
-                if (!isValid) {
-                    showNotification('Por favor, corrija los errores antes de guardar', 'error');
-                    return;
+                // Mostrar notificación de validación
+                showNotification('Validando datos...', 'info');
+                    
+                try {
+                    const isValid = await validarTodosLosStocks();
+                    
+                    if (!isValid) {
+                        showNotification('Por favor, corrija los errores antes de guardar', 'error');
+                        return;
+                    }
+                    
+                    // Si todo está válido, enviar el formulario
+                    this.submit();
+                } catch (error) {
+                    console.error('Error durante la validación:', error);
+                    showNotification('Error durante la validación. Por favor, intente nuevamente.', 'error');
                 }
-                
-                // Si todo está válido, enviar el formulario
-                this.submit();
-            } catch (error) {
-                console.error('Error durante la validación:', error);
-                showNotification('Error durante la validación. Por favor, intente nuevamente.', 'error');
-            }
-        });
+            });
+        }
 
         // Agregar estilos CSS para los errores
         const style = document.createElement('style');
@@ -1116,6 +1146,13 @@
             }
             input.error:focus {
                 box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+            }
+            .btn-select.error {
+                border-color: #dc3545;
+                background-color: #fff;
+            }
+            .btn-select.error:hover {
+                background-color: #f8d7da;
             }
         `;
         document.head.appendChild(style);

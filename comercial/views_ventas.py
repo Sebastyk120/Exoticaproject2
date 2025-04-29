@@ -96,7 +96,7 @@ def detalle_venta(request, venta_id=None):
         # Eliminar duplicados manteniendo el orden
         todos_pedidos = list(dict.fromkeys(todos_pedidos))
     else:
-        # Si es una nueva venta, solo obtener los últimos 5 pedidos
+        # Si es una nueva venta, obtener los últimos 5 pedidos
         todos_pedidos = Pedido.objects.all().order_by('-fecha_entrega')[:5]
     
     context = {
@@ -113,50 +113,96 @@ def detalle_venta(request, venta_id=None):
 @require_POST
 def guardar_venta(request, venta_id=None):
     """Handle saving the main sale data"""
-    if venta_id:
-        venta = get_object_or_404(Venta, pk=venta_id)
-    else:
-        venta = Venta()
-    
-    # Get form data
-    venta.cliente_id = request.POST.get('cliente')
-    
-    # Validar que se haya seleccionado al menos un pedido
-    pedidos_seleccionados = request.POST.getlist('pedidos')
-    if not pedidos_seleccionados:
-        return JsonResponse({'success': False, 'message': 'Debe seleccionar al menos un pedido.'}, status=400)
-    
-    # Obtener la fecha de compra y semana del primer pedido seleccionado
-    primer_pedido = Pedido.objects.get(id=pedidos_seleccionados[0])
-    venta.fecha_compra = primer_pedido.fecha_entrega
-    venta.semana = primer_pedido.semana  # Actualizar el campo semana
-    
-    venta.fecha_entrega = parse_date(request.POST.get('fecha_entrega'))
-    venta.numero_nc = request.POST.get('numero_nc', '')
-    venta.observaciones = request.POST.get('observaciones', '')
-    
-    # Capturar el porcentaje de IVA del formulario
     try:
-        venta.porcentaje_iva = Decimal(request.POST.get('porcentaje_iva', '4.00'))
-    except (ValueError, decimal.InvalidOperation):
-        venta.porcentaje_iva = Decimal('4.00')  # Valor predeterminado si hay un error
-    
-    # Save the sale
-    venta.save()
-    
-    # Asociar los pedidos seleccionados a la venta
-    venta.pedidos.set(pedidos_seleccionados)
-    
-    # Check if the request is AJAX and respond with JSON
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({
-            'success': True,
-            'message': f'Venta {venta.id} guardada correctamente',
-            'venta_id': venta.id
-        })
-    
-    messages.success(request, f'Venta {venta.id} guardada correctamente')
-    return redirect('comercial:detalle_venta', venta_id=venta.id)
+        if venta_id:
+            venta = get_object_or_404(Venta, pk=venta_id)
+        else:
+            venta = Venta()
+        
+        # Validar cliente
+        cliente_id = request.POST.get('cliente')
+        if not cliente_id:
+            return JsonResponse({'success': False, 'message': 'Debe seleccionar un cliente.'}, status=400)
+        
+        try:
+            cliente = Cliente.objects.get(id=cliente_id)
+            venta.cliente = cliente
+        except Cliente.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'El cliente seleccionado no existe.'}, status=400)
+        
+        # Validar que se haya seleccionado al menos un pedido
+        pedidos_seleccionados = request.POST.getlist('pedidos')
+        if not pedidos_seleccionados:
+            return JsonResponse({'success': False, 'message': 'Debe seleccionar al menos un pedido.'}, status=400)
+        
+        # Validar y obtener la fecha de entrega
+        fecha_entrega_str = request.POST.get('fecha_entrega')
+        if not fecha_entrega_str:
+            from django.utils import timezone
+            venta.fecha_entrega = timezone.now().date()
+        else:
+            try:
+                venta.fecha_entrega = parse_date(fecha_entrega_str)
+                if not venta.fecha_entrega:
+                    raise ValueError('Fecha inválida')
+            except (ValueError, TypeError) as e:
+                return JsonResponse({'success': False, 'message': f'La fecha de entrega no es válida. Detalle: {str(e)}'}, status=400)
+        
+        # Obtener la fecha de compra del primer pedido seleccionado
+        try:
+            primer_pedido = Pedido.objects.get(id=pedidos_seleccionados[0])
+            venta.fecha_compra = primer_pedido.fecha_entrega
+            venta.semana = primer_pedido.semana
+        except Pedido.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Uno de los pedidos seleccionados no existe.'}, status=400)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Error al procesar el pedido: {str(e)}'}, status=400)
+        
+        # Capturar el porcentaje de IVA del formulario
+        try:
+            iva_str = request.POST.get('porcentaje_iva', '4.00')
+            venta.porcentaje_iva = Decimal(iva_str)
+        except (ValueError, decimal.InvalidOperation):
+            venta.porcentaje_iva = Decimal('4.00')
+        
+        # Otros campos
+        venta.numero_nc = request.POST.get('numero_nc', '')
+        venta.observaciones = request.POST.get('observaciones', '')
+        
+        # Guardar la venta primero para que tenga un ID
+        venta.save()
+        
+        # Asociar los pedidos
+        venta.pedidos.set(pedidos_seleccionados)
+        
+        # Actualizar la semana basada en los pedidos asociados
+        pedidos_actuales = venta.pedidos.all()
+        if pedidos_actuales.exists():
+            primer_pedido = pedidos_actuales.first()
+            if primer_pedido and primer_pedido.semana:
+                venta.semana = primer_pedido.semana
+                venta.save(update_fields=['semana'])
+        
+        # Check if the request is AJAX and respond with JSON
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': f'Venta {venta.id} guardada correctamente',
+                'venta_id': venta.id
+            })
+        
+        messages.success(request, f'Venta {venta.id} guardada correctamente')
+        return redirect('comercial:detalle_venta', venta_id=venta.id)
+        
+    except Exception as e:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'message': f'Error al guardar la venta: {str(e)}'
+            }, status=500)
+        
+        messages.error(request, f'Error al guardar la venta: {str(e)}')
+        return redirect('comercial:lista_ventas')
 
 @login_required
 @require_POST
@@ -279,11 +325,15 @@ def guardar_detalles_batch(request, venta_id):
 @login_required
 def nueva_venta(request):
     """View to create a new sale"""
+    # Obtener los últimos 5 pedidos para la nueva venta
+    todos_pedidos = Pedido.objects.all().order_by('-fecha_entrega')[:5]
+    
     context = {
         'venta': None,
         'detalles': [],
         'clientes': Cliente.objects.all(),
         'presentaciones': Presentacion.objects.all().select_related('fruta'),
+        'ultimos_pedidos': todos_pedidos,  # Añadir los pedidos al contexto
     }
     return render(request, 'ventas/ventas.html', context)
 

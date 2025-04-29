@@ -78,33 +78,44 @@ class Venta(models.Model):
     observaciones = models.CharField(verbose_name="Observaciones", max_length=100, blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        # Calcular IVA y total factura
         if self.subtotal_factura:
             self.iva = self.subtotal_factura * self.porcentaje_iva / 100
             self.valor_total_factura_euro = self.subtotal_factura + self.iva
 
-        # Actualizar la semana basada en los pedidos asociados
-        if self.pedidos.exists():
-            # Obtener la semana del primer pedido asociado
-            primer_pedido = self.pedidos.first()
-            if primer_pedido and primer_pedido.semana:
-                self.semana = primer_pedido.semana
-
-        # El cálculo de fecha_vencimiento sigue dependiendo de fecha_entrega y dias_pago
-        if self.fecha_entrega is not None:
+        # Calcular fecha de vencimiento si hay fecha de entrega y cliente
+        if self.fecha_entrega is not None and self.cliente is not None:
             self.fecha_vencimiento = self.fecha_entrega + datetime.timedelta(days=self.cliente.dias_pago)
 
-        if not self.numero_factura:
-            # Use the last two digits of the current year
+        # Generar número de factura solo para nuevas ventas
+        if not self.numero_factura and not self.pk:
             current_year = datetime.datetime.now().year % 100
-            last_venta = Venta.objects.filter(numero_factura__startswith=f'{current_year}/').order_by(
-                'id').last()
+            last_venta = Venta.objects.filter(numero_factura__startswith=f'{current_year}/').order_by('id').last()
             if last_venta:
                 last_consecutive = int(last_venta.numero_factura.split('/')[-1])
                 new_consecutive = last_consecutive + 1
             else:
                 new_consecutive = 1088
             self.numero_factura = f'{current_year}/{new_consecutive}'
+        
+        # Guardar el objeto para obtener un ID
         super(Venta, self).save(*args, **kwargs)
+        
+        # Actualizar la semana basada en los pedidos asociados
+        if self.pk:
+            # Obtener los pedidos actuales después de guardar
+            pedidos_actuales = self.pedidos.all()
+            if pedidos_actuales.exists():
+                primer_pedido = pedidos_actuales.first()
+                if primer_pedido and primer_pedido.semana:
+                    # Actualizar la semana siempre que haya un pedido con semana
+                    self.semana = primer_pedido.semana
+                    # Guardar solo la semana
+                    super(Venta, self).save(update_fields=['semana'])
+            else:
+                # Si no hay pedidos, limpiar la semana
+                self.semana = None
+                super(Venta, self).save(update_fields=['semana'])
 
     def reevaluar_pagos_cliente(self):
         """
