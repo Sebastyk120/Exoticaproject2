@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Venta, DetalleVenta, Cliente, BalanceCliente
 from productos.models import Presentacion, ListaPreciosVentas
 from django.core.exceptions import ValidationError
-from importacion.models import Bodega
+from importacion.models import Bodega, Pedido
 
 @login_required
 def lista_ventas(request):
@@ -86,11 +86,25 @@ def detalle_venta(request, venta_id=None):
     # Include fruta to avoid additional queries when displaying presentaciones
     presentaciones = Presentacion.objects.all().select_related('fruta')
     
+    # Get pedidos for the selector
+    if venta:
+        # Si es una venta existente, obtener los últimos 5 pedidos y los pedidos asignados
+        pedidos_asignados = venta.pedidos.all()
+        ultimos_pedidos = Pedido.objects.exclude(id__in=pedidos_asignados).order_by('-fecha_entrega')[:5]
+        # Combinar los pedidos asignados con los últimos pedidos, eliminando duplicados
+        todos_pedidos = list(pedidos_asignados) + list(ultimos_pedidos)
+        # Eliminar duplicados manteniendo el orden
+        todos_pedidos = list(dict.fromkeys(todos_pedidos))
+    else:
+        # Si es una nueva venta, solo obtener los últimos 5 pedidos
+        todos_pedidos = Pedido.objects.all().order_by('-fecha_entrega')[:5]
+    
     context = {
         'venta': venta,
         'detalles': detalles,
         'clientes': clientes,
         'presentaciones': presentaciones,
+        'ultimos_pedidos': todos_pedidos,  # Cambiamos el nombre de la variable para reflejar que ahora incluye todos los pedidos relevantes
     }
     
     return render(request, 'ventas/ventas.html', context)
@@ -106,11 +120,17 @@ def guardar_venta(request, venta_id=None):
     
     # Get form data
     venta.cliente_id = request.POST.get('cliente')
-    # Nuevo: fecha_compra obligatoria
-    fecha_compra = request.POST.get('fecha_compra')
-    if not fecha_compra:
-        return JsonResponse({'success': False, 'message': 'La fecha de compra es obligatoria.'}, status=400)
-    venta.fecha_compra = parse_date(fecha_compra)
+    
+    # Validar que se haya seleccionado al menos un pedido
+    pedidos_seleccionados = request.POST.getlist('pedidos')
+    if not pedidos_seleccionados:
+        return JsonResponse({'success': False, 'message': 'Debe seleccionar al menos un pedido.'}, status=400)
+    
+    # Obtener la fecha de compra y semana del primer pedido seleccionado
+    primer_pedido = Pedido.objects.get(id=pedidos_seleccionados[0])
+    venta.fecha_compra = primer_pedido.fecha_entrega
+    venta.semana = primer_pedido.semana  # Actualizar el campo semana
+    
     venta.fecha_entrega = parse_date(request.POST.get('fecha_entrega'))
     venta.numero_nc = request.POST.get('numero_nc', '')
     venta.observaciones = request.POST.get('observaciones', '')
@@ -123,6 +143,9 @@ def guardar_venta(request, venta_id=None):
     
     # Save the sale
     venta.save()
+    
+    # Asociar los pedidos seleccionados a la venta
+    venta.pedidos.set(pedidos_seleccionados)
     
     # Check if the request is AJAX and respond with JSON
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':

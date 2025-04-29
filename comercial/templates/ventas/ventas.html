@@ -68,12 +68,56 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="fecha_compra">Fecha de Compra:</label>
-                            <input type="date" id="fecha_compra" name="fecha_compra" value="{{ venta.fecha_compra|date:'Y-m-d' }}" required>
+                            <label for="pedidos">Pedidos: <span class="required">*</span></label>
+                            <div class="pedidos-input-container">
+                                <button type="button" id="open-pedidos-modal" class="btn btn-select">
+                                    <span id="pedidos-selected-text">Seleccionar pedidos asociados a esta venta</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <div id="pedidos-selected-count" class="selected-count">0 seleccionados</div>
+                            </div>
+                            <div id="pedidos-error" class="field-error" style="display: none;">
+                                Debe seleccionar al menos un pedido
+                            </div>
+                        </div>
+
+                        <!-- Modal de selección de pedidos -->
+                        <div id="pedidos-modal" class="modal">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3>Seleccionar Pedidos</h3>
+                                    <button type="button" class="close-modal">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="pedidos-container">
+                                        {% for pedido in ultimos_pedidos %}
+                                            <div class="pedido-option {% if venta and pedido in venta.pedidos.all %}assigned{% endif %}">
+                                                <input type="checkbox" 
+                                                       id="pedido_{{ pedido.id }}" 
+                                                       name="pedidos" 
+                                                       value="{{ pedido.id }}"
+                                                       {% if venta and pedido in venta.pedidos.all %}checked{% endif %}>
+                                                <label for="pedido_{{ pedido.id }}">
+                                                    <span class="pedido-date">{{ pedido.fecha_entrega|date:"d/m/Y" }}</span>
+                                                    <span class="pedido-awb">AWB: {{ pedido.awb|default:"Sin AWB" }}</span>
+                                                    <span class="pedido-exportador">Exportador: {{ pedido.exportador.nombre|default:"Sin exportador" }}</span>
+                                                    {% if venta and pedido in venta.pedidos.all %}
+                                                        <span class="pedido-status">(Asignado a esta venta)</span>
+                                                    {% endif %}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" id="confirm-pedidos" class="btn btn-primary">Confirmar</button>
+                                    <button type="button" class="btn btn-cancel close-modal">Cancelar</button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="fecha_entrega">Fecha de Entrega:</label>
+                            <label for="fecha_entrega">Fecha de Emision Factura/Entrega:</label>
                             <input type="date" id="fecha_entrega" name="fecha_entrega" value="{{ venta.fecha_entrega|date:'Y-m-d' }}" required>
                         </div>
                         
@@ -734,6 +778,80 @@
                     }
                 });
             }
+
+            // Funcionalidad del modal de pedidos
+            const modal = document.getElementById('pedidos-modal');
+            const openModalBtn = document.getElementById('open-pedidos-modal');
+            const closeModalBtns = document.querySelectorAll('.close-modal');
+            const confirmBtn = document.getElementById('confirm-pedidos');
+            const pedidosSelectedText = document.getElementById('pedidos-selected-text');
+            const pedidosSelectedCount = document.getElementById('pedidos-selected-count');
+            const pedidosError = document.getElementById('pedidos-error');
+
+            // Función para actualizar el texto del botón con los pedidos seleccionados
+            function updateSelectedPedidosText() {
+                const selectedPedidos = document.querySelectorAll('input[name="pedidos"]:checked');
+                const selectedCount = selectedPedidos.length;
+                
+                pedidosSelectedCount.textContent = `${selectedCount} seleccionado${selectedCount > 1 ? 's' : ''}`;
+                
+                if (selectedCount > 0) {
+                    const dates = Array.from(selectedPedidos).map(pedido => {
+                        const label = pedido.nextElementSibling;
+                        return label.querySelector('.pedido-date').textContent;
+                    });
+                    pedidosSelectedText.textContent = dates.join(', ');
+                } else {
+                    pedidosSelectedText.textContent = 'Seleccionar pedidos';
+                }
+            }
+
+            // Actualizar el texto inicial si hay pedidos seleccionados
+            updateSelectedPedidosText();
+
+            // Abrir modal
+            openModalBtn.addEventListener('click', function() {
+                modal.style.display = 'block';
+            });
+
+            // Cerrar modal
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+            });
+
+            // Cerrar modal al hacer clic fuera
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            // Confirmar selección
+            confirmBtn.addEventListener('click', function() {
+                const selectedPedidos = document.querySelectorAll('input[name="pedidos"]:checked');
+                const selectedCount = selectedPedidos.length;
+                
+                if (selectedCount === 0) {
+                    pedidosError.style.display = 'block';
+                    return;
+                }
+
+                pedidosError.style.display = 'none';
+                updateSelectedPedidosText();
+                modal.style.display = 'none';
+            });
+
+            // Validar antes de enviar el formulario
+            document.getElementById('sale-form').addEventListener('submit', function(e) {
+                const selectedPedidos = document.querySelectorAll('input[name="pedidos"]:checked');
+                if (selectedPedidos.length === 0) {
+                    e.preventDefault();
+                    pedidosError.style.display = 'block';
+                    openModalBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
         });
 
         // Función para validar stock y mostrar error

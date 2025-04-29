@@ -468,3 +468,286 @@ input.zero-value {
 input.zero-value:focus {
     box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
+
+/* Estilos para la selección de pedidos */
+.pedidos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: white;
+}
+
+.pedido-option {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.pedido-option:hover {
+    background-color: var(--primary-light);
+}
+
+.pedido-option input[type="checkbox"] {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.pedido-option label {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    flex: 1;
+}
+
+.pedido-date {
+    font-weight: 500;
+    color: var(--dark-color);
+    font-size: 1.1em;
+}
+
+.pedido-awb, .pedido-exportador {
+    font-size: 0.9em;
+    color: var(--secondary-color);
+}
+
+.pedido-exportador {
+    font-style: italic;
+}
+
+.pedido-option.assigned {
+    background-color: rgba(16, 185, 129, 0.1);
+    border-left: 4px solid var(--success-color);
+}
+
+.pedido-status {
+    font-size: 0.8em;
+    color: var(--success-color);
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+/* Estilo para el scrollbar */
+.pedidos-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.pedidos-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.pedidos-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+.pedidos-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* Estilos para el selector de pedidos */
+.pedidos-input-container {
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.btn-select {
+    width: 100%;
+    text-align: left;
+    padding: 10px 15px;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-select:hover {
+    border-color: var(--primary-color);
+    background-color: var(--light-color);
+}
+
+.selected-count {
+    position: absolute;
+    right: 15px;
+    top: -20px;
+    font-size: 0.8em;
+    color: var(--secondary-color);
+}
+
+.required {
+    color: var(--danger-color);
+    margin-left: 4px;
+}
+
+/* Estilos para el modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    width: 80%;
+    max-width: 600px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--dark-color);
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--secondary-color);
+    padding: 0;
+    line-height: 1;
+}
+
+.close-modal:hover {
+    color: var(--danger-color);
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) #f1f1f1;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Estilos para los checkboxes de pedidos en el modal */
+.modal .pedidos-container {
+    max-height: none;
+    border: none;
+    padding: 0;
+}
+
+.modal .pedido-option {
+    padding: 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+.modal .pedido-option:hover {
+    background-color: var(--light-color);
+    border-color: var(--primary-color);
+}
+
+.modal .pedido-option input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+}
+
+.modal .pedido-option label {
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Estilos para el mensaje de error */
+.field-error {
+    color: var(--danger-color);
+    font-size: 0.9em;
+    margin-top: 5px;
+    display: none;
+}
+
+/* Estilos para los botones del modal */
+.modal .btn {
+    padding: 8px 16px;
+    font-size: 0.9em;
+}
+
+.modal .btn-cancel {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.modal .btn-cancel:hover {
+    background-color: #5a6268;
+}
+
+/* Estilos para el botón de selección cuando hay pedidos seleccionados */
+.btn-select.has-selection {
+    background-color: var(--light-color);
+    border-color: var(--primary-color);
+}
+
+.btn-select.has-selection:hover {
+    background-color: #e9ecef;
+}
