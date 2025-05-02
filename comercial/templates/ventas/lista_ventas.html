@@ -58,7 +58,6 @@
                                 <label><input type="checkbox" data-column="id" checked disabled> ID</label>
                                 <label><input type="checkbox" data-column="cliente" checked disabled> Cliente</label>
                                 <label><input type="checkbox" data-column="fecha_compra" checked> Fecha Compra</label>
-                                <label><input type="checkbox" data-column="fecha_entrega" checked> Fecha Entrega</label>
                                 <label><input type="checkbox" data-column="fecha_vencimiento" checked> Fecha Vencimiento</label>
                                 <label><input type="checkbox" data-column="semana" checked> Semana</label>
                                 <label><input type="checkbox" data-column="cajas" checked> Total Cajas</label>
@@ -104,7 +103,6 @@
                                     <th class="column-id">ID</th>
                                     <th class="column-cliente">Cliente</th>
                                     <th class="column-fecha_compra">Fecha Compra</th>
-                                    <th class="column-fecha_entrega">Fecha Entrega</th>
                                     <th class="column-fecha_vencimiento">Fecha Vencimiento</th>
                                     <th class="column-semana">Semana</th>
                                     <th class="column-cajas">Total Cajas</th>
@@ -126,7 +124,6 @@
                                         <span class="cliente-nombre">{{ venta.cliente.nombre }}</span>
                                     </td>
                                     <td class="column-fecha_compra">{{ venta.fecha_compra|date:"d/m/Y" }}</td>
-                                    <td class="column-fecha_entrega">{{ venta.fecha_entrega|date:"d/m/Y" }}</td>
                                     <td class="column-fecha_vencimiento">{{ venta.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</td>
                                     <td class="column-semana">{{ venta.semana|default:"-" }}</td>
                                     <td class="column-cajas">{{ venta.total_cajas_pedido|default:0 }}</td>
@@ -164,7 +161,7 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="15" class="empty-message">
+                                    <td colspan="14" class="empty-message">
                                         <div class="empty-state">
                                             <i class="fas fa-shopping-cart"></i>
                                             <p>No hay ventas para mostrar</p>
@@ -206,10 +203,6 @@
                                     <div class="info-item column-fecha_compra">
                                         <span class="info-label">Fecha Compra</span>
                                         <span class="info-value">{{ venta.fecha_compra|date:"d/m/Y" }}</span>
-                                    </div>
-                                    <div class="info-item column-fecha_entrega">
-                                        <span class="info-label">Fecha Entrega</span>
-                                        <span class="info-value">{{ venta.fecha_entrega|date:"d/m/Y" }}</span>
                                     </div>
                                     <div class="info-item column-fecha_vencimiento">
                                         <span class="info-label">Fecha Vencimiento</span>
@@ -324,10 +317,6 @@
                             <div class="info-item">
                                 <label>Cliente:</label>
                                 <span id="modal-cliente"></span>
-                            </div>
-                            <div class="info-item">
-                                <label>Fecha Entrega:</label>
-                                <span id="modal-fecha-entrega"></span>
                             </div>
                             <div class="info-item">
                                 <label>Fecha Vencimiento:</label>
@@ -711,7 +700,6 @@
                     .then(data => {
                         // Actualizar información básica
                         document.getElementById('modal-cliente').textContent = data.venta.cliente;
-                        document.getElementById('modal-fecha-entrega').textContent = data.venta.fecha_entrega;
                         document.getElementById('modal-fecha-vencimiento').textContent = data.venta.fecha_vencimiento;
                         document.getElementById('modal-total-cajas').textContent = data.venta.total_cajas;
                         document.getElementById('modal-total-euros').textContent = data.venta.total_euros;
