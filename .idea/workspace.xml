@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Mejoras de SEO">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Mejoras de SEO (Eliminacion de precios Console Google)" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -228,14 +226,7 @@
       <workItem from="1746207239002" duration="1333000" />
       <workItem from="1746209537491" duration="973000" />
       <workItem from="1746225043109" duration="560000" />
-    </task>
-    <task id="LOCAL-00027" summary="Cambios en documentos.">
-      <option name="closed" value="true" />
-      <created>1744078434536</created>
-      <option name="number" value="00027" />
-      <option name="presentableId" value="LOCAL-00027" />
-      <option name="project" value="LOCAL" />
-      <updated>1744078434536</updated>
+      <workItem from="1746306750603" duration="355000" />
     </task>
     <task id="LOCAL-00028" summary="Cabeceras de dominio.">
       <option name="closed" value="true" />
@@ -621,7 +612,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746202526799</updated>
     </task>
-    <option name="localTasksCounter" value="76" />
+    <task id="LOCAL-00076" summary="Mejoras de SEO (Eliminacion de precios Console Google)">
+      <option name="closed" value="true" />
+      <created>1746306867635</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1746306867635</updated>
+    </task>
+    <option name="localTasksCounter" value="77" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -639,7 +638,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Utilidades Vacio" />
     <MESSAGE value="Utilidades Abono" />
     <MESSAGE value="Cambio de lista de compras 10." />
     <MESSAGE value="Retoques" />
@@ -664,6 +662,7 @@
     <MESSAGE value="Cambio en relacion de Ventas con compras Manytomany para evitar errores." />
     <MESSAGE value="Cambio en relacion de Ventas con compras Manytomany para evitar errores 2" />
     <MESSAGE value="Mejoras de SEO" />
-    <option name="LAST_COMMIT_MESSAGE" value="Mejoras de SEO" />
+    <MESSAGE value="Mejoras de SEO (Eliminacion de precios Console Google)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Mejoras de SEO (Eliminacion de precios Console Google)" />
   </component>
 </project>
