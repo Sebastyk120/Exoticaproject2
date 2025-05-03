@@ -6,9 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Mejoras de SEO">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/lista_ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/lista_ventas.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/robots.txt" beforeDir="false" afterPath="$PROJECT_DIR$/templates/robots.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -227,15 +224,10 @@
       <workItem from="1746107175483" duration="2866000" />
       <workItem from="1746196453749" duration="77000" />
       <workItem from="1746198802855" duration="678000" />
-      <workItem from="1746200215469" duration="1959000" />
-    </task>
-    <task id="LOCAL-00026" summary="Cambio de URL Database 4">
-      <option name="closed" value="true" />
-      <created>1744034452950</created>
-      <option name="number" value="00026" />
-      <option name="presentableId" value="LOCAL-00026" />
-      <option name="project" value="LOCAL" />
-      <updated>1744034452950</updated>
+      <workItem from="1746200215469" duration="2074000" />
+      <workItem from="1746207239002" duration="1333000" />
+      <workItem from="1746209537491" duration="973000" />
+      <workItem from="1746225043109" duration="560000" />
     </task>
     <task id="LOCAL-00027" summary="Cambios en documentos.">
       <option name="closed" value="true" />
@@ -621,7 +613,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745938554601</updated>
     </task>
-    <option name="localTasksCounter" value="75" />
+    <task id="LOCAL-00075" summary="Mejoras de SEO">
+      <option name="closed" value="true" />
+      <created>1746202526799</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1746202526799</updated>
+    </task>
+    <option name="localTasksCounter" value="76" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
