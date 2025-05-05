@@ -47,6 +47,13 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # En producción, Whitenoise servirá los archivos estáticos y de medios
+    # pero necesitamos agregar un patrón para la URL de medios
+    from django.views.static import serve
+    urlpatterns += [
+        path('media/<path:path>', serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
 
 # Personaliza el título del admin
 admin.site.site_header = 'Administración L&M Exótica'
