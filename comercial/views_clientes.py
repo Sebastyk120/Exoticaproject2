@@ -44,6 +44,7 @@ def add_client(request):
                 telefono=request.POST.get('telefono', ''),
                 dias_pago=request.POST['dias_pago'],
                 domicilio=request.POST['domicilio'],
+                domicilio_albaran=request.POST.get('domicilio_albaran', ''),
                 cif=request.POST.get('cif', '')
             )
             cliente.full_clean()  # Esto ejecutará la validación de correos adicionales
@@ -72,6 +73,7 @@ def get_client(request, client_id):
             'telefono': cliente.telefono,
             'dias_pago': cliente.dias_pago,
             'domicilio': cliente.domicilio,
+            'domicilio_albaran': cliente.domicilio_albaran,
             'cif': cliente.cif
         }
         return JsonResponse(data)
@@ -102,6 +104,7 @@ def edit_client(request, client_id):
             cliente.telefono = request.POST.get('telefono', '')
             cliente.dias_pago = request.POST['dias_pago']
             cliente.domicilio = request.POST['domicilio']
+            cliente.domicilio_albaran = request.POST.get('domicilio_albaran', '')
             cliente.cif = request.POST.get('cif', '')
             
             cliente.full_clean()  # Esto ejecutará la validación de correos adicionales

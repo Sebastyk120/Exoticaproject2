@@ -57,6 +57,7 @@
                                 <th>Nombre</th>
                                 <th>Ciudad</th>
                                 <th>Domicilio</th>
+                                <th>Domicilio Albarán</th>
                                 <th>Email</th>
                                 <th>Correos Adicionales</th>
                                 <th>Teléfono</th>
@@ -71,6 +72,7 @@
                                 <td title="{{ cliente.nombre }}">{{ cliente.nombre }}</td>
                                 <td title="{{ cliente.ciudad }}">{{ cliente.ciudad }}</td>
                                 <td title="{{ cliente.domicilio }}">{{ cliente.domicilio }}</td>
+                                <td title="{{ cliente.domicilio_albaran }}">{{ cliente.domicilio_albaran }}</td>
                                 <td title="{{ cliente.email }}">{{ cliente.email }}</td>
                                 <td title="{{ cliente.correos_adicionales }}">{{ cliente.correos_adicionales }}</td>
                                 <td title="{{ cliente.telefono }}">{{ cliente.telefono }}</td>
@@ -110,6 +112,20 @@
                                     <div class="info-item">
                                         <i class="bi bi-geo-alt"></i>
                                         <span>{{ cliente.ciudad }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if cliente.domicilio %}
+                                    <div class="info-item">
+                                        <i class="bi bi-house"></i>
+                                        <span>{{ cliente.domicilio }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if cliente.domicilio_albaran %}
+                                    <div class="info-item">
+                                        <i class="bi bi-house-door"></i>
+                                        <span>Albarán: {{ cliente.domicilio_albaran }}</span>
                                     </div>
                                     {% endif %}
                                     
@@ -195,6 +211,13 @@
                             </div>
                         </div>
                         <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">Domicilio Albarán</label>
+                                <input type="text" class="form-control" name="domicilio_albaran" placeholder="Dirección para albaranes (opcional)">
+                                <small class="form-text text-muted">Si se deja en blanco, se usará el domicilio principal</small>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
                             <div class="col-md-6 mb-3 mb-md-0">
                                 <label class="form-label">Email <span class="text-danger">*</span></label>
                                 <div class="input-group">
@@ -270,6 +293,13 @@
                             <div class="col-12">
                                 <label class="form-label">Domicilio <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="domicilio" id="edit_domicilio" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">Domicilio Albarán</label>
+                                <input type="text" class="form-control" name="domicilio_albaran" id="edit_domicilio_albaran" placeholder="Dirección para albaranes (opcional)">
+                                <small class="form-text text-muted">Si se deja en blanco, se usará el domicilio principal</small>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -415,6 +445,7 @@
                     document.getElementById('edit_telefono').value = data.telefono || '';
                     document.getElementById('edit_dias_pago').value = data.dias_pago;
                     document.getElementById('edit_domicilio').value = data.domicilio;
+                    document.getElementById('edit_domicilio_albaran').value = data.domicilio_albaran || '';
                     document.getElementById('edit_cif').value = data.cif || '';
 
                     // Actualizar la acción del formulario

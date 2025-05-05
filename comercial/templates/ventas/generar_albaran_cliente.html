@@ -115,7 +115,7 @@
                 <div class="client-info">
                     <p><strong>Cliente:</strong> {{ venta.cliente.nombre }}</p>
                     <p><strong>NIF/CIF:</strong> {{ venta.cliente.cif|default:"-" }}</p>
-                    <p><strong>Dirección:</strong> {{ venta.cliente.domicilio|default:"-" }}</p>
+                    <p><strong>Domicilio Albaran:</strong> {{ venta.cliente.domicilio_albaran|default:"-" }}</p>
                     <p><strong>Ciudad:</strong> {{ venta.cliente.ciudad|default:"-" }}, {{ venta.cliente.pais|default:"-" }}</p>
                     <p><strong>Teléfono:</strong> {{ venta.cliente.telefono|default:"-" }}</p>
                     <p><strong>Email:</strong> {{ venta.cliente.email|default:"-" }}</p>

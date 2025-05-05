@@ -4,33 +4,26 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView, TemplateView
 from django.contrib.sitemaps.views import sitemap
-from django.contrib.sitemaps import Sitemap
 from django.shortcuts import reverse
 from autenticacion.views import login_view, logout_view, home_view, index_view, landing_page_view
+from autenticacion.sitemaps import StaticViewSitemap, ProductsSitemap, NewsSitemap
 from datetime import datetime
 
 # Define sitemaps
-class StaticViewSitemap(Sitemap):
-    priority = 1.0
-    changefreq = 'weekly'
-    protocol = 'https'
-
-    def items(self):
-        return ['landing_page']
-
-    def location(self, item):
-        return reverse(item)
-    
-    def lastmod(self, item):
-        return datetime.now()
-
 sitemaps = {
     'static': StaticViewSitemap,
+    'products': ProductsSitemap,
+    'news': NewsSitemap,
 }
 
 urlpatterns = [
-    # Root URL now points to the public landing page
+    # Root URL points to the public landing page
     path('', landing_page_view, name='landing_page'),
+    
+    # URLs for sitemap sections (these don't need to be real URLs, son solo para el sitemap)
+    path('about/', landing_page_view, name='landing_page_about'),
+    path('products/', landing_page_view, name='landing_page_products'),
+    path('contact/', landing_page_view, name='landing_page_contact'),
     
     # Internal application routes
     path('app/', index_view, name='index'),

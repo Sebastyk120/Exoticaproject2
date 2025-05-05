@@ -98,42 +98,76 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     title = 'Contraseña Restablecida - L&M Exotic Fruit'
 
 def landing_page_view(request):
+    """Vista para la página de inicio pública con optimización SEO."""
+    # Obtener todas las frutas ordenadas por nombre
+    fruits = Fruta.objects.all().order_by('nombre')
     
+    # Determinar qué sección mostrar según el hash en la URL si existe
+    section = request.GET.get('section', '')
+    
+    # Contexto SEO personalizado según la sección
+    seo_context = {
+        'meta_title': 'L&M Exotic Fruits - Importador Mayorista de Frutas Exóticas Premium en España',
+        'meta_description': 'Importadores y distribuidores mayoristas de frutas exóticas premium desde 2017. Mangostino, pitahaya, gulupa y más con la mejor calidad y servicio en toda España y Europa.',
+        'canonical_url': f"{settings.BASE_URL}{reverse('landing_page')}",
+        'og_type': 'website',
+    }
+    
+    # Actualizar contexto SEO según la sección
+    if section == 'about':
+        seo_context.update({
+            'meta_title': 'Sobre Nosotros | L&M Exotic Fruits - Importadores de Frutas Exóticas',
+            'meta_description': 'Desde 2017 en L&M Exotic Fruits importamos y distribuimos frutas exóticas premium para toda España y Europa. Conoce nuestra historia y compromiso con la calidad.',
+            'canonical_url': f"{settings.BASE_URL}{reverse('landing_page_about')}",
+        })
+    elif section == 'products':
+        seo_context.update({
+            'meta_title': 'Nuestros Productos | L&M Exotic Fruits - Frutas Tropicales Premium',
+            'meta_description': 'Descubre nuestra selección de frutas exóticas premium: mangostino, pitahaya, gulupa, granadilla, uchuva y más. Calidad excepcional para el mercado español.',
+            'canonical_url': f"{settings.BASE_URL}{reverse('landing_page_products')}",
+        })
+    elif section == 'contact':
+        seo_context.update({
+            'meta_title': 'Contacto | L&M Exotic Fruits - Mayorista Frutas Exóticas',
+            'meta_description': 'Contacta con L&M Exotic Fruits para pedidos mayoristas de frutas exóticas premium. Servicio para toda España y Europa con la mejor calidad garantizada.',
+            'canonical_url': f"{settings.BASE_URL}{reverse('landing_page_contact')}",
+        })
+    
+    # Preparar el formulario de contacto
+    form = ContactForm()
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            name = form.cleaned_data['name']
+            # Procesar el formulario y enviar el correo
+            nombre = form.cleaned_data['nombre']
             email = form.cleaned_data['email']
-            subject = form.cleaned_data['subject'] or 'Consulta desde el sitio web'
-            message = form.cleaned_data['message']
+            mensaje = form.cleaned_data['mensaje']
+            telefono = form.cleaned_data.get('telefono', '')
             
-            # Preparar el contenido del email
-            email_message = f"Nombre: {name}\nEmail: {email}\nAsunto: {subject}\n\nMensaje:\n{message}"
+            # Enviar el email
+            subject = f'Nuevo contacto desde la web: {nombre}'
+            message = f'Nombre: {nombre}\nEmail: {email}\nTeléfono: {telefono}\n\nMensaje:\n{mensaje}'
             
-            # Enviar email
-            try:
-                send_mail(
-                    f"Contacto sitio web: {subject}",
-                    email_message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    ['import@luzmeloexoticfruits.com'],
-                    fail_silently=False,
-                )
-                messages.success(request, 'Tu mensaje ha sido enviado con éxito. Nos pondremos en contacto contigo pronto.')
-            except Exception as e:
-                messages.error(request, 'Ha ocurrido un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.')
-        else:
-            # Si hay errores de validación (incluyendo el captcha)
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f"{error}")
-        
-        # Redireccionar a la misma página con el ancla del formulario
-        return redirect(f"{request.path}#contact")
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [settings.CONTACT_EMAIL],
+                fail_silently=False,
+            )
+            
+            # Devolver a la misma página con mensaje de éxito
+            messages.success(request, 'Tu mensaje ha sido enviado correctamente. Nos pondremos en contacto contigo pronto.')
+            return redirect('landing_page')
+      # Contexto para la plantilla
+    context = {
+        'frutas': fruits,
+        'form': form,
+        'section': section,
+        **seo_context,
+    }
     
-    else:
-        form = ContactForm()  # Crear formulario vacío para GET
-    
-    return render(request, 'index.html', {'form': form})
+    # Renderizar la plantilla
+    return render(request, 'index.html', context)
 
 

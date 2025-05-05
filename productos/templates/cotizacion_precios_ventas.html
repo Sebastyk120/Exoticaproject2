@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Cotización de Precios{% endblock %}
+{% block title %}Oferta Comercial de Precios{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/cotizacion_precios_ventas.css' %}">
@@ -20,7 +20,7 @@
         </button>
         {% if is_new_customer and not cotizacion %}
         <button id="saveQuoteBtn" class="btn btn-info">
-            <i class="fas fa-save"></i> Guardar Cotización
+            <i class="fas fa-save"></i> Guardar Oferta Comercial
         </button>
         {% endif %}
         <a href="{% url 'lista_cotizaciones' %}" class="btn btn-secondary">
@@ -38,7 +38,7 @@
                     <img src="{% static 'img/logo_sin_fondo.png' %}" alt="Logo de la empresa">
                 </div>
                 <div class="company-info">
-                    <h1>L&M Exotic Fruits</h1>
+                    <h1>Luz Mery Melo Mejia</h1>
                     <p>Barcelona, España</p>
                     <p>Tel: +34 633 49 42 28</p>
                     <p>Email: import@luzmeloexoticfruits.com</p>
@@ -48,7 +48,13 @@
             <!-- Quotation Info -->
             <div class="quotation-block">
                 <div class="quotation-number">
-                    <h2>COTIZACIÓN #{{ quotation_number }}</h2>
+                    <h2>Oferta Comercial #
+                        {% if cotizacion %}
+                            {{ cotizacion.numero }}
+                        {% else %}
+                            {{ quotation_number }}
+                        {% endif %}
+                    </h2>
                     <p>Fecha: {{ quotation_date }}</p>
                     <p>Válido hasta: {{ valid_until }}</p>
                 </div>
@@ -153,7 +159,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="4" class="no-products">No hay productos en esta cotización.</td>
+                            <td colspan="4" class="no-products">No hay productos en esta oferta comercial.</td>
                         </tr>
                         {% endfor %}
                     {% elif is_new_customer %}
@@ -204,10 +210,8 @@
                 {% if cotizacion and cotizacion.terminos %}
                     {{ cotizacion.terminos|safe }}
                 {% else %}
-                <p>1. Los precios están sujetos a disponibilidad y pueden cambiar sin previo aviso.</p>
+                <p>1. Después de 3 días de recepción de la mercancía no se aceptan reclamaciones.</p>
                 <p>2. Forma de pago: Transferencia bancaria.</p>
-                <p>3. Tiempo de entrega: 3-5 días hábiles después de confirmado el pedido.</p>
-                <p>4. Esta cotización tiene una validez de 15 días a partir de la fecha de emisión.</p>
                 {% endif %}
             </div>
             
@@ -232,7 +236,7 @@
 <div id="emailModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 class="modal-title">Enviar Cotización por Correo</h3>
+            <h3 class="modal-title">Enviar Oferta Comercial por Correo</h3>
             <button class="close-modal">&times;</button>
         </div>
         <form id="emailForm" method="post" action="{% url 'enviar_cotizacion' %}">
@@ -264,17 +268,17 @@
             
             <div class="form-group">
                 <label for="email_subject">Asunto:</label>
-                <input type="text" id="email_subject" name="email_subject" value="Cotización de Precios - L&M Exotic Fruits" required>
+                <input type="text" id="email_subject" name="email_subject" value="Oferta Comercial de Precios - L&M Exotic Fruits" required>
             </div>
             
             <div class="form-group">
                 <label for="email_message">Mensaje:</label>
                 <textarea id="email_message" name="email_message" rows="6" required>Estimado/a {% if customer %}{{ customer.nombre }}{% else %}cliente{% endif %},
 
-Adjuntamos nuestra cotización de precios para los productos de su interés. Por favor, no dude en contactarnos si tiene alguna pregunta.
+Adjuntamos nuestra oferta comercial de precios para los productos de su interés. Por favor, no dude en contactarnos si tiene alguna pregunta.
 
 Saludos cordiales,
-L&M Exotic Fruits
+Luz Mery Melo Mejia
 </textarea>
             </div>
             

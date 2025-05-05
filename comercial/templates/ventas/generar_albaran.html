@@ -106,7 +106,7 @@
                 <div class="client-info">
                     <p><strong>Cliente:</strong> {{ venta.cliente.nombre }}</p>
                     <p><strong>NIF/CIF:</strong> {{ venta.cliente.cif|default:"-" }}</p>
-                    <p><strong>Dirección:</strong> {{ venta.cliente.domicilio|default:"-" }}</p>
+                    <p><strong>Domicilio Alabaran:</strong> {{ venta.cliente.domicilio_albaran|default:"-" }}</p>
                     <p><strong>Ciudad:</strong> {{ venta.cliente.ciudad|default:"-" }}, {{ venta.cliente.pais|default:"-" }}</p>
                 </div>
             </div>

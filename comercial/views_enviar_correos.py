@@ -656,8 +656,8 @@ def enviar_albaranes_aduana(request):
         info = f"• Albarán #{venta.id} - Cliente: {cliente.nombre}"
         
         # Añadir dirección y ciudad
-        if hasattr(cliente, 'domicilio') and cliente.domicilio:
-            info += f"\n  Dirección: {cliente.domicilio}"
+        if hasattr(cliente, 'domicilio_albaran') and cliente.domicilio_albaran:
+            info += f"\n  Dirección: {cliente.domicilio_albaran}"
         if hasattr(cliente, 'ciudad') and cliente.ciudad:
             info += f"\n  Ciudad: {cliente.ciudad}"
             # No check for pais since it doesn't exist in your model

@@ -4,12 +4,32 @@ from django.db import models
 
 class Fruta(models.Model):
     nombre = models.CharField(max_length=20, unique=True)
+    descripcion = models.TextField(verbose_name="Descripción", blank=True, null=True)
+    imagen = models.ImageField(upload_to='frutas/', verbose_name="Imagen", blank=True, null=True)
+    
+    # Campos adicionales para SEO
+    meta_description = models.CharField(max_length=160, blank=True, null=True, 
+                                       help_text="Descripción corta para motores de búsqueda (máx. 160 caracteres)")
+    beneficios = models.TextField(blank=True, null=True, help_text="Beneficios nutricionales o para la salud")
+    origen = models.CharField(max_length=100, blank=True, null=True, help_text="País o región de origen")
+    slug = models.SlugField(max_length=50, unique=True, blank=True, null=True, 
+                           help_text="URL amigable para el producto (se genera automáticamente)")
+    fecha_actualizacion = models.DateTimeField(auto_now=True, verbose_name="Última actualización")
 
     def __str__(self):
         return self.nombre
+        
+    def save(self, *args, **kwargs):
+        # Generar slug automáticamente si no existe
+        if not self.slug:
+            from django.utils.text import slugify
+            self.slug = slugify(self.nombre)
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['nombre']
+        verbose_name = "Fruta"
+        verbose_name_plural = "Frutas"
 
 
 

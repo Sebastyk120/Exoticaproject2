@@ -415,17 +415,18 @@ def cotizacion_cliente(request, cliente_id):
     # Formatear los precios para que usen punto como separador decimal
     for precio in precios:
         precio.precio_euro = str(precio.precio_euro).replace(',', '.')
-    
-    # Generate unique quote number
-    year = datetime.datetime.now().year
-    month = datetime.datetime.now().month
-    last_quote = Cotizacion.objects.order_by('-id').first()
+      # Generate unique quote number in YY-XX format (same as in model)
+    year_short = datetime.datetime.now().strftime('%y')
+    last_quote = Cotizacion.objects.filter(numero__startswith=f"{year_short}-").order_by('-id').first()
     if last_quote:
-        last_number = int(last_quote.numero.split('-')[-1])
-        new_number = last_number + 1
+        try:
+            prev = int(last_quote.numero.split('-')[-1])
+        except Exception:
+            prev = 0
+        seq = prev + 1
     else:
-        new_number = 1
-    quotation_number = f"COT-{year}{month:02d}-{new_number:04d}"
+        seq = 1
+    quotation_number = f"{year_short}-{seq:02d}"
     
     # Calculate validity date (15 days from now)
     quotation_date = datetime.date.today()
@@ -451,17 +452,18 @@ def cotizacion_prospecto(request):
     """
     # Get all presentations for pricing
     presentaciones = Presentacion.objects.all().select_related('fruta').order_by('fruta__nombre', 'kilos')
-    
-    # Generate unique quote number
-    year = datetime.datetime.now().year
-    month = datetime.datetime.now().month
-    last_quote = Cotizacion.objects.order_by('-id').first()
+      # Generate unique quote number in YY-XX format (same as in model)
+    year_short = datetime.datetime.now().strftime('%y')
+    last_quote = Cotizacion.objects.filter(numero__startswith=f"{year_short}-").order_by('-id').first()
     if last_quote:
-        last_number = int(last_quote.numero.split('-')[-1])
-        new_number = last_number + 1
+        try:
+            prev = int(last_quote.numero.split('-')[-1])
+        except Exception:
+            prev = 0
+        seq = prev + 1
     else:
-        new_number = 1
-    quotation_number = f"COT-{year}{month:02d}-{new_number:04d}"
+        seq = 1
+    quotation_number = f"{year_short}-{seq:02d}"
     
     # Set prospect data if provided
     prospect_name = request.GET.get('nombre', '')

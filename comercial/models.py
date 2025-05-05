@@ -21,6 +21,7 @@ def validate_multiple_emails(value):
 class Cliente(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
     domicilio = models.CharField(max_length=255, verbose_name="Domicilio:")
+    domicilio_albaran = models.CharField(max_length=255, verbose_name="Domicilio Albaran", null=True, blank=True)
     ciudad = models.CharField(max_length=100, verbose_name="Ciudad", null=True, blank=True)
     cif = models.CharField(max_length=20, verbose_name="Código  CIF", null=True, blank=True)
     email = models.EmailField(verbose_name="Correo")
@@ -45,6 +46,8 @@ class Cliente(models.Model):
                 raise ValidationError({'correos_adicionales': e.messages})
 
     def save(self, *args, **kwargs):
+        if not self.domicilio_albaran:
+            self.domicilio_albaran = self.domicilio
         if not self.token_acceso:
             # Generate a short unique token (8 characters)
             self.token_acceso = uuid.uuid4().hex[:8]
@@ -346,7 +349,7 @@ class Cotizacion(models.Model):
         ('vencida', 'Vencida'),
     ]
     
-    numero = models.CharField(max_length=20, unique=True)
+    numero = models.CharField(max_length=6, unique=True)  # YY-XX format
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)
     prospect_nombre = models.CharField(max_length=100, null=True, blank=True)
     prospect_email = models.EmailField(null=True, blank=True)
@@ -359,18 +362,19 @@ class Cotizacion(models.Model):
     notas = models.TextField(null=True, blank=True)
     
     def save(self, *args, **kwargs):
-        # Generate unique quote number if not set
+        # Generate numeric quote number in YY-XX format
         if not self.numero:
-            year = datetime.datetime.now().year
-            month = datetime.datetime.now().month
-            last_quote = Cotizacion.objects.order_by('-id').first()
-            if last_quote:
-                last_number = int(last_quote.numero.split('-')[-1])
-                new_number = last_number + 1
+            yy = datetime.datetime.now().strftime('%y')
+            last = Cotizacion.objects.filter(numero__startswith=f"{yy}-").order_by('-id').first()
+            if last:
+                try:
+                    prev = int(last.numero.split('-')[-1])
+                except Exception:
+                    prev = 0
+                seq = prev + 1
             else:
-                new_number = 1
-            self.numero = f"COT-{year}{month:02d}-{new_number:04d}"
-            
+                seq = 1
+            self.numero = f"{yy}-{seq:02d}"
         super().save(*args, **kwargs)
         
     class Meta:

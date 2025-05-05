@@ -1,33 +1,35 @@
 # robots.txt para L&M Exotic Fruits
-# Última actualización: 2024-04-13
+# Última actualización: 2025-05-05
 
 User-agent: *
 Allow: /
 Allow: /sitemap.xml
 Allow: /static/
 Allow: /media/
+Allow: /about/
+Allow: /products/
+Allow: /contact/
 
-# Bloquear acceso a áreas administrativas y privadas
-Disallow: /app/admin/
-Disallow: /static/admin/
-Disallow: /__pycache__/
-Disallow: /app/login/
-Disallow: /app/logout/
-Disallow: /app/home/
+# Restringir acceso a áreas administrativas
+Disallow: /admin/
+Disallow: /app/
+Disallow: /autenticacion/
+Disallow: /importacion/
+Disallow: /productos/admin/
+Disallow: /comercial/
 
-# Bloquear acceso a archivos de configuración y bases de datos
-Disallow: /*.sql$
-Disallow: /*.db$
-Disallow: /*.env$
-Disallow: /*.py$
-
-# Bloquear acceso a archivos de desarrollo
-Disallow: /*.map$
-Disallow: /*.scss$
-Disallow: /*.less$
+# No indexar parámetros de búsqueda o sesión
+Disallow: /*?*query=
+Disallow: /*?*session=
+Disallow: /*?*utm_
 
 # Sitemap
 Sitemap: https://luzmeloexoticfruits.com/sitemap.xml
 
-# Crawl-delay para evitar sobrecarga del servidor
-Crawl-delay: 10
+# Velocidad de rastreo para Googlebot
+User-agent: Googlebot
+Crawl-delay: 1
+
+# Velocidad de rastreo para Bingbot
+User-agent: Bingbot
+Crawl-delay: 2

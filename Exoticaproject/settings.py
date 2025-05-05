@@ -33,6 +33,18 @@ SECRET_KEY = 'django-insecure-gywh)zrdwb8ohd$l97a2mj_+u^pa6@hnsu$=)!ud(3l27%fe-y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+# Site settings for SEO
+BASE_URL = 'https://luzmeloexoticfruits.com'
+
+# SEO settings
+SITE_ID = 1  # Necesario para django.contrib.sites
+
+# SEO adicionales
+SITE_NAME = 'L&M Exotic Fruits'
+SITE_DESCRIPTION = 'Importadores y distribuidores mayoristas de frutas exóticas premium desde 2017 en España y Europa.'
+
+# Configuración del correo para el formulario de contacto (usar el EMAIL_HOST_USER ya configurado)
+CONTACT_EMAIL = 'import@luzmeloexoticfruits.com'  # Cambiar por el correo real
 
 # Application definition
 
@@ -49,6 +61,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # Necesario para sitemaps
+    'django.contrib.sitemaps',  # Añadimos soporte para sitemaps
     'django.contrib.humanize',
     'django_tables2',
     'crispy_forms',

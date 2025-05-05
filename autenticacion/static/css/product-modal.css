@@ -1,0 +1,257 @@
+/* Estilos para los elementos del modal de productos */
+
+/* Botones de acción en cada producto */
+.product-item__actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* Botón de texto */
+.btn--text {
+    background: transparent;
+    color: var(--md-on-surface-variant);
+    padding: 0.5rem 1rem;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn--text:hover {
+    color: var(--md-primary);
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.btn--text i {
+    margin-right: 5px;
+}
+
+/* Imagen del modal con dimensiones ajustadas para mostrar la imagen completa */
+.modal__image-wrapper {
+    max-height: 400px; /* Adjust as needed */
+    width: 100%;
+    overflow: hidden;
+    border-radius: 12px; /* Use consistent radius */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px; /* Add padding for contained images */
+    background-color: rgba(0, 0, 0, 0.02); /* Light background for contrast */
+}
+
+/* Mejoras visuales para la imagen - ahora mostrando la imagen completa */
+.modal__image {
+    max-width: 100%;
+    max-height: 380px; /* Slightly less than wrapper */
+    object-fit: contain; /* Changed from cover to contain */
+    object-position: center;
+    transition: transform 0.5s ease;
+}
+
+.modal__image:hover {
+    transform: scale(1.05);
+}
+
+/* Características en el modal */
+.modal__features {
+    margin: 0.5rem 0 1.5rem;
+    padding-left: 1.5rem;
+}
+
+.modal__features li {
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.modal__features li::before {
+    content: '•';
+    color: var(--md-primary);
+    font-weight: bold;
+    position: absolute;
+    left: -1rem;
+}
+
+/* Mejoras para la descripción */
+#modalDescription {
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    color: var(--md-on-surface); /* Use theme color */
+    font-size: 1rem;
+    text-align: justify; /* Improve readability */
+    /* Remove height restrictions and ensure visibility */
+    overflow: visible;
+    display: block;
+    max-height: none;
+    /* Add word wrapping for long words if needed */
+    word-break: normal; /* Or break-word if necessary */
+    overflow-wrap: break-word;
+}
+
+/* Ajuste del contenedor de información para que se adapte mejor a descripciones largas */
+.modal__info {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Allow info to use available space */
+    overflow-y: visible; /* Ensure content isn't clipped */
+}
+
+/* Botón de consulta en el footer del modal */
+.btn--modal-contact {
+    background-color: var(--md-primary);
+    color: var(--md-on-primary);
+    padding: 0.75rem 1.5rem;
+    border-radius: 2rem;
+    font-weight: 500;
+    box-shadow: var(--md-elevation-1);
+    transition: all 0.3s ease;
+}
+
+.btn--modal-contact:hover {
+    background-color: var(--md-primary-variant);
+    box-shadow: var(--md-elevation-2);
+    transform: translateY(-2px);
+}
+
+/* Mejoras al footer del modal */
+.modal__footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Mejoras al cuerpo del modal para mejor adaptabilidad */
+.modal__body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start; /* Align items to the top */
+    max-height: none; /* Remove max-height if previously set */
+}
+
+/* Ajustes para el contenido del modal */
+.modal__content {
+    padding: 2rem;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.modal__header {
+    margin-bottom: 1.5rem;
+}
+
+/* Animación avanzada para el modal */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal.open {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.modal.open .modal__dialog {
+    animation: slideIn 0.4s ease-out forwards;
+}
+
+/* Animación para elementos internos del modal */
+.modal.open .modal__image-wrapper {
+    animation: fadeIn 0.5s ease-out 0.2s forwards;
+    opacity: 0;
+    animation-fill-mode: both;
+}
+
+.modal.open .modal__info {
+    animation: fadeIn 0.5s ease-out 0.3s forwards;
+    opacity: 0;
+    animation-fill-mode: both;
+}
+
+.modal.open .modal__footer {
+    animation: fadeIn 0.5s ease-out 0.4s forwards;
+    opacity: 0;
+    animation-fill-mode: both;
+}
+
+/* Responsive para el modal */
+@media (max-width: 1024px) {
+    .modal__body {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal__image-wrapper {
+        margin-bottom: 1.5rem;
+        max-height: 350px;
+    }
+    
+    .modal__image {
+        max-height: 330px;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal__content {
+        padding: 1.5rem;
+    }
+    
+    .modal__footer {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .modal__footer button, 
+    .modal__footer a {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .modal__image-wrapper {
+        max-height: 300px;
+    }
+    
+    .modal__image {
+        max-height: 280px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal__dialog {
+        width: 95%;
+    }
+    
+    .modal__title {
+        font-size: 1.5rem;
+    }
+    
+    .modal__image-wrapper {
+        max-height: 250px;
+    }
+    
+    .modal__image {
+        max-height: 230px;
+    }
+    
+    .product-item__actions {
+        flex-direction: column;
+    }
+}

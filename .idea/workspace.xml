@@ -4,7 +4,30 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Mejoras de SEO (Eliminacion de precios Console Google)" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Favicon.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exoticaproject/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/static/css/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/static/css/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/static/img/mangostino.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/clientes/clientes.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/clientes/clientes.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran_cliente.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/views_clientes.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_clientes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/views_enviar_correos.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_enviar_correos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/productos/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/productos/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/static/css/cotizacion_precios_ventas.css" beforeDir="false" afterPath="$PROJECT_DIR$/productos/static/css/cotizacion_precios_ventas.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/templates/cotizacion_precios_ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/productos/templates/cotizacion_precios_ventas.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/templates/lista_cotizaciones.html" beforeDir="false" afterPath="$PROJECT_DIR$/productos/templates/lista_cotizaciones.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/productos/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/productos/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/robots.txt" beforeDir="false" afterPath="$PROJECT_DIR$/templates/robots.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/sitemap.xml" beforeDir="false" afterPath="$PROJECT_DIR$/templates/sitemap.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -226,15 +249,11 @@
       <workItem from="1746207239002" duration="1333000" />
       <workItem from="1746209537491" duration="973000" />
       <workItem from="1746225043109" duration="560000" />
-      <workItem from="1746306750603" duration="355000" />
-    </task>
-    <task id="LOCAL-00028" summary="Cabeceras de dominio.">
-      <option name="closed" value="true" />
-      <created>1744081512456</created>
-      <option name="number" value="00028" />
-      <option name="presentableId" value="LOCAL-00028" />
-      <option name="project" value="LOCAL" />
-      <updated>1744081512456</updated>
+      <workItem from="1746306750603" duration="1132000" />
+      <workItem from="1746318590381" duration="625000" />
+      <workItem from="1746359268897" duration="2339000" />
+      <workItem from="1746451302683" duration="6441000" />
+      <workItem from="1746463490556" duration="1067000" />
     </task>
     <task id="LOCAL-00029" summary="Cabeceras de dominio 2">
       <option name="closed" value="true" />
@@ -620,7 +639,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746306867635</updated>
     </task>
-    <option name="localTasksCounter" value="77" />
+    <task id="LOCAL-00077" summary="Favicon.">
+      <option name="closed" value="true" />
+      <created>1746309358987</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1746309358987</updated>
+    </task>
+    <option name="localTasksCounter" value="78" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -638,7 +665,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Utilidades Abono" />
     <MESSAGE value="Cambio de lista de compras 10." />
     <MESSAGE value="Retoques" />
     <MESSAGE value="Utilidades." />
@@ -663,6 +689,7 @@
     <MESSAGE value="Cambio en relacion de Ventas con compras Manytomany para evitar errores 2" />
     <MESSAGE value="Mejoras de SEO" />
     <MESSAGE value="Mejoras de SEO (Eliminacion de precios Console Google)" />
-    <option name="LAST_COMMIT_MESSAGE" value="Mejoras de SEO (Eliminacion de precios Console Google)" />
+    <MESSAGE value="Favicon." />
+    <option name="LAST_COMMIT_MESSAGE" value="Favicon." />
   </component>
 </project>
