@@ -61,7 +61,13 @@ class ProductsSitemap(Sitemap):
             all_items = all_items[i_start:i_end]
         
         for item in all_items:
-            loc = f"{protocol}://{site.domain}{self.location(item)}"
+            # Check if site is a string or an object with domain attribute
+            if isinstance(site, str):
+                domain = site
+            else:
+                domain = site.domain
+                
+            loc = f"{protocol}://{domain}{self.location(item)}"
             lastmod = self.lastmod(item) if self.lastmod is not None else None
             
             # Actualizar latest_lastmod si es necesario

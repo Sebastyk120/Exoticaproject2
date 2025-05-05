@@ -4,12 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Cambios en direccion de alabaran, pagina y tecnologia. Cambio en modelo Fruta.">
-      <change afterPath="$PROJECT_DIR$/comercial/migrations/0007_cliente_domicilio_albaran_alter_cotizacion_numero.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/productos/migrations/0002_alter_fruta_options_fruta_beneficios_and_more.py" afterDir="false" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Correccion media files.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Exoticaproject/wsgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/wsgi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/sitemaps.py" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/sitemaps.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -236,47 +233,8 @@
       <workItem from="1746318590381" duration="625000" />
       <workItem from="1746359268897" duration="2339000" />
       <workItem from="1746451302683" duration="6441000" />
-      <workItem from="1746463490556" duration="1882000" />
-    </task>
-    <task id="LOCAL-00030" summary="Cabeceras de dominio 3">
-      <option name="closed" value="true" />
-      <created>1744082935904</created>
-      <option name="number" value="00030" />
-      <option name="presentableId" value="LOCAL-00030" />
-      <option name="project" value="LOCAL" />
-      <updated>1744082935904</updated>
-    </task>
-    <task id="LOCAL-00031" summary="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS">
-      <option name="closed" value="true" />
-      <created>1744084430535</created>
-      <option name="number" value="00031" />
-      <option name="presentableId" value="LOCAL-00031" />
-      <option name="project" value="LOCAL" />
-      <updated>1744084430535</updated>
-    </task>
-    <task id="LOCAL-00032" summary="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS 2">
-      <option name="closed" value="true" />
-      <created>1744084656554</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1744084656554</updated>
-    </task>
-    <task id="LOCAL-00033" summary="Cabeceras de dominio 4 CSRF_TRUSTED_ORIGINS 2">
-      <option name="closed" value="true" />
-      <created>1744084731986</created>
-      <option name="number" value="00033" />
-      <option name="presentableId" value="LOCAL-00033" />
-      <option name="project" value="LOCAL" />
-      <updated>1744084731986</updated>
-    </task>
-    <task id="LOCAL-00034" summary="Cambio Ema Back">
-      <option name="closed" value="true" />
-      <created>1744117680140</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1744117680140</updated>
+      <workItem from="1746463490556" duration="5268000" />
+      <workItem from="1746469586047" duration="337000" />
     </task>
     <task id="LOCAL-00035" summary="Puntos de control">
       <option name="closed" value="true" />
@@ -630,7 +588,47 @@
       <option name="project" value="LOCAL" />
       <updated>1746464719041</updated>
     </task>
-    <option name="localTasksCounter" value="79" />
+    <task id="LOCAL-00079" summary="Correcion Whitnoise.">
+      <option name="closed" value="true" />
+      <created>1746465426159</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1746465426159</updated>
+    </task>
+    <task id="LOCAL-00080" summary="Correcion Whitnoise.">
+      <option name="closed" value="true" />
+      <created>1746465773049</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1746465773049</updated>
+    </task>
+    <task id="LOCAL-00081" summary="Correccion Formulario.">
+      <option name="closed" value="true" />
+      <created>1746467985517</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1746467985517</updated>
+    </task>
+    <task id="LOCAL-00082" summary="Correccion media files.">
+      <option name="closed" value="true" />
+      <created>1746468802138</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1746468802138</updated>
+    </task>
+    <task id="LOCAL-00083" summary="Correccion media files.">
+      <option name="closed" value="true" />
+      <created>1746468980148</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1746468980148</updated>
+    </task>
+    <option name="localTasksCounter" value="84" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -648,9 +646,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Retoques" />
-    <MESSAGE value="Utilidades." />
-    <MESSAGE value="Ubicacion Single page." />
     <MESSAGE value="Cambios en fechas de factura y albaranes." />
     <MESSAGE value="Total cajas y esto de cuenta." />
     <MESSAGE value="Calculo de dash utilidades." />
@@ -673,6 +668,9 @@
     <MESSAGE value="Mejoras de SEO (Eliminacion de precios Console Google)" />
     <MESSAGE value="Favicon." />
     <MESSAGE value="Cambios en direccion de alabaran, pagina y tecnologia. Cambio en modelo Fruta." />
-    <option name="LAST_COMMIT_MESSAGE" value="Cambios en direccion de alabaran, pagina y tecnologia. Cambio en modelo Fruta." />
+    <MESSAGE value="Correcion Whitnoise." />
+    <MESSAGE value="Correccion Formulario." />
+    <MESSAGE value="Correccion media files." />
+    <option name="LAST_COMMIT_MESSAGE" value="Correccion media files." />
   </component>
 </project>
