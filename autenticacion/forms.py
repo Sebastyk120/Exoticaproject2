@@ -2,32 +2,36 @@ from django import forms
 from captcha.fields import CaptchaField
 
 class ContactForm(forms.Form):
-    nombre = forms.CharField(
+    name = forms.CharField(
+        label="Nombre Completo",
         max_length=100, 
         widget=forms.TextInput(attrs={
-            'placeholder': 'Nombre', 
+            'placeholder': 'Nombre Completo', 
             'required': True,
             'class': 'form-control'
         })
     )
     email = forms.EmailField(
+        label="Correo Electrónico",
         widget=forms.EmailInput(attrs={
-            'placeholder': 'Email', 
+            'placeholder': 'Correo Electrónico', 
             'required': True,
             'class': 'form-control',
             'pattern': "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$",
             'title': "Por favor ingresa un email válido"
         })
     )
-    telefono = forms.CharField(
-        max_length=20, 
-        required=False,
+    subject = forms.CharField(
+        label="Asunto",
+        max_length=150,
         widget=forms.TextInput(attrs={
-            'placeholder': 'Teléfono (opcional)', 
+            'placeholder': 'Asunto',
+            'required': True,
             'class': 'form-control'
         })
     )
-    mensaje = forms.CharField(
+    message = forms.CharField(
+        label="Mensaje",
         widget=forms.Textarea(attrs={
             'placeholder': 'Mensaje', 
             'required': True,

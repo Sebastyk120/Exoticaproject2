@@ -139,18 +139,18 @@ def landing_page_view(request):
         form = ContactForm(request.POST)
         if form.is_valid():
             # Procesar el formulario y enviar el correo
-            nombre = form.cleaned_data['nombre']
+            name = form.cleaned_data['name']
             email = form.cleaned_data['email']
-            mensaje = form.cleaned_data['mensaje']
-            telefono = form.cleaned_data.get('telefono', '')
+            subject = form.cleaned_data['subject']
+            message = form.cleaned_data['message']
             
             # Enviar el email
-            subject = f'Nuevo contacto desde la web: {nombre}'
-            message = f'Nombre: {nombre}\nEmail: {email}\nTeléfono: {telefono}\n\nMensaje:\n{mensaje}'
+            subject_email = f'Nuevo contacto desde la web: {subject}'
+            message_email = f'Nombre: {name}\nEmail: {email}\n\nMensaje:\n{message}'
             
             send_mail(
-                subject,
-                message,
+                subject_email,
+                message_email,
                 settings.DEFAULT_FROM_EMAIL,
                 [settings.CONTACT_EMAIL],
                 fail_silently=False,
@@ -159,7 +159,7 @@ def landing_page_view(request):
             # Devolver a la misma página con mensaje de éxito
             messages.success(request, 'Tu mensaje ha sido enviado correctamente. Nos pondremos en contacto contigo pronto.')
             return redirect('landing_page')
-      # Contexto para la plantilla
+    # Contexto para la plantilla
     context = {
         'frutas': fruits,
         'form': form,
