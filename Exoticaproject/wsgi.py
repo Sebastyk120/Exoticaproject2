@@ -14,3 +14,6 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Exoticaproject.settings')
 
 application = get_wsgi_application()
+
+from productos.apps import ensure_media_directories
+ensure_media_directories()
