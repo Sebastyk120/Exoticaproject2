@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Reparacion en SEO sitemaps.py">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Reparacion de tabla clientes.html">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autenticacion/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/robots.txt" beforeDir="false" afterPath="$PROJECT_DIR$/templates/robots.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,6 +64,7 @@
     &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR_AND_PREVIEW&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/Legion 5 Pro/Downloads/exotic-fruit-bliss-landing-main&quot;,
     &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -237,14 +240,12 @@
       <workItem from="1746469586047" duration="1002000" />
       <workItem from="1746563313178" duration="6000" />
       <workItem from="1746575884828" duration="112000" />
-    </task>
-    <task id="LOCAL-00036" summary="Mac compatible">
-      <option name="closed" value="true" />
-      <created>1744134677946</created>
-      <option name="number" value="00036" />
-      <option name="presentableId" value="LOCAL-00036" />
-      <option name="project" value="LOCAL" />
-      <updated>1744134677946</updated>
+      <workItem from="1746580993854" duration="231000" />
+      <workItem from="1746634200709" duration="49000" />
+      <workItem from="1746634816811" duration="926000" />
+      <workItem from="1746638382810" duration="493000" />
+      <workItem from="1746638890866" duration="3013000" />
+      <workItem from="1746642142108" duration="329000" />
     </task>
     <task id="LOCAL-00037" summary="Correo.">
       <option name="closed" value="true" />
@@ -630,7 +631,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746469939093</updated>
     </task>
-    <option name="localTasksCounter" value="85" />
+    <task id="LOCAL-00085" summary="Reparacion de tabla clientes.html">
+      <option name="closed" value="true" />
+      <created>1746581220458</created>
+      <option name="number" value="00085" />
+      <option name="presentableId" value="LOCAL-00085" />
+      <option name="project" value="LOCAL" />
+      <updated>1746581220459</updated>
+    </task>
+    <option name="localTasksCounter" value="86" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -648,7 +657,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Total cajas y esto de cuenta." />
     <MESSAGE value="Calculo de dash utilidades." />
     <MESSAGE value="Calculo de dash utilidades 2, para semanas 1" />
     <MESSAGE value="Utlimo cambio del dashboard." />
@@ -673,6 +681,7 @@
     <MESSAGE value="Correccion Formulario." />
     <MESSAGE value="Correccion media files." />
     <MESSAGE value="Reparacion en SEO sitemaps.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="Reparacion en SEO sitemaps.py" />
+    <MESSAGE value="Reparacion de tabla clientes.html" />
+    <option name="LAST_COMMIT_MESSAGE" value="Reparacion de tabla clientes.html" />
   </component>
 </project>
