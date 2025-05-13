@@ -17,6 +17,7 @@ from pathlib import Path
 from django.templatetags.static import static
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ImproperlyConfigured
 from .unfold_config import UNFOLD
 load_dotenv()
 
@@ -224,7 +225,10 @@ EMAIL_HOST = 'smtp.office365.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = DEFAULT_FROM_EMAIL
-EMAIL_HOST_PASSWORD = 'Bogota1973'
+try:
+    EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+except KeyError:
+    raise ImproperlyConfigured('La variable de entorno EMAIL_HOST_PASSWORD no está definida')
 ADMIN_SITE_NAME = 'Administración L&M Exótica'
 
 # Aumentar límite para datos de upload (10MB)
