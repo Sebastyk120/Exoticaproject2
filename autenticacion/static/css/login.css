@@ -1,23 +1,30 @@
-/* iOS/Apple-inspired Login Form for L&M Exotic Fruit */
+/* iOS/Apple-inspired Login Form for L&M Exotic Fruit - Enhanced Professional Look */
 
 :root {
-    --primary-gradient: linear-gradient(135deg, #42b883 0%, #3eb8c4 100%);
-    --secondary-color: #f2f2f7;
-    --text-color: #333;
-    --error-color: #ff3b30;
-    --highlight-color: #42b883;
-    --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    --input-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    --error-red: #ff3b30;
-    --success-green: #34c759;
-    --button-success: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+    --primary-color: #D81B60; /* Color base */
+    --primary-lighter: #E91E63; /* Versión más clara del color primario */
+    --primary-lightest: #F06292; /* Versión aún más clara */
+    --primary-gradient: linear-gradient(135deg, var(--primary-lighter) 0%, var(--primary-color) 100%);
+    --secondary-color: #faf0f4; /* Fondo con un toque muy sutil del color primario */
+    --text-color: #212529;
+    --text-secondary-color: #6c757d;
+    --error-color: #dc3545;
+    --success-color: #28a745;
+    --highlight-color: var(--primary-lighter);
+    --card-background: #ffffff;
+    --card-shadow: 0 12px 28px rgba(216, 27, 96, 0.08);
+    --input-background: #fff;
+    --input-border-color: #ffe4ec;
+    --input-focus-border-color: var(--primary-lighter);
+    --input-shadow: 0 3px 10px rgba(233, 30, 99, 0.05);
+    --button-success-gradient: linear-gradient(135deg, #28a745 0%, #218838 100%);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 body {
@@ -25,13 +32,15 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: var(--secondary-color);
+    background-color: var(--secondary-color);
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 450px; /* Ligeramente más ancho para una mejor proporción */
     padding: 20px;
     display: flex;
     justify-content: center;
@@ -40,93 +49,101 @@ body {
 
 .login-card {
     width: 100%;
-    max-width: 420px;
-    background: white;
-    border-radius: 20px;
-    padding: 40px 30px;
+    background: var(--card-background);
+    border-radius: 24px; /* Bordes más redondeados */
+    padding: 48px 36px; /* Más padding */
     box-shadow: var(--card-shadow);
     transform: translateY(0);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    animation: float 6s ease-in-out infinite;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    /* animation: float 8s ease-in-out infinite; // Animación float puede ser distractora */
 }
 
+/*
 .login-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
+*/
 
 .brand {
     text-align: center;
-    margin-bottom: 36px;
+    margin-bottom: 40px;
 }
 
 .brand h1 {
-    font-size: 28px;
+    font-size: 30px; /* Ligeramente más grande */
     font-weight: 700;
-    color: var(--text-color);
-    margin-bottom: 12px;
-    background: var(--primary-gradient);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--primary-color);
+    margin-bottom: 16px;
+    /* Se elimina el fondo degradado para el H1 para un look más limpio, el color primario es suficiente */
 }
 
 .logo-container {
     display: flex;
     justify-content: center;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
 }
 
 .logo-container img {
-    max-width: 170px;
+    max-width: 180px; /* Un poco más grande */
     height: auto;
+    border-radius: 8px; /* Suavizar bordes si el logo lo permite */
 }
 
-h2 {
-    font-size: 22px;
+h2 { /* Este h2 no está en el HTML actual, pero por si se usa */
+    font-size: 24px;
     font-weight: 500;
     color: var(--text-color);
-    margin-bottom: 30px;
+    margin-bottom: 32px;
     text-align: center;
 }
 
 .input-group {
     position: relative;
-    margin-bottom: 26px;
+    margin-bottom: 30px; /* Más espacio entre inputs */
     transition: transform 0.3s ease;
 }
 
 .input-group input {
     width: 100%;
-    padding: 16px;
+    padding: 18px 16px; /* Padding más generoso */
     font-size: 16px;
-    border: 2px solid transparent;
-    border-radius: 12px;
-    background-color: #f9f9fc;
-    box-shadow: var(--input-shadow);
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: var(--input-background);
+    border: 1px solid var(--input-border-color);
+    border-radius: 10px; /* Bordes ligeramente más suaves */
+    box-shadow: none; /* Eliminar sombra de input, el borde es suficiente */
     outline: none;
-    transition: all 0.3s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    -webkit-appearance: none; /* Para quitar estilos por defecto en iOS */
 }
 
 .input-group input:focus {
-    box-shadow: 0 0 0 2px var(--highlight-color);
-    transform: translateY(-2px);
+    border-color: var(--input-focus-border-color);
+    box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.15); /* Sombra más suave */
 }
 
 .input-group.error input {
-    border-color: var(--error-red);
-    animation: shake 0.5s ease-in-out;
+    border-color: var(--error-color);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15); /* Se mantiene el color de error */
+}
+
+.input-group.error input:focus {
+    border-color: var(--error-color);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25); /* Se mantiene el color de error */
 }
 
 .error-text {
     position: absolute;
-    bottom: -20px;
-    left: 0;
-    font-size: 12px;
-    color: var(--error-red);
+    bottom: -22px; /* Ajustar posición */
+    left: 2px;
+    font-size: 13px;
+    color: var(--error-color);
     opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
+    transform: translateY(-5px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    font-weight: 500;
 }
 
 .input-group.error .error-text {
@@ -145,83 +162,116 @@ h2 {
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: #8e8e93;
+    color: var(--text-secondary-color);
     cursor: pointer;
-    padding: 0;
+    padding: 4px; /* Área de click más grande */
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    transition: all 0.2s ease;
+    width: 30px; /* Tamaño del botón */
+    height: 30px;
+    transition: color 0.2s ease;
+}
+
+.toggle-password i {
+    font-size: 18px; /* Icono ligeramente más grande */
 }
 
 .toggle-password:hover {
-    color: var(--highlight-color);
+    color: var(--primary-color);
 }
 
+/*
 .toggle-password:active {
-    transform: translateY(-50%) scale(0.95);
+    transform: translateY(-50%) scale(0.95); // Puede ser innecesario
 }
+*/
 
 .input-group label {
     position: absolute;
-    top: 50%;
-    left: 16px;
-    transform: translateY(-50%);
+    top: 18px; /* Ajustar con el padding del input */
+    left: 17px;
     font-size: 16px;
-    color: #8e8e93;
+    font-weight: 400;
+    color: var(--text-secondary-color);
     pointer-events: none;
-    transition: all 0.3s ease;
-    background-color: transparent;
-    padding: 0 4px;
-    z-index: 2; /* Asegura que el label esté siempre por encima */
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    background-color: var(--input-background); /* Para que tape el borde del input al subir */
+    padding: 0 5px;
+    z-index: 1; /* Asegura que el label esté siempre por encima */
 }
 
 .input-group input:focus + label,
 .input-group input:not(:placeholder-shown) + label {
     top: 0;
-    transform: translateY(-50%);
-    font-size: 12px;
-    color: var(--highlight-color);
-    background-color: white;
-    z-index: 2;
+    transform: translateY(-50%) scale(0.85); /* Escalar un poco el label */
+    font-size: 12px; /* Este font-size se aplicará después del scale, así que ajustarlo */
+    color: var(--primary-lighter);
+    background-color: var(--card-background); /* Fondo del card para que se vea sobre el input */
+    font-weight: 500;
+    z-index: 1;
 }
 
-.input-group input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 30px #f9f9fc inset;
+/* Placeholder transparente para que el label funcione bien */
+.input-group input::placeholder {
+    color: transparent;
 }
+
+.input-group input:-webkit-autofill,
+.input-group input:-webkit-autofill:hover,
+.input-group input:-webkit-autofill:focus,
+.input-group input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--input-background) inset !important;
+    -webkit-text-fill-color: var(--text-color) !important;
+    border-color: var(--input-border-color); /* Mantener el borde en autofill */
+    transition: background-color 5000s ease-in-out 0s; /* Para evitar cambio de color de fondo */
+}
+
+/* Ajuste para que el label se mueva correctamente con autofill */
+.input-group input:-webkit-autofill + label {
+    top: 0;
+    transform: translateY(-50%) scale(0.85);
+    font-size: 12px;
+    color: var(--primary-lighter);
+    background-color: var(--card-background);
+    font-weight: 500;
+    z-index: 1;
+}
+
 
 .login-btn {
     position: relative;
     width: 100%;
     padding: 16px;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     background: var(--primary-gradient);
     color: white;
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 17px;
+    font-weight: 600;
     cursor: pointer;
     overflow: hidden;
-    transition: all 0.3s ease;
-    margin-top: 10px;
-    box-shadow: 0 4px 12px rgba(66, 184, 131, 0.3);
+    transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
+    margin-top: 16px;
+    box-shadow: 0 4px 15px rgba(233, 30, 99, 0.2); /* Sombra más suave */
+    -webkit-appearance: none;
 }
 
 .login-btn:hover {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-lighter) 100%);
+    box-shadow: 0 6px 20px rgba(233, 30, 99, 0.25);
     transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(66, 184, 131, 0.35);
 }
 
 .login-btn:active {
-    transform: translateY(1px);
+    transform: translateY(0px);
+    box-shadow: 0 2px 10px rgba(233, 30, 99, 0.2);
 }
 
 .login-btn .btn-text {
     position: relative;
     z-index: 2;
-    transition: all 0.5s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .login-btn .loader {
@@ -231,54 +281,42 @@ h2 {
     transform: translate(-50%, -50%) scale(0);
     width: 24px;
     height: 24px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
+    border: 3px solid rgba(255, 255, 255, 0.4);
     border-top-color: white;
     border-radius: 50%;
     opacity: 0;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
     z-index: 1;
 }
 
-.login-btn:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: skewX(-30deg);
-    transition: all 0.5s ease;
-    z-index: 1;
-}
+/* Se elimina la animación :before para un look más limpio */
 
 .login-btn.loading {
-    animation: buttonPulse 2s infinite;
-    background: var(--button-success);
-    box-shadow: 0 4px 15px rgba(52, 199, 89, 0.4);
+    /* animation: buttonPulse 1.5s infinite cubic-bezier(0.4, 0, 0.6, 1); // Considerar si es necesaria */
+    background: var(--button-success-gradient); /* Cambia a gradiente de éxito */
+    cursor: default;
 }
 
 .login-btn.loading .btn-text {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(5px); /* Sutil movimiento del texto */
 }
 
 .login-btn.loading .loader {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
-    animation: spin 1s linear infinite;
+    animation: spin 0.8s linear infinite;
 }
 
-.login-btn.loading:before {
-    left: 100%;
-}
 
-.login-btn.success {
-    background: var(--success-green);
+.login-btn.success { /* Estilo si el login es exitoso (si se implementa) */
+    background: var(--success-color);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
 }
 
 .login-btn.success .loader {
     opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
 }
 
 .login-btn.success:after {
@@ -286,133 +324,144 @@ h2 {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(0);
     color: white;
     font-size: 24px;
-    animation: scaleIn 0.5s ease;
+    animation: scaleIn 0.5s ease forwards;
 }
 
-.error-message {
+.error-message { /* Para errores generales del formulario, no de un campo específico */
     color: var(--error-color);
     text-align: center;
-    margin: 15px 0;
+    margin: 20px 0 10px;
     font-size: 14px;
-    animation: shake 0.5s ease-in-out;
+    font-weight: 500;
+    /* animation: shake 0.4s ease-in-out; // La animación puede ser molesta */
+    padding: 10px;
+    background-color: rgba(220, 53, 69, 0.05);
+    border: 1px solid rgba(220, 53, 69, 0.1);
+    border-radius: 8px;
 }
 
 .links {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 24px;
 }
 
 .links a {
-    color: var(--highlight-color);
+    color: var(--primary-lighter);
     text-decoration: none;
     font-size: 14px;
-    transition: color 0.2s;
+    font-weight: 500;
+    transition: color 0.2s, text-decoration 0.2s;
 }
 
 .links a:hover {
+    color: var(--primary-color);
     text-decoration: underline;
 }
 
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-5px); }
-    40%, 80% { transform: translateX(5px); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
 }
 
 @keyframes spin {
-    to {
-        transform: translate(-50%, -50%) rotate(360deg);
-    }
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
+/*
 @keyframes buttonPulse {
-    0% { box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3); }
-    50% { box-shadow: 0 4px 20px rgba(52, 199, 89, 0.6); }
-    100% { box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3); }
+    0% { box-shadow: 0 4px 15px rgba(0, 122, 122, 0.2); }
+    50% { box-shadow: 0 6px 22px rgba(0, 122, 122, 0.3); }
+    100% { box-shadow: 0 4px 15px rgba(0, 122, 122, 0.2); }
 }
+*/
 
 @keyframes scaleIn {
-    0% { transform: translate(-50%, -50%) scale(0); }
-    80% { transform: translate(-50%, -50%) scale(1.2); }
-    100% { transform: translate(-50%, -50%) scale(1); }
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    70% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
 /* Make the form adaptive to different screen sizes */
 @media (max-width: 576px) {
+    .container {
+        padding: 15px;
+    }
     .login-card {
-        padding: 30px 20px;
-        max-width: 100%;
-        border-radius: 16px;
+        padding: 36px 24px; /* Menos padding en móviles */
+        border-radius: 20px;
     }
     
     .brand h1 {
-        font-size: 24px;
-    }
-    
-    h2 {
-        font-size: 20px;
-        margin-bottom: 25px;
+        font-size: 26px;
     }
     
     .input-group input {
-        padding: 14px;
+        padding: 16px 14px;
+        font-size: 15px;
     }
 
     .input-group {
-        margin-bottom: 30px;
+        margin-bottom: 28px;
     }
-
+    
     .input-group label {
-        font-size: 14px;
+        font-size: 15px;
+        left: 15px;
+        top: 17px;
     }
 
     .input-group input:focus + label,
-    .input-group input:not(:placeholder-shown) + label {
-        top: 0;
-        transform: translateY(-50%);
-        font-size: 11px;
+    .input-group input:not(:placeholder-shown) + label,
+    .input-group input:-webkit-autofill + label {
+        font-size: 11px; /* Reajustar el tamaño escalado */
+    }
+
+    .login-btn {
+        padding: 15px;
+        font-size: 16px;
+    }
+
+    .error-text {
+        font-size: 12px;
     }
 }
 
-/* Fix para iOS cuando el teclado está desplegado */
-@supports (-webkit-touch-callout: none) {
-    .input-group {
-        padding-top: 8px; /* Añade espacio extra arriba para el label */
-    }
+/* Fix para iOS cuando el teclado está desplegado y el label flotante */
+/* Se eliminan los fixes específicos de iOS que pueden ser complejos de mantener
+   y se apuesta por un comportamiento de label más estándar o se prueba
+   minuciosamente en dispositivos reales si se mantienen.
+   El nuevo enfoque del label con background-color debería mitigar algunos problemas.
+*/
 
-    .input-group input:focus + label,
-    .input-group input:not(:placeholder-shown) + label {
-        background-color: white;
-        padding: 0 4px;
-        top: 0;
-        transform: translateY(-50%);
-        box-shadow: 0 0 0 2px white; /* Añade un "halo" blanco alrededor del label */
-        border-radius: 2px;
-        z-index: 3; /* Asegura que esté por encima del borde verde */
-    }
-
-    /* Ajuste adicional para el modo de enfoque */
-    .input-group input:focus {
-        padding-top: 20px; /* Aumenta el padding superior cuando está enfocado */
-        padding-bottom: 12px; /* Reduce el padding inferior para mantener la altura total */
-    }
-}
-
-/* Fix for floating label on iOS */
-@supports (-webkit-touch-callout: none) {
-    .input-group input:focus + label,
-    .input-group input:not(:placeholder-shown) + label {
-        background-color: white;
-        padding: 0 4px;
-        top: 0;
-        transform: translateY(-50%);
-    }
-}
-
-/* Add a subtle placeholder to ensure label animation works properly */
+/* El placeholder transparente ya está definido arriba */
+/*
 .input-group input::placeholder {
-    color: transparent;
+    color: transparent; 
+}
+*/
+
+/* Eliminar animación float que estaba comentada */
+/*
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+*/
+
+/* Estilos para mejorar la experiencia de foco visualmente */
+input:focus, button:focus, select:focus, textarea:focus {
+    outline: 2px solid transparent; /* Elimina el outline por defecto */
+    outline-offset: 2px;
+    /* La sombra de foco ya se maneja en .input-group input:focus y .login-btn:focus-visible */
+}
+
+/* Para el botón, usar :focus-visible para mejor accesibilidad con teclado */
+.login-btn:focus-visible {
+    box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.25);
 }

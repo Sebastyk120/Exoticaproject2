@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Reparacion de tabla clientes.html">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="login cambio">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/robots.txt" beforeDir="false" afterPath="$PROJECT_DIR$/templates/robots.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autenticacion/static/css/login.css" beforeDir="false" afterPath="$PROJECT_DIR$/autenticacion/static/css/login.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/importacion/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,8 +40,8 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Sebastyk120/Exoticaproject.git&quot;,
-    &quot;accountId&quot;: &quot;8c48352c-4f32-433e-b11c-6e71d900a554&quot;
+    &quot;url&quot;: &quot;https://github.com/Sebastyk120/Exoticaproject2.git&quot;,
+    &quot;accountId&quot;: &quot;ba77ec36-c992-4f7f-828f-e052b1ee1556&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -72,7 +71,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -91,7 +90,7 @@
   <component name="RunManager">
     <configuration name="Exoticaproject" type="Python.DjangoServer" factoryName="Django server">
       <module name="Exoticaproject" />
-      <option name="ENV_FILES" value="" />
+      <option name="ENV_FILES" value="$PROJECT_DIR$/.venv/pyvenv.cfg" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -99,13 +98,14 @@
         <env name="DJANGO_SETTINGS_MODULE" value="Exoticaproject.settings" />
       </envs>
       <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.13 (Exoticaproject2)" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="launchJavascriptDebuger" value="false" />
       <option name="port" value="8000" />
-      <option name="host" value="" />
+      <option name="host" value="localhost" />
       <option name="additionalOptions" value="" />
       <option name="browserUrl" value="" />
       <option name="runTestServer" value="false" />
@@ -118,8 +118,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-PY-251.23774.444" />
-        <option value="bundled-python-sdk-890ed5b35930-d9c5bdb153f4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.23774.444" />
+        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-PY-251.25410.159" />
+        <option value="bundled-python-sdk-e0ed3721d81e-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.25410.159" />
       </set>
     </attachedChunks>
   </component>
@@ -246,6 +246,17 @@
       <workItem from="1746638382810" duration="493000" />
       <workItem from="1746638890866" duration="3013000" />
       <workItem from="1746642142108" duration="329000" />
+      <workItem from="1747174607604" duration="268000" />
+      <workItem from="1747340773689" duration="186000" />
+      <workItem from="1747340989230" duration="287000" />
+      <workItem from="1747341293920" duration="1674000" />
+      <workItem from="1747344058442" duration="678000" />
+      <workItem from="1747346814667" duration="9000" />
+      <workItem from="1747346999500" duration="223000" />
+      <workItem from="1747347236194" duration="6000" />
+      <workItem from="1747483932903" duration="193000" />
+      <workItem from="1747504819101" duration="57000" />
+      <workItem from="1747518904852" duration="755000" />
     </task>
     <task id="LOCAL-00037" summary="Correo.">
       <option name="closed" value="true" />

@@ -100,17 +100,38 @@ class Pedido(models.Model):
                                           null=True, blank=True, editable=False, default=0)
 
     def save(self, *args, **kwargs):
-        if self.fecha_entrega is not None:
-            semana_numero = self.fecha_entrega.isocalendar()[1]
-            ano = self.fecha_entrega.year
-            if semana_numero == 1 and self.fecha_entrega.month == 12:
-                ano += 1
+        # Check if we're doing a partial update with update_fields
+        update_fields = kwargs.get('update_fields')
+        
+        # Only calculate fecha_vencimiento and semana if needed
+        if update_fields is None or 'fecha_entrega' in update_fields or 'semana' in update_fields or 'fecha_vencimiento' in update_fields:
+            if self.fecha_entrega is not None:
+                semana_numero = self.fecha_entrega.isocalendar()[1]
+                ano = self.fecha_entrega.year
+                if semana_numero == 1 and self.fecha_entrega.month == 12:
+                    ano += 1
 
-            if semana_numero >= 52 and self.fecha_entrega.month == 1:
-                ano -= 1
+                if semana_numero >= 52 and self.fecha_entrega.month == 1:
+                    ano -= 1
 
-            self.semana = f"{semana_numero}-{ano}"
-            self.fecha_vencimiento = self.fecha_entrega + timedelta(days=self.exportador.dias_credito)
+                self.semana = f"{semana_numero}-{ano}"
+                
+                # Only access exportador if it's needed and already loaded
+                if hasattr(self, 'exportador_id') and self.exportador_id is not None:
+                    # Either get the cached exportador or fetch dias_credito directly
+                    if hasattr(self, 'exportador') and self.exportador is not None:
+                        dias_credito = self.exportador.dias_credito
+                    else:
+                        # Import here to avoid circular imports
+                        from django.apps import apps
+                        Exportador = apps.get_model('importacion', 'Exportador')
+                        try:
+                            dias_credito = Exportador.objects.values_list('dias_credito', flat=True).get(pk=self.exportador_id)
+                        except Exportador.DoesNotExist:
+                            dias_credito = 0
+                    
+                    self.fecha_vencimiento = self.fecha_entrega + timedelta(days=dias_credito)
+        
         super(Pedido, self).save(*args, **kwargs)
 
     def __str__(self):
