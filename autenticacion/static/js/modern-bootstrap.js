@@ -164,6 +164,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 productModal.show();
             });
         });
+
+        // Limpieza de backdrop y clases residuales al cerrar el modal
+        productModalElement.addEventListener('hidden.bs.modal', function() {
+            // Elimina cualquier backdrop residual
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            // Elimina clases residuales del body
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            // Asegura que el modal no tenga aria-hidden incorrecto
+            productModalElement.removeAttribute('aria-hidden');
+            productModalElement.style.display = 'none';
+        });
     }
 
     // Contact Form Enhancement
@@ -392,9 +405,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Keyboard navigation improvements
     document.addEventListener('keydown', function(e) {
-        // Close modal with Escape key
-        if (e.key === 'Escape' && productModal) {
-            productModal.hide();
+        // Close modal with Escape key SOLO si el modal está visible
+        if (e.key === 'Escape' && productModalElement && productModalElement.classList.contains('show')) {
+            if (productModal) productModal.hide();
         }
         
         // Focus management for accessibility
