@@ -517,3 +517,117 @@ def estado_cuenta_cliente_token(request, token):
     }
     
     return render(request, 'clientes/estado_cuenta_cliente.html', context)
+
+@login_required
+def api_cliente_resumen(request, cliente_id):
+    """
+    API endpoint que devuelve un resumen del estado de cuenta del cliente
+    """
+    try:
+        cliente = get_object_or_404(Cliente, id=cliente_id)
+        
+        # Get all ventas and transferencias for this client
+        ventas_query = Venta.objects.filter(cliente=cliente)
+        transferencias_query = TranferenciasCliente.objects.filter(cliente=cliente)
+        detalles_query = DetalleVenta.objects.filter(venta__in=ventas_query)
+        
+        # Calculate summary metrics
+        total_facturado = ventas_query.aggregate(total=Sum('valor_total_factura_euro'))['total'] or 0
+        total_cajas_vendidas = ventas_query.aggregate(total=Sum('total_cajas_pedido'))['total'] or 0
+        total_reclamaciones = ventas_query.aggregate(total=Sum('valor_total_abono_euro'))['total'] or 0
+        total_cajas_reclamadas = detalles_query.aggregate(total=Sum('no_cajas_abono'))['total'] or 0
+        total_pagado_transferencias = transferencias_query.aggregate(total=Sum('valor_transferencia'))['total'] or 0
+        
+        # Calculate real balance
+        saldo_real = total_facturado - total_reclamaciones - total_pagado_transferencias
+        
+        # Calculate facturas proximas a vencer
+        from datetime import date, timedelta
+        hoy = date.today()
+        facturas_pendientes = ventas_query.filter(pagado=False).order_by('fecha_entrega')
+        
+        facturas_con_vencimiento = []
+        for factura in facturas_pendientes:
+            if factura.fecha_entrega and cliente.dias_pago:
+                try:
+                    dias_pago = int(cliente.dias_pago)
+                    fecha_vencimiento = factura.fecha_entrega + timedelta(days=dias_pago)
+                    dias_hasta_vencimiento = (fecha_vencimiento - hoy).days
+                    
+                    estado = "vencida" if dias_hasta_vencimiento < 0 else "proxima" if dias_hasta_vencimiento <= 7 else "normal"
+                    
+                    # Check if has rectificative invoice (abono)
+                    tiene_abono = factura.valor_total_abono_euro > 0 if factura.valor_total_abono_euro else False
+                    
+                    facturas_con_vencimiento.append({
+                        'id': factura.id,
+                        'numero_factura': factura.numero_factura,
+                        'fecha_entrega': factura.fecha_entrega.strftime('%d/%m/%Y'),
+                        'fecha_vencimiento': fecha_vencimiento.strftime('%d/%m/%Y'),
+                        'dias_hasta_vencimiento': dias_hasta_vencimiento,
+                        'valor_total': float(factura.valor_total_factura_euro),
+                        'valor_abono': float(factura.valor_total_abono_euro) if factura.valor_total_abono_euro else 0,
+                        'valor_neto': float(factura.valor_total_factura_euro - (factura.valor_total_abono_euro or 0)),
+                        'tiene_abono': tiene_abono,
+                        'estado': estado
+                    })
+                except (ValueError, TypeError):
+                    tiene_abono = factura.valor_total_abono_euro > 0 if factura.valor_total_abono_euro else False
+                    
+                    facturas_con_vencimiento.append({
+                        'id': factura.id,
+                        'numero_factura': factura.numero_factura,
+                        'fecha_entrega': factura.fecha_entrega.strftime('%d/%m/%Y') if factura.fecha_entrega else 'N/A',
+                        'fecha_vencimiento': 'N/A',
+                        'dias_hasta_vencimiento': None,
+                        'valor_total': float(factura.valor_total_factura_euro),
+                        'valor_abono': float(factura.valor_total_abono_euro) if factura.valor_total_abono_euro else 0,
+                        'valor_neto': float(factura.valor_total_factura_euro - (factura.valor_total_abono_euro or 0)),
+                        'tiene_abono': tiene_abono,
+                        'estado': "desconocido"
+                    })
+        
+        # Sort by expiration date (most urgent first)
+        facturas_con_vencimiento = sorted(facturas_con_vencimiento, key=lambda x: x['dias_hasta_vencimiento'] if x['dias_hasta_vencimiento'] is not None else 999)
+        
+        # Count invoices by status
+        facturas_vencidas = len([f for f in facturas_con_vencimiento if f['estado'] == 'vencida'])
+        facturas_proximas = len([f for f in facturas_con_vencimiento if f['estado'] == 'proxima'])
+        facturas_normales = len([f for f in facturas_con_vencimiento if f['estado'] == 'normal'])
+        facturas_con_abono = len([f for f in facturas_con_vencimiento if f['tiene_abono']])
+        
+        # Format the response data
+        data = {
+            'success': True,
+            'cliente': {
+                'id': cliente.id,
+                'nombre': cliente.nombre,
+                'email': cliente.email,
+                'dias_pago': cliente.dias_pago,
+            },
+            'resumen': {
+                'total_facturado': float(total_facturado),
+                'total_cajas_vendidas': int(total_cajas_vendidas or 0),
+                'total_reclamaciones': float(total_reclamaciones),
+                'total_cajas_reclamadas': int(total_cajas_reclamadas or 0),
+                'total_pagado_transferencias': float(total_pagado_transferencias),
+                'saldo_real': float(saldo_real),
+            },
+            'facturas_pendientes': facturas_con_vencimiento[:15],  # Limit to 15 most urgent
+            'estadisticas_facturas': {
+                'total_pendientes': len(facturas_con_vencimiento),
+                'vencidas': facturas_vencidas,
+                'proximas': facturas_proximas,
+                'normales': facturas_normales,
+                'con_abono': facturas_con_abono
+            }
+        }
+        
+        return JsonResponse(data)
+        
+    except Exception as e:
+        logger.error(f"Error getting client summary for client {cliente_id}: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Error al obtener el resumen del cliente'
+        }, status=500)

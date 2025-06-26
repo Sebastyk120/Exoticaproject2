@@ -57,4 +57,7 @@ urlpatterns = [
     # URLs para descarga directa de facturas/rectificativas    path('generar-factura/<int:venta_id>/', views_ventas.generar_factura_download, name='generar-factura'),    path('generar-rectificativa/<int:venta_id>/', views_ventas.generar_rectificativa_download, name='generar-rectificativa'),    # Nueva URLs para acceso por token a facturas y rectificativas
     path('cliente-factura/<int:venta_id>/<str:token>/', views_ventas.factura_cliente_token, name='factura_cliente_token'),
     path('cliente-rectificativa/<int:venta_id>/<str:token>/', views_ventas.rectificativa_cliente_token, name='rectificativa_cliente_token'),
+    
+    # API endpoint for client summary
+    path('api/cliente-resumen/<int:cliente_id>/', views_clientes.api_cliente_resumen, name='api_cliente_resumen'),
 ]

@@ -6,8 +6,12 @@ from datetime import datetime, time
 import time as time_module
 
 def check_consulate_website():
-    # Target text to search for
-    target_text = "En este momento, la plataforma se encuentra cerrada. Se habilitará de lunes a viernes entre las 12:00 y 4:00 p.m. (la hora exacta en que se habilita para solicitar cita es aleatoria). Los días festivos no se habilita la plataforma."
+    # Target text to search for - more flexible search
+    target_keywords = [
+        "Las citas se habilitan de lunes a viernes",
+        "partir de las 1:00 p.m hasta las 4:00 p.m",
+        "Los dias festivos  no se habilita la plataforma"
+    ]
     
     while True:
         # Get current time
@@ -25,22 +29,32 @@ def check_consulate_website():
             response = requests.get('https://citasmadridconsulado.com/')
             response.raise_for_status()  # Raise an exception for bad status codes
             
-            # Parse the HTML
-            soup = BeautifulSoup(response.text, 'html.parser')
+            # Debug: Print part of the response to check content
+            print(f"Status code: {response.status_code}")
+            print(f"Content length: {len(response.text)}")
             
-            # Search for the target text
-            if target_text not in response.text:
+            # Check if ALL target keywords are present
+            keywords_found = [keyword for keyword in target_keywords if keyword in response.text]
+            all_keywords_present = len(keywords_found) == len(target_keywords)
+            
+            print(f"Keywords found: {len(keywords_found)}/{len(target_keywords)}")
+            
+            # Only send alert if keywords are missing (indicating real change)
+            if not all_keywords_present:
                 # Send email notification
+                message = f'El texto de información sobre horarios de citas ha cambiado en la página del consulado. Keywords encontradas: {keywords_found}. Es posible que el sistema de citas esté ahora disponible.'
+                subject = 'ALERTA: Cambio detectado - Consulado'
+                
                 send_mail(
-                    'Alerta: Cambio en la página del Consulado',
-                    'El texto de cierre de plataforma no se encontró en la página del consulado. Por favor, verifica manualmente.',
+                    subject,
+                    message,
                     settings.DEFAULT_FROM_EMAIL,
                     ['sebastyk120@gmail.com'],  # Replace with your email
                     fail_silently=False,
                 )
-                print("Email notification sent - Target text not found")
+                print("Email notification sent - Target keywords missing")
             else:
-                print("Target text found - No action needed")
+                print("All target keywords found - No action needed")
                 
         except Exception as e:
             # Send email in case of any error
@@ -58,4 +72,4 @@ def check_consulate_website():
         time_module.sleep(300)  # 300 seconds = 5 minutes
 
 if __name__ == "__main__":
-    check_consulate_website() 
+    check_consulate_website()

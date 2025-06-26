@@ -61,12 +61,16 @@ def home_view(request):
     import_count = Pedido.objects.count()
     sales_count = Venta.objects.count()
     
+    # Get all clients for the modal
+    clientes = Cliente.objects.all().order_by('nombre')
+    
     context = {
         'user': request.user,
         'client_count': client_count,
         'product_count': product_count,
         'import_count': import_count,
         'sales_count': sales_count,
+        'clientes': clientes,
     }
     
     return render(request, 'home.html', context)
