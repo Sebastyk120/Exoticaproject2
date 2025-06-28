@@ -259,7 +259,7 @@
             // Configuración para PDF
             const pdfOptions = {
                 margin: [10, 10, 10, 10],
-                filename: 'Factura_{{ venta.id }}_{{ venta.cliente.nombre|slugify }}.pdf',
+                filename: '{% if venta.numero_factura %}{{ venta.numero_factura }}{% else %}{{ venta.id }}{% endif %}_{{ venta.cliente.nombre|slugify }}.pdf',
                 image: { type: 'jpeg', quality: 1 },
                 html2canvas: { 
                     scale: 3,
