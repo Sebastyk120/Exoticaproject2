@@ -245,13 +245,21 @@ def update_gasto(request, gasto_id):
         valor_nota_credito = request.POST.get('valor_nota_credito')
         if valor_nota_credito and valor_nota_credito.strip():
             gasto.valor_nota_credito = Decimal(valor_nota_credito)
-            # Calcular monto pendiente
             gasto.monto_pendiente = gasto.valor_gastos_carga - Decimal(valor_nota_credito)
         else:
             gasto.valor_nota_credito = None
             gasto.monto_pendiente = gasto.valor_gastos_carga
-            
+        
         gasto.save()
+        
+        # Actualizar relación de pedidos
+        pedidos_ids = request.POST.getlist('pedidos')
+        gasto.pedidos.clear()
+        for pedido_id in pedidos_ids:
+            from django.shortcuts import get_object_or_404
+            pedido = get_object_or_404(Pedido, id=pedido_id)
+            gasto.pedidos.add(pedido)
+            
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
