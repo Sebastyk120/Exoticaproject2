@@ -187,7 +187,7 @@
 
     <!-- Edit Modal -->
     <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Editar Gasto</h5>
@@ -199,6 +199,15 @@
                         <div class="form-group">
                             <label class="form-label">Número Factura</label>
                             <input type="text" name="numero_factura" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Pedidos</label>
+                            <select name="pedidos" class="form-control select2-multiple" multiple="multiple" required style="min-height:100px;">
+                                {% for pedido in pedidos_disponibles %}
+                                <option value="{{ pedido.id }}">{{ pedido.id }} - {{ pedido }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">Puede seleccionar múltiples pedidos</small>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Valor (USD)</label>
@@ -474,6 +483,12 @@
                 form.valor_gastos_carga.value = data.valor_gastos_carga;
                 form.numero_nota_credito.value = data.numero_nota_credito || '';
                 form.valor_nota_credito.value = data.valor_nota_credito || '';
+
+                // Get the select2 element and set selected values
+                const pedidosSelect = $(form.querySelector('select[name="pedidos"]'));
+                const pedidosIds = data.pedidos.map(pedido => pedido.split(' - ')[0]);
+                pedidosSelect.val(pedidosIds).trigger('change');
+
                 editModal.show();
             })
             .catch(error => {
@@ -486,6 +501,16 @@
         
         const form = document.getElementById('editForm');
         const formData = new FormData(form);
+        
+        // Get all selected pedidos
+        const selectedPedidos = Array.from(form.querySelector('select[name="pedidos"]').selectedOptions)
+            .map(option => option.value);
+        
+        // Remove single pedidos entry and add each selected value
+        formData.delete('pedidos');
+        selectedPedidos.forEach(pedidoId => {
+            formData.append('pedidos', pedidoId);
+        });
         
         fetch(`/importacion/carga/gasto/${currentGastoId}/update/`, {
             method: 'POST',

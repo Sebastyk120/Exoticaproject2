@@ -245,11 +245,17 @@ def update_gasto(request, gasto_id):
         valor_nota_credito = request.POST.get('valor_nota_credito')
         if valor_nota_credito and valor_nota_credito.strip():
             gasto.valor_nota_credito = Decimal(valor_nota_credito)
-            # Calcular monto pendiente
             gasto.monto_pendiente = gasto.valor_gastos_carga - Decimal(valor_nota_credito)
         else:
             gasto.valor_nota_credito = None
             gasto.monto_pendiente = gasto.valor_gastos_carga
+        
+        # Actualizar pedidos asociados
+        pedidos_ids = request.POST.getlist('pedidos')
+        gasto.pedidos.clear()  # Eliminar asociaciones existentes
+        for pedido_id in pedidos_ids:
+            pedido = get_object_or_404(Pedido, id=pedido_id)
+            gasto.pedidos.add(pedido)
             
         gasto.save()
         return JsonResponse({'success': True})
