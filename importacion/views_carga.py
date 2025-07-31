@@ -208,24 +208,17 @@ def get_gasto(request, gasto_id):
         gasto = get_object_or_404(GastosCarga, id=gasto_id)
         logger.info(f"Gasto encontrado: {gasto}")
         
-        # Obtener todos los pedidos disponibles para el select en el modal de edición
-        pedidos_disponibles = list(Pedido.objects.all().values('id', 'awb'))
-        pedidos_asociados = list(gasto.pedidos.values_list('id', flat=True))
-        
         data = {
             'id': gasto.id,
             'numero_factura': gasto.numero_factura,
             'agencia_carga': gasto.agencia_carga.nombre,
-            'agencia_carga_id': gasto.agencia_carga.id,
             'valor_gastos_carga': str(gasto.valor_gastos_carga),
             'valor_gastos_carga_eur': str(gasto.valor_gastos_carga_eur) if gasto.valor_gastos_carga_eur else None,
             'numero_nota_credito': gasto.numero_nota_credito,
             'valor_nota_credito': str(gasto.valor_nota_credito) if gasto.valor_nota_credito else None,
             'monto_pendiente': str(gasto.monto_pendiente) if gasto.monto_pendiente else None,
             'pagado': gasto.pagado,
-            'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()],
-            'pedidos_ids': pedidos_asociados,
-            'pedidos_disponibles': pedidos_disponibles,
+            'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()]
         }
         logger.info(f"Datos preparados para respuesta: {data}")
         return JsonResponse(data)
@@ -257,12 +250,7 @@ def update_gasto(request, gasto_id):
         else:
             gasto.valor_nota_credito = None
             gasto.monto_pendiente = gasto.valor_gastos_carga
-
-        # Actualizar pedidos asociados si se envían
-        pedidos_ids = request.POST.getlist('pedidos')
-        if pedidos_ids:
-            gasto.pedidos.set(pedidos_ids)
-        
+            
         gasto.save()
         return JsonResponse({'success': True})
     except Exception as e:
