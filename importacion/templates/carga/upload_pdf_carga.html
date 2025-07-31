@@ -212,15 +212,6 @@
                             <label class="form-label">Valor Nota Crédito (USD)</label>
                             <input type="number" name="valor_nota_credito" class="form-control" step="0.01">
                         </div>
-                        <!-- Nuevo campo para seleccionar pedidos asociados -->
-                        <div class="form-group">
-                            <label class="form-label">Pedidos (AWB asociados)</label>
-                            <select name="pedidos" class="form-control select2-multiple" multiple="multiple" required style="min-height:100px;">
-                                {% for pedido in pedidos_disponibles %}
-                                    <option value="{{ pedido.id }}">{{ pedido.id }} - {{ pedido }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -405,7 +396,7 @@
             }
             return response.json();
         })
-        .then data => {
+        .then(data => {
             if (data.success === false) {
                 showAlert(data.error, 'danger');
             } else {
@@ -483,14 +474,6 @@
                 form.valor_gastos_carga.value = data.valor_gastos_carga;
                 form.numero_nota_credito.value = data.numero_nota_credito || '';
                 form.valor_nota_credito.value = data.valor_nota_credito || '';
-                // Asignar los pedidos seleccionados basados en el id extraído de "id - ..." en data.pedidos
-                let pedidosSelect = form.querySelector('select[name="pedidos"]');
-                if (pedidosSelect) {
-                    // Limpiar selección existente
-                    $(pedidosSelect).val(null).trigger('change');
-                    const selectedPedidos = data.pedidos.map(item => item.split(' - ')[0]);
-                    $(pedidosSelect).val(selectedPedidos).trigger('change');
-                }
                 editModal.show();
             })
             .catch(error => {
