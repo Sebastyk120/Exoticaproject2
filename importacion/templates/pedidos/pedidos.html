@@ -248,6 +248,50 @@
         // Variables globales
         let newDetailCounter = 0;
         const exportadorId = {% if pedido.exportador %}{{ pedido.exportador.id }}{% else %}null{% endif %};
+        let isFormSubmitting = false;
+        
+        // Función para deshabilitar el botón de guardar
+        function disableSaveButton() {
+            const saveBtn = document.getElementById('save-all-btn');
+            const originalText = saveBtn.innerHTML;
+            
+            isFormSubmitting = true;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            saveBtn.classList.add('loading');
+            
+            // Deshabilitar también otros botones de acción
+            const enviarBtn = document.getElementById('enviar-solicitud-btn');
+            if (enviarBtn) {
+                enviarBtn.disabled = true;
+            }
+            
+            const addDetailBtn = document.getElementById('add-detail-btn');
+            if (addDetailBtn) {
+                addDetailBtn.disabled = true;
+            }
+        }
+        
+        // Función para rehabilitar el botón de guardar (en caso de error)
+        function enableSaveButton() {
+            const saveBtn = document.getElementById('save-all-btn');
+            
+            isFormSubmitting = false;
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Todo';
+            saveBtn.classList.remove('loading');
+            
+            // Rehabilitar también otros botones de acción
+            const enviarBtn = document.getElementById('enviar-solicitud-btn');
+            if (enviarBtn) {
+                enviarBtn.disabled = false;
+            }
+            
+            const addDetailBtn = document.getElementById('add-detail-btn');
+            if (addDetailBtn) {
+                addDetailBtn.disabled = false;
+            }
+        }
 
         // Template for new detail row
         const newDetailRowTemplate = `
@@ -717,6 +761,11 @@
             const enviarSolicitudBtn = document.getElementById('enviar-solicitud-btn');
             if (enviarSolicitudBtn) {
                 enviarSolicitudBtn.addEventListener('click', function() {
+                    // Verificar si el formulario ya está siendo enviado
+                    if (isFormSubmitting || this.disabled) {
+                        return false;
+                    }
+                    
                     // Obtener la URL de solicitar_pedido a la que redirigir después de guardar
                     const redirectUrl = this.getAttribute('data-url');
                     
@@ -750,6 +799,8 @@
                     });
                     
                     if (isValid) {
+                        // Deshabilitar botones antes de enviar
+                        disableSaveButton();
                         form.submit();
                     } else {
                         showNotification('Por favor, corrija los errores en el formulario antes de enviar la solicitud.', 'error');
@@ -793,6 +844,14 @@
 
             // Add submit handler to validate before submitting
             document.getElementById('unified-form').addEventListener('submit', function(e) {
+                const saveBtn = document.getElementById('save-all-btn');
+                
+                // Verificar si el formulario ya está siendo enviado
+                if (saveBtn.disabled) {
+                    e.preventDefault();
+                    return false;
+                }
+                
                 let isValid = validateNCFields();
                 
                 // Validar todos los campos de valor caja
@@ -807,7 +866,11 @@
                 if (!isValid) {
                     e.preventDefault();
                     showNotification('Por favor, corrija los errores en el formulario.', 'error');
+                    return false;
                 }
+                
+                // Si la validación es exitosa, deshabilitar el botón y mostrar indicador de carga
+                disableSaveButton();
             });
 
             // Add validation listeners to existing rows
@@ -880,6 +943,21 @@
                 notification.remove();
             });
         }
+        
+        // Detectar si la página se está descargando para evitar rehabilitar el botón
+        let isPageUnloading = false;
+        window.addEventListener('beforeunload', function() {
+            isPageUnloading = true;
+        });
+        
+        // Rehabilitar el botón si hay un error de red o la página no se redirige
+        // (esto puede suceder si hay errores de validación del servidor)
+        setTimeout(function() {
+            if (!isPageUnloading && isFormSubmitting) {
+                enableSaveButton();
+                showNotification('Hubo un problema al guardar. Por favor, inténtelo de nuevo.', 'error');
+            }
+        }, 30000); // 30 segundos timeout
     </script>
 </body>
 </html>
