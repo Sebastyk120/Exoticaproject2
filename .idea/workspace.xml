@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Error Pedidos.">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Proteccion para boton de Guardar Todo en Pedidos y duplicacion accidental.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/static/css/pedidos/pedidos.css" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/static/css/pedidos/pedidos.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/templates/pedidos/pedidos.html" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/templates/pedidos/pedidos.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -264,15 +262,8 @@
       <workItem from="1749179184232" duration="1773000" />
       <workItem from="1749203715740" duration="509000" />
       <workItem from="1749207925642" duration="1369000" />
-      <workItem from="1756130257298" duration="2037000" />
-    </task>
-    <task id="LOCAL-00037" summary="Correo.">
-      <option name="closed" value="true" />
-      <created>1744137311932</created>
-      <option name="number" value="00037" />
-      <option name="presentableId" value="LOCAL-00037" />
-      <option name="project" value="LOCAL" />
-      <updated>1744137311932</updated>
+      <workItem from="1756130257298" duration="2677000" />
+      <workItem from="1756151234777" duration="10000" />
     </task>
     <task id="LOCAL-00038" summary="Correo.">
       <option name="closed" value="true" />
@@ -658,7 +649,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746581220459</updated>
     </task>
-    <option name="localTasksCounter" value="86" />
+    <task id="LOCAL-00086" summary="Proteccion para boton de Guardar Todo en Pedidos y duplicacion accidental.">
+      <option name="closed" value="true" />
+      <created>1756134663416</created>
+      <option name="number" value="00086" />
+      <option name="presentableId" value="LOCAL-00086" />
+      <option name="project" value="LOCAL" />
+      <updated>1756134663416</updated>
+    </task>
+    <option name="localTasksCounter" value="87" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -676,7 +675,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Calculo de dash utilidades." />
     <MESSAGE value="Calculo de dash utilidades 2, para semanas 1" />
     <MESSAGE value="Utlimo cambio del dashboard." />
     <MESSAGE value="Revision de Utilidades." />
@@ -701,6 +699,7 @@
     <MESSAGE value="Correccion media files." />
     <MESSAGE value="Reparacion en SEO sitemaps.py" />
     <MESSAGE value="Reparacion de tabla clientes.html" />
-    <option name="LAST_COMMIT_MESSAGE" value="Reparacion de tabla clientes.html" />
+    <MESSAGE value="Proteccion para boton de Guardar Todo en Pedidos y duplicacion accidental." />
+    <option name="LAST_COMMIT_MESSAGE" value="Proteccion para boton de Guardar Todo en Pedidos y duplicacion accidental." />
   </component>
 </project>
