@@ -17,7 +17,7 @@ class ContactForm(forms.Form):
             'placeholder': 'Correo Electrónico', 
             'required': True,
             'class': 'form-control',
-            'pattern': "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$",
+            'pattern': r"[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$",
             'title': "Por favor ingresa un email válido"
         })
     )
