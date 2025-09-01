@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Proteccion para boton de Guardar Todo en Pedidos y duplicacion accidental.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Redeploy" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -264,14 +262,7 @@
       <workItem from="1749207925642" duration="1369000" />
       <workItem from="1756130257298" duration="2677000" />
       <workItem from="1756151234777" duration="10000" />
-    </task>
-    <task id="LOCAL-00038" summary="Correo.">
-      <option name="closed" value="true" />
-      <created>1744139272546</created>
-      <option name="number" value="00038" />
-      <option name="presentableId" value="LOCAL-00038" />
-      <option name="project" value="LOCAL" />
-      <updated>1744139272546</updated>
+      <workItem from="1756380168584" duration="408000" />
     </task>
     <task id="LOCAL-00039" summary="Correo.">
       <option name="closed" value="true" />
@@ -657,7 +648,15 @@
       <option name="project" value="LOCAL" />
       <updated>1756134663416</updated>
     </task>
-    <option name="localTasksCounter" value="87" />
+    <task id="LOCAL-00087" summary="Redeploy">
+      <option name="closed" value="true" />
+      <created>1756380186549</created>
+      <option name="number" value="00087" />
+      <option name="presentableId" value="LOCAL-00087" />
+      <option name="project" value="LOCAL" />
+      <updated>1756380186549</updated>
+    </task>
+    <option name="localTasksCounter" value="88" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -675,7 +674,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Calculo de dash utilidades 2, para semanas 1" />
     <MESSAGE value="Utlimo cambio del dashboard." />
     <MESSAGE value="Revision de Utilidades." />
     <MESSAGE value="Ultimos ajustes de gastos de aduana y Dashboard de Utilidades." />
@@ -700,6 +698,7 @@
     <MESSAGE value="Reparacion en SEO sitemaps.py" />
     <MESSAGE value="Reparacion de tabla clientes.html" />
     <MESSAGE value="Proteccion para boton de Guardar Todo en Pedidos y duplicacion accidental." />
-    <option name="LAST_COMMIT_MESSAGE" value="Proteccion para boton de Guardar Todo en Pedidos y duplicacion accidental." />
+    <MESSAGE value="Redeploy" />
+    <option name="LAST_COMMIT_MESSAGE" value="Redeploy" />
   </component>
 </project>
