@@ -218,17 +218,29 @@ CORS_ORIGINS_WHITELIST = [
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 
-# CONFIGURACIÓN MAIL:
+# CONFIGURACIÓN MAIL CON MAILJET:
 DEFAULT_FROM_EMAIL = "import@luzmeloexoticfruits.com"
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.office365.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = DEFAULT_FROM_EMAIL
+
+# Usar el backend personalizado de Mailjet
+EMAIL_BACKEND = 'Exoticaproject.backends.MailjetBackend'
+
+# Configuración de respaldo SMTP (comentada)
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.office365.com'
+# EMAIL_USE_TLS = True
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = DEFAULT_FROM_EMAIL
+# try:
+#     EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+# except KeyError:
+#     raise ImproperlyConfigured('La variable de entorno EMAIL_HOST_PASSWORD no está definida')
+
+# Verificar que las variables de entorno de Mailjet estén definidas
 try:
-    EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
-except KeyError:
-    raise ImproperlyConfigured('La variable de entorno EMAIL_HOST_PASSWORD no está definida')
+    MJ_APIKEY_PUBLIC = os.environ['MJ_APIKEY_PUBLIC']
+    MJ_APIKEY_PRIVATE = os.environ['MJ_APIKEY_PRIVATE']
+except KeyError as e:
+    raise ImproperlyConfigured(f'La variable de entorno {e} no está definida para Mailjet')
 ADMIN_SITE_NAME = 'Administración L&M Exótica'
 
 # Aumentar límite para datos de upload (10MB)

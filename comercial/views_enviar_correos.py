@@ -1,6 +1,8 @@
 import base64
 import io
 import json
+import os
+import logging
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.core.mail import EmailMessage
@@ -11,6 +13,73 @@ from comercial.templatetags.custom_filters import format_currency_eur
 from .models import Venta
 from decimal import Decimal
 from importacion.models import AgenciaAduana
+from mailjet_rest import Client
+
+logger = logging.getLogger(__name__)
+
+def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=None):
+    """
+    Función auxiliar para enviar emails directamente con Mailjet API
+    Especialmente útil para emails con adjuntos grandes
+    """
+    try:
+        # Obtener credenciales de Mailjet
+        api_key = os.environ.get('MJ_APIKEY_PUBLIC')
+        api_secret = os.environ.get('MJ_APIKEY_PRIVATE')
+        
+        if not api_key or not api_secret:
+            raise ValueError("Credenciales de Mailjet no encontradas")
+        
+        # Inicializar cliente Mailjet
+        mailjet = Client(auth=(api_key, api_secret), version='v3.1')
+        
+        # Preparar destinatarios
+        to_recipients = []
+        for email in to_emails:
+            to_recipients.append({"Email": email.strip()})
+        
+        # Preparar mensaje
+        mailjet_message = {
+            "From": {
+                "Email": from_email,
+                "Name": "L&M Exotic Fruit"
+            },
+            "To": to_recipients,
+            "Subject": subject,
+            "TextPart": body
+        }
+        
+        # Añadir adjuntos si existen
+        if attachments:
+            mailjet_attachments = []
+            for attachment in attachments:
+                filename, content_bytes, content_type = attachment
+                content_b64 = base64.b64encode(content_bytes).decode('utf-8')
+                mailjet_attachments.append({
+                    "ContentType": content_type,
+                    "Filename": filename,
+                    "Base64Content": content_b64
+                })
+            mailjet_message["Attachments"] = mailjet_attachments
+        
+        # Enviar email
+        data = {'Messages': [mailjet_message]}
+        result = mailjet.send.create(data=data)
+        
+        if result.status_code == 200:
+            response_data = result.json()
+            if (response_data.get('Messages') and 
+                len(response_data['Messages']) > 0 and 
+                response_data['Messages'][0].get('Status') == 'success'):
+                return True, None
+            else:
+                return False, "Error en la respuesta de Mailjet"
+        else:
+            return False, f"Error HTTP {result.status_code}: {result.text}"
+            
+    except Exception as e:
+        logger.error(f"Error enviando email con Mailjet: {str(e)}")
+        return False, str(e)
 
 @login_required
 def enviar_factura_email(request, venta_id):
@@ -107,23 +176,21 @@ Luz Mery Melo Mejia
 L&M Exotic Fruit
         """
         
-        # Crear y enviar el email
-        email = EmailMessage(
+        # Preparar adjunto para Mailjet
+        filename = f'Factura_{venta.numero_factura}_{venta.cliente.nombre.replace(" ", "_")}.pdf'
+        attachments = [(filename, pdf_bytes, 'application/pdf')]
+        
+        # Enviar email usando Mailjet directamente para mejor manejo de adjuntos
+        success, error = send_email_with_mailjet(
             subject=subject,
             body=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            to=emails,
+            to_emails=emails,
+            attachments=attachments
         )
         
-        # Adjuntar el PDF al email
-        email.attach(
-            f'Factura_{venta.numero_factura}_{venta.cliente.nombre.replace(" ", "_")}.pdf',
-            pdf_bytes,
-            'application/pdf'
-        )
-        
-        # Enviar el email
-        email.send()
+        if not success:
+            raise Exception(f"Error enviando email: {error}")
         
         return JsonResponse({
             'success': True,
@@ -219,20 +286,21 @@ Luz Mery Melo Mejia
 L&M Exotic Fruit
         """
 
-        email = EmailMessage(
+        # Preparar adjunto para Mailjet
+        filename = f'Albaran_Cliente_{venta.id}_{venta.cliente.nombre.replace(" ", "_")}.pdf'
+        attachments = [(filename, pdf_bytes, 'application/pdf')]
+        
+        # Enviar email usando Mailjet directamente
+        success, error = send_email_with_mailjet(
             subject=subject,
             body=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            to=emails,
+            to_emails=emails,
+            attachments=attachments
         )
-
-        email.attach(
-            f'Albaran_Cliente_{venta.id}_{venta.cliente.nombre.replace(" ", "_")}.pdf',
-            pdf_bytes,
-            'application/pdf'
-        )
-
-        email.send()
+        
+        if not success:
+            raise Exception(f"Error enviando email: {error}")
 
         return JsonResponse({
             'success': True,
@@ -353,20 +421,21 @@ Luz Mery Melo Mejia
 L&M Exotic Fruit
         """
 
-        email = EmailMessage(
+        # Preparar adjunto para Mailjet
+        filename = f'Factura_Rectificativa_{venta.numero_nc}_{venta.cliente.nombre.replace(" ", "_")}.pdf'
+        attachments = [(filename, pdf_bytes, 'application/pdf')]
+        
+        # Enviar email usando Mailjet directamente
+        success, error = send_email_with_mailjet(
             subject=subject,
             body=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            to=emails,
+            to_emails=emails,
+            attachments=attachments
         )
-
-        email.attach(
-            f'Factura_Rectificativa_{venta.numero_nc}_{venta.cliente.nombre.replace(" ", "_")}.pdf',
-            pdf_bytes,
-            'application/pdf'
-        )
-
-        email.send()
+        
+        if not success:
+            raise Exception(f"Error enviando email: {error}")
 
         return JsonResponse({
             'success': True,
@@ -697,25 +766,27 @@ Luz Mery Melo Mejia
 L&M Exotic Fruit
     """
     
-    # Crear y enviar el email
+    # Preparar adjuntos para Mailjet
+    attachments = []
+    for pdf_file in pdf_files:
+        attachments.append((
+            pdf_file['filename'],
+            pdf_file['content'],
+            'application/pdf'
+        ))
+    
+    # Crear y enviar el email usando Mailjet directamente
     try:
-        email = EmailMessage(
+        success, error = send_email_with_mailjet(
             subject=email_subject,
             body=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            to=emails,
+            to_emails=emails,
+            attachments=attachments
         )
         
-        # Adjuntar los PDFs al email
-        for pdf_file in pdf_files:
-            email.attach(
-                pdf_file['filename'],
-                pdf_file['content'],
-                'application/pdf'
-            )
-        
-        # Enviar el email
-        email.send()
+        if not success:
+            raise Exception(f"Error enviando email: {error}")
         
         return JsonResponse({
             'success': True,
