@@ -109,9 +109,9 @@ def detalle_correo(request, correo_id):
                 'fecha_envio': correo.fecha_envio.strftime('%d/%m/%Y %H:%M:%S'),
                 'estado': correo.get_estado_envio_display(),
                 'usuario': correo.usuario.username if correo.usuario else 'Sistema',
-                'observaciones': correo.observaciones or 'Sin observaciones',
+                'cuerpo_mensaje': correo.cuerpo_mensaje or 'Sin mensaje',
                 'mensaje_error': correo.mensaje_error or 'Sin errores',
-                'archivo_adjunto': correo.archivo_adjunto.name if correo.archivo_adjunto else None,
+                'documentos_adjuntos': correo.documentos_adjuntos or 'Sin archivos adjuntos',
             }
         }
     except EmailLog.DoesNotExist:

@@ -13,20 +13,13 @@
     <!-- Header Section -->
     <div class="page-header">
         <div class="row align-items-center">
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <h1 class="page-title">
-                    <i class="fas fa-envelope-open-text text-primary me-3"></i>
+                    <i class="fas fa-envelope-open-text me-3"></i>
                     Registro de Correos Electrónicos
                 </h1>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a></li>
-                        <li class="breadcrumb-item">Comercial</li>
-                        <li class="breadcrumb-item active">Correos</li>
-                    </ol>
-                </nav>
             </div>
-            <div class="col-md-6 text-end">
+            <div class="col-md-4 text-end">
                 <button class="btn btn-outline-primary" id="refreshBtn">
                     <i class="fas fa-sync-alt me-2"></i>Actualizar
                 </button>
@@ -34,74 +27,47 @@
         </div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="stats-card stats-primary">
-                <div class="stats-icon">
-                    <i class="fas fa-envelope"></i>
-                </div>
-                <div class="stats-content">
-                    <h3>{{ total_correos }}</h3>
-                    <p>Total de Correos</p>
-                </div>
+    <!-- Statistics Cards - Compact Design -->
+    <div class="stats-grid mb-4">
+        <div class="stats-card stats-primary">
+            <div class="stats-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="stats-content">
+                <h3>{{ total_correos }}</h3>
+                <p>Total de Correos</p>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="stats-card stats-success">
-                <div class="stats-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stats-content">
-                    <h3>{{ correos_exitosos }}</h3>
-                    <p>Enviados Exitosamente</p>
-                </div>
+        <div class="stats-card stats-success">
+            <div class="stats-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stats-content">
+                <h3>{{ correos_exitosos }}</h3>
+                <p>Enviados Exitosamente</p>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="stats-card stats-danger">
-                <div class="stats-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div class="stats-content">
-                    <h3>{{ correos_fallidos }}</h3>
-                    <p>Fallidos</p>
-                </div>
+        <div class="stats-card stats-danger">
+            <div class="stats-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stats-content">
+                <h3>{{ correos_fallidos }}</h3>
+                <p>Fallidos</p>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="stats-card stats-info">
-                <div class="stats-icon">
-                    <i class="fas fa-calendar-day"></i>
-                </div>
-                <div class="stats-content">
-                    <h3>{{ correos_hoy }}</h3>
-                    <p>Enviados Hoy</p>
-                </div>
+        <div class="stats-card stats-info">
+            <div class="stats-icon">
+                <i class="fas fa-calendar-day"></i>
+            </div>
+            <div class="stats-content">
+                <h3>{{ correos_hoy }}</h3>
+                <p>Enviados Hoy</p>
             </div>
         </div>
     </div>
 
-    <!-- Success Rate Progress -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Tasa de Éxito</h5>
-                    <div class="progress mb-2" style="height: 25px;">
-                        <div class="progress-bar bg-success" role="progressbar" 
-                             style="width: {{ porcentaje_exito }}%;" 
-                             aria-valuenow="{{ porcentaje_exito }}" 
-                             aria-valuemin="0" 
-                             aria-valuemax="100">
-                            {{ porcentaje_exito }}%
-                        </div>
-                    </div>
-                    <small class="text-muted">Porcentaje de correos enviados exitosamente</small>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Filters Section -->
     <div class="card mb-4">
@@ -402,17 +368,17 @@ function verDetalle(correoId) {
                                     <td class="text-break">${correo.destinatarios}</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Archivo Adjunto:</strong></td>
-                                    <td>${correo.archivo_adjunto ? correo.archivo_adjunto : 'Sin archivo'}</td>
+                                    <td><strong>Documentos Adjuntos:</strong></td>
+                                    <td>${correo.documentos_adjuntos ? correo.documentos_adjuntos : 'Sin archivos'}</td>
                                 </tr>
                             </table>
                         </div>
                     </div>
                     <div class="row mt-3">
                         <div class="col-12">
-                            <h6 class="text-primary">Observaciones</h6>
+                            <h6 class="text-primary">Cuerpo del Mensaje</h6>
                             <div class="alert alert-light">
-                                ${correo.observaciones}
+                                ${correo.cuerpo_mensaje}
                             </div>
                         </div>
                     </div>

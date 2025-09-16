@@ -6,7 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="feat(email): add EmailLog model and admin interface for email tracking">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/static/css/ventas/correos.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/ventas/correos.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/correos.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/correos.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -272,7 +274,7 @@
       <workItem from="1757177089666" duration="15000" />
       <workItem from="1757180486914" duration="1058000" />
       <workItem from="1757233477661" duration="686000" />
-      <workItem from="1758045938153" duration="2859000" />
+      <workItem from="1758045938153" duration="3838000" />
     </task>
     <task id="LOCAL-00041" summary="Correo.">
       <option name="closed" value="true" />
