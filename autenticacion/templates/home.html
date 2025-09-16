@@ -145,6 +145,19 @@
                                 </div>
                             </a>
                         </div>
+                        <div class="col-md-2-4 col-sm-6 mb-4">
+                            <a href="{% url 'comercial:lista_correos' %}" class="text-decoration-none">
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="background-color: var(--section-comercial);">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div class="stat-data">
+                                        <h3>Correos</h3>
+                                        <p class="stat-number">{{ email_count|default:"0" }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
                     </div>
                 </div>
 

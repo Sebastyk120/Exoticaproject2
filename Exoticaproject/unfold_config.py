@@ -251,6 +251,11 @@ UNFOLD = {
                         "icon": "account_balance_wallet",
                         "link": reverse_lazy("admin:comercial_balancecliente_changelist"),
                     },
+                    {
+                        "title": _("Logs de Correos"),
+                        "icon": "email",
+                        "link": reverse_lazy("admin:comercial_emaillog_changelist"),
+                    },
                 ],
             },
         ],

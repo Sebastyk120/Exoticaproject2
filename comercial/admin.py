@@ -1,7 +1,7 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 from import_export.admin import ImportExportModelAdmin
-from .models import Cliente, Venta, DetalleVenta, TranferenciasCliente, BalanceCliente, Cotizacion, DetalleCotizacion
+from .models import Cliente, Venta, DetalleVenta, TranferenciasCliente, BalanceCliente, Cotizacion, DetalleCotizacion, EmailLog
 from .resources import (
     ClienteResource, VentaResource, DetalleVentaResource, 
     TranferenciasClienteResource, BalanceClienteResource,
@@ -124,3 +124,33 @@ class DetalleCotizacionAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAd
     search_help_text = "Buscar por: número de cotización, nombre de la fruta."
     list_filter = ('cotizacion', 'presentacion')
     resource_class = DetalleCotizacionResource
+
+@admin.register(EmailLog)
+class EmailLogAdmin(ModelAdmin, SimpleHistoryAdmin):
+    list_display = ('proceso', 'asunto', 'fecha_envio', 'usuario', 'estado_envio', 'cliente', 'venta', 'cotizacion')
+    search_fields = ('asunto', 'destinatarios', 'cliente__nombre', 'venta__numero_factura', 'cotizacion__numero')
+    search_help_text = "Buscar por: asunto, destinatarios, cliente, número de factura, número de cotización."
+    list_filter = ('proceso', 'estado_envio', 'fecha_envio', 'usuario')
+    readonly_fields = ('fecha_envio', 'respuesta_api')
+    date_hierarchy = 'fecha_envio'
+    
+    fieldsets = (
+        ('Información del Proceso', {
+            'fields': ('proceso', 'fecha_envio', 'usuario', 'estado_envio')
+        }),
+        ('Información del Correo', {
+            'fields': ('asunto', 'destinatarios', 'cuerpo_mensaje', 'documentos_adjuntos')
+        }),
+        ('Referencias', {
+            'fields': ('cliente', 'venta', 'cotizacion'),
+            'classes': ('collapse',)
+        }),
+        ('Respuesta del Sistema', {
+            'fields': ('respuesta_api', 'mensaje_error'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        # Los logs de email se crean automáticamente, no manualmente
+        return False
