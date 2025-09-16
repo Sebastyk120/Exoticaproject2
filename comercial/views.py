@@ -28,7 +28,7 @@ def lista_correos(request):
         correos = correos.filter(proceso=proceso)
     
     if estado:
-        correos = correos.filter(estado=estado)
+        correos = correos.filter(estado_envio=estado)
     
     if fecha_desde:
         try:
@@ -62,8 +62,8 @@ def lista_correos(request):
     
     # Estadísticas rápidas
     total_correos = EmailLog.objects.count()
-    correos_exitosos = EmailLog.objects.filter(estado='exitoso').count()
-    correos_fallidos = EmailLog.objects.filter(estado='fallido').count()
+    correos_exitosos = EmailLog.objects.filter(estado_envio='exitoso').count()
+    correos_fallidos = EmailLog.objects.filter(estado_envio='fallido').count()
     correos_hoy = EmailLog.objects.filter(fecha_envio__date=timezone.now().date()).count()
     
     # Obtener opciones para los filtros
@@ -107,7 +107,7 @@ def detalle_correo(request, correo_id):
                 'asunto': correo.asunto,
                 'destinatarios': correo.destinatarios,
                 'fecha_envio': correo.fecha_envio.strftime('%d/%m/%Y %H:%M:%S'),
-                'estado': correo.get_estado_display(),
+                'estado': correo.get_estado_envio_display(),
                 'usuario': correo.usuario.username if correo.usuario else 'Sistema',
                 'observaciones': correo.observaciones or 'Sin observaciones',
                 'mensaje_error': correo.mensaje_error or 'Sin errores',
