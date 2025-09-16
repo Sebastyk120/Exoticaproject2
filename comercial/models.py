@@ -397,3 +397,90 @@ class DetalleCotizacion(models.Model):
         verbose_name = "Detalle de Cotización"
         verbose_name_plural = "Detalles de Cotizaciones"
 
+
+class EmailLog(models.Model):
+    """
+    Modelo para registrar todas las operaciones de envío de correos electrónicos
+    """
+    PROCESO_CHOICES = [
+        ('factura', 'Envío de Factura'),
+        ('albaran', 'Envío de Albarán'),
+        ('rectificativa', 'Envío de Factura Rectificativa'),
+        ('albaran_aduana', 'Envío de Albarán a Aduana'),
+        ('cotizacion', 'Envío de Cotización'),
+        ('otro', 'Otro'),
+    ]
+    
+    ESTADO_CHOICES = [
+        ('exitoso', 'Exitoso'),
+        ('fallido', 'Fallido'),
+        ('pendiente', 'Pendiente'),
+    ]
+    
+    # Información del proceso
+    proceso = models.CharField(max_length=20, choices=PROCESO_CHOICES, verbose_name="Tipo de Proceso")
+    fecha_envio = models.DateTimeField(auto_now_add=True, verbose_name="Fecha y Hora de Envío")
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuario que Envió" )
+    
+    # Información del correo
+    asunto = models.CharField(max_length=255, verbose_name="Asunto del Correo")
+    destinatarios = models.TextField(verbose_name="Destinatarios", help_text="Lista de correos separados por coma")
+    cuerpo_mensaje = models.TextField(verbose_name="Cuerpo del Mensaje")
+    
+    # Información de adjuntos
+    documentos_adjuntos = models.TextField(null=True, blank=True, verbose_name="Documentos Adjuntos", help_text="Nombres de archivos adjuntos separados por coma")
+    
+    # Estado del envío
+    estado_envio = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente', verbose_name="Estado del Envío")
+    
+    # Respuesta de la API
+    respuesta_api = models.JSONField(null=True, blank=True, verbose_name="Respuesta de la API", help_text="Respuesta completa de Mailjet API")
+    mensaje_error = models.TextField(null=True, blank=True, verbose_name="Mensaje de Error")
+    
+    # Referencias a objetos relacionados
+    venta = models.ForeignKey(Venta, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Venta Relacionada")
+    cotizacion = models.ForeignKey(Cotizacion, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Cotización Relacionada")
+    cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Cliente")
+    
+
+    
+    def __str__(self):
+        return f"{self.get_proceso_display()} - {self.asunto} - {self.fecha_envio.strftime('%d/%m/%Y %H:%M')}"
+    
+    def get_destinatarios_list(self):
+        """Retorna la lista de destinatarios como una lista de Python"""
+        if self.destinatarios:
+            return [email.strip() for email in self.destinatarios.split(',') if email.strip()]
+        return []
+    
+    def get_adjuntos_list(self):
+        """Retorna la lista de adjuntos como una lista de Python"""
+        if self.documentos_adjuntos:
+            return [archivo.strip() for archivo in self.documentos_adjuntos.split(',') if archivo.strip()]
+        return []
+    
+    def marcar_como_exitoso(self, respuesta_api=None):
+        """Marca el envío como exitoso y guarda la respuesta de la API"""
+        self.estado_envio = 'exitoso'
+        if respuesta_api:
+            self.respuesta_api = respuesta_api
+        self.save(update_fields=['estado_envio', 'respuesta_api'])
+    
+    def marcar_como_fallido(self, mensaje_error, respuesta_api=None):
+        """Marca el envío como fallido y guarda el error"""
+        self.estado_envio = 'fallido'
+        self.mensaje_error = mensaje_error
+        if respuesta_api:
+            self.respuesta_api = respuesta_api
+        self.save(update_fields=['estado_envio', 'mensaje_error', 'respuesta_api'])
+    
+    class Meta:
+        verbose_name = "Log de Correo Electrónico"
+        verbose_name_plural = "Logs de Correos Electrónicos"
+        ordering = ['-fecha_envio']
+        indexes = [
+            models.Index(fields=['proceso', 'fecha_envio']),
+            models.Index(fields=['estado_envio', 'fecha_envio']),
+            models.Index(fields=['cliente', 'fecha_envio']),
+        ]
+

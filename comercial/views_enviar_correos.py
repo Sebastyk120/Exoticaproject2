@@ -10,18 +10,34 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.template.defaultfilters import register
 from comercial.templatetags.custom_filters import format_currency_eur
-from .models import Venta
+from .models import Venta, EmailLog
 from decimal import Decimal
 from importacion.models import AgenciaAduana
 from mailjet_rest import Client
 
 logger = logging.getLogger(__name__)
 
-def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=None):
+def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=None, 
+                           proceso=None, usuario=None, venta=None, cotizacion=None, cliente=None):
     """
     Función auxiliar para enviar emails directamente con Mailjet API
     Especialmente útil para emails con adjuntos grandes
+    Ahora incluye logging automático en EmailLog
     """
+    # Crear el registro de EmailLog antes del envío
+    email_log = EmailLog.objects.create(
+        proceso=proceso or 'otro',
+        usuario=usuario,
+        asunto=subject,
+        destinatarios=', '.join(to_emails) if isinstance(to_emails, list) else str(to_emails),
+        cuerpo_mensaje=body,
+        documentos_adjuntos=', '.join([att[0] for att in attachments]) if attachments else None,
+        estado_envio='pendiente',
+        venta=venta,
+        cotizacion=cotizacion,
+        cliente=cliente
+    )
+    
     try:
         # Obtener credenciales de Mailjet
         api_key = os.environ.get('MJ_APIKEY_PUBLIC')
@@ -71,15 +87,24 @@ def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=No
             if (response_data.get('Messages') and 
                 len(response_data['Messages']) > 0 and 
                 response_data['Messages'][0].get('Status') == 'success'):
-                return True, None
+                # Marcar como exitoso
+                email_log.marcar_como_exitoso(response_data)
+                return True, None, email_log
             else:
-                return False, "Error en la respuesta de Mailjet"
+                # Marcar como fallido
+                email_log.marcar_como_fallido("Error en la respuesta de Mailjet", response_data)
+                return False, "Error en la respuesta de Mailjet", email_log
         else:
-            return False, f"Error HTTP {result.status_code}: {result.text}"
+            # Marcar como fallido
+            error_msg = f"Error HTTP {result.status_code}: {result.text}"
+            email_log.marcar_como_fallido(error_msg)
+            return False, error_msg, email_log
             
     except Exception as e:
         logger.error(f"Error enviando email con Mailjet: {str(e)}")
-        return False, str(e)
+        # Marcar como fallido
+        email_log.marcar_como_fallido(str(e))
+        return False, str(e), email_log
 
 @login_required
 def enviar_factura_email(request, venta_id):
@@ -181,12 +206,16 @@ L&M Exotic Fruit
         attachments = [(filename, pdf_bytes, 'application/pdf')]
         
         # Enviar email usando Mailjet directamente para mejor manejo de adjuntos
-        success, error = send_email_with_mailjet(
+        success, error, email_log = send_email_with_mailjet(
             subject=subject,
             body=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to_emails=emails,
-            attachments=attachments
+            attachments=attachments,
+            proceso='factura',
+            usuario=request.user,
+            venta=venta,
+            cliente=venta.cliente
         )
         
         if not success:
@@ -291,12 +320,16 @@ L&M Exotic Fruit
         attachments = [(filename, pdf_bytes, 'application/pdf')]
         
         # Enviar email usando Mailjet directamente
-        success, error = send_email_with_mailjet(
+        success, error, email_log = send_email_with_mailjet(
             subject=subject,
             body=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to_emails=emails,
-            attachments=attachments
+            attachments=attachments,
+            proceso='albaran',
+            usuario=request.user,
+            venta=venta,
+            cliente=venta.cliente
         )
         
         if not success:
@@ -426,12 +459,16 @@ L&M Exotic Fruit
         attachments = [(filename, pdf_bytes, 'application/pdf')]
         
         # Enviar email usando Mailjet directamente
-        success, error = send_email_with_mailjet(
+        success, error, email_log = send_email_with_mailjet(
             subject=subject,
             body=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to_emails=emails,
-            attachments=attachments
+            attachments=attachments,
+            proceso='rectificativa',
+            usuario=request.user,
+            venta=venta,
+            cliente=venta.cliente
         )
         
         if not success:
@@ -775,14 +812,18 @@ L&M Exotic Fruit
             'application/pdf'
         ))
     
-    # Crear y enviar el email usando Mailjet directamente
+    # Enviar email usando Mailjet directamente
     try:
-        success, error = send_email_with_mailjet(
+        success, error, email_log = send_email_with_mailjet(
             subject=email_subject,
             body=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to_emails=emails,
-            attachments=attachments
+            attachments=attachments,
+            proceso='albaran_aduana',
+            usuario=request.user,
+            venta=venta,
+            cliente=venta.cliente
         )
         
         if not success:

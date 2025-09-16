@@ -60,4 +60,8 @@ urlpatterns = [
     
     # API endpoint for client summary
     path('api/cliente-resumen/<int:cliente_id>/', views_clientes.api_cliente_resumen, name='api_cliente_resumen'),
+    
+    # URLs para el registro de correos
+    path('correos/', views.lista_correos, name='lista_correos'),
+    path('correos/detalle/<int:correo_id>/', views.detalle_correo, name='detalle_correo'),
 ]
