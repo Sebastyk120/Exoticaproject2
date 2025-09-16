@@ -13,14 +13,12 @@
     <!-- Header Section -->
     <div class="page-header">
         <div class="row align-items-center">
-            <div class="col-md-8">
+            <div class="col-12 text-center">
                 <h1 class="page-title">
                     <i class="fas fa-envelope-open-text me-3"></i>
                     Registro de Correos Electrónicos
                 </h1>
-            </div>
-            <div class="col-md-4 text-end">
-                <button class="btn btn-outline-primary" id="refreshBtn">
+                <button class="btn btn-outline-light mt-2" id="refreshBtn">
                     <i class="fas fa-sync-alt me-2"></i>Actualizar
                 </button>
             </div>
@@ -188,17 +186,25 @@
                                 </span>
                             </td>
                             <td>
-                                {% if correo.estado == 'exitoso' %}
-                                    <span class="badge bg-success">
-                                        <i class="fas fa-check me-1"></i>{{ correo.get_estado_display }}
+                                {% if correo.estado == 'exitoso' or correo.estado == 'EXITOSO' or correo.estado == 'Exitoso' %}
+                                    <span class="badge bg-success d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-check-circle me-1"></i>{{ correo.get_estado_display }}
                                     </span>
-                                {% elif correo.estado == 'fallido' %}
-                                    <span class="badge bg-danger">
-                                        <i class="fas fa-times me-1"></i>{{ correo.get_estado_display }}
+                                {% elif correo.estado == 'fallido' or correo.estado == 'FALLIDO' or correo.estado == 'Fallido' %}
+                                    <span class="badge bg-danger d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-times-circle me-1"></i>{{ correo.get_estado_display }}
+                                    </span>
+                                {% elif correo.estado == 'pendiente' or correo.estado == 'PENDIENTE' or correo.estado == 'Pendiente' %}
+                                    <span class="badge bg-warning d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-clock me-1"></i>{{ correo.get_estado_display }}
+                                    </span>
+                                {% elif correo.estado == 'enviando' or correo.estado == 'ENVIANDO' or correo.estado == 'Enviando' %}
+                                    <span class="badge bg-info d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-paper-plane me-1"></i>{{ correo.get_estado_display }}
                                     </span>
                                 {% else %}
-                                    <span class="badge bg-warning">
-                                        <i class="fas fa-clock me-1"></i>{{ correo.get_estado_display }}
+                                    <span class="badge bg-secondary d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-question-circle me-1"></i>{{ correo.get_estado_display }}
                                     </span>
                                 {% endif %}
                             </td>
