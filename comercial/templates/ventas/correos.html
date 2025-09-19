@@ -346,7 +346,10 @@ function verDetalle(correoId) {
                                 </tr>
                                 <tr>
                                     <td><strong>Estado:</strong></td>
-                                    <td><span class="badge ${correo.estado_envio === 'exitoso' ? 'bg-success' : correo.estado_envio === 'fallido' ? 'bg-danger' : 'bg-warning'}">${correo.estado_envio}</span></td>
+                                    <td><span class="badge ${correo.estado_envio === 'exitoso' ? 'bg-success' : correo.estado_envio === 'fallido' ? 'bg-danger' : correo.estado_envio === 'pendiente' ? 'bg-warning' : 'bg-secondary'}">
+                                        <i class="fas ${correo.estado_envio === 'exitoso' ? 'fa-check-circle' : correo.estado_envio === 'fallido' ? 'fa-times-circle' : correo.estado_envio === 'pendiente' ? 'fa-clock' : 'fa-question-circle'} me-1"></i>
+                                        ${correo.estado_envio === 'exitoso' ? 'Exitoso' : correo.estado_envio === 'fallido' ? 'Fallido' : correo.estado_envio === 'pendiente' ? 'Pendiente' : correo.estado_envio}
+                                    </span></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Fecha/Hora:</strong></td>

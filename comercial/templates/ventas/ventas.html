@@ -430,9 +430,21 @@
                 .then(data => {
                     if (data.success && data.precio) {
                         valorCajaInput.value = data.precio;
+                        valorCajaInput.classList.remove('no-price-configured');
+                    } else {
+                        // No hay precio configurado - limpiar el campo y mostrar notificación
+                        valorCajaInput.value = '';
+                        valorCajaInput.classList.add('no-price-configured');
+                        valorCajaInput.focus();
+                        showNotification('No hay precio configurado para esta presentación y cliente. Por favor, ingrese el precio manualmente.', 'warning');
                     }
                 })
-                .catch(error => console.error('Error al cargar el precio:', error));
+                .catch(error => {
+                    console.error('Error al cargar el precio:', error);
+                    valorCajaInput.value = '';
+                    valorCajaInput.classList.add('no-price-configured');
+                    showNotification('Error al cargar el precio. Por favor, ingrese el precio manualmente.', 'error');
+                });
         }
         
         // Función para mostrar notificación
@@ -1080,18 +1092,26 @@
         
         // Función para validar valor de caja
         function validarValorCaja(input) {
-            const valor = parseFloat(input.value) || 0;
+            const valor = parseFloat(input.value);
+            
+            // Si el campo está vacío o el valor es inválido
+            if (isNaN(valor) || input.value.trim() === '') {
+                input.classList.add('zero-value');
+                input.setCustomValidity('Debe ingresar un precio válido para la caja');
+                showNotification('Debe ingresar un precio válido para la caja', 'warning');
+                return false;
+            }
+            
+            // Si el valor es 0 o menor
             if (valor <= 0) {
                 input.classList.add('zero-value');
                 input.setCustomValidity('El valor de la caja debe ser mayor que 0');
-                // Si el valor es 0 o menor, establecer un valor mínimo
-                if (valor <= 0) {
-                    input.value = '0.01';
-                    showNotification('El valor de la caja no puede ser 0 o menor. Se ha establecido el valor mínimo de €0.01', 'warning');
-                }
+                showNotification('El valor de la caja debe ser mayor que €0. Por favor, ingrese un precio válido.', 'warning');
+                return false;
             } else {
-                input.classList.remove('zero-value');
+                input.classList.remove('zero-value', 'no-price-configured');
                 input.setCustomValidity('');
+                return true;
             }
         }
 
@@ -1173,6 +1193,26 @@
             }
             .btn-select.error:hover {
                 background-color: #f8d7da;
+            }
+            .zero-value {
+                border-color: #dc3545 !important;
+                background-color: #fff5f5 !important;
+            }
+            .zero-value:focus {
+                box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+            }
+            .no-price-configured {
+                border-color: #ffc107 !important;
+                background-color: #fffbf0 !important;
+                animation: pulse-warning 2s infinite;
+            }
+            .no-price-configured:focus {
+                box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25) !important;
+            }
+            @keyframes pulse-warning {
+                0% { border-color: #ffc107; }
+                50% { border-color: #ff8c00; }
+                100% { border-color: #ffc107; }
             }
         `;
         document.head.appendChild(style);

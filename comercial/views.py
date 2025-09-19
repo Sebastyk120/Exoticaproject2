@@ -108,7 +108,7 @@ def detalle_correo(request, correo_id):
                 'asunto': correo.asunto,
                 'destinatarios': correo.destinatarios,
                 'fecha_envio': correo.fecha_envio.strftime('%d/%m/%Y %H:%M:%S'),
-                'estado': correo.get_estado_envio_display(),
+                'estado_envio': correo.estado_envio,
                 'usuario': correo.usuario.username if correo.usuario else 'Sistema',
                 'cuerpo_mensaje': correo.cuerpo_mensaje or 'Sin mensaje',
                 'mensaje_error': correo.mensaje_error or 'Sin errores',
