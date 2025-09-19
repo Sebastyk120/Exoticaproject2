@@ -186,25 +186,21 @@
                                 </span>
                             </td>
                             <td>
-                                {% if correo.estado == 'exitoso' or correo.estado == 'EXITOSO' or correo.estado == 'Exitoso' %}
+                                {% if correo.estado_envio == 'exitoso' %}
                                     <span class="badge bg-success d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-check-circle me-1"></i>{{ correo.get_estado_display }}
+                                        <i class="fas fa-check-circle me-1"></i>{{ correo.get_estado_envio_display }}
                                     </span>
-                                {% elif correo.estado == 'fallido' or correo.estado == 'FALLIDO' or correo.estado == 'Fallido' %}
+                                {% elif correo.estado_envio == 'fallido' %}
                                     <span class="badge bg-danger d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-times-circle me-1"></i>{{ correo.get_estado_display }}
+                                        <i class="fas fa-times-circle me-1"></i>{{ correo.get_estado_envio_display }}
                                     </span>
-                                {% elif correo.estado == 'pendiente' or correo.estado == 'PENDIENTE' or correo.estado == 'Pendiente' %}
+                                {% elif correo.estado_envio == 'pendiente' %}
                                     <span class="badge bg-warning d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-clock me-1"></i>{{ correo.get_estado_display }}
-                                    </span>
-                                {% elif correo.estado == 'enviando' or correo.estado == 'ENVIANDO' or correo.estado == 'Enviando' %}
-                                    <span class="badge bg-info d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-paper-plane me-1"></i>{{ correo.get_estado_display }}
+                                        <i class="fas fa-clock me-1"></i>{{ correo.get_estado_envio_display }}
                                     </span>
                                 {% else %}
                                     <span class="badge bg-secondary d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-question-circle me-1"></i>{{ correo.get_estado_display }}
+                                        <i class="fas fa-question-circle me-1"></i>{{ correo.get_estado_envio_display }}
                                     </span>
                                 {% endif %}
                             </td>
@@ -288,7 +284,7 @@
 
 <!-- Modal para detalles del correo -->
 <div class="modal fade" id="detalleModal" tabindex="-1" aria-labelledby="detalleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="detalleModalLabel">
@@ -350,7 +346,7 @@ function verDetalle(correoId) {
                                 </tr>
                                 <tr>
                                     <td><strong>Estado:</strong></td>
-                                    <td><span class="badge ${correo.estado === 'Exitoso' ? 'bg-success' : correo.estado === 'Fallido' ? 'bg-danger' : 'bg-warning'}">${correo.estado}</span></td>
+                                    <td><span class="badge ${correo.estado_envio === 'exitoso' ? 'bg-success' : correo.estado_envio === 'fallido' ? 'bg-danger' : 'bg-warning'}">${correo.estado_envio}</span></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Fecha/Hora:</strong></td>

@@ -49,7 +49,8 @@ def lista_correos(request):
             Q(asunto__icontains=buscar) |
             Q(destinatarios__icontains=buscar) |
             Q(usuario__username__icontains=buscar) |
-            Q(observaciones__icontains=buscar)
+            Q(cuerpo_mensaje__icontains=buscar) |
+            Q(mensaje_error__icontains=buscar)
         )
     
     # Ordenar por fecha más reciente
