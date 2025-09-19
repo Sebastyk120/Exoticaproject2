@@ -4,11 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="feat(email): add EmailLog model and admin interface for email tracking">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="fix">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/static/css/ventas/correos.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/ventas/correos.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/correos.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/correos.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/resources.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/resources.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_albaran_cliente.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_factura.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_factura.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/generar_rectificativa.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/generar_rectificativa.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/ventas.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/ventas.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/views_ventas.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_ventas.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,30 +59,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;Django Server.Exoticaproject.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
-    &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR_AND_PREVIEW&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Legion 5 Pro/Downloads/exotic-fruit-bliss-landing-main&quot;,
-    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Django Server.Exoticaproject.executor": "Run",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "django.template.preview.state": "SHOW_EDITOR_AND_PREVIEW",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "C:/Users/Legion 5 Pro/Downloads/exotic-fruit-bliss-landing-main",
+    "list.type.of.created.stylesheet": "CSS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Legion 5 Pro\Desktop\Exoticaproject\importacion\static" />
@@ -275,22 +283,7 @@
       <workItem from="1757180486914" duration="1058000" />
       <workItem from="1757233477661" duration="686000" />
       <workItem from="1758045938153" duration="3838000" />
-    </task>
-    <task id="LOCAL-00041" summary="Correo.">
-      <option name="closed" value="true" />
-      <created>1744145760254</created>
-      <option name="number" value="00041" />
-      <option name="presentableId" value="LOCAL-00041" />
-      <option name="project" value="LOCAL" />
-      <updated>1744145760254</updated>
-    </task>
-    <task id="LOCAL-00042" summary="Correo.">
-      <option name="closed" value="true" />
-      <created>1744176705354</created>
-      <option name="number" value="00042" />
-      <option name="presentableId" value="LOCAL-00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1744176705354</updated>
+      <workItem from="1758306170602" duration="1391000" />
     </task>
     <task id="LOCAL-00043" summary="Lanzamiento de APP">
       <option name="closed" value="true" />
@@ -668,7 +661,23 @@
       <option name="project" value="LOCAL" />
       <updated>1758050266351</updated>
     </task>
-    <option name="localTasksCounter" value="90" />
+    <task id="LOCAL-00090" summary="Las ventas ya no pueden facturarse en 0 por ninguna razon, ahora deben tener un valor mayor que 0, se realizara correctamente el proceso de rectificativa.">
+      <option name="closed" value="true" />
+      <created>1758306313275</created>
+      <option name="number" value="00090" />
+      <option name="presentableId" value="LOCAL-00090" />
+      <option name="project" value="LOCAL" />
+      <updated>1758306313275</updated>
+    </task>
+    <task id="LOCAL-00091" summary="fix">
+      <option name="closed" value="true" />
+      <created>1758307012375</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1758307012375</updated>
+    </task>
+    <option name="localTasksCounter" value="92" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -686,8 +695,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Ultimos ajustes de gastos de aduana y Dashboard de Utilidades." />
-    <MESSAGE value="Ajustes en Gastos de Aduana y carga, mejoras en table." />
     <MESSAGE value="Implementacion de Fecha de compra." />
     <MESSAGE value="Cambio queryset listas de precio importacion y venta." />
     <MESSAGE value="Reparacion de SEO e implementacion de Captcha en formulario de contacto, implementacion inical de cotizaciones." />
@@ -711,6 +718,8 @@
     <MESSAGE value="Redeploy" />
     <MESSAGE value="Implementacion de guardado de correos." />
     <MESSAGE value="feat(email): add EmailLog model and admin interface for email tracking" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(email): add EmailLog model and admin interface for email tracking" />
+    <MESSAGE value="Las ventas ya no pueden facturarse en 0 por ninguna razon, ahora deben tener un valor mayor que 0, se realizara correctamente el proceso de rectificativa." />
+    <MESSAGE value="fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix" />
   </component>
 </project>

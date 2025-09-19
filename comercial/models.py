@@ -79,6 +79,7 @@ class Venta(models.Model):
     monto_pendiente = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto Pendiente", null=True, blank=True, default=0, editable=False)
     pagado = models.BooleanField(verbose_name="Pagado", default=False, editable=False)
     observaciones = models.CharField(verbose_name="Observaciones", max_length=100, blank=True, null=True)
+    origen = models.CharField(verbose_name="Origen", max_length=50, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         # Calcular IVA y total factura

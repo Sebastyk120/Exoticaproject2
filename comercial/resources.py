@@ -11,7 +11,7 @@ class VentaResource(resources.ModelResource):
         model = Venta
         fields = ('id', 'cliente', 'fecha_entrega', 'fecha_vencimiento', 'semana', 'numero_factura', 'iva',
                   'subtotal_factura', 'valor_total_factura_euro', 'valor_total_abono_euro', 'numero_nc',
-                  'pagado', 'observaciones')
+                  'pagado', 'observaciones', 'origen')
 
 class DetalleVentaResource(resources.ModelResource):
     class Meta:

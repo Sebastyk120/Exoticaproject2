@@ -86,6 +86,7 @@
                         <p><strong>Fecha Emisión:</strong> {{ venta.fecha_entrega }}</p>
                         <p><strong>Referencia a Factura:</strong> {% if venta.numero_factura %}{{ venta.numero_factura }}{% else %}{{ venta.id }}{% endif %}</p>
                         <p><strong>Semana:</strong> {{ venta.semana|default:"-" }}</p>
+                        {% if venta.origen %}<p><strong>Origen:</strong> {{ venta.origen }}</p>{% endif %}
                     </div>
                 </div>
             </div>

@@ -40,7 +40,7 @@ class VentaAdmin(ModelAdmin, ImportExportModelAdmin, SimpleHistoryAdmin):
     list_display = ('id', 'cliente', 'fecha_entrega', 'fecha_vencimiento', 'semana', 
                    'total_cajas_pedido', 'numero_factura', 'iva', 'subtotal_factura', 
                    'valor_total_factura_euro', 'valor_total_abono_euro', 'numero_nc', 'monto_pendiente',
-                   'pagado', 'observaciones')
+                   'pagado', 'observaciones', 'origen')
     search_fields = ('cliente__nombre', 'numero_factura')
     search_help_text = "Buscar por: nombre del cliente, número de factura."
     list_filter = ('cliente', 'fecha_entrega', 'pagado')

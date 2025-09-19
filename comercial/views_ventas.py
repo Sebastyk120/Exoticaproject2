@@ -168,6 +168,7 @@ def guardar_venta(request, venta_id=None):
         # Otros campos
         venta.numero_nc = request.POST.get('numero_nc', '')
         venta.observaciones = request.POST.get('observaciones', '')
+        venta.origen = request.POST.get('origen', '')
         
         # Guardar la venta primero para que tenga un ID
         venta.save()
