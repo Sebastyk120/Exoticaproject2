@@ -147,7 +147,7 @@ class DetalleVenta(models.Model):
     presentacion = models.ForeignKey(Presentacion, on_delete=models.CASCADE, verbose_name="Presentación")
     kilos = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Kilos Netos", editable=False, null=True, blank=True)
     cajas_enviadas = models.IntegerField(validators=[MinValueValidator(0)], verbose_name="Cajas Enviadas", null=True, blank=True, default=0)
-    valor_x_caja_euro = models.DecimalField(validators=[MinValueValidator(0)], max_digits=10, decimal_places=2, verbose_name="Valor Caja Euro")
+    valor_x_caja_euro = models.DecimalField(validators=[MinValueValidator(0.01)], max_digits=10, decimal_places=2, verbose_name="Valor Caja Euro")
     valor_x_producto = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total Producto", null=True, blank=True, editable=False)
     no_cajas_abono = models.DecimalField(max_digits=10, decimal_places=1, verbose_name="No Cajas Abono/Reclamación", null=True, blank=True, default=0)
     valor_abono_euro = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Abono/Reclamación Euro", null=True, blank=True, default=0, editable=False)

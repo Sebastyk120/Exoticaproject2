@@ -219,7 +219,14 @@ def guardar_detalle(request, venta_id, detalle_id=None):
     try:
         detalle.presentacion_id = request.POST.get('presentacion')
         detalle.cajas_enviadas = int(request.POST.get('cajas_enviadas') or 0)
-        detalle.valor_x_caja_euro = Decimal(request.POST.get('valor_x_caja_euro') or 0)
+        valor_caja = Decimal(request.POST.get('valor_x_caja_euro') or 0)
+        
+        # Validar que el valor de la caja sea mayor que 0
+        if valor_caja <= 0:
+            messages.error(request, 'El valor de la caja debe ser mayor que 0.')
+            return redirect('comercial:detalle_venta', venta_id=venta.id)
+            
+        detalle.valor_x_caja_euro = valor_caja
         detalle.no_cajas_abono = Decimal(request.POST.get('no_cajas_abono') or 0)
     except (ValueError, TypeError, decimal.InvalidOperation):
         # Handle conversion errors gracefully
@@ -269,7 +276,13 @@ def guardar_detalles_batch(request, venta_id):
             # Actualizar campos
             detalle.presentacion_id = request.POST.get(f'detalle_{detail_id}_presentacion')
             detalle.cajas_enviadas = int(request.POST.get(f'detalle_{detail_id}_cajas_enviadas') or 0)
-            detalle.valor_x_caja_euro = Decimal(request.POST.get(f'detalle_{detail_id}_valor_x_caja_euro') or 0)
+            
+            valor_caja = Decimal(request.POST.get(f'detalle_{detail_id}_valor_x_caja_euro') or 0)
+            if valor_caja <= 0:
+                messages.error(request, f'El valor de la caja en detalle #{detail_id} debe ser mayor que 0.')
+                return redirect('comercial:detalle_venta', venta_id=venta.id)
+            
+            detalle.valor_x_caja_euro = valor_caja
             detalle.no_cajas_abono = Decimal(request.POST.get(f'detalle_{detail_id}_no_cajas_abono') or 0)
             
             detalle.save()
@@ -305,7 +318,13 @@ def guardar_detalles_batch(request, venta_id):
             detalle = DetalleVenta(venta=venta)
             detalle.presentacion_id = presentacion_id
             detalle.cajas_enviadas = int(request.POST.get(f'new_{index}_cajas_enviadas') or 0)
-            detalle.valor_x_caja_euro = Decimal(request.POST.get(f'new_{index}_valor_x_caja_euro') or 0)
+            
+            valor_caja = Decimal(request.POST.get(f'new_{index}_valor_x_caja_euro') or 0)
+            if valor_caja <= 0:
+                messages.error(request, f'El valor de la caja en nuevo detalle debe ser mayor que 0.')
+                return redirect('comercial:detalle_venta', venta_id=venta.id)
+            
+            detalle.valor_x_caja_euro = valor_caja
             detalle.no_cajas_abono = Decimal(request.POST.get(f'new_{index}_no_cajas_abono') or 0)
             
             detalle.save()

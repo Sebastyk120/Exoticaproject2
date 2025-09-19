@@ -236,7 +236,7 @@
                                         </td>
                                         <td>
                                             <input type="number" name="detalle_{{ detalle.id }}_valor_x_caja_euro" 
-                                                   value="{{ detalle.valor_x_caja_euro_str|default:detalle.valor_x_caja_euro|default:'0.00' }}" min="0" step="0.01">
+                                                   value="{{ detalle.valor_x_caja_euro_str|default:detalle.valor_x_caja_euro|default:'0.01' }}" min="0.01" step="0.01" required>
                                         </td>
                                         <td>
                                             <input type="number" name="detalle_{{ detalle.id }}_no_cajas_abono" 
@@ -274,7 +274,7 @@
                                     <input type="number" name="new_INDEX_cajas_enviadas" value="0" min="0">
                                 </td>
                                 <td>
-                                    <input type="number" name="new_INDEX_valor_x_caja_euro" value="0" min="0" step="0.01">
+                                    <input type="number" name="new_INDEX_valor_x_caja_euro" value="0.01" min="0.01" step="0.01" required>
                                 </td>
                                 <td>
                                     <input type="number" name="new_INDEX_no_cajas_abono" value="0" min="0" step="0.1">
@@ -329,6 +329,15 @@
             
             // Apply handleZeroFields to the new row
             handleZeroFields(addedRow);
+            
+            // Apply validation to valor_x_caja_euro field in the new row
+            const valorCajaInput = addedRow.querySelector('input[name$="_valor_x_caja_euro"]');
+            if (valorCajaInput) {
+                validarValorCaja(valorCajaInput);
+                valorCajaInput.addEventListener('blur', function() {
+                    validarValorCaja(this);
+                });
+            }
             
             newDetailCounter++;
         }
@@ -739,6 +748,10 @@
             // Validar valores iniciales de caja
             document.querySelectorAll('input[name$="_valor_x_caja_euro"]').forEach(input => {
                 validarValorCaja(input);
+                // Agregar evento blur para validar cuando el usuario sale del campo
+                input.addEventListener('blur', function() {
+                    validarValorCaja(this);
+                });
             });
 
             // Aplicar manejo de campos con valor cero a todos los campos numéricos existentes
@@ -1068,10 +1081,17 @@
         // Función para validar valor de caja
         function validarValorCaja(input) {
             const valor = parseFloat(input.value) || 0;
-            if (valor === 0) {
+            if (valor <= 0) {
                 input.classList.add('zero-value');
+                input.setCustomValidity('El valor de la caja debe ser mayor que 0');
+                // Si el valor es 0 o menor, establecer un valor mínimo
+                if (valor <= 0) {
+                    input.value = '0.01';
+                    showNotification('El valor de la caja no puede ser 0 o menor. Se ha establecido el valor mínimo de €0.01', 'warning');
+                }
             } else {
                 input.classList.remove('zero-value');
+                input.setCustomValidity('');
             }
         }
 
