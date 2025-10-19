@@ -1,1 +1,0 @@
-web: gunicorn Exoticaproject.wsgi --log-file -
