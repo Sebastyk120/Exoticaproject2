@@ -47,6 +47,8 @@ urlpatterns = [
     path('enviar_factura_email/<int:venta_id>/', views_enviar_correos.enviar_factura_email, name='enviar_factura_email'),
     path('enviar_albaran_email/<int:venta_id>/', views_enviar_correos.enviar_albaran_email, name='enviar_albaran_email'),
     path('enviar_rectificativa_email/<int:venta_id>/', views_enviar_correos.enviar_rectificativa_email, name='enviar_rectificativa_email'),
+    path('descargar_adjunto/<int:email_log_id>/', views.descargar_adjunto_correo, name='descargar_adjunto'),
+
     
     # URLs para el envío de albaranes a agencias de aduana
     path('get_agencias_aduana/', views_enviar_correos.get_agencias_aduana, name='get_agencias_aduana'),
@@ -64,4 +66,5 @@ urlpatterns = [
     # URLs para el registro de correos
     path('correos/', views.lista_correos, name='lista_correos'),
     path('correos/detalle/<int:correo_id>/', views.detalle_correo, name='detalle_correo'),
+    path('correos/descargar/<int:email_log_id>/<str:filename>/', views.descargar_adjunto_correo, name='descargar_adjunto_correo'),
 ]

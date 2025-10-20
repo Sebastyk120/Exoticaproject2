@@ -139,7 +139,7 @@ class EmailLogAdmin(ModelAdmin, SimpleHistoryAdmin):
             'fields': ('proceso', 'fecha_envio', 'usuario', 'estado_envio')
         }),
         ('Información del Correo', {
-            'fields': ('asunto', 'destinatarios', 'cuerpo_mensaje', 'documentos_adjuntos')
+            'fields': ('asunto', 'destinatarios', 'cuerpo_mensaje', 'adjunto_1', 'adjunto_2', 'adjunto_3', 'adjunto_4', 'adjunto_5')
         }),
         ('Referencias', {
             'fields': ('cliente', 'venta', 'cotizacion'),

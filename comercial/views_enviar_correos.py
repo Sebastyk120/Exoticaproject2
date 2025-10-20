@@ -4,25 +4,55 @@ import json
 import os
 import logging
 from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.template.defaultfilters import register
+from django.core.files.base import ContentFile
 from comercial.templatetags.custom_filters import format_currency_eur
 from .models import Venta, EmailLog
 from decimal import Decimal
 from importacion.models import AgenciaAduana
 from mailjet_rest import Client
+import mimetypes
 
 logger = logging.getLogger(__name__)
+
+def save_attachment_to_disk(email_log_id, filename, content_bytes):
+    """
+    Guarda un archivo adjunto en el servidor
+    Retorna el campo del modelo donde se guardó (adjunto_1, adjunto_2, etc.)
+    """
+    try:
+        # Crear la carpeta si no existe
+        attachments_root = settings.EMAIL_ATTACHMENTS_ROOT
+        os.makedirs(attachments_root, exist_ok=True)
+        
+        # Crear subcarpeta para este email_log
+        email_log_folder = os.path.join(attachments_root, str(email_log_id))
+        os.makedirs(email_log_folder, exist_ok=True)
+        
+        # Generar ruta completa del archivo
+        file_path = os.path.join(email_log_folder, filename)
+        
+        # Guardar el archivo
+        with open(file_path, 'wb') as f:
+            f.write(content_bytes)
+        
+        # Retornar la ruta relativa para almacenar en la BD
+        relative_path = os.path.join(settings.EMAIL_ATTACHMENTS_FOLDER, str(email_log_id), filename)
+        return relative_path
+    except Exception as e:
+        logger.error(f"Error guardando adjunto {filename}: {str(e)}")
+        raise
 
 def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=None, 
                            proceso=None, usuario=None, venta=None, cotizacion=None, cliente=None):
     """
     Función auxiliar para enviar emails directamente con Mailjet API
     Especialmente útil para emails con adjuntos grandes
-    Ahora incluye logging automático en EmailLog
+    Ahora incluye logging automático en EmailLog y almacenamiento de adjuntos
     """
     # Crear el registro de EmailLog antes del envío
     email_log = EmailLog.objects.create(
@@ -31,7 +61,6 @@ def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=No
         asunto=subject,
         destinatarios=', '.join(to_emails) if isinstance(to_emails, list) else str(to_emails),
         cuerpo_mensaje=body,
-        documentos_adjuntos=', '.join([att[0] for att in attachments]) if attachments else None,
         estado_envio='pendiente',
         venta=venta,
         cotizacion=cotizacion,
@@ -65,11 +94,28 @@ def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=No
             "TextPart": body
         }
         
-        # Añadir adjuntos si existen
+        # Guardar adjuntos en el servidor y preparar para Mailjet
+        saved_attachments = []
+        adjunto_fields = {}  # Diccionario para mapear campos del modelo
+        
         if attachments:
             mailjet_attachments = []
-            for attachment in attachments:
+            for idx, attachment in enumerate(attachments):
                 filename, content_bytes, content_type = attachment
+                
+                # Guardar en el servidor
+                try:
+                    relative_path = save_attachment_to_disk(email_log.id, filename, content_bytes)
+                    saved_attachments.append(relative_path)
+                    
+                    # Mapear a campos adjunto_1, adjunto_2, etc. (máximo 5)
+                    if idx < 5:
+                        field_name = f'adjunto_{idx + 1}'
+                        adjunto_fields[field_name] = relative_path
+                except Exception as e:
+                    logger.warning(f"No se pudo guardar adjunto {filename} en servidor: {str(e)}")
+                
+                # Preparar para Mailjet
                 content_b64 = base64.b64encode(content_bytes).decode('utf-8')
                 mailjet_attachments.append({
                     "ContentType": content_type,
@@ -87,8 +133,15 @@ def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=No
             if (response_data.get('Messages') and 
                 len(response_data['Messages']) > 0 and 
                 response_data['Messages'][0].get('Status') == 'success'):
-                # Marcar como exitoso
+                # Marcar como exitoso y guardar rutas de adjuntos
                 email_log.marcar_como_exitoso(response_data)
+                
+                # Guardar rutas de adjuntos en los campos correspondientes
+                if adjunto_fields:
+                    for field_name, file_path in adjunto_fields.items():
+                        setattr(email_log, field_name, file_path)
+                    email_log.save()
+                
                 return True, None, email_log
             else:
                 # Marcar como fallido
@@ -843,3 +896,4 @@ L&M Exotic Fruit
             'success': False,
             'error': f'Error al enviar el email: {str(e)}'
         })
+

@@ -32,7 +32,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-gywh)zrdwb8ohd$l97a2mj_+u^pa6@hnsu$=)!ud(3l27%fe-y'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # Site settings for SEO
 BASE_URL = 'https://luzmeloexoticfruits.com'
@@ -193,6 +193,23 @@ else:
 # Añadir esta línea para que Whitenoise sirva archivos de medios en producción
 WHITENOISE_ROOT = MEDIA_ROOT
 
+# Configuración de carpeta para adjuntos de correos electrónicos
+EMAIL_ATTACHMENTS_FOLDER = 'email_attachments'
+EMAIL_ATTACHMENTS_ROOT = os.path.join(MEDIA_ROOT, EMAIL_ATTACHMENTS_FOLDER)
+
+# Crear la carpeta de adjuntos si no existe al iniciar Django
+def ensure_email_attachments_folder():
+    """Crea la carpeta de adjuntos de correos si no existe"""
+    try:
+        os.makedirs(EMAIL_ATTACHMENTS_ROOT, exist_ok=True)
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"No se pudo crear la carpeta de adjuntos de correos: {str(e)}")
+
+# Ejecutar la función al cargar las configuraciones
+ensure_email_attachments_folder()
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -224,18 +241,6 @@ DEFAULT_FROM_EMAIL = "import@luzmeloexoticfruits.com"
 # Usar el backend personalizado de Mailjet
 EMAIL_BACKEND = 'Exoticaproject.backends.MailjetBackend'
 
-# Configuración de respaldo SMTP (comentada)
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.office365.com'
-# EMAIL_USE_TLS = True
-# EMAIL_PORT = 587
-# EMAIL_HOST_USER = DEFAULT_FROM_EMAIL
-# try:
-#     EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
-# except KeyError:
-#     raise ImproperlyConfigured('La variable de entorno EMAIL_HOST_PASSWORD no está definida')
-
-# Verificar que las variables de entorno de Mailjet estén definidas
 try:
     MJ_APIKEY_PUBLIC = os.environ['MJ_APIKEY_PUBLIC']
     MJ_APIKEY_PRIVATE = os.environ['MJ_APIKEY_PRIVATE']
@@ -253,4 +258,3 @@ CAPTCHA_LETTER_ROTATION = (-15, 15)  # Rotación de letras
 CAPTCHA_BACKGROUND_COLOR = '#ffffff'  # Color de fondo
 CAPTCHA_FOREGROUND_COLOR = '#001100'  # Color de las letras
 CAPTCHA_TIMEOUT = 5  # Tiempo de validez en minutos
-

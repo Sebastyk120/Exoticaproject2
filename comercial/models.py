@@ -294,7 +294,7 @@ class DetalleVenta(models.Model):
             self.valor_abono_euro = Decimal('0')
             
         self.full_clean()  # Esto llamará a clean() para validar
-            
+             
         # Guardar el objeto
         super().save(*args, **kwargs)
         
@@ -428,8 +428,12 @@ class EmailLog(models.Model):
     destinatarios = models.TextField(verbose_name="Destinatarios", help_text="Lista de correos separados por coma")
     cuerpo_mensaje = models.TextField(verbose_name="Cuerpo del Mensaje")
     
-    # Información de adjuntos
-    documentos_adjuntos = models.TextField(null=True, blank=True, verbose_name="Documentos Adjuntos", help_text="Nombres de archivos adjuntos separados por coma")
+    # Información de adjuntos - Cambio: usar FileField en lugar de TextField
+    adjunto_1 = models.FileField(upload_to='email_attachments/', null=True, blank=True, verbose_name="Adjunto 1")
+    adjunto_2 = models.FileField(upload_to='email_attachments/', null=True, blank=True, verbose_name="Adjunto 2")
+    adjunto_3 = models.FileField(upload_to='email_attachments/', null=True, blank=True, verbose_name="Adjunto 3")
+    adjunto_4 = models.FileField(upload_to='email_attachments/', null=True, blank=True, verbose_name="Adjunto 4")
+    adjunto_5 = models.FileField(upload_to='email_attachments/', null=True, blank=True, verbose_name="Adjunto 5")
     
     # Estado del envío
     estado_envio = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente', verbose_name="Estado del Envío")
@@ -443,8 +447,6 @@ class EmailLog(models.Model):
     cotizacion = models.ForeignKey(Cotizacion, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Cotización Relacionada")
     cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Cliente")
     
-
-    
     def __str__(self):
         return f"{self.get_proceso_display()} - {self.asunto} - {self.fecha_envio.strftime('%d/%m/%Y %H:%M')}"
     
@@ -456,9 +458,16 @@ class EmailLog(models.Model):
     
     def get_adjuntos_list(self):
         """Retorna la lista de adjuntos como una lista de Python"""
-        if self.documentos_adjuntos:
-            return [archivo.strip() for archivo in self.documentos_adjuntos.split(',') if archivo.strip()]
-        return []
+        adjuntos = []
+        for i in range(1, 6):
+            adjunto = getattr(self, f'adjunto_{i}', None)
+            if adjunto:
+                adjuntos.append({
+                    'nombre': adjunto.name.split('/')[-1],
+                    'url': adjunto.url,
+                    'campo': f'adjunto_{i}'
+                })
+        return adjuntos
     
     def marcar_como_exitoso(self, respuesta_api=None):
         """Marca el envío como exitoso y guarda la respuesta de la API"""
@@ -484,4 +493,3 @@ class EmailLog(models.Model):
             models.Index(fields=['estado_envio', 'fecha_envio']),
             models.Index(fields=['cliente', 'fecha_envio']),
         ]
-

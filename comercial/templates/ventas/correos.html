@@ -331,6 +331,34 @@ function verDetalle(correoId) {
         .then(data => {
             if (data.success) {
                 const correo = data.correo;
+                let adjuntosHTML = '';
+                
+                // Generar HTML para adjuntos si existen
+                if (correo.adjuntos && correo.adjuntos.length > 0) {
+                    adjuntosHTML = `
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h6 class="text-primary">Archivos Adjuntos</h6>
+                                <div class="attachments-list">
+                    `;
+                    correo.adjuntos.forEach(adjunto => {
+                        adjuntosHTML += `
+                            <div class="attachment-item">
+                                <i class="fas fa-file me-2"></i>
+                                <a href="/comercial/correos/descargar/${correo.id}/${adjunto.nombre}/" 
+                                   class="attachment-link" title="Descargar ${adjunto.nombre}">
+                                    ${adjunto.nombre}
+                                </a>
+                            </div>
+                        `;
+                    });
+                    adjuntosHTML += `
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
                 content.innerHTML = `
                     <div class="row">
                         <div class="col-md-6">
@@ -373,8 +401,8 @@ function verDetalle(correoId) {
                                     <td class="text-break">${correo.destinatarios}</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Documentos Adjuntos:</strong></td>
-                                    <td>${correo.documentos_adjuntos ? correo.documentos_adjuntos : 'Sin archivos'}</td>
+                                    <td><strong>Cantidad de Adjuntos:</strong></td>
+                                    <td>${correo.adjuntos ? correo.adjuntos.length : 0}</td>
                                 </tr>
                             </table>
                         </div>
@@ -387,6 +415,7 @@ function verDetalle(correoId) {
                             </div>
                         </div>
                     </div>
+                    ${adjuntosHTML}
                     ${correo.mensaje_error !== 'Sin errores' ? `
                     <div class="row">
                         <div class="col-12">

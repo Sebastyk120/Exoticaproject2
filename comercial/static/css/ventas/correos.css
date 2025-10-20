@@ -449,6 +449,132 @@
     word-break: break-word;
 }
 
+/* Attachments Section Styles */
+.attachments-section {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.attachments-section h6 {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.attachments-section h6 i {
+    font-size: 1.1rem;
+}
+
+.attachments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.attachment-item:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.attachment-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.attachment-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+    color: white;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.attachment-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.attachment-name {
+    font-weight: 500;
+    color: var(--dark-color);
+    font-size: 0.9rem;
+    word-break: break-word;
+}
+
+.attachment-size {
+    font-size: 0.75rem;
+    color: var(--secondary-color);
+}
+
+.attachment-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.btn-download {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--success-color), #1e7e34);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.btn-download:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-download:active {
+    transform: translateY(0);
+}
+
+.no-attachments {
+    text-align: center;
+    padding: 1rem;
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+.no-attachments i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .page-header {
@@ -496,6 +622,17 @@
         padding: 0.4rem 0.8rem;
         font-size: 0.8rem;
     }
+
+    .attachment-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .attachment-actions {
+        width: 100%;
+        justify-content: flex-start;
+        margin-top: 0.5rem;
+    }
 }
 
 @media (max-width: 576px) {
@@ -513,6 +650,28 @@
     
     .modal-header {
         padding: 0.75rem 1rem;
+    }
+
+    .attachments-section {
+        padding: 0.75rem;
+    }
+
+    .attachment-item {
+        padding: 0.5rem;
+    }
+
+    .attachment-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+
+    .attachment-name {
+        font-size: 0.85rem;
+    }
+
+    .attachment-size {
+        font-size: 0.7rem;
     }
 }
 
