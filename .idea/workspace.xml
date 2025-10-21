@@ -4,19 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Update Django and migrate nixpack to Railipack 2">
-      <change afterPath="$PROJECT_DIR$/comercial/migrations/0012_remove_emaillog_archivo_adjunto_and_more.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/importacion/migrations/0004_alter_agenciaaduana_correos_adicionales_and_more.py" afterDir="false" />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Implementacion de adjuntos.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/static/css/ventas/correos.css" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/static/css/ventas/correos.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/templates/ventas/correos.html" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/templates/ventas/correos.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comercial/views_enviar_correos.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_enviar_correos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -301,15 +290,8 @@
       <workItem from="1760788013249" duration="8000" />
       <workItem from="1760905928402" duration="3227000" />
       <workItem from="1760988644896" duration="1572000" />
-      <workItem from="1760991158882" duration="5314000" />
-    </task>
-    <task id="LOCAL-00048" summary="Utilidades Abono">
-      <option name="closed" value="true" />
-      <created>1744260306460</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1744260306460</updated>
+      <workItem from="1760991158882" duration="5579000" />
+      <workItem from="1761076340591" duration="500000" />
     </task>
     <task id="LOCAL-00049" summary="Cambio de lista de compras 10.">
       <option name="closed" value="true" />
@@ -695,7 +677,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760909111334</updated>
     </task>
-    <option name="localTasksCounter" value="97" />
+    <task id="LOCAL-00097" summary="Implementacion de adjuntos.">
+      <option name="closed" value="true" />
+      <created>1760998235255</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1760998235256</updated>
+    </task>
+    <option name="localTasksCounter" value="98" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -713,7 +703,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Correccion Datos cotizacion_precios_ventas.html" />
     <MESSAGE value="Correcion En transferencias.html" />
     <MESSAGE value="Correcion En transferencias.html 2" />
     <MESSAGE value="Cambio en relacion de Ventas con compras Manytomany para evitar errores." />
@@ -738,6 +727,7 @@
     <MESSAGE value="Cambios en documentos y origen agregado. Mejoras en UX UI." />
     <MESSAGE value="Update Django and migrate nixpack to Railipack" />
     <MESSAGE value="Update Django and migrate nixpack to Railipack 2" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update Django and migrate nixpack to Railipack 2" />
+    <MESSAGE value="Implementacion de adjuntos." />
+    <option name="LAST_COMMIT_MESSAGE" value="Implementacion de adjuntos." />
   </component>
 </project>

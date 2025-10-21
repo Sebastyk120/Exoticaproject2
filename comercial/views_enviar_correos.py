@@ -640,195 +640,223 @@ def enviar_albaranes_aduana(request):
             'error': 'Se requiere método POST'
         }, status=400)
 
-    # Verificar que se recibió la agencia y al menos un PDF
-    agencia_id = request.POST.get('agencia_id')
-    email_subject = request.POST.get('email_subject', 'Datos de reparto - Awb: ')
-    email_message = request.POST.get('email_message', '')
-    
-    if not agencia_id:
-        return JsonResponse({
-            'success': False,
-            'error': 'No se especificó la agencia de aduana'
-        }, status=400)
-    
-    # Obtener IDs de las ventas
     try:
-        venta_ids_json = request.POST.get('venta_ids')
-        if venta_ids_json:
-            venta_ids = json.loads(venta_ids_json)
-        else:
-            venta_ids = []
-            
-            # Buscar PDFs adjuntos para identificar las ventas
-            for i in range(50):  # Limitar a 50 archivos como máximo
-                pdf_id = request.POST.get(f'pdf_id_{i}')
-                if not pdf_id:
-                    continue
-                try:
-                    venta_ids.append(int(pdf_id))
-                except (ValueError, TypeError):
-                    pass
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False,
-            'error': 'Formato incorrecto de IDs de ventas'
-        }, status=400)
-    
-    if not venta_ids:
-        return JsonResponse({
-            'success': False,
-            'error': 'No se seleccionaron albaranes para enviar'
-        }, status=400)
-    
-    # Verificar si hay demasiados albaranes seleccionados
-    if len(venta_ids) > 10:
-        return JsonResponse({
-            'success': False,
-            'error': 'Se seleccionaron demasiados albaranes. Por favor, envíe un máximo de 10 albaranes a la vez.'
-        }, status=400)
-    
-    # Obtener la agencia de aduana
-    try:
-        agencia = AgenciaAduana.objects.get(id=agencia_id)
-    except AgenciaAduana.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'error': 'La agencia de aduana especificada no existe'
-        }, status=404)
-    
-    # Obtener los correos seleccionados por el usuario
-    selected_emails_json = request.POST.get('selected_emails')
-    if selected_emails_json:
-        try:
-            emails = json.loads(selected_emails_json)
-            # Asegurar que emails es una lista
-            if not isinstance(emails, list):
-                emails = []
-        except json.JSONDecodeError:
-            emails = []
-    else:
-        # Si no se especificaron correos seleccionados, usar todos los correos de la agencia (comportamiento anterior)
-        emails = [agencia.correo] if agencia.correo else []
-        if agencia.correos_adicionales:
-            # Añadir correos adicionales si existen (separados por coma)
-            additional_emails = [email.strip() for email in agencia.correos_adicionales.split(',') if email.strip()]
-            emails.extend(additional_emails)
-    
-    if not emails:
-        return JsonResponse({
-            'success': False,
-            'error': 'No se seleccionaron direcciones de correo electrónico'
-        })
-    
-    # Obtener las ventas para incluir información en el correo
-    ventas = Venta.objects.select_related('cliente').filter(id__in=venta_ids)
-    if not ventas:
-        return JsonResponse({
-            'success': False,
-            'error': 'No se encontraron las ventas especificadas'
-        }, status=404)
-    
-    # Buscar PDFs adjuntos
-    pdf_files = []
-    for i in range(50):  # Limitar a 50 archivos como máximo
-        pdf_id = request.POST.get(f'pdf_id_{i}')
-        pdf_data = request.POST.get(f'pdf_data_{i}')
+        # Log inicial
+        logger.info(f"Iniciando envío de albaranes a aduana por usuario {request.user.username}")
         
-        if not pdf_id or not pdf_data:
-            continue
+        # Verificar que se recibió la agencia y al menos un PDF
+        agencia_id = request.POST.get('agencia_id')
+        email_subject = request.POST.get('email_subject', 'Datos de reparto - Awb: ')
+        email_message = request.POST.get('email_message', '')
         
-        try:
-            # Si viene como data URI, extraer solo la parte base64
-            if 'base64,' in pdf_data:
-                pdf_base64 = pdf_data.split('base64,')[1]
-            else:
-                pdf_base64 = pdf_data
-                
-            # Verificar la longitud del PDF antes de decodificar
-            if len(pdf_base64) > 5000000:  # Aproximadamente 5MB en base64
-                return JsonResponse({
-                    'success': False,
-                    'error': f'El PDF del albarán #{pdf_id} es demasiado grande. Intente comprimir el PDF o enviar menos albaranes a la vez.'
-                }, status=413)  # 413 Payload Too Large
-            
-            # Decodificar los datos PDF
-            try:
-                pdf_bytes = base64.b64decode(pdf_base64)
-            except Exception as e:
-                return JsonResponse({
-                    'success': False,
-                    'error': f'Error al decodificar el PDF del albarán #{pdf_id}: {str(e)}'
-                }, status=400)
-            
-            # Buscar la venta correspondiente
-            venta_id = int(pdf_id)
-            venta = next((v for v in ventas if v.id == venta_id), None)
-            
-            if venta:
-                # Añadir a la lista de archivos
-                pdf_files.append({
-                    'filename': f'Albaran_{venta.id}_{venta.cliente.nombre.replace(" ", "_")}.pdf',
-                    'content': pdf_bytes,
-                    'venta': venta
-                })
-        except Exception as e:
+        if not agencia_id:
             return JsonResponse({
                 'success': False,
-                'error': f'Error al procesar el PDF del albarán #{pdf_id}: {str(e)}'
-            })
-    
-    if not pdf_files:
-        return JsonResponse({
-            'success': False,
-            'error': 'No se recibieron datos PDF válidos'
-        }, status=400)
-    
-    # Obtener la fecha de entrega del primer albarán o del albarán actual si está incluido
-    fecha_entrega = None
-    # Primero buscar si el albarán actual está incluido
-    current_venta_id = request.POST.get('current_venta_id')
-    if current_venta_id:
+                'error': 'No se especificó la agencia de aduana'
+            }, status=400)
+        
+        # Obtener IDs de las ventas
         try:
-            current_venta_id = int(current_venta_id)
-            current_venta = next((pdf['venta'] for pdf in pdf_files if pdf['venta'].id == current_venta_id), None)
-            if current_venta and current_venta.fecha_entrega:
-                fecha_entrega = current_venta.fecha_entrega
-        except (ValueError, TypeError):
-            pass
-    
-    # Si no se encontró fecha con el albarán actual, usar la primera fecha disponible
-    if not fecha_entrega and pdf_files:
-        for pdf in pdf_files:
-            if pdf['venta'].fecha_entrega:
-                fecha_entrega = pdf['venta'].fecha_entrega
-                break
-    
-    # Actualizar el asunto con la fecha de entrega si está disponible
-    if fecha_entrega:
-        email_subject = f"{email_subject} - Fecha: {fecha_entrega.strftime('%d/%m/%Y')}"
-    
-    # Preparar la información detallada de los albaranes
-    ventas_info = []
-    for pdf in pdf_files:
-        venta = pdf['venta']
-        cliente = venta.cliente
-        info = f"• Albarán #{venta.id} - Cliente: {cliente.nombre}"
+            venta_ids_json = request.POST.get('venta_ids')
+            if venta_ids_json:
+                venta_ids = json.loads(venta_ids_json)
+            else:
+                venta_ids = []
+                
+                # Buscar PDFs adjuntos para identificar las ventas
+                for i in range(50):  # Limitar a 50 archivos como máximo
+                    pdf_id = request.POST.get(f'pdf_id_{i}')
+                    if not pdf_id:
+                        continue
+                    try:
+                        venta_ids.append(int(pdf_id))
+                    except (ValueError, TypeError):
+                        pass
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'error': 'Formato incorrecto de IDs de ventas'
+            }, status=400)
         
-        # Añadir dirección y ciudad
-        if hasattr(cliente, 'domicilio_albaran') and cliente.domicilio_albaran:
-            info += f"\n  Dirección: {cliente.domicilio_albaran}"
-        if hasattr(cliente, 'ciudad') and cliente.ciudad:
-            info += f"\n  Ciudad: {cliente.ciudad}"
-            # No check for pais since it doesn't exist in your model
+        if not venta_ids:
+            return JsonResponse({
+                'success': False,
+                'error': 'No se seleccionaron albaranes para enviar'
+            }, status=400)
         
-        # Añadir fecha de entrega
-        if venta.fecha_entrega:
-            info += f"\n  Fecha de entrega: {venta.fecha_entrega.strftime('%d/%m/%Y')}"
+        # Verificar si hay demasiados albaranes seleccionados
+        if len(venta_ids) > 10:
+            return JsonResponse({
+                'success': False,
+                'error': 'Se seleccionaron demasiados albaranes. Por favor, envíe un máximo de 10 albaranes a la vez.'
+            }, status=400)
+        
+        logger.info(f"Procesando {len(venta_ids)} albaranes: {venta_ids}")
+        
+        # Obtener la agencia de aduana
+        try:
+            agencia = AgenciaAduana.objects.get(id=agencia_id)
+        except AgenciaAduana.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'La agencia de aduana especificada no existe'
+            }, status=404)
+        
+        # Obtener los correos seleccionados por el usuario
+        selected_emails_json = request.POST.get('selected_emails')
+        if selected_emails_json:
+            try:
+                emails = json.loads(selected_emails_json)
+                # Asegurar que emails es una lista
+                if not isinstance(emails, list):
+                    emails = []
+            except json.JSONDecodeError:
+                emails = []
+        else:
+            # Si no se especificaron correos seleccionados, usar todos los correos de la agencia (comportamiento anterior)
+            emails = [agencia.correo] if agencia.correo else []
+            if agencia.correos_adicionales:
+                # Añadir correos adicionales si existen (separados por coma)
+                additional_emails = [email.strip() for email in agencia.correos_adicionales.split(',') if email.strip()]
+                emails.extend(additional_emails)
+        
+        if not emails:
+            return JsonResponse({
+                'success': False,
+                'error': 'No se seleccionaron direcciones de correo electrónico'
+            })
+        
+        # Obtener las ventas para incluir información en el correo
+        ventas = Venta.objects.select_related('cliente').filter(id__in=venta_ids)
+        if not ventas:
+            return JsonResponse({
+                'success': False,
+                'error': 'No se encontraron las ventas especificadas'
+            }, status=404)
+        
+        # Buscar PDFs adjuntos con procesamiento optimizado
+        pdf_files = []
+        total_size = 0
+        max_total_size = 20 * 1024 * 1024  # 20MB total máximo
+        
+        for i in range(50):  # Limitar a 50 archivos como máximo
+            pdf_id = request.POST.get(f'pdf_id_{i}')
+            pdf_data = request.POST.get(f'pdf_data_{i}')
             
-        ventas_info.append(info)
-    
-    # Construir el cuerpo del mensaje
-    body = f"""
+            if not pdf_id or not pdf_data:
+                continue
+            
+            try:
+                logger.info(f"Procesando PDF #{pdf_id}")
+                
+                # Si viene como data URI, extraer solo la parte base64
+                if 'base64,' in pdf_data:
+                    pdf_base64 = pdf_data.split('base64,')[1]
+                else:
+                    pdf_base64 = pdf_data
+                    
+                # Verificar la longitud del PDF antes de decodificar
+                pdf_base64_size = len(pdf_base64)
+                estimated_size = (pdf_base64_size * 3) // 4  # Tamaño aproximado decodificado
+                
+                if estimated_size > 5242880:  # 5MB por archivo
+                    logger.warning(f"PDF #{pdf_id} demasiado grande: {estimated_size} bytes")
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'El PDF del albarán #{pdf_id} es demasiado grande ({estimated_size // 1024} KB). Intente comprimir el PDF o enviar menos albaranes a la vez.'
+                    }, status=413)
+                
+                # Verificar tamaño total acumulado
+                if total_size + estimated_size > max_total_size:
+                    logger.warning(f"Tamaño total excedido: {total_size + estimated_size} bytes")
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'El tamaño total de los PDFs excede el límite permitido. Por favor, envíe menos albaranes a la vez.'
+                    }, status=413)
+                
+                # Decodificar los datos PDF
+                try:
+                    pdf_bytes = base64.b64decode(pdf_base64)
+                    total_size += len(pdf_bytes)
+                    logger.info(f"PDF #{pdf_id} decodificado exitosamente: {len(pdf_bytes)} bytes")
+                except Exception as e:
+                    logger.error(f"Error decodificando PDF #{pdf_id}: {str(e)}")
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'Error al decodificar el PDF del albarán #{pdf_id}: {str(e)}'
+                    }, status=400)
+                
+                # Buscar la venta correspondiente
+                venta_id = int(pdf_id)
+                venta = next((v for v in ventas if v.id == venta_id), None)
+                
+                if venta:
+                    # Añadir a la lista de archivos
+                    pdf_files.append({
+                        'filename': f'Albaran_{venta.id}_{venta.cliente.nombre.replace(" ", "_")}.pdf',
+                        'content': pdf_bytes,
+                        'venta': venta
+                    })
+                    logger.info(f"PDF #{pdf_id} agregado a la lista de envío")
+                    
+            except Exception as e:
+                logger.error(f"Error procesando PDF #{pdf_id}: {str(e)}")
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Error al procesar el PDF del albarán #{pdf_id}: {str(e)}'
+                })
+        
+        if not pdf_files:
+            return JsonResponse({
+                'success': False,
+                'error': 'No se recibieron datos PDF válidos'
+            }, status=400)
+        
+        # Obtener la fecha de entrega del primer albarán o del albarán actual si está incluido
+        fecha_entrega = None
+        # Primero buscar si el albarán actual está incluido
+        current_venta_id = request.POST.get('current_venta_id')
+        if current_venta_id:
+            try:
+                current_venta_id = int(current_venta_id)
+                current_venta = next((pdf['venta'] for pdf in pdf_files if pdf['venta'].id == current_venta_id), None)
+                if current_venta and current_venta.fecha_entrega:
+                    fecha_entrega = current_venta.fecha_entrega
+            except (ValueError, TypeError):
+                pass
+        
+        # Si no se encontró fecha con el albarán actual, usar la primera fecha disponible
+        if not fecha_entrega and pdf_files:
+            for pdf in pdf_files:
+                if pdf['venta'].fecha_entrega:
+                    fecha_entrega = pdf['venta'].fecha_entrega
+                    break
+        
+        # Actualizar el asunto con la fecha de entrega si está disponible
+        if fecha_entrega:
+            email_subject = f"{email_subject} - Fecha: {fecha_entrega.strftime('%d/%m/%Y')}"
+        
+        # Preparar la información detallada de los albaranes
+        ventas_info = []
+        for pdf in pdf_files:
+            venta = pdf['venta']
+            cliente = venta.cliente
+            info = f"• Albarán #{venta.id} - Cliente: {cliente.nombre}"
+            
+            # Añadir dirección y ciudad
+            if hasattr(cliente, 'domicilio_albaran') and cliente.domicilio_albaran:
+                info += f"\n  Dirección: {cliente.domicilio_albaran}"
+            if hasattr(cliente, 'ciudad') and cliente.ciudad:
+                info += f"\n  Ciudad: {cliente.ciudad}"
+            
+            # Añadir fecha de entrega
+            if venta.fecha_entrega:
+                info += f"\n  Fecha de entrega: {venta.fecha_entrega.strftime('%d/%m/%Y')}"
+                
+            ventas_info.append(info)
+        
+        # Construir el cuerpo del mensaje
+        body = f"""
 Estimado/a {agencia.nombre},
 
 Adjunto encontrará los siguientes albaranes para trámites de aduana:
@@ -840,33 +868,33 @@ Por favor, proceda con los trámites correspondientes.
 Gracias por su colaboración.
 """
 
-    # Añadir mensaje adicional si existe (en lugar de reemplazar)
-    if email_message:
-        body += f"""
+        # Añadir mensaje adicional si existe (en lugar de reemplazar)
+        if email_message:
+            body += f"""
 
 Nota adicional:
 {email_message}
 """
 
-    # Añadir firma al final
-    body += """
+        # Añadir firma al final
+        body += """
 
 Atentamente,
 Luz Mery Melo Mejia
 L&M Exotic Fruit
-    """
-    
-    # Preparar adjuntos para Mailjet
-    attachments = []
-    for pdf_file in pdf_files:
-        attachments.append((
-            pdf_file['filename'],
-            pdf_file['content'],
-            'application/pdf'
-        ))
-    
-    # Enviar email usando Mailjet directamente
-    try:
+        """
+        
+        # Preparar adjuntos para Mailjet
+        attachments = []
+        for pdf_file in pdf_files:
+            attachments.append((
+                pdf_file['filename'],
+                pdf_file['content'],
+                'application/pdf'
+            ))
+        
+        # Enviar email usando Mailjet directamente
+        logger.info(f"Iniciando envío de email a {len(emails)} destinatario(s)")
         success, error, email_log = send_email_with_mailjet(
             subject=email_subject,
             body=body,
@@ -880,8 +908,10 @@ L&M Exotic Fruit
         )
         
         if not success:
+            logger.error(f"Error enviando email: {error}")
             raise Exception(f"Error enviando email: {error}")
         
+        logger.info(f"Email enviado exitosamente con {len(pdf_files)} adjunto(s)")
         return JsonResponse({
             'success': True,
             'emails': ", ".join(emails),
@@ -890,10 +920,10 @@ L&M Exotic Fruit
         
     except Exception as e:
         import traceback
-        print(f"Error al enviar el email: {str(e)}")
-        print(traceback.format_exc())
+        logger.error(f"Error en enviar_albaranes_aduana: {str(e)}")
+        logger.error(traceback.format_exc())
         return JsonResponse({
             'success': False,
             'error': f'Error al enviar el email: {str(e)}'
-        })
+        }, status=500)
 

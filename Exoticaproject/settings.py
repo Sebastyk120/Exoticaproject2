@@ -248,8 +248,12 @@ except KeyError as e:
     raise ImproperlyConfigured(f'La variable de entorno {e} no está definida para Mailjet')
 ADMIN_SITE_NAME = 'Administración L&M Exótica'
 
-# Aumentar límite para datos de upload (10MB)
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB en bytes
+# Aumentar límite para datos de upload (25MB para múltiples PDFs)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 26214400  # 25MB en bytes
+FILE_UPLOAD_MAX_MEMORY_SIZE = 26214400  # 25MB en bytes
+
+# Aumentar límite del tamaño del cuerpo de la petición
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000  # Aumentar para manejar múltiples campos de PDFs
 
 # Configuración de CAPTCHA
 CAPTCHA_LENGTH = 5  # Longitud del captcha
