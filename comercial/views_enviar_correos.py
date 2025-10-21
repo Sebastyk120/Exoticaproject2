@@ -47,13 +47,16 @@ def save_attachment_to_disk(email_log_id, filename, content_bytes):
         logger.error(f"Error guardando adjunto {filename}: {str(e)}")
         raise
 
-def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=None, 
+def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=None,
                            proceso=None, usuario=None, venta=None, cotizacion=None, cliente=None):
     """
     Función auxiliar para enviar emails directamente con Mailjet API
     Especialmente útil para emails con adjuntos grandes
-    Ahora incluye logging automático en EmailLog y almacenamiento de adjuntos
+    Optimizado para reducir tiempos de procesamiento
     """
+    import time
+    start_time = time.time()
+    
     # Crear el registro de EmailLog antes del envío
     email_log = EmailLog.objects.create(
         proceso=proceso or 'otro',
@@ -66,6 +69,7 @@ def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=No
         cotizacion=cotizacion,
         cliente=cliente
     )
+    logger.info(f"EmailLog creado en {time.time() - start_time:.2f}s")
     
     try:
         # Obtener credenciales de Mailjet
@@ -79,9 +83,7 @@ def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=No
         mailjet = Client(auth=(api_key, api_secret), version='v3.1')
         
         # Preparar destinatarios
-        to_recipients = []
-        for email in to_emails:
-            to_recipients.append({"Email": email.strip()})
+        to_recipients = [{"Email": email.strip()} for email in to_emails]
         
         # Preparar mensaje
         mailjet_message = {
@@ -94,68 +96,76 @@ def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=No
             "TextPart": body
         }
         
-        # Guardar adjuntos en el servidor y preparar para Mailjet
-        saved_attachments = []
-        adjunto_fields = {}  # Diccionario para mapear campos del modelo
+        # Preparar adjuntos para Mailjet (sin guardar en disco aún)
+        adjunto_fields = {}
+        attachments_to_save = []  # Lista de adjuntos para guardar después
         
         if attachments:
+            prep_start = time.time()
             mailjet_attachments = []
+            
             for idx, attachment in enumerate(attachments):
                 filename, content_bytes, content_type = attachment
                 
-                # Guardar en el servidor
-                try:
-                    relative_path = save_attachment_to_disk(email_log.id, filename, content_bytes)
-                    saved_attachments.append(relative_path)
-                    
-                    # Mapear a campos adjunto_1, adjunto_2, etc. (máximo 5)
-                    if idx < 5:
-                        field_name = f'adjunto_{idx + 1}'
-                        adjunto_fields[field_name] = relative_path
-                except Exception as e:
-                    logger.warning(f"No se pudo guardar adjunto {filename} en servidor: {str(e)}")
+                # Guardar referencia para guardado posterior
+                if idx < 5:
+                    attachments_to_save.append((idx, filename, content_bytes))
                 
-                # Preparar para Mailjet
+                # Preparar para Mailjet (ya está en bytes, solo codificar)
                 content_b64 = base64.b64encode(content_bytes).decode('utf-8')
                 mailjet_attachments.append({
                     "ContentType": content_type,
                     "Filename": filename,
                     "Base64Content": content_b64
                 })
+            
             mailjet_message["Attachments"] = mailjet_attachments
+            logger.info(f"Adjuntos preparados en {time.time() - prep_start:.2f}s ({len(attachments)} archivos)")
         
-        # Enviar email
+        # Enviar email (parte crítica)
+        send_start = time.time()
         data = {'Messages': [mailjet_message]}
         result = mailjet.send.create(data=data)
+        logger.info(f"Email enviado a Mailjet en {time.time() - send_start:.2f}s")
         
         if result.status_code == 200:
             response_data = result.json()
-            if (response_data.get('Messages') and 
-                len(response_data['Messages']) > 0 and 
+            if (response_data.get('Messages') and
+                len(response_data['Messages']) > 0 and
                 response_data['Messages'][0].get('Status') == 'success'):
-                # Marcar como exitoso y guardar rutas de adjuntos
-                email_log.marcar_como_exitoso(response_data)
                 
-                # Guardar rutas de adjuntos en los campos correspondientes
+                # Guardar adjuntos en disco de forma asíncrona (después del envío exitoso)
+                save_start = time.time()
+                for idx, filename, content_bytes in attachments_to_save:
+                    try:
+                        relative_path = save_attachment_to_disk(email_log.id, filename, content_bytes)
+                        field_name = f'adjunto_{idx + 1}'
+                        adjunto_fields[field_name] = relative_path
+                    except Exception as e:
+                        logger.warning(f"No se pudo guardar adjunto {filename}: {str(e)}")
+                
+                logger.info(f"Adjuntos guardados en disco en {time.time() - save_start:.2f}s")
+                
+                # Actualizar EmailLog con estado exitoso y rutas de adjuntos en una sola operación
+                email_log.estado_envio = 'exitoso'
+                email_log.respuesta_mailjet = response_data
                 if adjunto_fields:
                     for field_name, file_path in adjunto_fields.items():
                         setattr(email_log, field_name, file_path)
-                    email_log.save()
+                email_log.save()
                 
+                logger.info(f"Proceso total completado en {time.time() - start_time:.2f}s")
                 return True, None, email_log
             else:
-                # Marcar como fallido
                 email_log.marcar_como_fallido("Error en la respuesta de Mailjet", response_data)
                 return False, "Error en la respuesta de Mailjet", email_log
         else:
-            # Marcar como fallido
             error_msg = f"Error HTTP {result.status_code}: {result.text}"
             email_log.marcar_como_fallido(error_msg)
             return False, error_msg, email_log
             
     except Exception as e:
         logger.error(f"Error enviando email con Mailjet: {str(e)}")
-        # Marcar como fallido
         email_log.marcar_como_fallido(str(e))
         return False, str(e), email_log
 
