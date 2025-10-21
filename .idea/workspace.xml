@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Implementacion de adjuntos.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -292,22 +292,7 @@
       <workItem from="1760988644896" duration="1572000" />
       <workItem from="1760991158882" duration="5579000" />
       <workItem from="1761076340591" duration="500000" />
-    </task>
-    <task id="LOCAL-00049" summary="Cambio de lista de compras 10.">
-      <option name="closed" value="true" />
-      <created>1744295353551</created>
-      <option name="number" value="00049" />
-      <option name="presentableId" value="LOCAL-00049" />
-      <option name="project" value="LOCAL" />
-      <updated>1744295353551</updated>
-    </task>
-    <task id="LOCAL-00050" summary="Retoques">
-      <option name="closed" value="true" />
-      <created>1744318928111</created>
-      <option name="number" value="00050" />
-      <option name="presentableId" value="LOCAL-00050" />
-      <option name="project" value="LOCAL" />
-      <updated>1744318928111</updated>
+      <workItem from="1761077310851" duration="109000" />
     </task>
     <task id="LOCAL-00051" summary="Utilidades.">
       <option name="closed" value="true" />
@@ -685,7 +670,23 @@
       <option name="project" value="LOCAL" />
       <updated>1760998235256</updated>
     </task>
-    <option name="localTasksCounter" value="98" />
+    <task id="LOCAL-00098" summary="Implementacion de adjuntos.">
+      <option name="closed" value="true" />
+      <created>1761077360255</created>
+      <option name="number" value="00098" />
+      <option name="presentableId" value="LOCAL-00098" />
+      <option name="project" value="LOCAL" />
+      <updated>1761077360256</updated>
+    </task>
+    <task id="LOCAL-00099" summary="Implementacion de adjuntos.">
+      <option name="closed" value="true" />
+      <created>1761077383246</created>
+      <option name="number" value="00099" />
+      <option name="presentableId" value="LOCAL-00099" />
+      <option name="project" value="LOCAL" />
+      <updated>1761077383246</updated>
+    </task>
+    <option name="localTasksCounter" value="100" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

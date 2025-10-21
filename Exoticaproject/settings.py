@@ -32,7 +32,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-gywh)zrdwb8ohd$l97a2mj_+u^pa6@hnsu$=)!ud(3l27%fe-y'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = Falsew
+DEBUG = False
 
 # Site settings for SEO
 BASE_URL = 'https://luzmeloexoticfruits.com'
