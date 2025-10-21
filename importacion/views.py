@@ -6,8 +6,8 @@ from django.contrib.auth.decorators import login_required
 from .models import Bodega, Pedido
 from django.utils import timezone
 from django.db import transaction
-from django.core.mail import EmailMessage
 from django.conf import settings
+from comercial.views_enviar_correos import send_email_with_mailjet
 import base64
 from datetime import datetime
 
@@ -71,6 +71,7 @@ def enviar_pedido_email(request, pedido_id):
     """
     Vista para enviar el PDF de solicitud de pedido generado en el cliente por correo electrónico
     al exportador y los correos adicionales registrados.
+    Actualizado para usar la configuración optimizada de Mailjet.
     """
     if request.method != 'POST':
         return JsonResponse({
@@ -99,21 +100,37 @@ def enviar_pedido_email(request, pedido_id):
         # Obtener la información del pedido
         pedido = get_object_or_404(Pedido, pk=pedido_id)
         
-        # Preparar las direcciones de correo
-        emails = [pedido.exportador.email] if pedido.exportador.email else []  # Correo principal
-        if pedido.exportador.correos_adicionales:
-            # Añadir correos adicionales si existen (separados por coma)
-            additional_emails = [email.strip() for email in pedido.exportador.correos_adicionales.split(',') if email.strip()]
-            emails.extend(additional_emails)
+        # Obtener los correos seleccionados por el usuario (si se envían)
+        selected_emails_json = request.POST.get('selected_emails')
+        if selected_emails_json:
+            try:
+                import json
+                emails = json.loads(selected_emails_json)
+                # Asegurar que emails es una lista
+                if not isinstance(emails, list):
+                    emails = []
+            except json.JSONDecodeError:
+                emails = []
+        else:
+            # Si no se especificaron correos seleccionados, usar todos los correos del exportador
+            emails = [pedido.exportador.email] if pedido.exportador.email else []
+            if pedido.exportador.correos_adicionales:
+                # Añadir correos adicionales si existen (separados por coma)
+                additional_emails = [email.strip() for email in pedido.exportador.correos_adicionales.split(',') if email.strip()]
+                emails.extend(additional_emails)
         
         if not emails:
             return JsonResponse({
                 'success': False,
-                'error': 'El exportador no tiene dirección de correo electrónico'
+                'error': 'No se seleccionaron direcciones de correo electrónico'
             })
         
+        # Obtener asunto y mensaje personalizados (si se envían)
+        custom_subject = request.POST.get('email_subject')
+        custom_message = request.POST.get('email_message')
+        
         # Preparar el mensaje de correo
-        subject = f"Solicitud de Pedido #{pedido.id} - L&M Exotic Fruit"
+        subject = custom_subject or f"Solicitud de Pedido #{pedido.id} - L&M Exotic Fruit"
         body = f"""
 Estimado/a {pedido.exportador.nombre},
 
@@ -122,7 +139,15 @@ Adjunto encontrará la solicitud del pedido #{pedido.id}.
 Fecha de emisión: {datetime.now().strftime('%d/%m/%Y')}
 Fecha de entrega solicitada: {pedido.fecha_entrega.strftime('%d/%m/%Y')}
 Semana: {pedido.semana}
+"""
 
+        # Añadir mensaje personalizado si existe
+        if custom_message:
+            body += f"""
+{custom_message}
+"""
+
+        body += """
 Por favor, preparar el envío para la fecha indicada y asegurar que el producto cumpla con todas las normativas de exportación.
 Para cualquier aclaración, no dude en contactarnos.
 
@@ -133,23 +158,26 @@ Luz Mery Melo Mejia
 L&M Exotic Fruit
         """
         
-        # Crear y enviar el email
-        email = EmailMessage(
+        # Preparar adjunto para Mailjet
+        filename = f'Solicitud_Pedido_{pedido.id}_{pedido.exportador.nombre.replace(" ", "_")}.pdf'
+        attachments = [(filename, pdf_bytes, 'application/pdf')]
+        
+        # Enviar email usando Mailjet directamente para mejor manejo de adjuntos
+        success, error, email_log = send_email_with_mailjet(
             subject=subject,
             body=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            to=emails,
+            to_emails=emails,
+            attachments=attachments,
+            proceso='pedido',
+            usuario=request.user,
+            venta=None,
+            cotizacion=None,
+            cliente=None
         )
         
-        # Adjuntar el PDF al email
-        email.attach(
-            f'Solicitud_Pedido_{pedido.id}_{pedido.exportador.nombre.replace(" ", "_")}.pdf',
-            pdf_bytes,
-            'application/pdf'
-        )
-        
-        # Enviar el email
-        email.send()
+        if not success:
+            raise Exception(f"Error enviando email: {error}")
         
         return JsonResponse({
             'success': True,
