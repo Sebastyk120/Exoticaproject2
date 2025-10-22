@@ -19,6 +19,18 @@ import mimetypes
 
 logger = logging.getLogger(__name__)
 
+def sanitize_filename(filename):
+    """
+    Sanitiza nombres de archivo eliminando caracteres problemáticos
+    que podrían causar errores al guardar en disco
+    """
+    # Reemplazar barras diagonales y otros caracteres problemáticos
+    sanitized = filename.replace('/', '_').replace('\\', '_')
+    # También reemplazar otros caracteres que podrían causar problemas
+    sanitized = sanitized.replace(':', '_').replace('*', '_').replace('?', '_')
+    sanitized = sanitized.replace('"', '_').replace('<', '_').replace('>', '_').replace('|', '_')
+    return sanitized
+
 def save_attachment_to_disk(email_log_id, filename, content_bytes):
     """
     Guarda un archivo adjunto en el servidor
@@ -33,15 +45,18 @@ def save_attachment_to_disk(email_log_id, filename, content_bytes):
         email_log_folder = os.path.join(attachments_root, str(email_log_id))
         os.makedirs(email_log_folder, exist_ok=True)
         
+        # Sanitizar el nombre del archivo para evitar problemas con caracteres especiales
+        safe_filename = sanitize_filename(filename)
+        
         # Generar ruta completa del archivo
-        file_path = os.path.join(email_log_folder, filename)
+        file_path = os.path.join(email_log_folder, safe_filename)
         
         # Guardar el archivo
         with open(file_path, 'wb') as f:
             f.write(content_bytes)
         
-        # Retornar la ruta relativa para almacenar en la BD
-        relative_path = os.path.join(settings.EMAIL_ATTACHMENTS_FOLDER, str(email_log_id), filename)
+        # Retornar la ruta relativa para almacenar en la BD (con nombre sanitizado)
+        relative_path = os.path.join(settings.EMAIL_ATTACHMENTS_FOLDER, str(email_log_id), safe_filename)
         return relative_path
     except Exception as e:
         logger.error(f"Error guardando adjunto {filename}: {str(e)}")
@@ -266,6 +281,7 @@ L&M Exotic Fruit
         
         # Preparar adjunto para Mailjet
         filename = f'Factura_{venta.numero_factura}_{venta.cliente.nombre.replace(" ", "_")}.pdf'
+        filename = sanitize_filename(filename)
         attachments = [(filename, pdf_bytes, 'application/pdf')]
         
         # Enviar email usando Mailjet directamente para mejor manejo de adjuntos
@@ -380,6 +396,7 @@ L&M Exotic Fruit
 
         # Preparar adjunto para Mailjet
         filename = f'Albaran_Cliente_{venta.id}_{venta.cliente.nombre.replace(" ", "_")}.pdf'
+        filename = sanitize_filename(filename)
         attachments = [(filename, pdf_bytes, 'application/pdf')]
         
         # Enviar email usando Mailjet directamente
@@ -519,6 +536,7 @@ L&M Exotic Fruit
 
         # Preparar adjunto para Mailjet
         filename = f'Factura_Rectificativa_{venta.numero_nc}_{venta.cliente.nombre.replace(" ", "_")}.pdf'
+        filename = sanitize_filename(filename)
         attachments = [(filename, pdf_bytes, 'application/pdf')]
         
         # Enviar email usando Mailjet directamente
@@ -802,8 +820,10 @@ def enviar_albaranes_aduana(request):
                 
                 if venta:
                     # Añadir a la lista de archivos
+                    filename = f'Albaran_{venta.id}_{venta.cliente.nombre.replace(" ", "_")}.pdf'
+                    filename = sanitize_filename(filename)
                     pdf_files.append({
-                        'filename': f'Albaran_{venta.id}_{venta.cliente.nombre.replace(" ", "_")}.pdf',
+                        'filename': filename,
                         'content': pdf_bytes,
                         'venta': venta
                     })
