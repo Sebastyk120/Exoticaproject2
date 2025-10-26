@@ -20,6 +20,7 @@ urlpatterns = [
     path('ventas/<int:venta_id>/detalles-json/', views_ventas.obtener_detalles_venta, name='obtener_detalles_venta'),
     path('obtener-precio-presentacion/<int:presentacion_id>/<int:cliente_id>/', views_ventas.obtener_precio_presentacion, name='obtener_precio_presentacion'),
     path('ventas/<int:venta_id>/generar-factura/', views_ventas.generar_factura, name='generar_factura'),
+    path('ventas/<int:venta_id>/generar-factura-weasyprint/', views_ventas.generar_factura_weasyprint, name='generar_factura_weasyprint'),
     path('ventas/<int:venta_id>/generar-rectificativa/', views_ventas.generar_rectificativa, name='generar_rectificativa'),
     path('ventas/<int:venta_id>/generar-albaran/', views_ventas.generar_albaran, name='generar_albaran'),
     path('ventas/<int:venta_id>/generar-albaran-cliente/', views_ventas.generar_albaran_cliente, name='generar_albaran_cliente'),

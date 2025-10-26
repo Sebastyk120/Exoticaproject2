@@ -97,6 +97,9 @@
             <button id="downloadPdf" class="btn btn-primary">
                 <i class="fas fa-file-pdf"></i> Descargar PDF
             </button>
+            <a href="{% url 'comercial:generar_factura_weasyprint' venta.id %}" class="btn btn-info" id="downloadPdfWeasyPrint">
+                <i class="fas fa-file-pdf"></i> PDF (WeasyPrint)
+            </a>
             <button id="sendEmail" class="btn btn-success">
                 <i class="fas fa-envelope"></i> Enviar por Email
             </button>
@@ -334,6 +337,24 @@
                         button.disabled = false;
                     }, 1500);
                 });
+            });
+
+            // Función para el botón de WeasyPrint
+            document.getElementById('downloadPdfWeasyPrint').addEventListener('click', function(e) {
+                const button = this;
+                const originalText = button.innerHTML;
+                
+                // Mostrar indicador de carga
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
+                button.style.pointerEvents = 'none';
+                button.style.opacity = '0.7';
+                
+                // Restaurar el botón después de un tiempo (el PDF se descargará automáticamente)
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.pointerEvents = '';
+                    button.style.opacity = '';
+                }, 3000);
             });
 
             // Función para cargar los correos electrónicos en el modal
