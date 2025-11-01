@@ -196,7 +196,7 @@ def generar_factura_reportlab(request, venta_id):
             Paragraph(f'<b>Cliente:</b> {venta.cliente.nombre}', normal_style),
             Paragraph(f'<b>NIF/CIF:</b> {venta.cliente.cif or "-"}', normal_style),
             Paragraph(f'<b>Dirección:</b> {venta.cliente.domicilio or "-"}', normal_style),
-            Paragraph(f'<b>Ciudad:</b> {venta.cliente.ciudad or "-"}, {venta.cliente.pais or "-"}', normal_style),
+            Paragraph(f'<b>Ciudad:</b> {venta.cliente.ciudad or "-"}', normal_style),
             Paragraph(f'<b>Teléfono:</b> {venta.cliente.telefono or "-"}', normal_style),
             Paragraph(f'<b>Email:</b> {venta.cliente.email or "-"}', normal_style)
         ]
