@@ -16,12 +16,6 @@ from productos.models import Presentacion, ListaPreciosVentas
 from django.core.exceptions import ValidationError
 from importacion.models import Bodega, Pedido
 
-try:
-    from weasyprint import HTML, CSS
-    WEASYPRINT_AVAILABLE = True
-except ImportError:
-    WEASYPRINT_AVAILABLE = False
-
 @login_required
 def lista_ventas(request):
     """View to list all sales with search and filter functionality"""
@@ -589,40 +583,3 @@ def rectificativa_cliente_token(request, venta_id, token):
         'detalles': detalles,
         'token': token
     })
-
-@login_required
-def generar_factura_weasyprint(request, venta_id):
-    """View to generate invoice PDF using WeasyPrint"""
-    if not WEASYPRINT_AVAILABLE:
-        messages.error(request, "WeasyPrint no está disponible. Por favor, instale la librería.")
-        return redirect('comercial:generar_factura', venta_id=venta_id)
-    
-    venta = get_object_or_404(Venta, pk=venta_id)
-    detalles = DetalleVenta.objects.filter(venta=venta).select_related('presentacion', 'presentacion__fruta')
-    
-    # Renderizar el template HTML
-    html_string = render_to_string('ventas/generar_factura_weasyprint.html', {
-        'venta': venta,
-        'detalles': detalles,
-        'request': request,  # Importante para que funcionen las URLs estáticas
-    })
-    
-    # Crear el PDF con WeasyPrint
-    # Usar base_url para que las rutas relativas funcionen correctamente
-    base_url = request.build_absolute_uri('/')[:-1]  # Quitar el slash final
-    
-    html = HTML(string=html_string, base_url=base_url)
-    
-    # Obtener el CSS para el PDF
-    css_path = os.path.join(settings.BASE_DIR, 'comercial/static/css/ventas/factura_venta.css')
-    css = CSS(filename=css_path)
-    
-    # Generar el PDF
-    pdf = html.write_pdf(stylesheets=[css])
-    
-    # Preparar la respuesta HTTP
-    response = HttpResponse(pdf, content_type='application/pdf')
-    filename = f"factura_{venta.numero_factura if venta.numero_factura else venta.id}_{venta.cliente.nombre}.pdf"
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
-    
-    return response

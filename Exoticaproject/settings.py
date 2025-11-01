@@ -262,3 +262,10 @@ CAPTCHA_LETTER_ROTATION = (-15, 15)  # Rotación de letras
 CAPTCHA_BACKGROUND_COLOR = '#ffffff'  # Color de fondo
 CAPTCHA_FOREGROUND_COLOR = '#001100'  # Color de las letras
 CAPTCHA_TIMEOUT = 5  # Tiempo de validez en minutos
+
+
+# Variables para PDF weasyprint
+"""
+RAILPACK_BUILD_APT_PACKAGES = libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b libcairo2 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info libxml2-dev libxslt-dev
+RAILPACK_DEPLOY_APT_PACKAGES = libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b libcairo2 libgdk-pixbuf2.0-0 shared-mime-info
+"""

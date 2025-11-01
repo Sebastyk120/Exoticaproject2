@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Error de guardado de Barras contrarias en guardado en disco." />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Error de guardado de Barras contrarias en guardado en disco.">
+      <change afterPath="$PROJECT_DIR$/comercial/view_test_export_pdf.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comercial/views_ventas.py" beforeDir="false" afterPath="$PROJECT_DIR$/comercial/views_ventas.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -40,6 +45,9 @@
     &quot;accountId&quot;: &quot;ba77ec36-c992-4f7f-828f-e052b1ee1556&quot;
   }
 }</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>

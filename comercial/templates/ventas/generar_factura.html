@@ -97,8 +97,8 @@
             <button id="downloadPdf" class="btn btn-primary">
                 <i class="fas fa-file-pdf"></i> Descargar PDF
             </button>
-            <a href="{% url 'comercial:generar_factura_weasyprint' venta.id %}" class="btn btn-dark" id="downloadPdfWeasyPrint">
-                <i class="fas fa-file-pdf"></i> PDF (WeasyPrint)
+            <a href="{% url 'comercial:generar_factura_reportlab' venta.id %}" class="btn btn-dark" id="downloadPdfReportLab">
+                <i class="fas fa-file-pdf"></i> PDF (ReportLab)
             </a>
             <button id="sendEmail" class="btn btn-success">
                 <i class="fas fa-envelope"></i> Enviar por Email
@@ -339,8 +339,8 @@
                 });
             });
 
-            // Función para el botón de WeasyPrint
-            document.getElementById('downloadPdfWeasyPrint').addEventListener('click', function(e) {
+            // Función para el botón de ReportLab
+            document.getElementById('downloadPdfReportLab').addEventListener('click', function(e) {
                 const button = this;
                 const originalText = button.innerHTML;
                 
