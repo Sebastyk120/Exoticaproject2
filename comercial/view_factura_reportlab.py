@@ -143,217 +143,217 @@ def generar_factura_reportlab(request, venta_id):
     )
     
     # Header with logo and company info
-    header_data = []
-    
-    # Logo section
     logo_path = os.path.join(settings.BASE_DIR, 'comercial/static/img/logo-oficial.jpg')
     
-    # Company info with logo
-    company_col = []
+    # Create logo
     if os.path.exists(logo_path):
         try:
             logo = Image(logo_path, width=2.6*cm, height=2.6*cm)
-            company_col.append([logo])
         except:
-            company_col.append([Paragraph('[LOGO]', normal_style)])
+            logo = Paragraph('<font size="8">[LOGO]</font>', normal_style)
     else:
-        company_col.append([Paragraph('[LOGO]', normal_style)])
+        logo = Paragraph('<font size="8">[LOGO]</font>', normal_style)
     
-    # Company title and details
-    company_title = ParagraphStyle(
-        'CompanyTitle',
-        parent=styles['Normal'],
-        fontSize=14,
-        textColor=primary_color,
-        fontName=font_name + '-Bold' if font_name == 'Helvetica' else font_name,
-        leading=16
-    )
-    
-    company_info = f"""
+    # Company info
+    company_info = Paragraph('''
     <b><font size="14" color="#1A7B6B">LUZ MERY MELO MEJIA</font></b><br/>
     <font size="9" color="#7f8c8d">Calle Juan de la cierva # 23</font><br/>
     <font size="9" color="#7f8c8d">08210 Barbera del valles, España</font><br/>
     <font size="9" color="#7f8c8d">Tel: +34 633 49 42 28</font><br/>
     <font size="9" color="#7f8c8d">Email: import@luzmeloexoticfruits.com</font><br/>
     <font size="9" color="#7f8c8d">CIF: 26062884C</font>
-    """
+    ''', company_style)
     
-    company_table = Table([[logo if os.path.exists(logo_path) else Paragraph('[LOGO]', normal_style), Paragraph(company_info, company_style)]],
-                         colWidths=[2.6*cm, 6*cm])
-    company_table.setStyle(TableStyle([
-        ('ALIGN', (0, 0), (0, 0), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 3),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-        ('TOPPADDING', (0, 0), (-1, -1), 2),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-    ]))
-    
-    # Invoice info
-    invoice_title = Paragraph('<b><font size="16" color="#1A7B6B">FACTURA</font></b>', title_style)
+    # Invoice info section
     invoice_number = f"Nº: {venta.numero_factura if venta.numero_factura else venta.id}"
-    
-    invoice_info_parts = [
-        invoice_title,
-        Paragraph(f'<b><font size="13" color="#2c3e50">{invoice_number}</font></b>', normal_style),
-        Spacer(1, 2),
-        Paragraph(f'<font size="9" color="#7f8c8d"><b>Fecha Emisión:</b> {venta.fecha_entrega.strftime("%d/%m/%Y")}</font>', small_style),
-        Paragraph(f'<font size="9" color="#e74c3c"><b>Fecha Vencimiento:</b> {venta.fecha_vencimiento.strftime("%d/%m/%Y") if venta.fecha_vencimiento else "-"}</font>', small_style),
-        Paragraph(f'<font size="9" color="#7f8c8d"><b>Semana:</b> {venta.semana or "-"}</font>', small_style),
-    ]
+    invoice_info_html = f'''
+    <para alignment="right">
+    <b><font size="16" color="#1A7B6B">FACTURA</font></b><br/>
+    <b><font size="13" color="#2c3e50">{invoice_number}</font></b><br/><br/>
+    <font size="9" color="#7f8c8d"><b>Fecha Emisión:</b> {venta.fecha_entrega.strftime("%d/%m/%Y")}</font><br/>
+    <font size="9" color="#e74c3c"><b>Fecha Vencimiento:</b> {venta.fecha_vencimiento.strftime("%d/%m/%Y") if venta.fecha_vencimiento else "-"}</font><br/>
+    <font size="9" color="#7f8c8d"><b>Semana:</b> {venta.semana or "-"}</font>'''
     
     if venta.origen:
-        invoice_info_parts.append(Paragraph(f'<font size="9" color="#7f8c8d"><b>Origen:</b> {venta.origen}</font>', small_style))
+        invoice_info_html += f'<br/><font size="9" color="#7f8c8d"><b>Origen:</b> {venta.origen}</font>'
     
-    invoice_table = Table([[p] for p in invoice_info_parts], colWidths=[5*cm])
-    invoice_table.setStyle(TableStyle([
-        ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 2),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-        ('BACKGROUND', (0, 0), (-1, -1), light_bg),
-    ]))
+    invoice_info_html += '</para>'
     
-    header_table = Table([[company_table, invoice_table]], colWidths=[9*cm, 9*cm])
+    invoice_info_style = ParagraphStyle(
+        'InvoiceInfo',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=text_light,
+        fontName=font_name,
+        leading=11,
+        alignment=TA_RIGHT
+    )
+    
+    invoice_info = Paragraph(invoice_info_html, invoice_info_style)
+    
+    # Header table with logo, company info and invoice info
+    header_table = Table([
+        [logo, company_info, invoice_info]
+    ], colWidths=[2.8*cm, 7.5*cm, 7.5*cm])
+    
     header_table.setStyle(TableStyle([
-        ('ALIGN', (0, 0), (0, 0), 'LEFT'),
-        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
+        ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+        ('ALIGN', (1, 0), (1, 0), 'LEFT'),
+        ('ALIGN', (2, 0), (2, 0), 'RIGHT'),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 2),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 2),
-        ('TOPPADDING', (0, 0), (-1, -1), 2),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('BACKGROUND', (2, 0), (2, 0), light_bg),
         ('LINEBELOW', (0, 0), (-1, -1), 2, primary_color),
     ]))
     
     story.append(header_table)
-    story.append(Spacer(1, 4))
+    story.append(Spacer(1, 6))
     
-    # Client info - Grid layout like HTML
+    # Client info - Grid layout like HTML with proper spacing
     client_header = Paragraph('<b><font size="11" color="#1A7B6B">DATOS DEL CLIENTE</font></b>', header_style)
     
     pais = venta.cliente.pais if hasattr(venta.cliente, 'pais') and venta.cliente.pais else ""
     ciudad_pais = f'{venta.cliente.ciudad or "-"}, {pais}' if pais else f'{venta.cliente.ciudad or "-"}'
     
     client_data = [
-        [client_header, ''],
+        [client_header, '', ''],
         [
             Paragraph(f'<font size="9"><b color="#1A7B6B">Cliente:</b> {venta.cliente.nombre}</font>', normal_style),
+            '',
             Paragraph(f'<font size="9"><b color="#1A7B6B">NIF/CIF:</b> {venta.cliente.cif or "-"}</font>', normal_style)
         ],
         [
             Paragraph(f'<font size="9"><b color="#1A7B6B">Dirección:</b> {venta.cliente.domicilio or "-"}</font>', normal_style),
+            '',
             Paragraph(f'<font size="9"><b color="#1A7B6B">Ciudad:</b> {ciudad_pais}</font>', normal_style)
         ],
         [
             Paragraph(f'<font size="9"><b color="#1A7B6B">Teléfono:</b> {venta.cliente.telefono or "-"}</font>', normal_style),
+            '',
             Paragraph(f'<font size="9"><b color="#1A7B6B">Email:</b> {venta.cliente.email or "-"}</font>', normal_style)
         ]
     ]
     
-    client_table = Table(client_data, colWidths=[9*cm, 9*cm])
+    client_table = Table(client_data, colWidths=[8.5*cm, 0.5*cm, 8.5*cm])
     client_table.setStyle(TableStyle([
-        ('SPAN', (0, 0), (1, 0)),
+        ('SPAN', (0, 0), (2, 0)),
         ('BACKGROUND', (0, 0), (-1, -1), light_bg),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 2),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ('LINEBELOW', (0, 0), (-1, 0), 1, primary_color),
         ('BOX', (0, 0), (-1, -1), 1, primary_color),
     ]))
     
     story.append(client_table)
-    story.append(Spacer(1, 4))
+    story.append(Spacer(1, 6))
     
     # Items table
     items_header = Paragraph('<b><font size="11" color="#1A7B6B">DETALLE DE PRODUCTOS</font></b>', header_style)
     story.append(items_header)
-    story.append(Spacer(1, 2))
+    story.append(Spacer(1, 3))
     
-    # Table headers
+    # Table headers with better alignment
+    header_style_center = ParagraphStyle(
+        'HeaderCenter',
+        parent=normal_style,
+        alignment=TA_CENTER,
+        fontSize=9,
+        textColor=colors.white
+    )
+    
     headers = [
-        Paragraph('<b><font size="9" color="white">Producto</font></b>', normal_style),
-        Paragraph('<b><font size="9" color="white">Presentación</font></b>', normal_style),
-        Paragraph('<b><font size="9" color="white">Total Kg</font></b>', normal_style),
-        Paragraph('<b><font size="9" color="white">Cajas</font></b>', normal_style),
-        Paragraph('<b><font size="9" color="white">Precio/Caja (€)</font></b>', normal_style),
-        Paragraph('<b><font size="9" color="white">Total (€)</font></b>', normal_style)
+        Paragraph('<b>Producto</b>', normal_style),
+        Paragraph('<b>Presentación</b>', header_style_center),
+        Paragraph('<b>Total Kg</b>', header_style_center),
+        Paragraph('<b>Cajas</b>', header_style_center),
+        Paragraph('<b>Precio/Caja (€)</b>', header_style_center),
+        Paragraph('<b>Total (€)</b>', header_style_center)
     ]
     items_data = [headers]
     
-    # Table rows
+    # Table rows with better formatting
+    cell_style_center = ParagraphStyle(
+        'CellCenter',
+        parent=normal_style,
+        alignment=TA_CENTER,
+        fontSize=9
+    )
+    
     for detalle in detalles:
         row = [
             Paragraph(f'<font size="9">{detalle.presentacion.fruta.nombre}</font>', normal_style),
-            Paragraph(f'<font size="9">{detalle.presentacion.kilos} kg</font>', normal_style),
-            Paragraph(f'<font size="9">{detalle.kilos:.2f}</font>', normal_style),
-            Paragraph(f'<font size="9">{detalle.cajas_enviadas}</font>', normal_style),
-            Paragraph(f'<font size="9">{detalle.valor_x_caja_euro:.2f} €</font>', normal_style),
-            Paragraph(f'<font size="9">{detalle.valor_x_producto:.2f} €</font>', normal_style)
+            Paragraph(f'<font size="9">{detalle.presentacion.kilos} kg</font>', cell_style_center),
+            Paragraph(f'<font size="9">{detalle.kilos:.2f}</font>', cell_style_center),
+            Paragraph(f'<font size="9">{detalle.cajas_enviadas}</font>', cell_style_center),
+            Paragraph(f'<font size="9">{detalle.valor_x_caja_euro:.2f} €</font>', cell_style_center),
+            Paragraph(f'<font size="9">{detalle.valor_x_producto:.2f} €</font>', cell_style_center)
         ]
         items_data.append(row)
     
-    # Create items table
-    items_table = Table(items_data, colWidths=[3.5*cm, 2.5*cm, 2*cm, 1.8*cm, 3*cm, 3*cm])
+    # Create items table with better column widths
+    items_table = Table(items_data, colWidths=[4*cm, 2.5*cm, 2*cm, 1.8*cm, 2.8*cm, 2.7*cm])
     items_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), primary_color),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (0, 0), (-1, 0), 'LEFT'),
-        ('ALIGN', (0, 1), (0, -1), 'LEFT'),  # Product name left aligned
-        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),  # Other columns center aligned
+        ('ALIGN', (0, 0), (0, 0), 'LEFT'),
+        ('ALIGN', (1, 0), (-1, 0), 'CENTER'),
+        ('ALIGN', (0, 1), (0, -1), 'LEFT'),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 3),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-        ('TOPPADDING', (0, 0), (-1, -1), 2),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ('LEFTPADDING', (0, 0), (-1, -1), 4),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ('GRID', (0, 0), (-1, -1), 0.5, primary_color),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, light_bg]),
     ]))
     
     story.append(items_table)
-    story.append(Spacer(1, 4))
+    story.append(Spacer(1, 6))
     
-    # Bank info and summary section
+    # Bank info and summary section with better spacing
     # Bank information
-    bank_title = Paragraph('<b><font size="8" color="#1A7B6B">DATOS BANCARIOS</font></b>', small_style)
-    bank_content = Paragraph('<font size="7" color="#7f8c8d"><b>Banco:</b> Banco Santander<br/><b>IBAN:</b> ES76 0049 0030 2821 1019 2726<br/><b>SWIFT/BIC:</b> XXX-XXX-XXX</font>', small_style)
+    bank_title = Paragraph('<b><font size="9" color="#1A7B6B">DATOS BANCARIOS</font></b>', small_style)
+    bank_content = Paragraph('<font size="8" color="#7f8c8d"><b>Banco:</b> Banco Santander<br/><b>IBAN:</b> ES76 0049 0030 2821 1019 2726<br/><b>SWIFT/BIC:</b> XXX-XXX-XXX</font>', small_style)
     
     bank_table = Table([[bank_title], [bank_content]], colWidths=[8*cm])
     bank_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), light_bg),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 2),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
         ('LINEBELOW', (0, 0), (-1, 0), 1, primary_color),
         ('BOX', (0, 0), (-1, -1), 1, primary_color),
     ]))
     
     # Terms
-    terms_title = Paragraph('<b><font size="8" color="#1A7B6B">TÉRMINOS Y CONDICIONES DE PAGO</font></b>', small_style)
-    terms_content = Paragraph(f'<font size="7" color="#7f8c8d">Pago a {venta.cliente.dias_pago} días de la fecha de emisión de la factura.<br/>Forma de pago: Transferencia bancaria.</font>', small_style)
+    terms_title = Paragraph('<b><font size="9" color="#1A7B6B">TÉRMINOS Y CONDICIONES DE PAGO</font></b>', small_style)
+    terms_content = Paragraph(f'<font size="8" color="#7f8c8d">Pago a {venta.cliente.dias_pago} días de la fecha de emisión de la factura.<br/>Forma de pago: Transferencia bancaria.</font>', small_style)
     
     terms_table = Table([[terms_title], [terms_content]], colWidths=[8*cm])
     terms_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), light_bg),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 2),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
         ('LINEBELOW', (0, 0), (-1, 0), 1, primary_color),
         ('BOX', (0, 0), (-1, -1), 1, primary_color),
     ]))
     
-    bank_terms_col = Table([[bank_table], [Spacer(1, 2)], [terms_table]], colWidths=[8*cm])
+    bank_terms_col = Table([[bank_table], [Spacer(1, 3)], [terms_table]], colWidths=[8*cm])
     bank_terms_col.setStyle(TableStyle([
         ('LEFTPADDING', (0, 0), (-1, -1), 0),
         ('RIGHTPADDING', (0, 0), (-1, -1), 0),
@@ -361,33 +361,40 @@ def generar_factura_reportlab(request, venta_id):
         ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
     ]))
     
-    # Summary with orange highlight for Total Cajas
+    # Summary with orange highlight for Total Cajas and better alignment
+    summary_style_right = ParagraphStyle(
+        'SummaryRight',
+        parent=normal_style,
+        alignment=TA_RIGHT,
+        fontSize=9
+    )
+    
     summary_data = [
-        [Paragraph('<font size="9">Total Cajas:</font>', normal_style),
-         Paragraph(f'<font size="9">{venta.total_cajas_pedido}</font>', normal_style)],
-        [Paragraph('<font size="9">Base Imponible:</font>', normal_style),
-         Paragraph(f'<font size="9">{venta.subtotal_factura:.2f} €</font>', normal_style)],
-        [Paragraph('<font size="9">IVA (4%):</font>', normal_style),
-         Paragraph(f'<font size="9">{venta.iva:.2f} €</font>', normal_style)],
-        [Paragraph('<b><font size="11" color="white">TOTAL FACTURA:</font></b>', normal_style),
-         Paragraph(f'<b><font size="11" color="white">{venta.valor_total_factura_euro:.2f} €</font></b>', normal_style)]
+        [Paragraph('<b><font size="10" color="#e65100">Total Cajas:</font></b>', summary_style_right),
+         Paragraph(f'<b><font size="10" color="#e65100">{venta.total_cajas_pedido}</font></b>', summary_style_right)],
+        [Paragraph('<font size="9">Base Imponible:</font>', summary_style_right),
+         Paragraph(f'<font size="9">{venta.subtotal_factura:.2f} €</font>', summary_style_right)],
+        [Paragraph('<font size="9">IVA (4%):</font>', summary_style_right),
+         Paragraph(f'<font size="9">{venta.iva:.2f} €</font>', summary_style_right)],
+        [Paragraph('<b><font size="11" color="white">TOTAL FACTURA:</font></b>', summary_style_right),
+         Paragraph(f'<b><font size="11" color="white">{venta.valor_total_factura_euro:.2f} €</font></b>', summary_style_right)]
     ]
     
-    summary_table = Table(summary_data, colWidths=[5*cm, 4.5*cm])
+    summary_table = Table(summary_data, colWidths=[5.5*cm, 4*cm])
     summary_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), orange_light),  # Orange background for Total Cajas
+        ('BACKGROUND', (0, 0), (-1, 0), orange_light),
         ('TEXTCOLOR', (0, 0), (-1, 0), orange_dark),
         ('BACKGROUND', (0, 1), (-1, 2), light_bg),
-        ('BACKGROUND', (0, 3), (-1, 3), logo_color),  # Pink background for total
+        ('BACKGROUND', (0, 3), (-1, 3), logo_color),
         ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 2),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ('BOX', (0, 0), (-1, -1), 1, primary_color),
         ('LINEABOVE', (0, 3), (-1, 3), 2, text_color),
-        ('LINEBEFORE', (0, 0), (0, 0), 3, orange_color),  # Orange left border for Total Cajas
+        ('LINEBEFORE', (0, 0), (0, 0), 3, orange_color),
     ]))
     
     # Combine bank info and summary
@@ -403,38 +410,46 @@ def generar_factura_reportlab(request, venta_id):
     ]))
     
     story.append(bottom_table)
-    story.append(Spacer(1, 4))
+    story.append(Spacer(1, 6))
     
-    # Notes
+    # Notes with better spacing
     notes_title = Paragraph('<b><font size="10" color="#2c3e50">OBSERVACIONES</font></b>', header_style)
-    notes_content = Paragraph(f'<font size="8" color="#666666">{venta.observaciones if venta.observaciones else "Sin observaciones."}</font>', small_style)
+    notes_content = Paragraph(f'<font size="9" color="#666666">{venta.observaciones if venta.observaciones else "Sin observaciones."}</font>', small_style)
     
-    notes_table = Table([[notes_title], [notes_content]], colWidths=[18*cm])
+    notes_table = Table([[notes_title], [notes_content]], colWidths=[17.8*cm])
     notes_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), light_bg),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 2),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ('LINEBELOW', (0, 0), (-1, 0), 1, colors.HexColor('#ddd')),
         ('BOX', (0, 0), (-1, -1), 1, primary_color),
     ]))
     
     story.append(notes_table)
-    story.append(Spacer(1, 4))
+    story.append(Spacer(1, 6))
     
-    # Thank you message
-    thank_you_table = Table([[Paragraph('<b><font size="11" color="#ea1f78">¡Gracias por su confianza!</font></b>', title_style)]], colWidths=[18*cm])
+    # Thank you message with better styling
+    thank_you_style = ParagraphStyle(
+        'ThankYou',
+        parent=title_style,
+        fontSize=11,
+        textColor=logo_color,
+        alignment=TA_CENTER
+    )
+    
+    thank_you_table = Table([[Paragraph('<b>¡Gracias por su confianza!</b>', thank_you_style)]], colWidths=[17.8*cm])
     thank_you_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), light_bg),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
         ('BOX', (0, 0), (-1, -1), 1, primary_color),
     ]))
     story.append(thank_you_table)
