@@ -453,17 +453,6 @@ function verDetalle(correoId) {
                             </table>
                         </div>
                     </div>
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="message-body-header">
-                                <i class="fas fa-envelope-open-text"></i>
-                                <h6>Cuerpo del Mensaje</h6>
-                            </div>
-                            <div class="message-body-container">
-                                ${correo.cuerpo_mensaje}
-                            </div>
-                        </div>
-                    </div>
                     ${adjuntosHTML}
                     ${correo.mensaje_error !== 'Sin errores' ? `
                     <div class="row">
@@ -475,6 +464,17 @@ function verDetalle(correoId) {
                         </div>
                     </div>
                     ` : ''}
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="message-body-header">
+                                <i class="fas fa-envelope-open-text"></i>
+                                <h6>Cuerpo del Mensaje</h6>
+                            </div>
+                            <div class="message-body-container">
+                                ${correo.cuerpo_mensaje}
+                            </div>
+                        </div>
+                    </div>
                 `;
             } else {
                 content.innerHTML = `
