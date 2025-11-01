@@ -316,10 +316,11 @@ function verDetalle(correoId) {
     
     // Mostrar loading
     content.innerHTML = `
-        <div class="text-center">
+        <div class="modal-loading">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Cargando...</span>
             </div>
+            <p>Cargando detalles del correo...</p>
         </div>
     `;
     
@@ -333,27 +334,72 @@ function verDetalle(correoId) {
                 const correo = data.correo;
                 let adjuntosHTML = '';
                 
+                // Función para obtener icono según tipo de archivo
+                function getFileIcon(filename) {
+                    const ext = filename.split('.').pop().toLowerCase();
+                    const iconClass = {
+                        'pdf': 'file-icon-pdf',
+                        'doc': 'file-icon-doc',
+                        'docx': 'file-icon-docx',
+                        'xls': 'file-icon-xls',
+                        'xlsx': 'file-icon-xlsx',
+                        'jpg': 'file-icon-img',
+                        'jpeg': 'file-icon-img',
+                        'png': 'file-icon-img',
+                        'gif': 'file-icon-img',
+                        'zip': 'file-icon-zip',
+                        'rar': 'file-icon-rar'
+                    }[ext] || 'file-icon-default';
+                    
+                    return `<div class="attachment-icon-enhanced ${iconClass}">
+                        <i class="fas fa-file"></i>
+                    </div>`;
+                }
+                
                 // Generar HTML para adjuntos si existen
                 if (correo.adjuntos && correo.adjuntos.length > 0) {
                     adjuntosHTML = `
-                        <div class="row mt-3">
-                            <div class="col-12">
-                                <h6 class="text-primary">Archivos Adjuntos</h6>
-                                <div class="attachments-list">
+                        <div class="attachments-enhanced">
+                            <div class="section-header">
+                                <i class="fas fa-paperclip"></i>
+                                <h6>Archivos Adjuntos</h6>
+                                <span class="attachments-count">${correo.adjuntos.length} archivo(s)</span>
+                            </div>
+                            <div class="attachments-list">
                     `;
-                    correo.adjuntos.forEach(adjunto => {
+                    correo.adjuntos.forEach((adjunto, index) => {
                         adjuntosHTML += `
-                            <div class="attachment-item">
-                                <i class="fas fa-file me-2"></i>
-                                <a href="/comercial/correos/descargar/${correo.id}/${adjunto.nombre}/" 
-                                   class="attachment-link" title="Descargar ${adjunto.nombre}">
-                                    ${adjunto.nombre}
-                                </a>
+                            <div class="attachment-item-enhanced">
+                                <div class="attachment-main">
+                                    ${getFileIcon(adjunto.nombre)}
+                                    <div class="attachment-info-enhanced">
+                                        <div class="attachment-name-enhanced">${adjunto.nombre}</div>
+                                        <div class="attachment-meta">
+                                            <span><i class="fas fa-file me-1"></i>Archivo adjunto ${index + 1}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="attachment-action-enhanced">
+                                    <a href="/comercial/correos/descargar/${correo.id}/${adjunto.nombre}/"
+                                       class="btn-download-enhanced"
+                                       title="Descargar ${adjunto.nombre}">
+                                        <i class="fas fa-download"></i>
+                                        Descargar
+                                    </a>
+                                </div>
                             </div>
                         `;
                     });
                     adjuntosHTML += `
-                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    adjuntosHTML = `
+                        <div class="attachments-enhanced">
+                            <div class="no-attachments-enhanced">
+                                <i class="fas fa-paperclip"></i>
+                                <p>No hay archivos adjuntos</p>
                             </div>
                         </div>
                     `;
@@ -409,8 +455,11 @@ function verDetalle(correoId) {
                     </div>
                     <div class="row mt-3">
                         <div class="col-12">
-                            <h6 class="text-primary">Cuerpo del Mensaje</h6>
-                            <div class="alert alert-light">
+                            <div class="message-body-header">
+                                <i class="fas fa-envelope-open-text"></i>
+                                <h6>Cuerpo del Mensaje</h6>
+                            </div>
+                            <div class="message-body-container">
                                 ${correo.cuerpo_mensaje}
                             </div>
                         </div>
