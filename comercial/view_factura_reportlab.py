@@ -49,7 +49,7 @@ def generar_factura_reportlab(request, venta_id):
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     
     # Create the PDF with compact margins like the HTML version
-    doc = SimpleDocTemplate(response, pagesize=A4, topMargin=0.5*cm, bottomMargin=0.5*cm, leftMargin=0.8*cm, rightMargin=0.8*cm)
+    doc = SimpleDocTemplate(response, pagesize=A4, topMargin=1*cm, bottomMargin=1*cm, leftMargin=1.5*cm, rightMargin=1.5*cm)
     
     # Get the story (content) for the PDF
     story = []
@@ -70,16 +70,15 @@ def generar_factura_reportlab(request, venta_id):
         font_name = 'Helvetica'
     
     # Define colors matching CSS
-    primary_color = colors.HexColor('#1A7B6B')
-    secondary_color = colors.HexColor('#2A9D8F')
-    accent_color = colors.HexColor('#8CE2D6')
-    text_color = colors.HexColor('#2c3e50')
-    text_light = colors.HexColor('#7f8c8d')
-    light_bg = colors.HexColor('#f8f9fa')
-    logo_color = colors.HexColor('#ea1f78')
-    orange_color = colors.HexColor('#ff9800')
-    orange_dark = colors.HexColor('#e65100')
-    orange_light = colors.HexColor('#fff3e0')
+    primary_color = colors.HexColor('#0055A4')  # Azul oscuro
+    secondary_color = colors.HexColor('#E30A17') # Rojo
+    text_color = colors.HexColor('#000000')    # Negro
+    text_light = colors.HexColor('#6c757d')    # Gris
+    light_bg = colors.HexColor('#FFFFFF')      # Blanco
+    logo_color = colors.HexColor('#E30A17')    # Rojo para detalles
+    orange_color = colors.HexColor('#FF6F00')
+    orange_dark = colors.HexColor('#FF6F00')
+    orange_light = colors.HexColor('#FFF8E1')
     
     # Styles
     styles = getSampleStyleSheet()
@@ -156,23 +155,23 @@ def generar_factura_reportlab(request, venta_id):
     
     # Company info
     company_info = Paragraph('''
-    <b><font size="14" color="#1A7B6B">LUZ MERY MELO MEJIA</font></b><br/>
-    <font size="9" color="#7f8c8d">Calle Juan de la cierva # 23</font><br/>
-    <font size="9" color="#7f8c8d">08210 Barbera del valles, España</font><br/>
-    <font size="9" color="#7f8c8d">Tel: +34 633 49 42 28</font><br/>
-    <font size="9" color="#7f8c8d">Email: import@luzmeloexoticfruits.com</font><br/>
-    <font size="9" color="#7f8c8d">CIF: 26062884C</font>
+    <b><font size="12" color="#0055A4">LUZ MERY MELO MEJIA</font></b><br/>
+    <font size="9" color="#000000">Calle Juan de la cierva # 23</font><br/>
+    <font size="9" color="#000000">08210 Barbera del valles, España</font><br/>
+    <font size="9" color="#000000">Tel: +34 633 49 42 28</font><br/>
+    <font size="9" color="#000000">Email: import@luzmeloexoticfruits.com</font><br/>
+    <font size="9" color="#000000">CIF: 26062884C</font>
     ''', company_style)
     
     # Invoice info section
     invoice_number = f"Nº: {venta.numero_factura if venta.numero_factura else venta.id}"
     invoice_info_html = f'''
     <para alignment="right">
-    <b><font size="16" color="#1A7B6B">FACTURA</font></b><br/>
-    <b><font size="13" color="#2c3e50">{invoice_number}</font></b><br/><br/>
-    <font size="9" color="#7f8c8d"><b>Fecha Emisión:</b> {venta.fecha_entrega.strftime("%d/%m/%Y")}</font><br/>
-    <font size="9" color="#e74c3c"><b>Fecha Vencimiento:</b> {venta.fecha_vencimiento.strftime("%d/%m/%Y") if venta.fecha_vencimiento else "-"}</font><br/>
-    <font size="9" color="#7f8c8d"><b>Semana:</b> {venta.semana or "-"}</font>'''
+    <b><font size="20" color="#0055A4">FACTURA</font></b><br/>
+    <b><font size="14" color="#000000">{invoice_number}</font></b><br/><br/>
+    <font size="9" color="#000000"><b>Fecha Emisión:</b> {venta.fecha_entrega.strftime("%d/%m/%Y")}</font><br/>
+    <font size="9" color="#E30A17"><b>Fecha Vencimiento:</b> {venta.fecha_vencimiento.strftime("%d/%m/%Y") if venta.fecha_vencimiento else "-"}</font><br/>
+    <font size="9" color="#000000"><b>Semana:</b> {venta.semana or "-"}</font>'''
     
     if venta.origen:
         invoice_info_html += f'<br/><font size="9" color="#7f8c8d"><b>Origen:</b> {venta.origen}</font>'
@@ -194,7 +193,7 @@ def generar_factura_reportlab(request, venta_id):
     # Header table with logo, company info and invoice info
     header_table = Table([
         [logo, company_info, invoice_info]
-    ], colWidths=[2.8*cm, 7.5*cm, 7.5*cm])
+    ], colWidths=[3*cm, 8*cm, 6*cm])
     
     header_table.setStyle(TableStyle([
         ('ALIGN', (0, 0), (0, 0), 'CENTER'),
@@ -205,15 +204,15 @@ def generar_factura_reportlab(request, venta_id):
         ('RIGHTPADDING', (0, 0), (-1, -1), 5),
         ('TOPPADDING', (0, 0), (-1, -1), 5),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        ('BACKGROUND', (2, 0), (2, 0), light_bg),
-        ('LINEBELOW', (0, 0), (-1, -1), 2, primary_color),
+        ('BACKGROUND', (2, 0), (2, 0), colors.white),
+        ('LINEBELOW', (0, 0), (-1, 0), 2, primary_color),
     ]))
     
     story.append(header_table)
     story.append(Spacer(1, 6))
     
     # Client info - Grid layout like HTML with proper spacing
-    client_header = Paragraph('<b><font size="11" color="#1A7B6B">DATOS DEL CLIENTE</font></b>', header_style)
+    client_header = Paragraph('<b><font size="12" color="#0055A4">DATOS DEL CLIENTE</font></b>', header_style)
     
     pais = venta.cliente.pais if hasattr(venta.cliente, 'pais') and venta.cliente.pais else ""
     ciudad_pais = f'{venta.cliente.ciudad or "-"}, {pais}' if pais else f'{venta.cliente.ciudad or "-"}'
@@ -221,23 +220,23 @@ def generar_factura_reportlab(request, venta_id):
     client_data = [
         [client_header, '', ''],
         [
-            Paragraph(f'<font size="9"><b color="#1A7B6B">Cliente:</b> {venta.cliente.nombre}</font>', normal_style),
+            Paragraph(f'<b>Cliente:</b> {venta.cliente.nombre}', normal_style),
             '',
-            Paragraph(f'<font size="9"><b color="#1A7B6B">NIF/CIF:</b> {venta.cliente.cif or "-"}</font>', normal_style)
+            Paragraph(f'<b>NIF/CIF:</b> {venta.cliente.cif or "-"}', normal_style)
         ],
         [
-            Paragraph(f'<font size="9"><b color="#1A7B6B">Dirección:</b> {venta.cliente.domicilio or "-"}</font>', normal_style),
+            Paragraph(f'<b>Dirección:</b> {venta.cliente.domicilio or "-"}', normal_style),
             '',
-            Paragraph(f'<font size="9"><b color="#1A7B6B">Ciudad:</b> {ciudad_pais}</font>', normal_style)
+            Paragraph(f'<b>Ciudad:</b> {ciudad_pais}', normal_style)
         ],
         [
-            Paragraph(f'<font size="9"><b color="#1A7B6B">Teléfono:</b> {venta.cliente.telefono or "-"}</font>', normal_style),
+            Paragraph(f'<b>Teléfono:</b> {venta.cliente.telefono or "-"}', normal_style),
             '',
-            Paragraph(f'<font size="9"><b color="#1A7B6B">Email:</b> {venta.cliente.email or "-"}</font>', normal_style)
+            Paragraph(f'<b>Email:</b> {venta.cliente.email or "-"}', normal_style)
         ]
     ]
     
-    client_table = Table(client_data, colWidths=[8.5*cm, 0.5*cm, 8.5*cm])
+    client_table = Table(client_data, colWidths=[8*cm, 1*cm, 8*cm])
     client_table.setStyle(TableStyle([
         ('SPAN', (0, 0), (2, 0)),
         ('BACKGROUND', (0, 0), (-1, -1), light_bg),
@@ -255,7 +254,7 @@ def generar_factura_reportlab(request, venta_id):
     story.append(Spacer(1, 6))
     
     # Items table
-    items_header = Paragraph('<b><font size="11" color="#1A7B6B">DETALLE DE PRODUCTOS</font></b>', header_style)
+    items_header = Paragraph('<b><font size="12" color="#0055A4">DETALLE DE PRODUCTOS</font></b>', header_style)
     story.append(items_header)
     story.append(Spacer(1, 3))
     
@@ -298,7 +297,7 @@ def generar_factura_reportlab(request, venta_id):
         items_data.append(row)
     
     # Create items table with better column widths
-    items_table = Table(items_data, colWidths=[4*cm, 2.5*cm, 2*cm, 1.8*cm, 2.8*cm, 2.7*cm])
+    items_table = Table(items_data, colWidths=[5*cm, 2.5*cm, 2*cm, 1.5*cm, 3*cm, 3*cm])
     items_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), primary_color),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
@@ -312,7 +311,7 @@ def generar_factura_reportlab(request, venta_id):
         ('TOPPADDING', (0, 0), (-1, -1), 4),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ('GRID', (0, 0), (-1, -1), 0.5, primary_color),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, light_bg]),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F2F2F2')]),
     ]))
     
     story.append(items_table)
@@ -320,8 +319,8 @@ def generar_factura_reportlab(request, venta_id):
     
     # Bank info and summary section with better spacing
     # Bank information
-    bank_title = Paragraph('<b><font size="9" color="#1A7B6B">DATOS BANCARIOS</font></b>', small_style)
-    bank_content = Paragraph('<font size="8" color="#7f8c8d"><b>Banco:</b> Banco Santander<br/><b>IBAN:</b> ES76 0049 0030 2821 1019 2726<br/><b>SWIFT/BIC:</b> XXX-XXX-XXX</font>', small_style)
+    bank_title = Paragraph('<b><font size="10" color="#0055A4">DATOS BANCARIOS</font></b>', small_style)
+    bank_content = Paragraph('<font size="8" color="#000000"><b>Banco:</b> Banco Santander<br/><b>IBAN:</b> ES76 0049 0030 2821 1019 2726<br/><b>SWIFT/BIC:</b> XXX-XXX-XXX</font>', small_style)
     
     bank_table = Table([[bank_title], [bank_content]], colWidths=[8*cm])
     bank_table.setStyle(TableStyle([
@@ -337,8 +336,8 @@ def generar_factura_reportlab(request, venta_id):
     ]))
     
     # Terms
-    terms_title = Paragraph('<b><font size="9" color="#1A7B6B">TÉRMINOS Y CONDICIONES DE PAGO</font></b>', small_style)
-    terms_content = Paragraph(f'<font size="8" color="#7f8c8d">Pago a {venta.cliente.dias_pago} días de la fecha de emisión de la factura.<br/>Forma de pago: Transferencia bancaria.</font>', small_style)
+    terms_title = Paragraph('<b><font size="10" color="#0055A4">TÉRMINOS Y CONDICIONES DE PAGO</font></b>', small_style)
+    terms_content = Paragraph(f'<font size="8" color="#000000">Pago a {venta.cliente.dias_pago} días de la fecha de emisión de la factura.<br/>Forma de pago: Transferencia bancaria.</font>', small_style)
     
     terms_table = Table([[terms_title], [terms_content]], colWidths=[8*cm])
     terms_table.setStyle(TableStyle([
@@ -370,22 +369,22 @@ def generar_factura_reportlab(request, venta_id):
     )
     
     summary_data = [
-        [Paragraph('<b><font size="10" color="#e65100">Total Cajas:</font></b>', summary_style_right),
-         Paragraph(f'<b><font size="10" color="#e65100">{venta.total_cajas_pedido}</font></b>', summary_style_right)],
-        [Paragraph('<font size="9">Base Imponible:</font>', summary_style_right),
-         Paragraph(f'<font size="9">{venta.subtotal_factura:.2f} €</font>', summary_style_right)],
-        [Paragraph('<font size="9">IVA (4%):</font>', summary_style_right),
-         Paragraph(f'<font size="9">{venta.iva:.2f} €</font>', summary_style_right)],
-        [Paragraph('<b><font size="11" color="white">TOTAL FACTURA:</font></b>', summary_style_right),
-         Paragraph(f'<b><font size="11" color="white">{venta.valor_total_factura_euro:.2f} €</font></b>', summary_style_right)]
+        [Paragraph('<b>Total Cajas:</b>', summary_style_right),
+         Paragraph(f'<b>{venta.total_cajas_pedido}</b>', summary_style_right)],
+        [Paragraph('Base Imponible:', summary_style_right),
+         Paragraph(f'{venta.subtotal_factura:.2f} €', summary_style_right)],
+        [Paragraph('IVA (4%):', summary_style_right),
+         Paragraph(f'{venta.iva:.2f} €', summary_style_right)],
+        [Paragraph('<b><font size="12" color="white">TOTAL FACTURA:</font></b>', summary_style_right),
+         Paragraph(f'<b><font size="12" color="white">{venta.valor_total_factura_euro:.2f} €</font></b>', summary_style_right)]
     ]
     
-    summary_table = Table(summary_data, colWidths=[5.5*cm, 4*cm])
+    summary_table = Table(summary_data, colWidths=[5*cm, 4*cm])
     summary_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), orange_light),
-        ('TEXTCOLOR', (0, 0), (-1, 0), orange_dark),
-        ('BACKGROUND', (0, 1), (-1, 2), light_bg),
-        ('BACKGROUND', (0, 3), (-1, 3), logo_color),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.white),
+        ('TEXTCOLOR', (0, 0), (-1, 0), text_color),
+        ('BACKGROUND', (0, 1), (-1, 2), colors.white),
+        ('BACKGROUND', (0, 3), (-1, 3), primary_color),
         ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('LEFTPADDING', (0, 0), (-1, -1), 5),
@@ -413,8 +412,8 @@ def generar_factura_reportlab(request, venta_id):
     story.append(Spacer(1, 6))
     
     # Notes with better spacing
-    notes_title = Paragraph('<b><font size="10" color="#2c3e50">OBSERVACIONES</font></b>', header_style)
-    notes_content = Paragraph(f'<font size="9" color="#666666">{venta.observaciones if venta.observaciones else "Sin observaciones."}</font>', small_style)
+    notes_title = Paragraph('<b><font size="11" color="#0055A4">OBSERVACIONES</font></b>', header_style)
+    notes_content = Paragraph(f'<font size="9" color="#000000">{venta.observaciones if venta.observaciones else "Sin observaciones."}</font>', normal_style)
     
     notes_table = Table([[notes_title], [notes_content]], colWidths=[17.8*cm])
     notes_table.setStyle(TableStyle([
