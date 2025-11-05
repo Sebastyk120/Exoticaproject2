@@ -6,13 +6,13 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from .models import Fruta, Presentacion, ListaPreciosImportacion, ListaPreciosVentas
 from importacion.models import Exportador
-from comercial.models import Cliente, Cotizacion, DetalleCotizacion
+from comercial.models import Cliente, Cotizacion, DetalleCotizacion, EmailLog
 from decimal import Decimal
 import json
 import datetime
-from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 import base64
+from comercial.views_enviar_correos import send_email_with_mailjet
 
 @login_required
 def frutas_view(request):
@@ -604,27 +604,39 @@ def enviar_cotizacion(request):
 
     # Si hay destinatarios y asunto, enviar correo
     try:
-        from_email = settings.DEFAULT_FROM_EMAIL
-        email = EmailMultiAlternatives(
+        # Preparar adjuntos para Mailjet
+        attachments = [
+            (
+                f'Cotizacion_{quotation_data.get("quotation_number", "")}.pdf',
+                pdf_content,
+                'application/pdf'
+            )
+        ]
+
+        # Enviar email usando la función centralizada
+        success, error_message, email_log = send_email_with_mailjet(
             subject=email_subject,
             body=email_message,
-            from_email=from_email,
-            to=recipients
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to_emails=recipients,
+            attachments=attachments,
+            proceso='cotizacion',
+            usuario=request.user,
+            cotizacion=cotizacion,
+            cliente=cotizacion.cliente if cotizacion and cotizacion.cliente else None
         )
-        email.attach(
-            f'Cotizacion_{quotation_data.get("quotation_number", "")}.pdf',
-            pdf_content,
-            'application/pdf'
-        )
-        email.send()
-        
-        # Update cotizacion status to "enviada" if it exists
-        if cotizacion:
-            cotizacion.estado = 'enviada'
-            cotizacion.save()
-            
-        messages.success(request, f'Cotización enviada a {", ".join(recipients)}')
+
+        if success:
+            # Actualizar estado de la cotización si el envío fue exitoso
+            if cotizacion:
+                cotizacion.estado = 'enviada'
+                cotizacion.save()
+            messages.success(request, f'Cotización enviada a {", ".join(recipients)}')
+        else:
+            # Si hubo un error, mostrarlo pero no bloquear la redirección
+            messages.error(request, f'Error al enviar la cotización: {error_message}')
+
     except Exception as e:
-        messages.error(request, f'Error al enviar la cotización: {str(e)}')
+        messages.error(request, f'Error al preparar el envío de la cotización: {str(e)}')
 
     return redirect('lista_cotizaciones')
