@@ -18,6 +18,11 @@
         <button id="sendEmailBtn" class="btn btn-success">
             <i class="fas fa-envelope"></i> Enviar por Correo
         </button>
+        {% if is_new_customer and not cotizacion %}
+        <button id="saveQuoteBtn" class="btn btn-info">
+            <i class="fas fa-save"></i> Guardar Oferta Comercial
+        </button>
+        {% endif %}
         <a href="{% url 'lista_cotizaciones' %}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Volver
         </a>
@@ -279,7 +284,7 @@ Luz Mery Melo Mejia
             
             <input type="hidden" id="quotation_data" name="quotation_data">
             <input type="hidden" id="pdf_data" name="pdf_data">
-            <input type="hidden" name="save_quotation" value="true">
+            <input type="hidden" id="save_quotation" name="save_quotation" value="false">
             
             <div class="form-actions">
                 <button type="button" class="btn btn-secondary close-modal-btn">Cancelar</button>
@@ -375,37 +380,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Download PDF functionality
-    document.getElementById('downloadPdfBtn').addEventListener('click', async function() {
-        // We will trigger the form submission to save and then download
-        const quotationData = collectQuotationData();
+    document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+        const element = document.getElementById('quotationDocument');
         
-        // Asignar los datos al campo del formulario
-        document.getElementById('quotation_data').value = JSON.stringify(quotationData);
-
-        // Crear un formulario dinámico para enviar los datos
-        const form = document.createElement('form');
-        form.method = 'post';
-        form.action = "{% url 'enviar_cotizacion' %}";
+        // Temporarily hide action columns and prepare for PDF export
+        prepareForPdfExport(element);
         
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        
-        const fields = {
-            'csrfmiddlewaretoken': csrfToken,
-            'quotation_data': JSON.stringify(quotationData),
-            'save_quotation': 'true',
-            'download_pdf': 'true' // Flag para indicar que se quiere descargar el PDF
+        const opt = {
+            margin: 0,
+            filename: `Cotizacion_${quotationNumber}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-
-        for (const key in fields) {
-            const hiddenField = document.createElement('input');
-            hiddenField.type = 'hidden';
-            hiddenField.name = key;
-            hiddenField.value = fields[key];
-            form.appendChild(hiddenField);
-        }
-
-        document.body.appendChild(form);
-        form.submit();
+        
+        html2pdf().from(element).set(opt).save().then(() => {
+            // Restore document after PDF is generated
+            restoreFromPdfExport(element);
+        });
     });
     
     // Variables
@@ -425,9 +417,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeBtns = document.querySelectorAll('.close-modal, .close-modal-btn');
     
     sendEmailBtn.addEventListener('click', async function() {
+        // First, generate the PDF
         const element = document.getElementById('quotationDocument');
+        
+        // Temporarily hide action columns and prepare for PDF export
         prepareForPdfExport(element);
-
+        
         const opt = {
             margin: 0,
             filename: `Cotizacion_${quotationNumber}.pdf`,
@@ -435,19 +430,63 @@ document.addEventListener('DOMContentLoaded', function() {
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-
+        
         try {
+            // Generate PDF and get it as data URL
             const pdfBlob = await html2pdf().from(element).set(opt).outputPdf('blob');
+            
+            // Restore document after PDF is generated
             restoreFromPdfExport(element);
-
+            
+            // Convert blob to base64 data URL
             const reader = new FileReader();
             reader.readAsDataURL(pdfBlob);
             reader.onloadend = function() {
-                document.getElementById('pdf_data').value = reader.result;
+                // Set the PDF data in the hidden input
+                const base64data = reader.result;
+                document.getElementById('pdf_data').value = base64data;
                 
-                const quotationData = collectQuotationData();
+                // Prepare the quotation data to be sent in the form
+                const quotationData = {
+                    quotation_number: quotationNumber,
+                    client: {% if customer %}{
+                        id: {{ customer.id }},
+                        name: "{{ customer.nombre }}",
+                        email: "{{ customer.email }}"
+                    }{% else %}null{% endif %},
+                    prospect: {% if is_new_customer %}{
+                        name: document.getElementById('prospect-name').value,
+                        email: document.getElementById('prospect-email').value,
+                        address: document.getElementById('prospect-address').value,
+                        phone: document.getElementById('prospect-phone').value
+                    }{% else %}null{% endif %},
+                    items: [],
+                    // Add terms and notes from the editable fields
+                    terms: document.querySelector('.editable-terms').innerHTML,
+                    notes: document.querySelector('.editable-notes').innerHTML
+                };
+                
+                // Collect items data - only those that remain in the table
+                document.querySelectorAll('.product-row').forEach(row => {
+                    const presentationId = row.getAttribute('data-id');
+                    const priceInput = row.querySelector('.price-input');
+                    const unitPrice = parseFloat(priceInput.value) || 0;
+                    
+                    if (unitPrice > 0) {
+                        quotationData.items.push({
+                            presentation_id: presentationId,
+                            unit_price: unitPrice
+                        });
+                    }
+                });
+                
+                // Set the data in the hidden input
                 document.getElementById('quotation_data').value = JSON.stringify(quotationData);
                 
+                // Reset save_quotation to false for email sending
+                document.getElementById('save_quotation').value = 'false';
+                
+                // If prospect, set the email from the form
                 if ({% if is_new_customer %}true{% else %}false{% endif %}) {
                     const prospectEmail = document.getElementById('prospect-email').value;
                     if (prospectEmail) {
@@ -455,10 +494,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
                 
+                // Show the modal
                 emailModal.classList.add('show');
             };
         } catch (error) {
+            // Restore document in case of error
             restoreFromPdfExport(element);
+            
             console.error('Error generating PDF:', error);
             alert('Error al generar el PDF. Por favor, inténtelo de nuevo.');
         }
@@ -478,39 +520,82 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    function collectQuotationData() {
-        const quotationData = {
-            quotation_number: quotationNumber,
-            client: {% if customer %}{
-                id: {{ customer.id }},
-                name: "{{ customer.nombre }}",
-                email: "{{ customer.email }}"
-            }{% else %}null{% endif %},
-            prospect: {% if is_new_customer %}{
-                name: document.getElementById('prospect-name').value,
-                email: document.getElementById('prospect-email').value,
-                address: document.getElementById('prospect-address').value,
-                phone: document.getElementById('prospect-phone').value
-            }{% else %}null{% endif %},
-            items: [],
-            terms: document.querySelector('.editable-terms').innerHTML,
-            notes: document.querySelector('.editable-notes').innerHTML
-        };
-
-        document.querySelectorAll('.product-row').forEach(row => {
-            const presentationId = row.getAttribute('data-id');
-            const priceInput = row.querySelector('.price-input');
-            const unitPrice = parseFloat(priceInput.value) || 0;
-
-            if (unitPrice > 0) {
-                quotationData.items.push({
-                    presentation_id: presentationId,
-                    unit_price: unitPrice
-                });
+    // For new customers: save button functionality
+    const saveQuoteBtn = document.getElementById('saveQuoteBtn');
+    if (saveQuoteBtn) {
+        saveQuoteBtn.addEventListener('click', async function() {
+            // Collect all the data needed to save the quotation
+            const quotationData = {
+                quotation_number: quotationNumber,
+                prospect: {
+                    name: document.getElementById('prospect-name').value,
+                    email: document.getElementById('prospect-email').value,
+                    address: document.getElementById('prospect-address').value,
+                    phone: document.getElementById('prospect-phone').value
+                },
+                items: [],
+                terms: document.querySelector('.editable-terms').innerHTML,
+                notes: document.querySelector('.editable-notes').innerHTML
+            };
+            
+            // Collect items data - only those that remain in the table
+            document.querySelectorAll('.product-row').forEach(row => {
+                const presentationId = row.getAttribute('data-id');
+                const priceInput = row.querySelector('.price-input');
+                const unitPrice = parseFloat(priceInput.value) || 0;
+                
+                if (unitPrice > 0) {
+                    quotationData.items.push({
+                        presentation_id: presentationId,
+                        unit_price: unitPrice
+                    });
+                }
+            });
+            
+            // First, generate the PDF for saving with the quotation
+            try {
+                const element = document.getElementById('quotationDocument');
+                
+                // Temporarily hide action columns and prepare for PDF export
+                prepareForPdfExport(element);
+                
+                const opt = {
+                    margin: 0,
+                    filename: `Cotizacion_${quotationNumber}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                
+                await html2pdf().from(element).set(opt).save();
+                
+                // Restore document after PDF is generated
+                restoreFromPdfExport(element);
+                
+                // Set the data in the hidden input
+                document.getElementById('quotation_data').value = JSON.stringify(quotationData);
+                
+                // Reset save_quotation to false for email sending
+                document.getElementById('save_quotation').value = 'false';
+                
+                // If prospect, set the email from the form
+                if ({% if is_new_customer %}true{% else %}false{% endif %}) {
+                    const prospectEmail = document.getElementById('prospect-email').value;
+                    if (prospectEmail) {
+                        document.getElementById('recipient_email').value = prospectEmail;
+                    }
+                }
+                
+                // Show the modal
+                emailModal.classList.add('show');
+            } catch (error) {
+                // Restore document in case of error
+                restoreFromPdfExport(element);
+                
+                console.error('Error generating PDF:', error);
+                alert('Error al generar el PDF. Por favor, inténtelo de nuevo.');
             }
         });
-        
-        return quotationData;
     }
 });
 </script>
