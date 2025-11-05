@@ -526,117 +526,114 @@ def ver_cotizacion(request, cotizacion_id):
 
     return render(request, 'cotizacion_precios_ventas.html', context)
 
+from django.db import transaction
+from django.views.decorators.http import require_http_methods
+
 @login_required
+@require_http_methods(["POST"])
 def enviar_cotizacion(request):
     """
-    View to send a quotation by email or just save it
+    Handles saving and/or sending a quotation.
+    This view can:
+    1. Save a quotation and return a PDF for download.
+    2. Save a quotation and send it via email.
     """
-    if request.method != 'POST':
-        return redirect('lista_precios_ventas')
-
-    # Get form data and PDF data
-    quotation_data = json.loads(request.POST.get('quotation_data', '{}'))
-    recipients = request.POST.getlist('recipients')
-    if not recipients and 'recipient_email' in request.POST:
-        recipients = [request.POST.get('recipient_email')]
-    email_subject = request.POST.get('email_subject', 'Cotización - L&M Exotic Fruits')
-    email_message = request.POST.get('email_message', '')
-    pdf_data = request.POST.get('pdf_data', '')
-    if not pdf_data or not pdf_data.startswith('data:application/pdf;base64,'):
-        messages.error(request, 'No se ha generado correctamente el archivo PDF de la cotización.')
-        return redirect('lista_precios_ventas')
-
-    # Extract base64 data
-    pdf_content = base64.b64decode(pdf_data.replace('data:application/pdf;base64,', ''))
-    
-    # Variable to track the quotation if created or loaded
-    cotizacion = None
-
-    # Save quotation if flag is set
-    if request.POST.get('save_quotation') == 'true':
-        try:
-            # Create new quotation
-            cotizacion = Cotizacion()
-            # Set customer or prospect info
-            if quotation_data.get('client'):
-                cotizacion.cliente_id = quotation_data['client'].get('id')
-            else:
-                cotizacion.prospect_nombre = quotation_data.get('prospect', {}).get('name', '')
-                cotizacion.prospect_email = quotation_data.get('prospect', {}).get('email', '')
-                cotizacion.prospect_direccion = quotation_data.get('prospect', {}).get('address', '')
-                cotizacion.prospect_telefono = quotation_data.get('prospect', {}).get('phone', '')
-            # Set quotation number if provided
-            if quotation_data.get('quotation_number'):
-                cotizacion.numero = quotation_data.get('quotation_number')
-            # Set dates
-            cotizacion.fecha_validez = datetime.datetime.now() + datetime.timedelta(days=15)
-            # Set terms and notes if available in the data
-            if 'terms' in quotation_data:
-                cotizacion.terminos = quotation_data['terms']
-            if 'notes' in quotation_data:
-                cotizacion.notas = quotation_data['notes']
-            # Al guardar, se usa el estado "borrador"
-            cotizacion.estado = 'borrador'
-            # Save main record
-            cotizacion.save()
-            # Add items - with simplified structure
-            for item in quotation_data.get('items', []):
-                detalle = DetalleCotizacion(
-                    cotizacion=cotizacion,
-                    presentacion_id=item.get('presentation_id'),
-                    precio_unitario=item.get('unit_price', 0),
-                )
-                detalle.save()
-            messages.success(request, f'Cotización guardada con número {cotizacion.numero}')
-            # Si se guarda, se redirige sin enviar correo
-            return redirect('lista_cotizaciones')
-        except Exception as e:
-            messages.error(request, f'Error al guardar la cotización: {str(e)}')
-            return redirect('lista_cotizaciones')
-    else:
-        # If we're sending an existing quotation, try to find it by quotation_number
-        if quotation_data.get('quotation_number'):
-            try:
-                cotizacion = Cotizacion.objects.get(numero=quotation_data.get('quotation_number'))
-            except Cotizacion.DoesNotExist:
-                # If not found, it's a temporary quotation that wasn't saved
-                pass
-
-    # Si hay destinatarios y asunto, enviar correo
     try:
-        # Preparar adjuntos para Mailjet
-        attachments = [
-            (
-                f'Cotizacion_{quotation_data.get("quotation_number", "")}.pdf',
-                pdf_content,
-                'application/pdf'
-            )
-        ]
+        quotation_data = json.loads(request.POST.get('quotation_data', '{}'))
+        save_quotation = request.POST.get('save_quotation') == 'true'
+        download_pdf = request.POST.get('download_pdf') == 'true'
 
-        # Enviar email usando la función centralizada
-        success, error_message, email_log = send_email_with_mailjet(
+        cotizacion = None
+        
+        with transaction.atomic():
+            # Siempre se guarda o se actualiza la cotización
+            numero_cotizacion = quotation_data.get('quotation_number')
+            
+            # Intentar encontrar una cotización existente por número para actualizarla
+            try:
+                cotizacion = Cotizacion.objects.get(numero=numero_cotizacion)
+                # Si existe, se actualiza en lugar de crear una nueva
+                cotizacion.detalles.all().delete() # Eliminar detalles antiguos para reemplazarlos
+            except Cotizacion.DoesNotExist:
+                cotizacion = Cotizacion(numero=numero_cotizacion)
+
+            # Asignar datos del cliente o prospecto
+            if quotation_data.get('client') and quotation_data['client'].get('id'):
+                cotizacion.cliente = get_object_or_404(Cliente, id=quotation_data['client']['id'])
+                cotizacion.prospect_nombre = None
+                cotizacion.prospect_email = None
+                cotizacion.prospect_direccion = None
+                cotizacion.prospect_telefono = None
+            elif quotation_data.get('prospect'):
+                prospect_info = quotation_data['prospect']
+                cotizacion.prospect_nombre = prospect_info.get('name', '')
+                cotizacion.prospect_email = prospect_info.get('email', '')
+                cotizacion.prospect_direccion = prospect_info.get('address', '')
+                cotizacion.prospect_telefono = prospect_info.get('phone', '')
+                cotizacion.cliente = None
+
+            cotizacion.fecha_validez = datetime.date.today() + datetime.timedelta(days=15)
+            cotizacion.terminos = quotation_data.get('terms', '')
+            cotizacion.notas = quotation_data.get('notes', '')
+            
+            # Si se envía por correo, el estado cambia a 'enviada'
+            if not download_pdf:
+                cotizacion.estado = 'enviada'
+            else:
+                cotizacion.estado = 'borrador'
+
+            cotizacion.save()
+
+            # Guardar detalles
+            for item in quotation_data.get('items', []):
+                DetalleCotizacion.objects.create(
+                    cotizacion=cotizacion,
+                    presentacion=get_object_or_404(Presentacion, id=item.get('presentation_id')),
+                    precio_unitario=Decimal(item.get('unit_price', 0))
+                )
+
+        # Generar el PDF para descarga o envío
+        if download_pdf:
+            messages.success(request, f'Cotización #{cotizacion.numero} guardada y descargada correctamente.')
+            return redirect('lista_cotizaciones')
+
+        # Lógica de envío de correo (si no es solo descarga)
+        pdf_data = request.POST.get('pdf_data', '')
+        if not pdf_data:
+            messages.error(request, 'No se pudo generar el PDF para el envío.')
+            return redirect('lista_cotizaciones')
+
+        pdf_content = base64.b64decode(pdf_data.replace('data:application/pdf;base64,', ''))
+        
+        recipients = request.POST.getlist('recipients')
+        if not recipients and 'recipient_email' in request.POST:
+            recipients = [request.POST['recipient_email']]
+
+        email_subject = request.POST.get('email_subject', f'Oferta Comercial - {cotizacion.numero}')
+        email_message = request.POST.get('email_message', '')
+
+        success, error_message, _ = send_email_with_mailjet(
             subject=email_subject,
             body=email_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
             to_emails=recipients,
-            attachments=attachments,
+            attachments=[(f'Cotizacion_{cotizacion.numero}.pdf', pdf_content, 'application/pdf')],
             proceso='cotizacion',
             usuario=request.user,
             cotizacion=cotizacion,
-            cliente=cotizacion.cliente if cotizacion and cotizacion.cliente else None
+            cliente=cotizacion.cliente
         )
 
         if success:
-            # Actualizar estado de la cotización si el envío fue exitoso
-            if cotizacion:
-                cotizacion.estado = 'enviada'
-                cotizacion.save()
-            messages.success(request, f'Cotización enviada a {", ".join(recipients)}')
+            messages.success(request, f'Cotización #{cotizacion.numero} enviada a {", ".join(recipients)}.')
         else:
-            # Si hubo un error, mostrarlo pero no bloquear la redirección
-            messages.error(request, f'Error al enviar la cotización: {error_message}')
+            messages.error(request, f'No se pudo enviar la cotización: {error_message}')
+            # Si falla el envío, el estado debería revertirse o manejarse
+            cotizacion.estado = 'borrador'
+            cotizacion.save()
 
+    except json.JSONDecodeError:
+        messages.error(request, 'Error al procesar los datos de la cotización.')
     except Exception as e:
-        messages.error(request, f'Error al preparar el envío de la cotización: {str(e)}')
+        messages.error(request, f'Ocurrió un error inesperado: {str(e)}')
 
     return redirect('lista_cotizaciones')
