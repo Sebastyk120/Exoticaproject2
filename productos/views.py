@@ -619,6 +619,10 @@ def enviar_cotizacion(request):
     recipients = request.POST.getlist('recipients')
     if not recipients and 'recipient_email' in request.POST:
         recipients = [request.POST.get('recipient_email')]
+    
+    # Get CC recipients
+    cc_recipients = request.POST.getlist('cc_recipients')
+    
     email_subject = request.POST.get('email_subject', 'Cotización - L&M Exotic Fruits')
     email_message = request.POST.get('email_message', '')
     pdf_data = request.POST.get('pdf_data', '')
@@ -708,6 +712,7 @@ def enviar_cotizacion(request):
             body=email_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to_emails=recipients,
+            cc_emails=cc_recipients if cc_recipients else None,
             attachments=attachments,
             proceso='cotizacion',
             usuario=request.user,
@@ -719,7 +724,12 @@ def enviar_cotizacion(request):
             # Actualizar estado de la cotización si el envío fue exitoso
             cotizacion.estado = 'enviada'
             cotizacion.save()
-            messages.success(request, f'Cotización #{cotizacion.numero} guardada y enviada a {", ".join(recipients)}')
+            
+            # Crear mensaje de éxito con información de destinatarios
+            success_msg = f'Cotización #{cotizacion.numero} guardada y enviada a {", ".join(recipients)}'
+            if cc_recipients:
+                success_msg += f' (CC: {", ".join(cc_recipients)})'
+            messages.success(request, success_msg)
         else:
             # Si hubo un error, mostrarlo pero la cotización ya está guardada
             messages.warning(request, f'Cotización #{cotizacion.numero} guardada pero hubo un error al enviar: {error_message}')

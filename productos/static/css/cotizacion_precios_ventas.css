@@ -451,10 +451,40 @@
 
 .recipient-checkboxes {
     margin-top: 10px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e1e4e8;
+}
+
+.recipient-checkboxes label:first-child {
+    display: block;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 8px;
+    font-size: 14px;
 }
 
 .checkbox-container {
     margin-bottom: 8px;
+    padding-left: 4px;
+}
+
+.checkbox-container input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.checkbox-container label {
+    cursor: pointer;
+    font-weight: normal;
+    color: #4b5563;
+    font-size: 13px;
+}
+
+.checkbox-container input[type="checkbox"]:checked + label {
+    font-weight: 600;
+    color: #1e3a8a;
 }
 
 .form-actions {

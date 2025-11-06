@@ -239,7 +239,7 @@
             
             {% if customer %}
             <div class="form-group recipient-checkboxes">
-                <label>Destinatarios:</label>
+                <label>Destinatarios Principales:</label>
                 <div class="checkbox-container">
                     <input type="checkbox" id="main_email" name="recipients" value="{{ customer.email }}" checked>
                     <label for="main_email">{{ customer.email }} (Principal)</label>
@@ -250,6 +250,23 @@
                     <div class="checkbox-container">
                         <input type="checkbox" id="additional_email_{{ forloop.counter }}" name="recipients" value="{{ email }}">
                         <label for="additional_email_{{ forloop.counter }}">{{ email }}</label>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <div class="form-group recipient-checkboxes">
+                <label>Con Copia (CC):</label>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="main_email_cc" name="cc_recipients" value="{{ customer.email }}">
+                    <label for="main_email_cc">{{ customer.email }} (Principal)</label>
+                </div>
+                
+                {% if customer.correos_adicionales %}
+                    {% for email in customer.correos_adicionales.split|stringformat:","|cut:" " %}
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="additional_email_cc_{{ forloop.counter }}" name="cc_recipients" value="{{ email }}">
+                        <label for="additional_email_cc_{{ forloop.counter }}">{{ email }}</label>
                     </div>
                     {% endfor %}
                 {% endif %}
@@ -575,6 +592,40 @@ document.addEventListener('DOMContentLoaded', function() {
             emailModal.classList.remove('show');
         }
     });
+    
+    // Handle email selection logic to prevent same email in both To and CC
+    {% if customer %}
+    const recipientCheckboxes = document.querySelectorAll('input[name="recipients"]');
+    const ccCheckboxes = document.querySelectorAll('input[name="cc_recipients"]');
+    
+    // Function to handle recipient checkbox changes
+    recipientCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                // Find corresponding CC checkbox and uncheck it
+                const email = this.value;
+                const ccCheckbox = Array.from(ccCheckboxes).find(cb => cb.value === email);
+                if (ccCheckbox) {
+                    ccCheckbox.checked = false;
+                }
+            }
+        });
+    });
+    
+    // Function to handle CC checkbox changes
+    ccCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                // Find corresponding recipient checkbox and uncheck it
+                const email = this.value;
+                const recipientCheckbox = Array.from(recipientCheckboxes).find(cb => cb.value === email);
+                if (recipientCheckbox) {
+                    recipientCheckbox.checked = false;
+                }
+            }
+        });
+    });
+    {% endif %}
 });
 </script>
 {% endblock %}

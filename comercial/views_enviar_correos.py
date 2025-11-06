@@ -62,22 +62,31 @@ def save_attachment_to_disk(email_log_id, filename, content_bytes):
         logger.error(f"Error guardando adjunto {filename}: {str(e)}")
         raise
 
-def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=None,
+def send_email_with_mailjet(subject, body, from_email, to_emails, cc_emails=None, attachments=None,
                            proceso=None, usuario=None, venta=None, cotizacion=None, cliente=None):
     """
     Función auxiliar para enviar emails directamente con Mailjet API
     Especialmente útil para emails con adjuntos grandes
     Optimizado para reducir tiempos de procesamiento
+    
+    Args:
+        cc_emails: Lista opcional de correos para enviar en copia (CC)
     """
     import time
     start_time = time.time()
     
     # Crear el registro de EmailLog antes del envío
+    # Construir string de destinatarios incluyendo CC si existe
+    destinatarios_str = ', '.join(to_emails) if isinstance(to_emails, list) else str(to_emails)
+    if cc_emails and len(cc_emails) > 0:
+        cc_str = ', '.join(cc_emails) if isinstance(cc_emails, list) else str(cc_emails)
+        destinatarios_str += f' (CC: {cc_str})'
+    
     email_log = EmailLog.objects.create(
         proceso=proceso or 'otro',
         usuario=usuario,
         asunto=subject,
-        destinatarios=', '.join(to_emails) if isinstance(to_emails, list) else str(to_emails),
+        destinatarios=destinatarios_str,
         cuerpo_mensaje=body,
         estado_envio='pendiente',
         venta=venta,
@@ -110,6 +119,12 @@ def send_email_with_mailjet(subject, body, from_email, to_emails, attachments=No
             "Subject": subject,
             "TextPart": body
         }
+        
+        # Agregar correos CC si existen
+        if cc_emails and len(cc_emails) > 0:
+            cc_recipients = [{"Email": email.strip()} for email in cc_emails if email.strip()]
+            if cc_recipients:
+                mailjet_message["Cc"] = cc_recipients
         
         # Preparar adjuntos para Mailjet (sin guardar en disco aún)
         adjunto_fields = {}
