@@ -24,5 +24,6 @@ urlpatterns = [
     path('cotizaciones/cliente/<int:cliente_id>/', views.cotizacion_cliente, name='cotizacion_cliente'),
     path('cotizaciones/nuevo-prospecto/', views.cotizacion_prospecto, name='cotizacion_prospecto'),
     path('cotizaciones/enviar/', views.enviar_cotizacion, name='enviar_cotizacion'),
+    path('cotizaciones/guardar-pdf/', views.guardar_cotizacion_pdf, name='guardar_cotizacion_pdf'),
     path('cotizaciones/<int:cotizacion_id>/', views.ver_cotizacion, name='ver_cotizacion'),
 ]

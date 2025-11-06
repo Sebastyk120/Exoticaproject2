@@ -525,11 +525,91 @@ def ver_cotizacion(request, cotizacion_id):
         context['is_new_customer'] = True
 
     return render(request, 'cotizacion_precios_ventas.html', context)
+@login_required
+def guardar_cotizacion_pdf(request):
+    """
+    View to save a quotation when downloading PDF
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+    try:
+        # Get quotation data
+        quotation_data = json.loads(request.POST.get('quotation_data', '{}'))
+        
+        if not quotation_data:
+            return JsonResponse({'success': False, 'error': 'No se recibieron datos de la cotización'}, status=400)
+        
+        cotizacion = None
+        
+        # Try to find existing quotation by number
+        if quotation_data.get('quotation_number'):
+            try:
+                cotizacion = Cotizacion.objects.get(numero=quotation_data.get('quotation_number'))
+                # Update existing quotation with current data
+                if quotation_data.get('client'):
+                    cotizacion.cliente_id = quotation_data['client'].get('id')
+                else:
+                    cotizacion.prospect_nombre = quotation_data.get('prospect', {}).get('name', '')
+                    cotizacion.prospect_email = quotation_data.get('prospect', {}).get('email', '')
+                    cotizacion.prospect_direccion = quotation_data.get('prospect', {}).get('address', '')
+                    cotizacion.prospect_telefono = quotation_data.get('prospect', {}).get('phone', '')
+                # Update terms and notes
+                if 'terms' in quotation_data:
+                    cotizacion.terminos = quotation_data['terms']
+                if 'notes' in quotation_data:
+                    cotizacion.notas = quotation_data['notes']
+            except Cotizacion.DoesNotExist:
+                # Create new quotation if not found
+                cotizacion = Cotizacion()
+                # Set customer or prospect info
+                if quotation_data.get('client'):
+                    cotizacion.cliente_id = quotation_data['client'].get('id')
+                else:
+                    cotizacion.prospect_nombre = quotation_data.get('prospect', {}).get('name', '')
+                    cotizacion.prospect_email = quotation_data.get('prospect', {}).get('email', '')
+                    cotizacion.prospect_direccion = quotation_data.get('prospect', {}).get('address', '')
+                    cotizacion.prospect_telefono = quotation_data.get('prospect', {}).get('phone', '')
+                # Set quotation number
+                cotizacion.numero = quotation_data.get('quotation_number')
+                # Set dates
+                cotizacion.fecha_validez = datetime.datetime.now() + datetime.timedelta(days=15)
+                # Set terms and notes
+                if 'terms' in quotation_data:
+                    cotizacion.terminos = quotation_data['terms']
+                if 'notes' in quotation_data:
+                    cotizacion.notas = quotation_data['notes']
+                # Set initial state as draft
+                cotizacion.estado = 'borrador'
+        
+        # Save the quotation
+        cotizacion.save()
+        
+        # Delete existing details and add new ones
+        DetalleCotizacion.objects.filter(cotizacion=cotizacion).delete()
+        for item in quotation_data.get('items', []):
+            detalle = DetalleCotizacion(
+                cotizacion=cotizacion,
+                presentacion_id=item.get('presentation_id'),
+                precio_unitario=item.get('unit_price', 0),
+            )
+            detalle.save()
+        
+        return JsonResponse({
+            'success': True, 
+            'message': f'Cotización #{cotizacion.numero} guardada correctamente',
+            'cotizacion_id': cotizacion.id,
+            'cotizacion_numero': cotizacion.numero
+        })
+            
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
 
 @login_required
 def enviar_cotizacion(request):
     """
-    View to send a quotation by email or just save it
+    View to send a quotation by email - always saves the quotation first
     """
     if request.method != 'POST':
         return redirect('lista_precios_ventas')
@@ -552,57 +632,66 @@ def enviar_cotizacion(request):
     # Variable to track the quotation if created or loaded
     cotizacion = None
 
-    # Save quotation if flag is set
-    if request.POST.get('save_quotation') == 'true':
-        try:
-            # Create new quotation
-            cotizacion = Cotizacion()
-            # Set customer or prospect info
-            if quotation_data.get('client'):
-                cotizacion.cliente_id = quotation_data['client'].get('id')
-            else:
-                cotizacion.prospect_nombre = quotation_data.get('prospect', {}).get('name', '')
-                cotizacion.prospect_email = quotation_data.get('prospect', {}).get('email', '')
-                cotizacion.prospect_direccion = quotation_data.get('prospect', {}).get('address', '')
-                cotizacion.prospect_telefono = quotation_data.get('prospect', {}).get('phone', '')
-            # Set quotation number if provided
-            if quotation_data.get('quotation_number'):
-                cotizacion.numero = quotation_data.get('quotation_number')
-            # Set dates
-            cotizacion.fecha_validez = datetime.datetime.now() + datetime.timedelta(days=15)
-            # Set terms and notes if available in the data
-            if 'terms' in quotation_data:
-                cotizacion.terminos = quotation_data['terms']
-            if 'notes' in quotation_data:
-                cotizacion.notas = quotation_data['notes']
-            # Al guardar, se usa el estado "borrador"
-            cotizacion.estado = 'borrador'
-            # Save main record
-            cotizacion.save()
-            # Add items - with simplified structure
-            for item in quotation_data.get('items', []):
-                detalle = DetalleCotizacion(
-                    cotizacion=cotizacion,
-                    presentacion_id=item.get('presentation_id'),
-                    precio_unitario=item.get('unit_price', 0),
-                )
-                detalle.save()
-            messages.success(request, f'Cotización guardada con número {cotizacion.numero}')
-            # Si se guarda, se redirige sin enviar correo
-            return redirect('lista_cotizaciones')
-        except Exception as e:
-            messages.error(request, f'Error al guardar la cotización: {str(e)}')
-            return redirect('lista_cotizaciones')
-    else:
-        # If we're sending an existing quotation, try to find it by quotation_number
+    # ALWAYS save or update the quotation when sending email
+    try:
+        # Try to find existing quotation by number
         if quotation_data.get('quotation_number'):
             try:
                 cotizacion = Cotizacion.objects.get(numero=quotation_data.get('quotation_number'))
+                # Update existing quotation with current data
+                if quotation_data.get('client'):
+                    cotizacion.cliente_id = quotation_data['client'].get('id')
+                else:
+                    cotizacion.prospect_nombre = quotation_data.get('prospect', {}).get('name', '')
+                    cotizacion.prospect_email = quotation_data.get('prospect', {}).get('email', '')
+                    cotizacion.prospect_direccion = quotation_data.get('prospect', {}).get('address', '')
+                    cotizacion.prospect_telefono = quotation_data.get('prospect', {}).get('phone', '')
+                # Update terms and notes
+                if 'terms' in quotation_data:
+                    cotizacion.terminos = quotation_data['terms']
+                if 'notes' in quotation_data:
+                    cotizacion.notas = quotation_data['notes']
             except Cotizacion.DoesNotExist:
-                # If not found, it's a temporary quotation that wasn't saved
-                pass
+                # Create new quotation if not found
+                cotizacion = Cotizacion()
+                # Set customer or prospect info
+                if quotation_data.get('client'):
+                    cotizacion.cliente_id = quotation_data['client'].get('id')
+                else:
+                    cotizacion.prospect_nombre = quotation_data.get('prospect', {}).get('name', '')
+                    cotizacion.prospect_email = quotation_data.get('prospect', {}).get('email', '')
+                    cotizacion.prospect_direccion = quotation_data.get('prospect', {}).get('address', '')
+                    cotizacion.prospect_telefono = quotation_data.get('prospect', {}).get('phone', '')
+                # Set quotation number
+                cotizacion.numero = quotation_data.get('quotation_number')
+                # Set dates
+                cotizacion.fecha_validez = datetime.datetime.now() + datetime.timedelta(days=15)
+                # Set terms and notes
+                if 'terms' in quotation_data:
+                    cotizacion.terminos = quotation_data['terms']
+                if 'notes' in quotation_data:
+                    cotizacion.notas = quotation_data['notes']
+                # Set initial state as draft
+                cotizacion.estado = 'borrador'
+        
+        # Save the quotation
+        cotizacion.save()
+        
+        # Delete existing details and add new ones
+        DetalleCotizacion.objects.filter(cotizacion=cotizacion).delete()
+        for item in quotation_data.get('items', []):
+            detalle = DetalleCotizacion(
+                cotizacion=cotizacion,
+                presentacion_id=item.get('presentation_id'),
+                precio_unitario=item.get('unit_price', 0),
+            )
+            detalle.save()
+            
+    except Exception as e:
+        messages.error(request, f'Error al guardar la cotización: {str(e)}')
+        return redirect('lista_cotizaciones')
 
-    # Si hay destinatarios y asunto, enviar correo
+    # Send email
     try:
         # Preparar adjuntos para Mailjet
         attachments = [
@@ -628,15 +717,14 @@ def enviar_cotizacion(request):
 
         if success:
             # Actualizar estado de la cotización si el envío fue exitoso
-            if cotizacion:
-                cotizacion.estado = 'enviada'
-                cotizacion.save()
-            messages.success(request, f'Cotización enviada a {", ".join(recipients)}')
+            cotizacion.estado = 'enviada'
+            cotizacion.save()
+            messages.success(request, f'Cotización #{cotizacion.numero} guardada y enviada a {", ".join(recipients)}')
         else:
-            # Si hubo un error, mostrarlo pero no bloquear la redirección
-            messages.error(request, f'Error al enviar la cotización: {error_message}')
+            # Si hubo un error, mostrarlo pero la cotización ya está guardada
+            messages.warning(request, f'Cotización #{cotizacion.numero} guardada pero hubo un error al enviar: {error_message}')
 
     except Exception as e:
-        messages.error(request, f'Error al preparar el envío de la cotización: {str(e)}')
+        messages.warning(request, f'Cotización #{cotizacion.numero} guardada pero hubo un error al preparar el envío: {str(e)}')
 
     return redirect('lista_cotizaciones')
