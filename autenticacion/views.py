@@ -11,7 +11,7 @@ from django.urls import get_resolver, reverse, NoReverseMatch
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
-from comercial.models import Cliente, Venta, EmailLog
+from comercial.models import Cliente, Venta, EmailLog, Cotizacion
 from productos.models import Fruta, Presentacion
 from importacion.models import Pedido
 import importlib
@@ -61,6 +61,7 @@ def home_view(request):
     import_count = Pedido.objects.count()
     sales_count = Venta.objects.count()
     email_count = EmailLog.objects.count()
+    cotizacion_count = Cotizacion.objects.count()
     
     # Get all clients for the modal
     clientes = Cliente.objects.all().order_by('nombre')
@@ -72,6 +73,7 @@ def home_view(request):
         'import_count': import_count,
         'sales_count': sales_count,
         'email_count': email_count,
+        'cotizacion_count': cotizacion_count,
         'clientes': clientes,
     }
     
