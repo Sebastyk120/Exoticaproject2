@@ -415,7 +415,13 @@ def cotizacion_cliente(request, cliente_id):
     # Formatear los precios para que usen punto como separador decimal
     for precio in precios:
         precio.precio_euro = str(precio.precio_euro).replace(',', '.')
-      # Generate unique quote number in YY-XX format (same as in model)
+    
+    # Procesar correos adicionales
+    correos_adicionales_list = []
+    if cliente.correos_adicionales:
+        correos_adicionales_list = [email.strip() for email in cliente.correos_adicionales.split(',') if email.strip()]
+    
+    # Generate unique quote number in YY-XX format (same as in model)
     year_short = datetime.datetime.now().strftime('%y')
     last_quote = Cotizacion.objects.filter(numero__startswith=f"{year_short}-").order_by('-id').first()
     if last_quote:
@@ -435,6 +441,7 @@ def cotizacion_cliente(request, cliente_id):
     context = {
         'customer': cliente,
         'precios': precios,
+        'correos_adicionales_list': correos_adicionales_list,
         'quotation_number': quotation_number,
         'quotation_date': quotation_date,
         'valid_until': valid_until,
@@ -514,7 +521,13 @@ def ver_cotizacion(request, cotizacion_id):
     
     # Si la cotización es para un cliente existente
     if cotizacion.cliente:
+        # Procesar correos adicionales
+        correos_adicionales_list = []
+        if cotizacion.cliente.correos_adicionales:
+            correos_adicionales_list = [email.strip() for email in cotizacion.cliente.correos_adicionales.split(',') if email.strip()]
+        
         context['customer'] = cotizacion.cliente
+        context['correos_adicionales_list'] = correos_adicionales_list
         context['is_new_customer'] = False
     # Si es para un prospecto
     else:

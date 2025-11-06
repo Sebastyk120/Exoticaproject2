@@ -245,8 +245,8 @@
                     <label for="main_email">{{ customer.email }} (Principal)</label>
                 </div>
                 
-                {% if customer.correos_adicionales %}
-                    {% for email in customer.correos_adicionales.split|stringformat:","|cut:" " %}
+                {% if correos_adicionales_list %}
+                    {% for email in correos_adicionales_list %}
                     <div class="checkbox-container">
                         <input type="checkbox" id="additional_email_{{ forloop.counter }}" name="recipients" value="{{ email }}">
                         <label for="additional_email_{{ forloop.counter }}">{{ email }}</label>
@@ -262,8 +262,8 @@
                     <label for="main_email_cc">{{ customer.email }} (Principal)</label>
                 </div>
                 
-                {% if customer.correos_adicionales %}
-                    {% for email in customer.correos_adicionales.split|stringformat:","|cut:" " %}
+                {% if correos_adicionales_list %}
+                    {% for email in correos_adicionales_list %}
                     <div class="checkbox-container">
                         <input type="checkbox" id="additional_email_cc_{{ forloop.counter }}" name="cc_recipients" value="{{ email }}">
                         <label for="additional_email_cc_{{ forloop.counter }}">{{ email }}</label>
