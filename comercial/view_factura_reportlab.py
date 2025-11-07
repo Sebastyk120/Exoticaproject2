@@ -51,6 +51,9 @@ def generar_factura_reportlab(request, venta_id):
     # Create the PDF with compact margins like the HTML version
     doc = SimpleDocTemplate(response, pagesize=A4, topMargin=1*cm, bottomMargin=1*cm, leftMargin=1.5*cm, rightMargin=1.5*cm)
     
+    # Available width calculation (A4: 21cm width - 3cm margins = 18cm)
+    available_width = 18*cm
+    
     # Get the story (content) for the PDF
     story = []
     
@@ -193,17 +196,17 @@ def generar_factura_reportlab(request, venta_id):
     # Header table with logo, company info and invoice info
     header_table = Table([
         [logo, company_info, invoice_info]
-    ], colWidths=[3*cm, 8*cm, 6*cm])
+    ], colWidths=[3*cm, 8*cm, 7*cm])
     
     header_table.setStyle(TableStyle([
         ('ALIGN', (0, 0), (0, 0), 'CENTER'),
         ('ALIGN', (1, 0), (1, 0), 'LEFT'),
         ('ALIGN', (2, 0), (2, 0), 'RIGHT'),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 5),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
         ('BACKGROUND', (2, 0), (2, 0), colors.white),
         ('LINEBELOW', (0, 0), (-1, 0), 2, primary_color),
     ]))
@@ -236,16 +239,16 @@ def generar_factura_reportlab(request, venta_id):
         ]
     ]
     
-    client_table = Table(client_data, colWidths=[8*cm, 1*cm, 8*cm])
+    client_table = Table(client_data, colWidths=[8*cm, 2*cm, 8*cm])
     client_table.setStyle(TableStyle([
         ('SPAN', (0, 0), (2, 0)),
         ('BACKGROUND', (0, 0), (-1, -1), light_bg),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 5),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
         ('LINEBELOW', (0, 0), (-1, 0), 1, primary_color),
         ('BOX', (0, 0), (-1, -1), 1, primary_color),
     ]))
@@ -297,7 +300,7 @@ def generar_factura_reportlab(request, venta_id):
         items_data.append(row)
     
     # Create items table with better column widths
-    items_table = Table(items_data, colWidths=[5*cm, 2.5*cm, 2*cm, 1.5*cm, 3*cm, 3*cm])
+    items_table = Table(items_data, colWidths=[5*cm, 2.5*cm, 2*cm, 2*cm, 3*cm, 3.5*cm])
     items_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), primary_color),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
@@ -306,10 +309,10 @@ def generar_factura_reportlab(request, venta_id):
         ('ALIGN', (0, 1), (0, -1), 'LEFT'),
         ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
         ('GRID', (0, 0), (-1, -1), 0.5, primary_color),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F2F2F2')]),
     ]))
@@ -327,10 +330,10 @@ def generar_factura_reportlab(request, venta_id):
         ('BACKGROUND', (0, 0), (-1, -1), light_bg),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 5),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-        ('TOPPADDING', (0, 0), (-1, -1), 3),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ('LINEBELOW', (0, 0), (-1, 0), 1, primary_color),
         ('BOX', (0, 0), (-1, -1), 1, primary_color),
     ]))
@@ -344,10 +347,10 @@ def generar_factura_reportlab(request, venta_id):
         ('BACKGROUND', (0, 0), (-1, -1), light_bg),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 5),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-        ('TOPPADDING', (0, 0), (-1, -1), 3),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ('LINEBELOW', (0, 0), (-1, 0), 1, primary_color),
         ('BOX', (0, 0), (-1, -1), 1, primary_color),
     ]))
@@ -387,17 +390,17 @@ def generar_factura_reportlab(request, venta_id):
         ('BACKGROUND', (0, 3), (-1, 3), primary_color),
         ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 5),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
         ('BOX', (0, 0), (-1, -1), 1, primary_color),
         ('LINEABOVE', (0, 3), (-1, 3), 2, text_color),
         ('LINEBEFORE', (0, 0), (0, 0), 3, orange_color),
     ]))
     
     # Combine bank info and summary
-    bottom_table = Table([[bank_terms_col, summary_table]], colWidths=[8*cm, 9.5*cm])
+    bottom_table = Table([[bank_terms_col, summary_table]], colWidths=[8*cm, 10*cm])
     bottom_table.setStyle(TableStyle([
         ('ALIGN', (0, 0), (0, 0), 'LEFT'),
         ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
@@ -415,15 +418,15 @@ def generar_factura_reportlab(request, venta_id):
     notes_title = Paragraph('<b><font size="11" color="#0055A4">OBSERVACIONES</font></b>', header_style)
     notes_content = Paragraph(f'<font size="9" color="#000000">{venta.observaciones if venta.observaciones else "Sin observaciones."}</font>', normal_style)
     
-    notes_table = Table([[notes_title], [notes_content]], colWidths=[17.8*cm])
+    notes_table = Table([[notes_title], [notes_content]], colWidths=[18*cm])
     notes_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), light_bg),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 5),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
         ('LINEBELOW', (0, 0), (-1, 0), 1, colors.HexColor('#ddd')),
         ('BOX', (0, 0), (-1, -1), 1, primary_color),
     ]))
@@ -440,15 +443,15 @@ def generar_factura_reportlab(request, venta_id):
         alignment=TA_CENTER
     )
     
-    thank_you_table = Table([[Paragraph('<b>¡Gracias por su confianza!</b>', thank_you_style)]], colWidths=[17.8*cm])
+    thank_you_table = Table([[Paragraph('<b>¡Gracias por su confianza!</b>', thank_you_style)]], colWidths=[18*cm])
     thank_you_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), light_bg),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 5),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
         ('BOX', (0, 0), (-1, -1), 1, primary_color),
     ]))
     story.append(thank_you_table)
