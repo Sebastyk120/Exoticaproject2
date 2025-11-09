@@ -147,7 +147,6 @@
 .file-link {
     display: flex;
     align-items: center;
-    color: var(--explorer-dark);
     text-decoration: none;
     padding: 5px 0;
     transition: all 0.3s ease;
@@ -162,13 +161,27 @@
     color: #0056b3;
 }
 
+.file-link.folder-link .file-name {
+    color: var(--explorer-primary);
+}
+
+.file-link.folder-link:hover .file-name {
+    color: #0056b3;
+}
+
 .file-link:hover {
     transform: translateX(5px);
+}
+
+.file-link:not(.folder-link) .file-name {
+    color: #212529;
 }
 
 .file-name {
     font-size: 1rem;
     word-break: break-word;
+    color: var(--explorer-dark);
+    font-weight: 500;
 }
 
 /* Folder Row Highlight */
