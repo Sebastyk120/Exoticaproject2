@@ -11,8 +11,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string
 from django.conf import settings
-from .models import Venta, DetalleVenta, Cliente, BalanceCliente
+from .models import Venta, DetalleVenta, Cliente, BalanceCliente, TranferenciasCliente
 from productos.models import Presentacion, ListaPreciosVentas
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 from importacion.models import Bodega, Pedido
 
@@ -583,3 +584,84 @@ def rectificativa_cliente_token(request, venta_id, token):
         'detalles': detalles,
         'token': token
     })
+
+@login_required
+@require_POST
+def registrar_pago_venta(request, venta_id):
+    """Vista para registrar o actualizar un pago de transferencia desde una venta"""
+    try:
+        venta = get_object_or_404(Venta, pk=venta_id)
+        
+        # Obtener datos del formulario
+        fecha_transferencia_str = request.POST.get('fecha_transferencia')
+        valor_transferencia = request.POST.get('valor_transferencia')
+        concepto = request.POST.get('concepto', '')
+        
+        # Validar datos requeridos
+        if not fecha_transferencia_str or not valor_transferencia:
+            return JsonResponse({
+                'success': False,
+                'message': 'Fecha y valor de transferencia son requeridos'
+            }, status=400)
+        
+        # Parsear fecha
+        try:
+            fecha_transferencia = parse_date(fecha_transferencia_str)
+            if not fecha_transferencia:
+                raise ValueError('Fecha inválida')
+        except (ValueError, TypeError):
+            return JsonResponse({
+                'success': False,
+                'message': 'La fecha de transferencia no es válida'
+            }, status=400)
+        
+        # Validar valor
+        try:
+            valor_transferencia = Decimal(valor_transferencia)
+            if valor_transferencia <= 0:
+                raise ValueError('El valor debe ser mayor que 0')
+        except (ValueError, decimal.InvalidOperation):
+            return JsonResponse({
+                'success': False,
+                'message': 'El valor de la transferencia no es válido'
+            }, status=400)
+        
+        # Buscar si ya existe una transferencia con esta referencia (número de factura)
+        referencia = venta.numero_factura
+        transferencia_existente = TranferenciasCliente.objects.filter(
+            cliente=venta.cliente,
+            referencia=referencia
+        ).first()
+        
+        if transferencia_existente:
+            # Actualizar transferencia existente
+            transferencia_existente.fecha_transferencia = fecha_transferencia
+            transferencia_existente.valor_transferencia = valor_transferencia
+            transferencia_existente.concepto = concepto
+            transferencia_existente.save()
+            message = f'Pago actualizado correctamente para la factura {referencia}'
+        else:
+            # Crear nueva transferencia
+            transferencia = TranferenciasCliente.objects.create(
+                cliente=venta.cliente,
+                referencia=referencia,
+                fecha_transferencia=fecha_transferencia,
+                valor_transferencia=valor_transferencia,
+                concepto=concepto
+            )
+            message = f'Pago registrado correctamente para la factura {referencia}'
+        
+        # Reevaluar el estado de pagos de la venta
+        venta.reevaluar_pagos_cliente()
+        
+        return JsonResponse({
+            'success': True,
+            'message': message,
+            'venta_id': venta.id
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error al registrar el pago: {str(e)}'
+        }, status=500)

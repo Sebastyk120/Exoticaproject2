@@ -154,6 +154,13 @@
                                                     data-venta-id="{{ venta.id }}">
                                                 <i class="fas fa-boxes"></i>
                                             </button>
+                                            <button type="button" class="btn-icon btn-pago" title="Registrar Pago"
+                                                    data-venta-id="{{ venta.id }}"
+                                                    data-cliente="{{ venta.cliente.nombre }}"
+                                                    data-numero-factura="{{ venta.numero_factura }}"
+                                                    data-total="{{ venta.valor_total_factura_euro }}">
+                                                <i class="fas fa-money-bill-wave"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -248,6 +255,13 @@
                                     <button type="button" class="btn-icon btn-details" title="Ver Detalles"
                                             data-venta-id="{{ venta.id }}">
                                         <i class="fas fa-boxes"></i>
+                                    </button>
+                                    <button type="button" class="btn-icon btn-pago" title="Registrar Pago"
+                                            data-venta-id="{{ venta.id }}"
+                                            data-cliente="{{ venta.cliente.nombre }}"
+                                            data-numero-factura="{{ venta.numero_factura }}"
+                                            data-total="{{ venta.valor_total_factura_euro }}">
+                                        <i class="fas fa-money-bill-wave"></i>
                                     </button>
                                 </div>
                             </div>
@@ -407,6 +421,58 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary close-modal-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para registrar pago -->
+    <div id="pago-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-money-bill-wave"></i> Registrar Pago - Factura #<span id="pago-numero-factura"></span></h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-pago" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" id="pago-venta-id" name="venta_id">
+                    
+                    <div class="form-group">
+                        <label for="pago-cliente">Cliente:</label>
+                        <input type="text" id="pago-cliente" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pago-referencia">Referencia (Número Factura):</label>
+                        <input type="text" id="pago-referencia" name="referencia" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pago-fecha">Fecha de Transferencia: <span class="required">*</span></label>
+                        <input type="date" id="pago-fecha" name="fecha_transferencia" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pago-valor">Valor Transferencia (€): <span class="required">*</span></label>
+                        <input type="number" id="pago-valor" name="valor_transferencia" class="form-control" step="0.01" min="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pago-concepto">Concepto / Observación:</label>
+                        <textarea id="pago-concepto" name="concepto" class="form-control" rows="3" placeholder="Ingrese alguna observación sobre el pago..."></textarea>
+                    </div>
+                    
+                    <div class="alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Si ya existe un registro de pago con este número de factura, será actualizado. De lo contrario, se creará uno nuevo.</p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline close-modal-btn">Cancelar</button>
+                <button type="submit" form="form-pago" class="btn btn-primary" id="btn-guardar-pago">
+                    <i class="fas fa-save"></i> Guardar Pago
+                </button>
             </div>
         </div>
     </div>
@@ -979,6 +1045,102 @@
                         updateInventarioSummary(filtered);
                     }
                 });
+            
+            // Funcionalidad del modal de pago
+            const pagoModal = document.getElementById('pago-modal');
+            const pagoBtns = document.querySelectorAll('.btn-pago');
+            const formPago = document.getElementById('form-pago');
+            const btnGuardarPago = document.getElementById('btn-guardar-pago');
+            
+            // Abrir modal de pago
+            pagoBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const ventaId = this.getAttribute('data-venta-id');
+                    const cliente = this.getAttribute('data-cliente');
+                    const numeroFactura = this.getAttribute('data-numero-factura');
+                    const total = this.getAttribute('data-total');
+                    
+                    // Rellenar el formulario
+                    document.getElementById('pago-venta-id').value = ventaId;
+                    document.getElementById('pago-cliente').value = cliente;
+                    document.getElementById('pago-referencia').value = numeroFactura;
+                    document.getElementById('pago-numero-factura').textContent = numeroFactura;
+                    document.getElementById('pago-valor').value = parseFloat(total).toFixed(2);
+                    
+                    // Establecer fecha actual
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('pago-fecha').value = today;
+                    
+                    // Limpiar concepto
+                    document.getElementById('pago-concepto').value = '';
+                    
+                    // Mostrar modal
+                    pagoModal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+            
+            // Manejar envío del formulario
+            formPago.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const ventaId = document.getElementById('pago-venta-id').value;
+                const formData = new FormData(formPago);
+                
+                // Deshabilitar botón mientras se procesa
+                btnGuardarPago.disabled = true;
+                btnGuardarPago.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+                
+                // Enviar datos
+                fetch(`/comercial/ventas/${ventaId}/registrar-pago/`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mostrar mensaje de éxito
+                        alert(data.message);
+                        
+                        // Cerrar modal y recargar página
+                        pagoModal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                        btnGuardarPago.disabled = false;
+                        btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
+                    }
+                })
+                .catch(error => {
+                    alert('Error al guardar el pago: ' + error);
+                    btnGuardarPago.disabled = false;
+                    btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
+                });
+            });
+            
+            // Cerrar modal de pago con los botones de cerrar
+            document.querySelectorAll('#pago-modal .close-modal, #pago-modal .close-modal-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    pagoModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    btnGuardarPago.disabled = false;
+                    btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
+                });
+            });
+            
+            // Cerrar modal de pago al hacer clic fuera
+            window.addEventListener('click', function(event) {
+                if (event.target === pagoModal) {
+                    pagoModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    btnGuardarPago.disabled = false;
+                    btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
+                }
+            });
             });
         });
     </script>

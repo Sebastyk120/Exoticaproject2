@@ -25,6 +25,7 @@ urlpatterns = [
     path('ventas/<int:venta_id>/generar-albaran/', views_ventas.generar_albaran, name='generar_albaran'),
     path('ventas/<int:venta_id>/generar-albaran-cliente/', views_ventas.generar_albaran_cliente, name='generar_albaran_cliente'),
     path('validar-stock/<int:presentacion_id>/<int:cajas_enviadas>/', views_ventas.validar_stock, name='validar_stock'),
+    path('ventas/<int:venta_id>/registrar-pago/', views_ventas.registrar_pago_venta, name='registrar_pago_venta'),
     path('estado-cuenta/cliente/<int:cliente_id>/', views_clientes.estado_cuenta_cliente, name='estado_cuenta_cliente'),
     # Añadir la ruta para acceso por token
     path('client-statement/<str:token>/', views_clientes.estado_cuenta_cliente_token, name='estado_cuenta_cliente_token'),
