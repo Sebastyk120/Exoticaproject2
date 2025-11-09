@@ -123,7 +123,7 @@
                         
                         <div class="form-group">
                             <label for="numero_nc">Número Abono/Reclamación:</label>
-                            <input type="text" id="numero_nc" name="numero_nc" value="{{ venta.numero_nc|default:'' }}">
+                            <input type="text" id="numero_nc" name="numero_nc" value="{{ venta.numero_nc|default:'Generado automáticamente' }}" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
                         </div>
                         
                         <div class="form-group">
@@ -513,6 +513,21 @@
                     return;
                 }
                 
+                // Verificar si hay cajas de abono y pedir confirmación
+                const totalCajasAbono = verificarCajasAbono();
+                if (totalCajasAbono > 0) {
+                    const confirmar = confirm(
+                        `⚠️ ADVERTENCIA: Se han detectado ${totalCajasAbono.toFixed(1)} cajas de abono.\n\n` +
+                        `Al guardar esta venta se generará automáticamente un Número de Abono/Reclamación.\n\n` +
+                        `¿Está seguro de que desea continuar?`
+                    );
+                    
+                    if (!confirmar) {
+                        showNotification('Guardado cancelado por el usuario', 'info');
+                        return;
+                    }
+                }
+                
                 // Mostrar notificación de guardado
                 showNotification('Guardando cambios...', 'info');
                 
@@ -599,6 +614,21 @@
                     return;
                 }
                 
+                // Verificar si hay cajas de abono y pedir confirmación
+                const totalCajasAbono = verificarCajasAbono();
+                if (totalCajasAbono > 0) {
+                    const confirmar = confirm(
+                        `⚠️ ADVERTENCIA: Se han detectado ${totalCajasAbono.toFixed(1)} cajas de abono.\n\n` +
+                        `Al guardar esta venta se generará automáticamente un Número de Abono/Reclamación.\n\n` +
+                        `¿Está seguro de que desea continuar?`
+                    );
+                    
+                    if (!confirmar) {
+                        showNotification('Guardado cancelado por el usuario', 'info');
+                        return;
+                    }
+                }
+                
                 // Mostrar notificación de guardado
                 showNotification('Guardando detalles...', 'info');
                 
@@ -654,6 +684,22 @@
             }
         }
 
+        // Función para verificar si hay cajas de abono
+        function verificarCajasAbono() {
+            const rows = document.querySelectorAll('.detail-row');
+            let totalCajasAbono = 0;
+            
+            for (const row of rows) {
+                const noCajasAbonoInput = row.querySelector('input[name$="_no_cajas_abono"]');
+                if (noCajasAbonoInput) {
+                    const noCajasAbono = parseFloat(noCajasAbonoInput.value) || 0;
+                    totalCajasAbono += noCajasAbono;
+                }
+            }
+            
+            return totalCajasAbono;
+        }
+
         // Modificar la función guardarTodo para incluir la validación
         async function guardarTodo() {
             try {
@@ -673,6 +719,21 @@
                 if (!isValidStock) {
                     showNotification('Por favor, corrija los errores antes de guardar', 'error');
                     return;
+                }
+                
+                // Verificar si hay cajas de abono y pedir confirmación
+                const totalCajasAbono = verificarCajasAbono();
+                if (totalCajasAbono > 0) {
+                    const confirmar = confirm(
+                        `⚠️ ADVERTENCIA: Se han detectado ${totalCajasAbono.toFixed(1)} cajas de abono.\n\n` +
+                        `Al guardar esta venta se generará automáticamente un Número de Abono/Reclamación.\n\n` +
+                        `¿Está seguro de que desea continuar?`
+                    );
+                    
+                    if (!confirmar) {
+                        showNotification('Guardado cancelado por el usuario', 'info');
+                        return;
+                    }
                 }
                 
                 // Mostrar notificación de guardado
@@ -1029,48 +1090,7 @@
             const rows = document.querySelectorAll('.detail-row');
             let isValid = true;
             
-            // Primero validar si hay cajas de abono
-            let tieneCajasAbono = false;
-            for (const row of rows) {
-                const noCajasAbonoInput = row.querySelector('input[name$="_no_cajas_abono"]');
-                if (noCajasAbonoInput) {
-                    const noCajasAbono = parseFloat(noCajasAbonoInput.value) || 0;
-                    if (noCajasAbono > 0) {
-                        tieneCajasAbono = true;
-                        break;
-                    }
-                }
-            }
-            
-            // Si hay cajas de abono, validar el número NC/Reclamación
-            if (tieneCajasAbono) {
-                const numeroNcInput = document.getElementById('numero_nc');
-                if (!numeroNcInput || !numeroNcInput.value.trim()) {
-                    // Mostrar error en el campo
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'field-error';
-                    errorDiv.textContent = 'El número NC/Reclamación es requerido cuando hay cajas de abono';
-                    
-                    // Remover error anterior si existe
-                    const existingError = numeroNcInput.parentElement.querySelector('.field-error');
-                    if (existingError) {
-                        existingError.remove();
-                    }
-                    
-                    // Agregar el nuevo error
-                    numeroNcInput.parentElement.appendChild(errorDiv);
-                    numeroNcInput.classList.add('error');
-                    
-                    isValid = false;
-                } else {
-                    // Remover error si existe
-                    const existingError = numeroNcInput.parentElement.querySelector('.field-error');
-                    if (existingError) {
-                        existingError.remove();
-                    }
-                    numeroNcInput.classList.remove('error');
-                }
-            }
+            // El numero_nc se genera automáticamente en el modelo, no es necesario validarlo aquí
             
             // Continuar con las validaciones existentes
             for (const row of rows) {

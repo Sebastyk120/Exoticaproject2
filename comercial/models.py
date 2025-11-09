@@ -81,6 +81,26 @@ class Venta(models.Model):
     observaciones = models.CharField(verbose_name="Observaciones", max_length=100, blank=True, null=True)
     origen = models.CharField(verbose_name="Origen", max_length=50, blank=True, null=True)
 
+    def generar_numero_nc(self):
+        """
+        Genera el número consecutivo para nota de crédito/abono
+        Formato: YY/NNN (ej: 25/101)
+        """
+        if not self.numero_nc:
+            current_year = datetime.datetime.now().year % 100
+            last_venta = Venta.objects.filter(numero_nc__startswith=f'{current_year}/').order_by('id').last()
+            if last_venta:
+                try:
+                    last_consecutive = int(last_venta.numero_nc.split('/')[-1])
+                    new_consecutive = last_consecutive + 1
+                except (ValueError, IndexError):
+                    new_consecutive = 101
+            else:
+                new_consecutive = 101
+            self.numero_nc = f'{current_year}/{new_consecutive}'
+            # Guardar solo el campo numero_nc para evitar recursión
+            Venta.objects.filter(pk=self.pk).update(numero_nc=self.numero_nc)
+
     def save(self, *args, **kwargs):
         # Calcular IVA y total factura
         if self.subtotal_factura:
@@ -221,7 +241,7 @@ class DetalleVenta(models.Model):
         """
         Actualiza los campos calculados de la venta relacionada usando consultas agregadas
         """
-        from django.db.models import Sum
+        from django.db.models import Sum, Q
         from django.db.models.functions import Coalesce
         from decimal import Decimal
         from django.db import transaction
@@ -260,8 +280,18 @@ class DetalleVenta(models.Model):
                 total_cajas_pedido=total_cajas
             )
             
-            # Ahora llamamos a reevaluar_pagos_cliente para actualizar el monto_pendiente
+            # Verificar si existe algún DetalleVenta con no_cajas_abono > 0
+            tiene_abono = DetalleVenta.objects.filter(
+                venta_id=venta_id,
+                no_cajas_abono__gt=0
+            ).exists()
+            
+            # Generar numero_nc si existe abono y aún no se ha generado
             venta = Venta.objects.get(pk=venta_id)
+            if tiene_abono and not venta.numero_nc:
+                venta.generar_numero_nc()
+            
+            # Ahora llamamos a reevaluar_pagos_cliente para actualizar el monto_pendiente
             venta.reevaluar_pagos_cliente()
     
     def save(self, *args, **kwargs):

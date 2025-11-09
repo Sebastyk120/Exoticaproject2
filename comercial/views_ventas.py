@@ -147,7 +147,7 @@ def guardar_venta(request, venta_id=None):
         except (ValueError, decimal.InvalidOperation):
             venta.porcentaje_iva = Decimal('4.00')
         
-        venta.numero_nc = request.POST.get('numero_nc', '')
+        # El numero_nc se genera automáticamente en el modelo cuando hay cajas de abono
         venta.observaciones = request.POST.get('observaciones', '')
         venta.origen = request.POST.get('origen', '')
         
