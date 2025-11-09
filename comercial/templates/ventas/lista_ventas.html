@@ -58,9 +58,8 @@
                                 <label><input type="checkbox" data-column="id" checked disabled> ID</label>
                                 <label><input type="checkbox" data-column="cliente" checked disabled> Cliente</label>
                                 <label><input type="checkbox" data-column="fecha_compra" checked> Fecha Compra</label>
-                                <label><input type="checkbox" data-column="fecha_vencimiento" checked> Fecha Vencimiento</label>
                                 <label><input type="checkbox" data-column="semana" checked> Semana</label>
-                                <label><input type="checkbox" data-column="cajas" checked> Total Cajas</label>
+                                <label><input type="checkbox" data-column="cajas" checked> No Cajas</label>
                                 <label><input type="checkbox" data-column="total_factura" checked>Total Factura + IVA €</label>
                                 <label><input type="checkbox" data-column="iva"> IVA €</label>
                                 <label><input type="checkbox" data-column="total_abono" checked>Abono + IVA €</label>
@@ -104,9 +103,8 @@
                                     <th class="column-cliente">Cliente</th>
                                     <th class="column-numero_factura">Nº Factura</th>
                                     <th class="column-fecha_compra">Fecha Compra</th>
-                                    <th class="column-fecha_vencimiento">Fecha Vencimiento</th>
                                     <th class="column-semana">Semana</th>
-                                    <th class="column-cajas">Total Cajas</th>
+                                    <th class="column-cajas">No Cajas</th>
                                     <th class="column-total_factura">Total Factura + IVA €</th>
                                     <th class="column-iva">IVA €</th>
                                     <th class="column-total_abono">Abono + IVA €</th>
@@ -125,8 +123,7 @@
                                         <span class="cliente-nombre">{{ venta.cliente.nombre }}</span>
                                     </td>
                                     <td class="column-numero_factura">{{ venta.numero_factura|default:"-" }}</td>
-                                    <td class="column-fecha_compra">{{ venta.fecha_compra|date:"d/m/Y" }}</td>
-                                    <td class="column-fecha_vencimiento">{{ venta.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</td>
+                                    <td class="column-fecha_compra">{{ venta.pedidos.first.fecha_entrega|date:"d/m/Y"|default:"-" }}</td>
                                     <td class="column-semana">{{ venta.semana|default:"-" }}</td>
                                     <td class="column-cajas">{{ venta.total_cajas_pedido|default:0 }}</td>
                                     <td class="column-total_factura">{{ venta.valor_total_factura_euro|default:0|format_currency_eur }}</td>
@@ -162,7 +159,7 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="14" class="empty-message">
+                                    <td colspan="13" class="empty-message">
                                         <div class="empty-state">
                                             <i class="fas fa-shopping-cart"></i>
                                             <p>No hay ventas para mostrar</p>
@@ -203,18 +200,14 @@
                                 <div class="info-grid">
                                     <div class="info-item column-fecha_compra">
                                         <span class="info-label">Fecha Compra</span>
-                                        <span class="info-value">{{ venta.fecha_compra|date:"d/m/Y" }}</span>
-                                    </div>
-                                    <div class="info-item column-fecha_vencimiento">
-                                        <span class="info-label">Fecha Vencimiento</span>
-                                        <span class="info-value">{{ venta.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</span>
+                                        <span class="info-value">{{ venta.pedidos.first.fecha_entrega|date:"d/m/Y"|default:"-" }}</span>
                                     </div>
                                     <div class="info-item column-semana">
                                         <span class="info-label">Semana</span>
                                         <span class="info-value">{{ venta.semana|default:"-" }}</span>
                                     </div>
                                     <div class="info-item column-cajas">
-                                        <span class="info-label">Total Cajas</span>
+                                        <span class="info-label">No Cajas</span>
                                         <span class="info-value highlight">{{ venta.total_cajas_pedido|default:0 }}</span>
                                     </div>
                                     <div class="info-item column-total_factura">
@@ -318,10 +311,6 @@
                             <div class="info-item">
                                 <label>Cliente:</label>
                                 <span id="modal-cliente"></span>
-                            </div>
-                            <div class="info-item">
-                                <label>Fecha Vencimiento:</label>
-                                <span id="modal-fecha-vencimiento"></span>
                             </div>
                         </div>
                     </div>

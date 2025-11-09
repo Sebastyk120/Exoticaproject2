@@ -19,7 +19,7 @@ from importacion.models import Bodega, Pedido
 @login_required
 def lista_ventas(request):
     """View to list all sales with search and filter functionality"""
-    queryset = Venta.objects.all().select_related('cliente')
+    queryset = Venta.objects.all().select_related('cliente').prefetch_related('pedidos')
     
     search_query = request.GET.get('q', '')
     if search_query:
