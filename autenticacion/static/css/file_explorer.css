@@ -1,0 +1,458 @@
+/* ====================================
+   File Explorer Styles
+   ==================================== */
+
+:root {
+    --explorer-primary: #007bff;
+    --explorer-danger: #dc3545;
+    --explorer-success: #28a745;
+    --explorer-warning: #ffc107;
+    --explorer-secondary: #6c757d;
+    --explorer-dark: #343a40;
+    --explorer-light: #f8f9fa;
+    --explorer-border: #dee2e6;
+    --explorer-hover: #f1f3f5;
+}
+
+/* Main Container */
+.file-explorer-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    margin: 20px;
+    overflow: hidden;
+}
+
+/* Header Section */
+.explorer-header {
+    background: linear-gradient(135deg, var(--explorer-primary) 0%, #0056b3 100%);
+    color: white;
+    padding: 30px;
+    border-bottom: 4px solid rgba(255, 255, 255, 0.2);
+}
+
+.explorer-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.explorer-title i {
+    font-size: 2.5rem;
+}
+
+/* Breadcrumb Navigation */
+.explorer-breadcrumb {
+    background: var(--explorer-light);
+    padding: 15px 30px;
+    margin: 0;
+    border-bottom: 1px solid var(--explorer-border);
+}
+
+.explorer-breadcrumb .breadcrumb {
+    margin: 0;
+    background: transparent;
+    padding: 0;
+}
+
+.breadcrumb-item {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.breadcrumb-item a {
+    color: var(--explorer-primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: var(--explorer-dark);
+    font-weight: 600;
+}
+
+/* Messages Container */
+.messages-container {
+    padding: 20px 30px 0;
+}
+
+.messages-container .alert {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Explorer Content */
+.explorer-content {
+    padding: 30px;
+}
+
+/* Files Table */
+.files-table {
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.files-table thead {
+    background: var(--explorer-light);
+}
+
+.files-table thead th {
+    border: none;
+    padding: 15px;
+    font-weight: 600;
+    color: var(--explorer-dark);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.files-table tbody tr {
+    border-bottom: 1px solid var(--explorer-border);
+    transition: all 0.3s ease;
+}
+
+.files-table tbody tr:hover {
+    background: var(--explorer-hover);
+    transform: translateX(5px);
+}
+
+.files-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.files-table tbody td {
+    padding: 15px;
+    vertical-align: middle;
+}
+
+/* File Icons */
+.file-icon {
+    font-size: 1.5rem;
+    width: 30px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* File Link */
+.file-link {
+    display: flex;
+    align-items: center;
+    color: var(--explorer-dark);
+    text-decoration: none;
+    padding: 5px 0;
+    transition: all 0.3s ease;
+}
+
+.file-link.folder-link {
+    color: var(--explorer-primary);
+    font-weight: 600;
+}
+
+.file-link.folder-link:hover {
+    color: #0056b3;
+}
+
+.file-link:hover {
+    transform: translateX(5px);
+}
+
+.file-name {
+    font-size: 1rem;
+    word-break: break-word;
+}
+
+/* Folder Row Highlight */
+.folder-row {
+    background: rgba(0, 123, 255, 0.02);
+}
+
+.folder-row:hover {
+    background: rgba(0, 123, 255, 0.08);
+}
+
+/* File Info */
+.file-size {
+    color: var(--explorer-secondary);
+    font-weight: 500;
+}
+
+.file-date {
+    color: var(--explorer-secondary);
+    font-size: 0.9rem;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.action-buttons .btn {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.action-buttons .btn i {
+    font-size: 1rem;
+}
+
+.btn-text {
+    display: inline;
+}
+
+/* Responsive: Hide button text on small screens */
+@media (max-width: 768px) {
+    .btn-text {
+        display: none;
+    }
+    
+    .action-buttons .btn {
+        padding: 6px 10px;
+    }
+}
+
+/* Footer Stats */
+.explorer-footer {
+    background: var(--explorer-light);
+    padding: 15px 30px;
+    border-top: 1px solid var(--explorer-border);
+    margin-top: 20px;
+}
+
+.stats-info {
+    display: flex;
+    align-items: center;
+    color: var(--explorer-secondary);
+    font-size: 0.9rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--explorer-secondary);
+}
+
+.empty-icon {
+    font-size: 5rem;
+    color: var(--explorer-border);
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    color: var(--explorer-dark);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+/* Delete Modal Customization */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    border-radius: 12px 12px 0 0;
+    padding: 20px 30px;
+}
+
+.modal-body {
+    padding: 30px;
+}
+
+.modal-footer {
+    padding: 20px 30px;
+    border-top: 1px solid var(--explorer-border);
+}
+
+.file-to-delete {
+    background: var(--explorer-light);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    border-left: 4px solid var(--explorer-danger);
+}
+
+/* Badge Styles */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Responsive Table */
+@media (max-width: 992px) {
+    .file-explorer-container {
+        margin: 10px;
+    }
+    
+    .explorer-header {
+        padding: 20px;
+    }
+    
+    .explorer-breadcrumb {
+        padding: 10px 20px;
+    }
+    
+    .explorer-content {
+        padding: 20px;
+    }
+    
+    .explorer-title {
+        font-size: 1.5rem;
+    }
+    
+    .files-table {
+        font-size: 0.9rem;
+    }
+    
+    .files-table thead th,
+    .files-table tbody td {
+        padding: 10px 8px;
+    }
+}
+
+@media (max-width: 768px) {
+    .explorer-title {
+        font-size: 1.3rem;
+    }
+    
+    .explorer-title i {
+        font-size: 1.5rem;
+    }
+    
+    /* Stack table on mobile */
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .files-table {
+        min-width: 600px;
+    }
+    
+    .breadcrumb {
+        font-size: 0.9rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .explorer-header,
+    .explorer-breadcrumb,
+    .action-buttons,
+    .explorer-footer {
+        display: none;
+    }
+    
+    .file-explorer-container {
+        box-shadow: none;
+        border: 1px solid var(--explorer-border);
+    }
+}
+
+/* Animation for Row Hover */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.files-table tbody tr {
+    animation: slideIn 0.3s ease;
+}
+
+/* Loading State (for future enhancement) */
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px;
+}
+
+.loading-spinner i {
+    font-size: 3rem;
+    color: var(--explorer-primary);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Icon Colors by File Type */
+.fa-file-pdf { color: #dc3545 !important; }
+.fa-file-word { color: #2b579a !important; }
+.fa-file-excel { color: #217346 !important; }
+.fa-file-image { color: #28a745 !important; }
+.fa-file-archive { color: #ffc107 !important; }
+.fa-file-code { color: #17a2b8 !important; }
+.fa-folder { color: #007bff !important; }
+
+/* Accessibility */
+.file-link:focus,
+.action-buttons .btn:focus {
+    outline: 2px solid var(--explorer-primary);
+    outline-offset: 2px;
+}
+
+/* Dark Mode Support (Optional) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --explorer-dark: #f8f9fa;
+        --explorer-light: #2d3748;
+        --explorer-border: #4a5568;
+        --explorer-hover: #374151;
+    }
+    
+    .file-explorer-container {
+        background: #1a202c;
+        color: #f8f9fa;
+    }
+    
+    .files-table tbody tr {
+        border-bottom-color: var(--explorer-border);
+    }
+}
