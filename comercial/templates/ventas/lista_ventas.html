@@ -61,11 +61,11 @@
                                 <label><input type="checkbox" data-column="fecha_vencimiento" checked> Fecha Vencimiento</label>
                                 <label><input type="checkbox" data-column="semana" checked> Semana</label>
                                 <label><input type="checkbox" data-column="cajas" checked> Total Cajas</label>
-                                <label><input type="checkbox" data-column="total_factura" checked>Valor Factura con IVA €</label>
+                                <label><input type="checkbox" data-column="total_factura" checked>Total Factura + IVA €</label>
                                 <label><input type="checkbox" data-column="iva"> IVA €</label>
-                                <label><input type="checkbox" data-column="total_abono" checked>Abono Con IVA €</label>
+                                <label><input type="checkbox" data-column="total_abono" checked>Abono + IVA €</label>
                                 <label><input type="checkbox" data-column="numero_factura"> Nº Factura</label>
-                                <label><input type="checkbox" data-column="numero_nc"> Nº NC</label>
+                                <label><input type="checkbox" data-column="numero_nc"> Nº Abono</label>
                                 <label><input type="checkbox" data-column="monto_pendiente" checked> Monto Pendiente</label>
                                 <label><input type="checkbox" data-column="pagado" checked disabled> Estado</label>
                                 <!-- Acciones siempre visibles -->
@@ -102,15 +102,16 @@
                                 <tr>
                                     <th class="column-id">ID</th>
                                     <th class="column-cliente">Cliente</th>
+                                    <th class="column-numero_factura">Nº Factura</th>
                                     <th class="column-fecha_compra">Fecha Compra</th>
                                     <th class="column-fecha_vencimiento">Fecha Vencimiento</th>
                                     <th class="column-semana">Semana</th>
                                     <th class="column-cajas">Total Cajas</th>
-                                    <th class="column-total_factura">Valor Factura Con IVA €</th>
+                                    <th class="column-total_factura">Total Factura + IVA €</th>
                                     <th class="column-iva">IVA €</th>
-                                    <th class="column-total_abono">Abono Con IVA €</th>
-                                    <th class="column-numero_factura">Nº Factura</th>
-                                    <th class="column-numero_nc">Nº NC</th>
+                                    <th class="column-total_abono">Abono + IVA €</th>
+                                    
+                                    <th class="column-numero_nc">Nº Abono</th>
                                     <th class="column-monto_pendiente">Monto Pendiente</th>
                                     <th class="column-pagado">Estado</th>
                                     <th class="column-acciones">Acciones</th>
@@ -123,6 +124,7 @@
                                     <td class="column-cliente">
                                         <span class="cliente-nombre">{{ venta.cliente.nombre }}</span>
                                     </td>
+                                    <td class="column-numero_factura">{{ venta.numero_factura|default:"-" }}</td>
                                     <td class="column-fecha_compra">{{ venta.fecha_compra|date:"d/m/Y" }}</td>
                                     <td class="column-fecha_vencimiento">{{ venta.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</td>
                                     <td class="column-semana">{{ venta.semana|default:"-" }}</td>
@@ -130,7 +132,6 @@
                                     <td class="column-total_factura">{{ venta.valor_total_factura_euro|default:0|format_currency_eur }}</td>
                                     <td class="column-iva">{{ venta.iva|default:0|format_currency_eur }}</td>
                                     <td class="column-total_abono">{{ venta.valor_total_abono_euro|default:0|format_currency_eur }}</td>
-                                    <td class="column-numero_factura">{{ venta.numero_factura|default:"-" }}</td>
                                     <td class="column-numero_nc">{{ venta.numero_nc|default:"-" }}</td>
                                     <td class="column-monto_pendiente">{{ venta.monto_pendiente|default:0|format_currency_eur }}</td>
                                     <td class="column-pagado">
@@ -233,7 +234,7 @@
                                         <span class="info-value">{{ venta.numero_factura|default:"-" }}</span>
                                     </div>
                                     <div class="info-item column-numero_nc">
-                                        <span class="info-label">Nº NC</span>
+                                        <span class="info-label">Nº Abono</span>
                                         <span class="info-value">{{ venta.numero_nc|default:"-" }}</span>
                                     </div>
                                     <div class="info-item column-monto_pendiente">
