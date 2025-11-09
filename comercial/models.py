@@ -85,19 +85,30 @@ class Venta(models.Model):
         """
         Genera el número consecutivo para nota de crédito/abono
         Formato: YY/NNN (ej: 25/101)
+        Busca el consecutivo más alto del año actual para evitar duplicados
         """
         if not self.numero_nc:
             current_year = datetime.datetime.now().year % 100
-            last_venta = Venta.objects.filter(numero_nc__startswith=f'{current_year}/').order_by('id').last()
-            if last_venta:
+            
+            # Obtener todas las ventas del año actual que tengan numero_nc
+            ventas_con_nc = Venta.objects.filter(
+                numero_nc__startswith=f'{current_year}/'
+            ).exclude(numero_nc__isnull=True).exclude(numero_nc='')
+            
+            # Encontrar el consecutivo más alto
+            max_consecutive = 100  # Valor por defecto (el siguiente será 101)
+            for venta in ventas_con_nc:
                 try:
-                    last_consecutive = int(last_venta.numero_nc.split('/')[-1])
-                    new_consecutive = last_consecutive + 1
+                    consecutive = int(venta.numero_nc.split('/')[-1])
+                    if consecutive > max_consecutive:
+                        max_consecutive = consecutive
                 except (ValueError, IndexError):
-                    new_consecutive = 101
-            else:
-                new_consecutive = 101
+                    continue
+            
+            # El nuevo consecutivo es el máximo + 1
+            new_consecutive = max_consecutive + 1
             self.numero_nc = f'{current_year}/{new_consecutive}'
+            
             # Guardar solo el campo numero_nc para evitar recursión
             Venta.objects.filter(pk=self.pk).update(numero_nc=self.numero_nc)
 
