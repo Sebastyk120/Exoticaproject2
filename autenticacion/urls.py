@@ -18,4 +18,5 @@ urlpatterns = [
     path('file-explorer/<path:subpath>/', views_file_explorer.file_explorer_view, name='file_explorer_subpath'),
     path('file-download/<path:file_path>/', views_file_explorer.download_file, name='file_download'),
     path('file-delete/<path:file_path>/', views_file_explorer.delete_file, name='file_delete'),
+    path('create-backup/', views_file_explorer.create_backup, name='create_backup'),
 ]

@@ -19,12 +19,20 @@
                 </h1>
                 <p class="text-muted mb-0">Gestiona los archivos en el directorio /media/</p>
             </div>
-            {% if has_parent %}
-            <a href="{% if parent_path %}{% url 'autenticacion:file_explorer_subpath' subpath=parent_path %}{% else %}{% url 'autenticacion:file_explorer' %}{% endif %}" 
-               class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Volver
-            </a>
-            {% endif %}
+            <div class="d-flex align-items-center">
+                <form action="{% url 'autenticacion:create_backup' %}" method="post" class="me-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-database me-2"></i>Crear Backup
+                    </button>
+                </form>
+                {% if has_parent %}
+                <a href="{% if parent_path %}{% url 'autenticacion:file_explorer_subpath' subpath=parent_path %}{% else %}{% url 'autenticacion:file_explorer' %}{% endif %}"
+                   class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver
+                </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 

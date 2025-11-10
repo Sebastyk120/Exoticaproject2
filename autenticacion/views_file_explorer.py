@@ -335,3 +335,106 @@ def delete_file(request, file_path):
         if parent_dir:
             return redirect('autenticacion:file_explorer_subpath', subpath=parent_dir)
         return redirect('autenticacion:file_explorer')
+
+
+@user_passes_test(lambda u: u.is_superuser, login_url='/app/login/')
+def create_backup(request):
+    """
+    Crea un backup de la base de datos PostgreSQL utilizando DATABASE_URL.
+    
+    Args:
+        request: HttpRequest object
+        
+    Returns:
+        Redirect a la carpeta de backups con mensaje de éxito o error
+    """
+    if request.method != 'POST':
+        messages.error(request, "Método no permitido.")
+        return redirect('autenticacion:file_explorer')
+
+    try:
+        import subprocess
+        
+        # Obtener DATABASE_URL desde las variables de entorno
+        database_url = os.getenv('DATABASE_URL')
+        
+        if not database_url:
+            messages.error(request, "DATABASE_URL no está configurada en las variables de entorno.")
+            logger.error("DATABASE_URL no encontrada al intentar crear backup")
+            return redirect('autenticacion:file_explorer')
+        
+        # Verificar que sea una base de datos PostgreSQL
+        if not database_url.startswith(('postgres://', 'postgresql://')):
+            messages.error(request, "La funcionalidad de backup solo está disponible para bases de datos PostgreSQL.")
+            logger.warning(f"Intento de backup con base de datos no PostgreSQL: {database_url[:20]}...")
+            return redirect('autenticacion:file_explorer')
+        
+        # Crear directorio de backups si no existe
+        backup_dir = os.path.join(settings.MEDIA_ROOT, 'backups')
+        os.makedirs(backup_dir, exist_ok=True)
+        
+        # Generar nombre del archivo con timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        # Extraer nombre de la base de datos desde DATABASE_URL para el nombre del archivo
+        # Formato: postgres://user:pass@host:port/dbname
+        try:
+            db_name = database_url.split('/')[-1].split('?')[0]  # Obtener dbname
+        except:
+            db_name = 'database'  # Fallback si no se puede extraer
+        
+        backup_filename = f'backup_{db_name}_{timestamp}.backup'
+        backup_filepath = os.path.join(backup_dir, backup_filename)
+        
+        # Construir el comando pg_dump usando DATABASE_URL directamente
+        command = [
+            'pg_dump',
+            '--dbname', database_url,
+            '-f', backup_filepath,
+            '--format=c',  # custom format, compressed
+            '--verbose',
+        ]
+        
+        logger.info(f"Usuario {request.user.username} inició creación de backup: {backup_filename}")
+        
+        # Ejecutar pg_dump
+        process = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=False  # No lanzar excepción en error para manejarlo manualmente
+        )
+        
+        if process.returncode == 0:
+            # Verificar que el archivo fue creado y tiene contenido
+            if os.path.exists(backup_filepath) and os.path.getsize(backup_filepath) > 0:
+                file_size = format_file_size(os.path.getsize(backup_filepath))
+                messages.success(
+                    request,
+                    f"Backup '{backup_filename}' creado exitosamente ({file_size}) en /media/backups/."
+                )
+                logger.info(f"Backup creado exitosamente: {backup_filename} ({file_size})")
+            else:
+                messages.warning(request, "El backup se completó pero el archivo está vacío o no fue creado.")
+                logger.warning(f"Backup completado pero archivo vacío o no existe: {backup_filepath}")
+        else:
+            # Capturar y registrar el error
+            error_message = process.stderr or process.stdout or "Error desconocido"
+            logger.error(f"Error al crear backup para usuario {request.user.username}: {error_message}")
+            messages.error(request, f"Error al crear el backup. Consulte los logs para más detalles.")
+    
+    except subprocess.TimeoutExpired:
+        logger.error("Timeout al ejecutar pg_dump")
+        messages.error(request, "El proceso de backup tardó demasiado y fue cancelado.")
+    except FileNotFoundError:
+        logger.error("pg_dump no encontrado en el sistema")
+        messages.error(
+            request,
+            "No se encontró el comando 'pg_dump'. Asegúrese de que PostgreSQL está instalado y en el PATH."
+        )
+    except Exception as e:
+        logger.error(f"Error inesperado al crear backup: {str(e)}", exc_info=True)
+        messages.error(request, f"Ocurrió un error inesperado al crear el backup.")
+
+    return redirect('autenticacion:file_explorer_subpath', subpath='backups')
+    
