@@ -382,7 +382,7 @@ Considerar implementar:
 
 ## 📞 Soporte y Contacto
 
-**Desarrollador**: Kilo Code AI  
+**Desarrollador**: Sebastian Melo 
 **Fecha de Implementación**: 2025-11-09  
 **Versión**: 1.0.0  
 **Proyecto**: L&M Exotic Fruits - Sistema de Gestión
