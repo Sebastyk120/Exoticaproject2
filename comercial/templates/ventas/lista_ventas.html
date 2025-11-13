@@ -1051,55 +1051,36 @@
             
             // Funcionalidad del modal de pago
             const pagoModal = document.getElementById('pago-modal');
+            const pagoBtns = document.querySelectorAll('.btn-pago');
             const formPago = document.getElementById('form-pago');
             const btnGuardarPago = document.getElementById('btn-guardar-pago');
-
-            // Comprobaciones defensivas
-            if (!pagoModal || !formPago || !btnGuardarPago) {
-                console.warn('Elementos del modal de pago no encontrados en el DOM.');
-            }
-
-            // Abrir modal de pago (delegación de eventos para elementos dinámicos)
-            document.addEventListener('click', function(event) {
-                const btn = event.target.closest('.btn-pago');
-                if (!btn) return;
-
-                const ventaId = btn.getAttribute('data-venta-id');
-                const cliente = btn.getAttribute('data-cliente');
-                const numeroFactura = btn.getAttribute('data-numero-factura');
-                const total = btn.getAttribute('data-total');
-
-                // Rellenar el formulario
-                const ventaIdInput = document.getElementById('pago-venta-id');
-                const clienteInput = document.getElementById('pago-cliente');
-                const referenciaInput = document.getElementById('pago-referencia');
-                const numeroFacturaSpan = document.getElementById('pago-numero-factura');
-                const valorInput = document.getElementById('pago-valor');
-                const fechaInput = document.getElementById('pago-fecha');
-                const conceptoInput = document.getElementById('pago-concepto');
-
-                if (!ventaIdInput || !clienteInput || !referenciaInput || !numeroFacturaSpan || !valorInput || !fechaInput || !conceptoInput) {
-                    console.warn('Campos del formulario de pago no disponibles.');
-                    return;
-                }
-
-                ventaIdInput.value = ventaId || '';
-                clienteInput.value = cliente || '';
-                referenciaInput.value = numeroFactura || '';
-                numeroFacturaSpan.textContent = numeroFactura || '';
-                const totalNumber = parseFloat(total);
-                valorInput.value = isNaN(totalNumber) ? '' : totalNumber.toFixed(2);
-
-                // Establecer fecha actual
-                const today = new Date().toISOString().split('T')[0];
-                fechaInput.value = today;
-
-                // Limpiar concepto
-                conceptoInput.value = '';
-
-                // Mostrar modal
-                pagoModal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
+            
+            // Abrir modal de pago
+            pagoBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const ventaId = this.getAttribute('data-venta-id');
+                    const cliente = this.getAttribute('data-cliente');
+                    const numeroFactura = this.getAttribute('data-numero-factura');
+                    const total = this.getAttribute('data-total');
+                    
+                    // Rellenar el formulario
+                    document.getElementById('pago-venta-id').value = ventaId;
+                    document.getElementById('pago-cliente').value = cliente;
+                    document.getElementById('pago-referencia').value = numeroFactura;
+                    document.getElementById('pago-numero-factura').textContent = numeroFactura;
+                    document.getElementById('pago-valor').value = parseFloat(total).toFixed(2);
+                    
+                    // Establecer fecha actual
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('pago-fecha').value = today;
+                    
+                    // Limpiar concepto
+                    document.getElementById('pago-concepto').value = '';
+                    
+                    // Mostrar modal
+                    pagoModal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                });
             });
             
             // Manejar envío del formulario
