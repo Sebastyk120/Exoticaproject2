@@ -340,9 +340,7 @@ def delete_file(request, file_path):
 @user_passes_test(lambda u: u.is_superuser, login_url='/app/login/')
 def create_backup(request):
     """
-    Crea un backup SQL completo de la base de datos.
-    Genera un backup SQL real sin depender de herramientas externas como pg_dump.
-    Ideal para bases de datos grandes y compatible con Railway.
+    Crea un backup de la base de datos PostgreSQL utilizando DATABASE_URL.
     
     Args:
         request: HttpRequest object
@@ -355,10 +353,21 @@ def create_backup(request):
         return redirect('autenticacion:file_explorer')
 
     try:
-        from django.db import connection, transaction
-        from django.core.management.color import no_style
-        from io import StringIO
-        import gzip
+        import subprocess
+        
+        # Obtener DATABASE_URL desde las variables de entorno
+        database_url = os.getenv('DATABASE_URL')
+        
+        if not database_url:
+            messages.error(request, "DATABASE_URL no está configurada en las variables de entorno.")
+            logger.error("DATABASE_URL no encontrada al intentar crear backup")
+            return redirect('autenticacion:file_explorer')
+        
+        # Verificar que sea una base de datos PostgreSQL
+        if not database_url.startswith(('postgres://', 'postgresql://')):
+            messages.error(request, "La funcionalidad de backup solo está disponible para bases de datos PostgreSQL.")
+            logger.warning(f"Intento de backup con base de datos no PostgreSQL: {database_url[:20]}...")
+            return redirect('autenticacion:file_explorer')
         
         # Crear directorio de backups si no existe
         backup_dir = os.path.join(settings.MEDIA_ROOT, 'backups')
@@ -367,168 +376,65 @@ def create_backup(request):
         # Generar nombre del archivo con timestamp
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
-        # Obtener nombre de la base de datos desde settings
-        db_settings = settings.DATABASES.get('default', {})
-        db_name = db_settings.get('NAME', 'database')
-        # Limpiar el nombre si viene de una URL
-        if '/' in db_name:
-            db_name = db_name.split('/')[-1].split('?')[0]
+        # Extraer nombre de la base de datos desde DATABASE_URL para el nombre del archivo
+        # Formato: postgres://user:pass@host:port/dbname
+        try:
+            db_name = database_url.split('/')[-1].split('?')[0]  # Obtener dbname
+        except:
+            db_name = 'database'  # Fallback si no se puede extraer
         
-        backup_filename = f'backup_{db_name}_{timestamp}.sql.gz'
+        backup_filename = f'backup_{db_name}_{timestamp}.backup'
         backup_filepath = os.path.join(backup_dir, backup_filename)
         
-        logger.info(f"Usuario {request.user.username} inició creación de backup SQL: {backup_filename}")
+        # Construir el comando pg_dump usando DATABASE_URL directamente
+        command = [
+            'pg_dump',
+            '--dbname', database_url,
+            '-f', backup_filepath,
+            '--format=c',  # custom format, compressed
+            '--verbose',
+        ]
         
-        # Contadores para el resumen
-        total_tables = 0
-        total_records = 0
-        total_size = 0
+        logger.info(f"Usuario {request.user.username} inició creación de backup: {backup_filename}")
         
-        with gzip.open(backup_filepath, 'wt', encoding='utf-8') as backup_file:
-            # Escribir header del backup
-            backup_file.write(f"-- Backup de {db_name} creado el {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-            backup_file.write(f"-- Generado por Django file_explorer\n")
-            backup_file.write(f"-- Usuario: {request.user.username}\n\n")
-            
-            # Obtener todas las tablas excepto django_migrations
-            with connection.cursor() as cursor:
-                # Listar todas las tablas
-                cursor.execute("""
-                    SELECT table_name
-                    FROM information_schema.tables
-                    WHERE table_schema = %s
-                    AND table_name NOT IN ('django_migrations', 'django_session')
-                    ORDER BY table_name
-                """, [connection.settings_dict.get('NAME', 'public')])
-                
-                tables = [row[0] for row in cursor.fetchall()]
-                total_tables = len(tables)
-                
-                # Escribir SQL para cada tabla
-                for table_name in tables:
-                    try:
-                        # Obtener esquema de la tabla
-                        backup_file.write(f"\n-- Estructura de la tabla: {table_name}\n")
-                        backup_file.write(f"DROP TABLE IF EXISTS {table_name} CASCADE;\n")
-                        
-                        # Obtener definición de la tabla
-                        cursor.execute("""
-                            SELECT column_name, data_type, is_nullable, column_default
-                            FROM information_schema.columns
-                            WHERE table_name = %s AND table_schema = %s
-                            ORDER BY ordinal_position
-                        """, [table_name, connection.settings_dict.get('NAME', 'public')])
-                        
-                        columns = cursor.fetchall()
-                        if not columns:
-                            continue
-                            
-                        # Crear tabla
-                        column_defs = []
-                        for col in columns:
-                            col_name, data_type, is_nullable, col_default = col
-                            
-                            if is_nullable == 'NO' and col_default is None:
-                                col_def = f"{col_name} {data_type} NOT NULL"
-                            else:
-                                col_def = f"{col_name} {data_type}"
-                                if col_default:
-                                    col_def += f" DEFAULT {col_default}"
-                                if is_nullable == 'NO':
-                                    col_def += " NOT NULL"
-                            
-                            column_defs.append(col_def)
-                        
-                        backup_file.write(f"CREATE TABLE {table_name} (\n")
-                        backup_file.write("    " + ",\n    ".join(column_defs))
-                        backup_file.write("\n);\n")
-                        
-                        # Obtener índices
-                        cursor.execute("""
-                            SELECT indexname, indexdef
-                            FROM pg_indexes
-                            WHERE tablename = %s AND schemaname = %s
-                        """, [table_name, connection.settings_dict.get('NAME', 'public')])
-                        
-                        indexes = cursor.fetchall()
-                        for idx_name, idx_def in indexes:
-                            if idx_name != f"{table_name}_pkey":  # Excluir PK que ya está en CREATE TABLE
-                                backup_file.write(f"\n{idx_def};\n")
-                        
-                        # Obtener datos de la tabla
-                        cursor.execute(f"SELECT * FROM {table_name}")
-                        rows = cursor.fetchall()
-                        
-                        if rows:
-                            backup_file.write(f"\n-- Datos de la tabla: {table_name} ({len(rows)} registros)\n")
-                            
-                            # Escribir INSERT statements en lotes
-                            batch_size = 1000
-                            for i in range(0, len(rows), batch_size):
-                                batch = rows[i:i + batch_size]
-                                backup_file.write(f"INSERT INTO {table_name} (")
-                                
-                                # Columnas
-                                column_names = [col[0] for col in columns]
-                                backup_file.write(", ".join(column_names))
-                                backup_file.write(") VALUES\n")
-                                
-                                # Valores
-                                values_lines = []
-                                for row in batch:
-                                    values = []
-                                    for value in row:
-                                        if value is None:
-                                            values.append("NULL")
-                                        elif isinstance(value, str):
-                                            # Escapar comillas simples
-                                            escaped_value = value.replace("'", "''")
-                                            values.append(f"'{escaped_value}'")
-                                        elif isinstance(value, bool):
-                                            values.append("TRUE" if value else "FALSE")
-                                        elif isinstance(value, (int, float)):
-                                            values.append(str(value))
-                                        else:
-                                            # Otros tipos de datos
-                                            escaped_value = str(value).replace("'", "''")
-                                            values.append(f"'{escaped_value}'")
-                                    
-                                    values_lines.append(f"    ({', '.join(values)})")
-                                
-                                backup_file.write(",\n".join(values_lines))
-                                backup_file.write(";\n\n")
-                                
-                                # Actualizar contador
-                                total_records += len(batch)
-                        
-                        logger.info(f"Backup de tabla {table_name} completado: {len(rows)} registros")
-                        
-                    except Exception as table_error:
-                        logger.error(f"Error al hacer backup de la tabla {table_name}: {str(table_error)}")
-                        backup_file.write(f"\n-- ERROR en la tabla {table_name}: {str(table_error)}\n")
-                        continue
-            
-            # Escribir footer
-            backup_file.write(f"\n-- Backup completado: {total_tables} tablas, {total_records} registros totales\n")
-            backup_file.write(f"-- Generado el: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        # Ejecutar pg_dump
+        process = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=False  # No lanzar excepción en error para manejarlo manualmente
+        )
         
-        # Verificar que el archivo fue creado y tiene contenido
-        if os.path.exists(backup_filepath) and os.path.getsize(backup_filepath) > 0:
-            file_size = format_file_size(os.path.getsize(backup_filepath))
-            total_size = os.path.getsize(backup_filepath)
-            
-            messages.success(
-                request,
-                f"Backup SQL '{backup_filename}' creado exitosamente: {total_records} registros, {file_size} en /media/backups/"
-            )
-            logger.info(f"Backup SQL creado exitosamente: {backup_filename} con {total_records} registros ({file_size})")
+        if process.returncode == 0:
+            # Verificar que el archivo fue creado y tiene contenido
+            if os.path.exists(backup_filepath) and os.path.getsize(backup_filepath) > 0:
+                file_size = format_file_size(os.path.getsize(backup_filepath))
+                messages.success(
+                    request,
+                    f"Backup '{backup_filename}' creado exitosamente ({file_size}) en /media/backups/."
+                )
+                logger.info(f"Backup creado exitosamente: {backup_filename} ({file_size})")
+            else:
+                messages.warning(request, "El backup se completó pero el archivo está vacío o no fue creado.")
+                logger.warning(f"Backup completado pero archivo vacío o no existe: {backup_filepath}")
         else:
-            messages.warning(request, "El backup se completó pero el archivo está vacío o no fue creado.")
-            logger.warning(f"Backup completado pero archivo vacío o no existe: {backup_filepath}")
+            # Capturar y registrar el error
+            error_message = process.stderr or process.stdout or "Error desconocido"
+            logger.error(f"Error al crear backup para usuario {request.user.username}: {error_message}")
+            messages.error(request, f"Error al crear el backup. Consulte los logs para más detalles.")
     
+    except subprocess.TimeoutExpired:
+        logger.error("Timeout al ejecutar pg_dump")
+        messages.error(request, "El proceso de backup tardó demasiado y fue cancelado.")
+    except FileNotFoundError:
+        logger.error("pg_dump no encontrado en el sistema")
+        messages.error(
+            request,
+            "No se encontró el comando 'pg_dump'. Asegúrese de que PostgreSQL está instalado y en el PATH."
+        )
     except Exception as e:
-        logger.error(f"Error inesperado al crear backup SQL: {str(e)}", exc_info=True)
-        messages.error(request, f"Ocurrió un error inesperado al crear el backup SQL: {str(e)}")
+        logger.error(f"Error inesperado al crear backup: {str(e)}", exc_info=True)
+        messages.error(request, f"Ocurrió un error inesperado al crear el backup.")
 
     return redirect('autenticacion:file_explorer_subpath', subpath='backups')
     

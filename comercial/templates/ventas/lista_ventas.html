@@ -476,9 +476,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Toast Container -->
-    <div id="toast-container" class="toast-container"></div>
 {% endblock %}
 
 {% block extra_js %}
@@ -1105,89 +1102,25 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Mostrar notificación de éxito profesional
-                        showToast('success', '¡Éxito!', data.message);
+                        // Mostrar mensaje de éxito
+                        alert(data.message);
                         
-                        // Cerrar modal
+                        // Cerrar modal y recargar página
                         pagoModal.style.display = 'none';
                         document.body.style.overflow = 'auto';
-                        
-                        // Actualizar la página después de un breve delay para que se vea la notificación
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
+                        window.location.reload();
                     } else {
-                        // Mostrar notificación de error profesional
-                        showToast('error', 'Error', data.message);
+                        alert('Error: ' + data.message);
                         btnGuardarPago.disabled = false;
                         btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
                     }
                 })
                 .catch(error => {
-                    // Mostrar notificación de error de conexión
-                    showToast('error', 'Error de Conexión', 'Error al guardar el pago: ' + error);
+                    alert('Error al guardar el pago: ' + error);
                     btnGuardarPago.disabled = false;
                     btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
                 });
             });
-            
-            // Función para mostrar notificaciones toast profesionales
-            function showToast(type, title, message) {
-                const toastContainer = document.getElementById('toast-container');
-                
-                // Crear el elemento toast
-                const toast = document.createElement('div');
-                toast.className = `toast toast-${type}`;
-                
-                // Iconos según el tipo
-                const icons = {
-                    success: 'fas fa-check-circle',
-                    error: 'fas fa-exclamation-circle',
-                    warning: 'fas fa-exclamation-triangle',
-                    info: 'fas fa-info-circle'
-                };
-                
-                // Colores según el tipo
-                const colors = {
-                    success: '#10b981',
-                    error: '#ef4444',
-                    warning: '#f59e0b',
-                    info: '#3b82f6'
-                };
-                
-                toast.innerHTML = `
-                    <div class="toast-content">
-                        <div class="toast-icon" style="color: ${colors[type]}">
-                            <i class="${icons[type]}"></i>
-                        </div>
-                        <div class="toast-message">
-                            <div class="toast-title">${title}</div>
-                            <div class="toast-text">${message}</div>
-                        </div>
-                        <button class="toast-close" onclick="this.parentElement.parentElement.remove()">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                `;
-                
-                // Agregar al contenedor
-                toastContainer.appendChild(toast);
-                
-                // Mostrar el toast con animación
-                setTimeout(() => {
-                    toast.classList.add('toast-show');
-                }, 100);
-                
-                // Auto-remover después de 5 segundos
-                setTimeout(() => {
-                    toast.classList.remove('toast-show');
-                    setTimeout(() => {
-                        if (toast.parentElement) {
-                            toast.remove();
-                        }
-                    }, 300);
-                }, 5000);
-            }
             
             // Cerrar modal de pago con los botones de cerrar
             document.querySelectorAll('#pago-modal .close-modal, #pago-modal .close-modal-btn').forEach(btn => {
@@ -1207,6 +1140,7 @@
                     btnGuardarPago.disabled = false;
                     btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
                 }
+            });
             });
         });
     </script>
