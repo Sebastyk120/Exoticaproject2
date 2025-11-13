@@ -592,6 +592,13 @@ def registrar_pago_venta(request, venta_id):
     try:
         venta = get_object_or_404(Venta, pk=venta_id)
         
+        # Validar que exista número de factura
+        if not venta.numero_factura:
+            return JsonResponse({
+                'success': False,
+                'message': 'La venta debe tener un número de factura asignado'
+            }, status=400)
+        
         # Obtener datos del formulario
         fecha_transferencia_str = request.POST.get('fecha_transferencia')
         valor_transferencia = request.POST.get('valor_transferencia')
@@ -612,7 +619,14 @@ def registrar_pago_venta(request, venta_id):
         except (ValueError, TypeError):
             return JsonResponse({
                 'success': False,
-                'message': 'La fecha de transferencia no es válida'
+                'message': 'La fecha de transferencia no es válida (formato: YYYY-MM-DD)'
+            }, status=400)
+        
+        # Validar que la fecha no sea futura
+        if fecha_transferencia > timezone.now().date():
+            return JsonResponse({
+                'success': False,
+                'message': 'La fecha de transferencia no puede ser futura'
             }, status=400)
         
         # Validar valor
@@ -626,33 +640,42 @@ def registrar_pago_venta(request, venta_id):
                 'message': 'El valor de la transferencia no es válido'
             }, status=400)
         
-        # Buscar si ya existe una transferencia con esta referencia (número de factura)
-        referencia = venta.numero_factura
-        transferencia_existente = TranferenciasCliente.objects.filter(
-            cliente=venta.cliente,
-            referencia=referencia
-        ).first()
+        # Validar que el monto no exceda lo adeudado
+        monto_adeudado = venta.monto_pendiente or Decimal('0')
+        if valor_transferencia > monto_adeudado:
+            return JsonResponse({
+                'success': False,
+                'message': f'El monto de transferencia (€{valor_transferencia:.2f}) no puede exceder lo adeudado (€{monto_adeudado:.2f})'
+            }, status=400)
         
-        if transferencia_existente:
-            # Actualizar transferencia existente
-            transferencia_existente.fecha_transferencia = fecha_transferencia
-            transferencia_existente.valor_transferencia = valor_transferencia
-            transferencia_existente.concepto = concepto
-            transferencia_existente.save()
-            message = f'Pago actualizado correctamente para la factura {referencia}'
-        else:
-            # Crear nueva transferencia
-            transferencia = TranferenciasCliente.objects.create(
+        # Buscar si ya existe una transferencia con esta referencia
+        referencia = venta.numero_factura
+        
+        # Usar get_or_create para evitar condiciones de carrera
+        from django.db import transaction
+        with transaction.atomic():
+            transferencia, created = TranferenciasCliente.objects.get_or_create(
                 cliente=venta.cliente,
                 referencia=referencia,
-                fecha_transferencia=fecha_transferencia,
-                valor_transferencia=valor_transferencia,
-                concepto=concepto
+                defaults={
+                    'fecha_transferencia': fecha_transferencia,
+                    'valor_transferencia': valor_transferencia,
+                    'concepto': concepto
+                }
             )
-            message = f'Pago registrado correctamente para la factura {referencia}'
+            
+            # Si ya existía, actualizar los valores
+            if not created:
+                transferencia.fecha_transferencia = fecha_transferencia
+                transferencia.valor_transferencia = valor_transferencia
+                transferencia.concepto = concepto
+                transferencia.save()
         
-        # Reevaluar el estado de pagos de la venta
-        venta.reevaluar_pagos_cliente()
+        # Actualizar venta con datos frescos
+        venta.refresh_from_db()
+        
+        action = 'actualizado' if not created else 'registrado'
+        message = f'Pago {action} correctamente para la factura {referencia}'
         
         return JsonResponse({
             'success': True,
@@ -661,6 +684,10 @@ def registrar_pago_venta(request, venta_id):
         })
         
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f'Error al registrar pago: {str(e)}', exc_info=True)
+        
         return JsonResponse({
             'success': False,
             'message': f'Error al registrar el pago: {str(e)}'

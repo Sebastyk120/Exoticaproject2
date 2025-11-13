@@ -1051,6 +1051,7 @@
             const pagoBtns = document.querySelectorAll('.btn-pago');
             const formPago = document.getElementById('form-pago');
             const btnGuardarPago = document.getElementById('btn-guardar-pago');
+            let isSubmittingPago = false; // Bandera para evitar envíos duplicados
             
             // Abrir modal de pago
             pagoBtns.forEach(btn => {
@@ -1071,8 +1072,11 @@
                     const today = new Date().toISOString().split('T')[0];
                     document.getElementById('pago-fecha').value = today;
                     
-                    // Limpiar concepto
+                    // Limpiar concepto y reiniciar estado del formulario
                     document.getElementById('pago-concepto').value = '';
+                    isSubmittingPago = false;
+                    btnGuardarPago.disabled = false;
+                    btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
                     
                     // Mostrar modal
                     pagoModal.style.display = 'flex';
@@ -1080,14 +1084,28 @@
                 });
             });
             
-            // Manejar envío del formulario
+            // Manejar envío del formulario - SOLO UN LISTENER
             formPago.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
+                // Evitar envíos duplicados
+                if (isSubmittingPago) {
+                    console.warn('Envío ya en proceso, ignorando clic duplicado');
+                    return;
+                }
+                
                 const ventaId = document.getElementById('pago-venta-id').value;
+                
+                // Validar que tenemos todos los datos
+                if (!ventaId) {
+                    alert('Error: ID de venta no válido');
+                    return;
+                }
+                
                 const formData = new FormData(formPago);
                 
-                // Deshabilitar botón mientras se procesa
+                // Marcar como enviando y deshabilitar botón
+                isSubmittingPago = true;
                 btnGuardarPago.disabled = true;
                 btnGuardarPago.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
                 
@@ -1099,8 +1117,16 @@
                         'X-CSRFToken': formData.get('csrfmiddlewaretoken')
                     }
                 })
-                .then(response => response.json())
+                .then(response => {
+                    // Verificar si la respuesta es válida
+                    if (!response.ok && response.status !== 400) {
+                        throw new Error(`HTTP Error: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    isSubmittingPago = false;
+                    
                     if (data.success) {
                         // Mostrar mensaje de éxito
                         alert(data.message);
@@ -1108,15 +1134,21 @@
                         // Cerrar modal y recargar página
                         pagoModal.style.display = 'none';
                         document.body.style.overflow = 'auto';
-                        window.location.reload();
+                        
+                        // Recargar después de un pequeño delay para asegurar la actualización
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 500);
                     } else {
-                        alert('Error: ' + data.message);
+                        alert('Error: ' + (data.message || 'Error desconocido'));
                         btnGuardarPago.disabled = false;
                         btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
                     }
                 })
                 .catch(error => {
-                    alert('Error al guardar el pago: ' + error);
+                    isSubmittingPago = false;
+                    console.error('Error al guardar pago:', error);
+                    alert('Error al guardar el pago: ' + error.message);
                     btnGuardarPago.disabled = false;
                     btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
                 });
@@ -1125,20 +1157,20 @@
             // Cerrar modal de pago con los botones de cerrar
             document.querySelectorAll('#pago-modal .close-modal, #pago-modal .close-modal-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    pagoModal.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                    btnGuardarPago.disabled = false;
-                    btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
+                    // Solo cerrar si no está procesando
+                    if (!isSubmittingPago) {
+                        pagoModal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                        isSubmittingPago = false;
+                    }
                 });
             });
             
-            // Cerrar modal de pago al hacer clic fuera
+            // Cerrar modal de pago al hacer clic fuera - SOLO SI NO ESTÁ PROCESANDO
             window.addEventListener('click', function(event) {
-                if (event.target === pagoModal) {
+                if (event.target === pagoModal && !isSubmittingPago) {
                     pagoModal.style.display = 'none';
                     document.body.style.overflow = 'auto';
-                    btnGuardarPago.disabled = false;
-                    btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
                 }
             });
             });
