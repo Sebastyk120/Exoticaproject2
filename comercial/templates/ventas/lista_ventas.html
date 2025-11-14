@@ -158,7 +158,7 @@
                                                     data-venta-id="{{ venta.id }}"
                                                     data-cliente="{{ venta.cliente.nombre }}"
                                                     data-numero-factura="{{ venta.numero_factura }}"
-                                                    data-total="{{ venta.valor_total_factura_euro }}">
+                                                    data-total="{{ venta.monto_pendiente }}">
                                                 <i class="fas fa-money-bill-wave"></i>
                                             </button>
                                         </div>
@@ -260,7 +260,7 @@
                                             data-venta-id="{{ venta.id }}"
                                             data-cliente="{{ venta.cliente.nombre }}"
                                             data-numero-factura="{{ venta.numero_factura }}"
-                                            data-total="{{ venta.valor_total_factura_euro }}">
+                                            data-total="{{ venta.monto_pendiente }}">
                                         <i class="fas fa-money-bill-wave"></i>
                                     </button>
                                 </div>
@@ -647,7 +647,7 @@
                     columnSelector.style.display = 'none';
                 }
             });
-
+            
             // Evitar que los clics dentro del selector lo cierren
             columnSelector.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -1098,7 +1098,10 @@
                     document.getElementById('pago-cliente').value = cliente;
                     document.getElementById('pago-referencia').value = numeroFactura;
                     document.getElementById('pago-numero-factura').textContent = numeroFactura;
-                    document.getElementById('pago-valor').value = parseFloat(total).toFixed(2);
+                    
+                    // Convertir el valor correctamente
+                    const valorLimpio = total.replace('.', '').replace(',', '.');
+                    document.getElementById('pago-valor').value = parseFloat(valorLimpio).toFixed(2);
                     
                     // Establecer fecha actual
                     const today = new Date().toISOString().split('T')[0];
