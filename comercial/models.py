@@ -361,7 +361,7 @@ class DetalleVenta(models.Model):
 
 class TranferenciasCliente(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, verbose_name="Cliente")
-    referencia = models.CharField(max_length=100, verbose_name="Referencia")
+    referencia = models.CharField(max_length=100, verbose_name="Referencia", unique=True)
     fecha_transferencia = models.DateField(verbose_name="Fecha Pago")
     valor_transferencia = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Pago Eur", validators=[MinValueValidator(0.0)])
     concepto = models.CharField(max_length=255, verbose_name="Concepto", null=True, blank=True)
