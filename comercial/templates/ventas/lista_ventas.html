@@ -1,0 +1,1147 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Lista de Ventas{% endblock %}
+
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/ventas/lista_ventas.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <header class="content-header">
+            <div class="header-content">
+                <h1><i class="fas fa-shopping-cart"></i> Lista de Ventas</h1>
+                <nav class="breadcrumb">
+                    <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a> &gt;
+                    <span>Ventas</span>
+                </nav>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="actions-bar">
+                <div class="search-bar">
+                    <form method="get" action="{% url 'comercial:lista_ventas' %}">
+                        <div class="search-input-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" name="q" placeholder="Buscar por cliente, factura..." value="{{ request.GET.q|default:'' }}">
+                        </div>
+                        <button type="submit" class="btn btn-search">Buscar</button>
+                    </form>
+                </div>
+                
+                <div class="filter-controls">
+                    <div class="filter-dropdown">
+                        <select name="pagado" id="pagado-filter">
+                            <option value="">Todos los pagos</option>
+                            <option value="Si">Pagado</option>
+                            <option value="No">Pendiente</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-icon"></i>
+                    </div>
+                    
+                    <button id="reset-filters" class="btn btn-outline">
+                        <i class="fas fa-sync-alt"></i> <span class="btn-text">Reiniciar filtros</span>
+                    </button>
+                    
+                    <button id="toggle-columns" class="btn btn-outline">
+                        <i class="fas fa-columns"></i> <span class="btn-text">Columnas</span>
+                    </button>
+                    
+                    <div id="column-selector" class="column-selector" style="display: none; position: absolute; right: 150px; top: 60px; z-index: 1000;">
+                        <div class="column-selector-content">
+                            <h4>Mostrar/Ocultar Columnas</h4>
+                            <div class="checkbox-list">
+                                <!-- Columnas principales siempre visibles -->
+                                <label><input type="checkbox" data-column="id" checked disabled> ID</label>
+                                <label><input type="checkbox" data-column="cliente" checked disabled> Cliente</label>
+                                <label><input type="checkbox" data-column="fecha_compra" checked> Fecha Compra</label>
+                                <label><input type="checkbox" data-column="semana" checked> Semana</label>
+                                <label><input type="checkbox" data-column="cajas" checked> No Cajas</label>
+                                <label><input type="checkbox" data-column="total_factura" checked>Total Factura + IVA €</label>
+                                <label><input type="checkbox" data-column="iva"> IVA €</label>
+                                <label><input type="checkbox" data-column="total_abono" checked>Abono + IVA €</label>
+                                <label><input type="checkbox" data-column="numero_factura"> Nº Factura</label>
+                                <label><input type="checkbox" data-column="numero_nc"> Nº Abono</label>
+                                <label><input type="checkbox" data-column="monto_pendiente" checked> Monto Pendiente</label>
+                                <label><input type="checkbox" data-column="pagado" checked disabled> Estado</label>
+                                <!-- Acciones siempre visibles -->
+                                <label><input type="checkbox" data-column="acciones" checked disabled> Acciones</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="show-bodega" class="btn btn-highlight" style="background-color: #4CAF50; color: white; font-weight: bold; border: 2px solid #2E7D32; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                        <i class="fas fa-warehouse"></i> <span class="btn-text">Bodega</span>
+                    </button>
+                    
+                    <a href="{% url 'comercial:nueva_venta' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> <span class="btn-text">Nueva Venta</span>
+                    </a>
+                    
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="table" title="Vista de tabla">
+                            <i class="fas fa-table"></i>
+                        </button>
+                        <button class="view-btn" data-view="cards" title="Vista de tarjetas">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ventas-container">
+                <!-- Vista de tabla (escritorio) -->
+                <div class="table-view active-view">
+                    <div class="table-responsive">
+                        <table id="ventas-table">
+                            <thead>
+                                <tr>
+                                    <th class="column-id">ID</th>
+                                    <th class="column-cliente">Cliente</th>
+                                    <th class="column-numero_factura">Nº Factura</th>
+                                    <th class="column-fecha_compra">Fecha Compra</th>
+                                    <th class="column-semana">Semana</th>
+                                    <th class="column-cajas">No Cajas</th>
+                                    <th class="column-total_factura">Total Factura + IVA €</th>
+                                    <th class="column-iva">IVA €</th>
+                                    <th class="column-total_abono">Abono + IVA €</th>
+                                    
+                                    <th class="column-numero_nc">Nº Abono</th>
+                                    <th class="column-monto_pendiente">Monto Pendiente</th>
+                                    <th class="column-pagado">Estado</th>
+                                    <th class="column-acciones">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for venta in ventas %}
+                                <tr>
+                                    <td class="column-id">#{{ venta.id }}</td>
+                                    <td class="column-cliente">
+                                        <span class="cliente-nombre">{{ venta.cliente.nombre }}</span>
+                                    </td>
+                                    <td class="column-numero_factura">{{ venta.numero_factura|default:"-" }}</td>
+                                    <td class="column-fecha_compra">{{ venta.pedidos.first.fecha_entrega|date:"d/m/Y"|default:"-" }}</td>
+                                    <td class="column-semana">{{ venta.semana|default:"-" }}</td>
+                                    <td class="column-cajas">{{ venta.total_cajas_pedido|default:0 }}</td>
+                                    <td class="column-total_factura">{{ venta.valor_total_factura_euro|default:0|format_currency_eur }}</td>
+                                    <td class="column-iva">{{ venta.iva|default:0|format_currency_eur }}</td>
+                                    <td class="column-total_abono">{{ venta.valor_total_abono_euro|default:0|format_currency_eur }}</td>
+                                    <td class="column-numero_nc">{{ venta.numero_nc|default:"-" }}</td>
+                                    <td class="column-monto_pendiente">{{ venta.monto_pendiente|default:0|format_currency_eur }}</td>
+                                    <td class="column-pagado">
+                                        {% if venta.pagado %}
+                                        <span class="status-badge status-pagado">
+                                            <i class="fas fa-circle-check"></i> Pagado
+                                        </span>
+                                        {% else %}
+                                        <span class="status-badge status-pendiente">
+                                            <i class="fas fa-clock"></i> Pendiente
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="column-acciones">
+                                        <div class="action-buttons">
+                                            <a href="{% url 'comercial:detalle_venta' venta.id %}" class="btn-icon" title="Ver/Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn-icon" title="Generar Factura" target="_blank">
+                                                <i class="fas fa-file-invoice"></i>
+                                            </a>
+                                            <button type="button" class="btn-icon btn-details" title="Ver Detalles"
+                                                    data-venta-id="{{ venta.id }}">
+                                                <i class="fas fa-boxes"></i>
+                                            </button>
+                                            <button type="button" class="btn-icon btn-pago" title="Registrar Pago"
+                                                    data-venta-id="{{ venta.id }}"
+                                                    data-cliente="{{ venta.cliente.nombre }}"
+                                                    data-numero-factura="{{ venta.numero_factura }}"
+                                                    data-total="{{ venta.valor_total_factura_euro }}">
+                                                <i class="fas fa-money-bill-wave"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="13" class="empty-message">
+                                        <div class="empty-state">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            <p>No hay ventas para mostrar</p>
+                                            <a href="{% url 'comercial:nueva_venta' %}" class="btn btn-primary">
+                                                <i class="fas fa-plus"></i> Crear Venta
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Vista de tarjetas (móvil) -->
+                <div class="cards-view">
+                    <div class="cards-container">
+                        {% for venta in ventas %}
+                        <div class="venta-card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <h3>#{{ venta.id }}</h3>
+                                    <span class="cliente-nombre">{{ venta.cliente.nombre }}</span>
+                                </div>
+                                {% if venta.pagado %}
+                                <span class="status-badge status-pagado">
+                                    <i class="fas fa-circle-check"></i> Pagado
+                                </span>
+                                {% else %}
+                                <span class="status-badge status-pendiente">
+                                    <i class="fas fa-clock"></i> Pendiente
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="card-body">
+                                <div class="info-grid">
+                                    <div class="info-item column-fecha_compra">
+                                        <span class="info-label">Fecha Compra</span>
+                                        <span class="info-value">{{ venta.pedidos.first.fecha_entrega|date:"d/m/Y"|default:"-" }}</span>
+                                    </div>
+                                    <div class="info-item column-semana">
+                                        <span class="info-label">Semana</span>
+                                        <span class="info-value">{{ venta.semana|default:"-" }}</span>
+                                    </div>
+                                    <div class="info-item column-cajas">
+                                        <span class="info-label">No Cajas</span>
+                                        <span class="info-value highlight">{{ venta.total_cajas_pedido|default:0 }}</span>
+                                    </div>
+                                    <div class="info-item column-total_factura">
+                                        <span class="info-label">Total</span>
+                                        <span class="info-value highlight">{{ venta.valor_total_factura_euro|default:0|format_currency_eur }}</span>
+                                    </div>
+                                    <div class="info-item column-iva">
+                                        <span class="info-label">IVA 4%</span>
+                                        <span class="info-value">{{ venta.iva|default:0|format_currency_eur }}</span>
+                                    </div>
+                                    <div class="info-item column-total_abono">
+                                        <span class="info-label">Total Abono</span>
+                                        <span class="info-value">{{ venta.valor_total_abono_euro|default:0|format_currency_eur }}</span>
+                                    </div>
+                                    <div class="info-item column-numero_factura">
+                                        <span class="info-label">Nº Factura</span>
+                                        <span class="info-value">{{ venta.numero_factura|default:"-" }}</span>
+                                    </div>
+                                    <div class="info-item column-numero_nc">
+                                        <span class="info-label">Nº Abono</span>
+                                        <span class="info-value">{{ venta.numero_nc|default:"-" }}</span>
+                                    </div>
+                                    <div class="info-item column-monto_pendiente">
+                                        <span class="info-label">Monto Pendiente</span>
+                                        <span class="info-value">{{ venta.monto_pendiente|default:0|format_currency_eur }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer">
+                                <div class="action-buttons">
+                                    <a href="{% url 'comercial:detalle_venta' venta.id %}" class="btn-icon" title="Ver/Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn-icon" title="Generar Factura" target="_blank">
+                                        <i class="fas fa-file-invoice"></i>
+                                    </a>
+                                    <button type="button" class="btn-icon btn-details" title="Ver Detalles"
+                                            data-venta-id="{{ venta.id }}">
+                                        <i class="fas fa-boxes"></i>
+                                    </button>
+                                    <button type="button" class="btn-icon btn-pago" title="Registrar Pago"
+                                            data-venta-id="{{ venta.id }}"
+                                            data-cliente="{{ venta.cliente.nombre }}"
+                                            data-numero-factura="{{ venta.numero_factura }}"
+                                            data-total="{{ venta.valor_total_factura_euro }}">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state">
+                            <i class="fas fa-shopping-cart"></i>
+                            <p>No hay ventas para mostrar</p>
+                            <a href="{% url 'comercial:nueva_venta' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Crear Venta
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if is_paginated %}
+                <div class="pagination-container">
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if page_obj.has_previous %}
+                                <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.pagado %}&pagado={{ request.GET.pagado }}{% endif %}" class="page-link first">
+                                    <i class="fas fa-angle-double-left"></i><span class="link-text">Primera</span>
+                                </a>
+                                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.pagado %}&pagado={{ request.GET.pagado }}{% endif %}" class="page-link prev">
+                                    <i class="fas fa-angle-left"></i><span class="link-text">Anterior</span>
+                                </a>
+                            {% endif %}
+
+                            <span class="current-page">
+                                <span class="current">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                            </span>
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.pagado %}&pagado={{ request.GET.pagado }}{% endif %}" class="page-link next">
+                                    <span class="link-text">Siguiente</span><i class="fas fa-angle-right"></i>
+                                </a>
+                                <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.pagado %}&pagado={{ request.GET.pagado }}{% endif %}" class="page-link last">
+                                    <span class="link-text">Última</span><i class="fas fa-angle-double-right"></i>
+                                </a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mostrar detalles de la venta -->
+    <div id="detalles-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-info-circle"></i> Detalles de la Venta #<span id="modal-venta-id"></span></h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="venta-info">
+                    <div class="info-header">
+                        <div class="info-row">
+                            <div class="info-item">
+                                <label>Cliente:</label>
+                                <span id="modal-cliente"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="details-title">Productos en esta venta</h3>
+                    <div id="detalles-container" class="detalles-container">
+                        <!-- Aquí se cargarán los detalles dinámicamente -->
+                        <div class="loading-spinner">
+                            <i class="fas fa-circle-notch fa-spin"></i>
+                            <p>Cargando detalles...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-summary">
+                    <div class="summary-item">
+                        <label>Total Cajas:</label>
+                        <span id="modal-total-cajas"></span>
+                    </div>
+                    <div class="summary-item">
+                        <label>Total €:</label>
+                        <span id="modal-total-euros"></span>
+                    </div>
+                </div>
+                <button class="btn btn-primary close-modal-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mostrar contenido de bodega -->
+    <div id="bodega-modal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2><i class="fas fa-warehouse"></i> Inventario de Bodega</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="bodega-controls">
+                    <div class="search-filter">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="bodega-search" placeholder="Buscar producto..." class="search-input">
+                    </div>
+                    <div class="sort-options">
+                        <label for="sort-inventory">Ordenar por:</label>
+                        <div class="select-container">
+                            <select id="sort-inventory" class="sort-select">
+                                <option value="nombre">Nombre</option>
+                                <option value="stock-asc">Stock (Menor a Mayor)</option>
+                                <option value="stock-desc">Stock (Mayor a Menor)</option>
+                                <option value="reciente">Actualización más reciente</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="inventory-tabs">
+                    <button class="tab-btn active" data-tab="all">Todos</button>
+                    <button class="tab-btn" data-tab="low-stock">Stock Bajo</button>
+                    <button class="tab-btn" data-tab="out-stock">Sin Stock</button>
+                </div>
+                
+                <div id="bodega-container" class="inventory-container">
+                    <div class="loading-spinner">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                        <p>Cargando inventario...</p>
+                    </div>
+                </div>
+                
+                <div class="inventory-summary">
+                    <div class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-box"></i></div>
+                        <div class="summary-data">
+                            <span class="summary-value" id="total-productos">0</span>
+                            <span class="summary-label">Productos</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-boxes"></i></div>
+                        <div class="summary-data">
+                            <span class="summary-value" id="total-cajas">0</span>
+                            <span class="summary-label">Total Cajas</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon alert-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div class="summary-data">
+                            <span class="summary-value" id="bajo-stock">0</span>
+                            <span class="summary-label">Stock Bajo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary close-modal-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para registrar pago -->
+    <div id="pago-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-money-bill-wave"></i> Registrar Pago - Factura #<span id="pago-numero-factura"></span></h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-pago" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" id="pago-venta-id" name="venta_id">
+                    
+                    <div class="form-group">
+                        <label for="pago-cliente">Cliente:</label>
+                        <input type="text" id="pago-cliente" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pago-referencia">Referencia (Número Factura):</label>
+                        <input type="text" id="pago-referencia" name="referencia" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pago-fecha">Fecha de Transferencia: <span class="required">*</span></label>
+                        <input type="date" id="pago-fecha" name="fecha_transferencia" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pago-valor">Valor Transferencia (€): <span class="required">*</span></label>
+                        <input type="number" id="pago-valor" name="valor_transferencia" class="form-control" step="0.01" min="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pago-concepto">Concepto / Observación:</label>
+                        <textarea id="pago-concepto" name="concepto" class="form-control" rows="3" placeholder="Ingrese alguna observación sobre el pago..."></textarea>
+                    </div>
+                    
+                    <div class="alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Si ya existe un registro de pago con este número de factura, será actualizado. De lo contrario, se creará uno nuevo.</p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline close-modal-btn">Cancelar</button>
+                <button type="submit" form="form-pago" class="btn btn-primary" id="btn-guardar-pago">
+                    <i class="fas fa-save"></i> Guardar Pago
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Estado de filtro
+            const pagadoFilter = document.getElementById('pagado-filter');
+            pagadoFilter.addEventListener('change', function() {
+                applyFilters();
+            });
+
+            // Botón para reiniciar filtros
+            const resetButton = document.getElementById('reset-filters');
+            resetButton.addEventListener('click', function() {
+                pagadoFilter.value = '';
+                
+                // Eliminar parámetros de búsqueda
+                const url = new URL(window.location.href);
+                url.search = '';
+                window.location.href = url.toString();
+            });
+
+            // Aplicar filtros
+            function applyFilters() {
+                const url = new URL(window.location.href);
+                const pagado = pagadoFilter.value;
+                
+                // Mantener parámetro de búsqueda si existe
+                const searchQuery = new URLSearchParams(window.location.search).get('q');
+                if (searchQuery) {
+                    url.searchParams.set('q', searchQuery);
+                }
+
+                if (pagado) {
+                    url.searchParams.set('pagado', pagado);
+                } else {
+                    url.searchParams.delete('pagado');
+                }
+
+                window.location.href = url.toString();
+            }
+
+            // Si hay un filtro activo, seleccionarlo en el dropdown
+            const urlParams = new URLSearchParams(window.location.search);
+            const pagadoParam = urlParams.get('pagado');
+            if (pagadoParam) {
+                pagadoFilter.value = pagadoParam;
+            }
+
+            // Cambio entre vista de tabla y tarjetas
+            const viewButtons = document.querySelectorAll('.view-btn');
+            const tableView = document.querySelector('.table-view');
+            const cardsView = document.querySelector('.cards-view');
+            
+            // Comprobar el ancho de la pantalla al cargar
+            checkScreenSize();
+            
+            // Cambiar vista al hacer clic en los botones
+            viewButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const view = this.getAttribute('data-view');
+                    viewButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    if (view === 'table') {
+                        tableView.classList.add('active-view');
+                        cardsView.classList.remove('active-view');
+                        localStorage.setItem('ventasViewMode', 'table');
+                    } else {
+                        cardsView.classList.add('active-view');
+                        tableView.classList.remove('active-view');
+                        localStorage.setItem('ventasViewMode', 'cards');
+                    }
+                });
+            });
+            
+            // Comprobar tamaño de la pantalla y ajustar vista
+            function checkScreenSize() {
+                const savedView = localStorage.getItem('ventasViewMode');
+                if (window.innerWidth < 768) {
+                    // En móviles, mostrar vista de tarjetas
+                    cardsView.classList.add('active-view');
+                    tableView.classList.remove('active-view');
+                    viewButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.getAttribute('data-view') === 'cards') {
+                            btn.classList.add('active');
+                        }
+                    });
+                } else {
+                    // En escritorio, respetar preferencia o mostrar tabla
+                    if (savedView === 'cards') {
+                        cardsView.classList.add('active-view');
+                        tableView.classList.remove('active-view');
+                        viewButtons.forEach(btn => {
+                            btn.classList.remove('active');
+                            if (btn.getAttribute('data-view') === 'cards') {
+                                btn.classList.add('active');
+                            }
+                        });
+                    } else {
+                        tableView.classList.add('active-view');
+                        cardsView.classList.remove('active-view');
+                        viewButtons.forEach(btn => {
+                            btn.classList.remove('active');
+                            if (btn.getAttribute('data-view') === 'table') {
+                                btn.classList.add('active');
+                            }
+                        });
+                    }
+                }
+            }
+            
+            // Verificar tamaño de pantalla al redimensionar
+            window.addEventListener('resize', checkScreenSize);
+
+            // Funcionalidad para mostrar/ocultar columnas
+            const toggleColumnsBtn = document.getElementById('toggle-columns');
+            const columnSelector = document.getElementById('column-selector');
+            
+            toggleColumnsBtn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Evitar propagación del evento
+                columnSelector.style.display = columnSelector.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Permitir que los clics dentro del botón también activen el selector
+            toggleColumnsBtn.querySelectorAll('*').forEach(element => {
+                element.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    columnSelector.style.display = columnSelector.style.display === 'none' ? 'block' : 'none';
+                });
+            });
+
+            // Cerrar el selector de columnas si se hace clic fuera de él o del botón
+            document.addEventListener('click', function(event) {
+                if (!columnSelector.contains(event.target) && !toggleColumnsBtn.contains(event.target)) {
+                    columnSelector.style.display = 'none';
+                }
+            });
+
+            // Evitar que los clics dentro del selector lo cierren
+            columnSelector.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // Manejo de las preferencias de columnas
+            const columnCheckboxes = document.querySelectorAll('.checkbox-list input[type="checkbox"]');
+            
+            // Carga de preferencias guardadas
+            loadColumnPreferences();
+            
+            // Configurar eventos de cambio en los checkboxes
+            columnCheckboxes.forEach(checkbox => {
+                if (!checkbox.disabled) {
+                    checkbox.addEventListener('change', function() {
+                        const columnName = this.getAttribute('data-column');
+                        const isChecked = this.checked;
+                        
+                        // Mostrar u ocultar columna
+                        toggleColumnVisibility(columnName, isChecked);
+                        
+                        // Guardar preferencias
+                        saveColumnPreferences();
+                    });
+                }
+            });
+
+            function toggleColumnVisibility(columnName, isVisible) {
+                const columns = document.querySelectorAll(`.column-${columnName}`);
+                columns.forEach(col => {
+                    col.style.display = isVisible ? '' : 'none';
+                });
+            }
+
+            function saveColumnPreferences() {
+                const preferences = {};
+                columnCheckboxes.forEach(checkbox => {
+                    if (!checkbox.disabled) {
+                        preferences[checkbox.getAttribute('data-column')] = checkbox.checked;
+                    }
+                });
+                localStorage.setItem('ventasColumnPreferences', JSON.stringify(preferences));
+            }
+
+            function loadColumnPreferences() {
+                const savedPreferences = localStorage.getItem('ventasColumnPreferences');
+                if (savedPreferences) {
+                    const preferences = JSON.parse(savedPreferences);
+                    
+                    columnCheckboxes.forEach(checkbox => {
+                        const columnName = checkbox.getAttribute('data-column');
+                        if (!checkbox.disabled && columnName in preferences) {
+                            checkbox.checked = preferences[columnName];
+                            toggleColumnVisibility(columnName, preferences[columnName]);
+                        }
+                    });
+                } else {
+                    // Configuración inicial - ocultar algunas columnas por defecto
+                    const defaultHiddenColumns = ['iva', 'numero_factura', 'numero_nc', 'observaciones'];
+                    defaultHiddenColumns.forEach(column => {
+                        const checkbox = document.querySelector(`input[data-column="${column}"]`);
+                        if (checkbox && !checkbox.disabled) {
+                            checkbox.checked = false;
+                            toggleColumnVisibility(column, false);
+                        }
+                    });
+                }
+            }
+
+            // Funcionalidad para el modal de detalles
+            const modal = document.getElementById('detalles-modal');
+            const bodegaModal = document.getElementById('bodega-modal');
+            const detailButtons = document.querySelectorAll('.btn-details');
+            const showBodegaBtn = document.getElementById('show-bodega');
+            const closeButtons = document.querySelectorAll('.close-modal, .close-modal-btn');
+            let inventarioData = []; // Para almacenar los datos del inventario
+            
+            // Abrir modal y cargar detalles
+            detailButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const ventaId = this.getAttribute('data-venta-id');
+                    openModal(ventaId);
+                });
+            });
+            
+            // Botón para mostrar modal de bodega
+            showBodegaBtn.addEventListener('click', function() {
+                openBodegaModal();
+            });
+            
+            // Configurar eventos de cierre para todos los modales
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Cerrar ambos modales
+                    modal.style.display = 'none';
+                    bodegaModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                });
+            });
+            
+            // Cerrar modal si se hace click fuera del contenido
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+                if (event.target === bodegaModal) {
+                    bodegaModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            
+            function openModal(ventaId) {
+                // Mostrar el modal
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden'; // Prevenir scroll
+                
+                // Establecer el ID de la venta en el título
+                document.getElementById('modal-venta-id').textContent = ventaId;
+                
+                // Mostrar spinner de carga
+                const detallesContainer = document.getElementById('detalles-container');
+                detallesContainer.innerHTML = `
+                    <div class="loading-spinner">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                        <p>Cargando detalles...</p>
+                    </div>
+                `;
+                
+                // Hacer petición AJAX para obtener los detalles reales
+                fetch(`/comercial/ventas/${ventaId}/detalles-json/`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al cargar los detalles');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Actualizar información básica
+                        document.getElementById('modal-cliente').textContent = data.venta.cliente;
+                        document.getElementById('modal-fecha-vencimiento').textContent = data.venta.fecha_vencimiento;
+                        document.getElementById('modal-total-cajas').textContent = data.venta.total_cajas;
+                        document.getElementById('modal-total-euros').textContent = data.venta.total_euros;
+                        
+                        // Generar HTML para los detalles
+                        let detallesHTML = '';
+                        
+                        if (data.detalles.length > 0) {
+                            // Show observations if present
+                            if (data.venta.observaciones) {
+                                detallesHTML += `
+                                    <div class="observaciones-section">
+                                        <h3><i class="fas fa-comment-alt"></i> Observaciones</h3>
+                                        <p>${data.venta.observaciones}</p>
+                                    </div>
+                                `;
+                            }
+                            
+                            detallesHTML += `
+                                <div class="detalle-cards">
+                                    ${data.detalles.map(detalle => `
+                                        <div class="detalle-card">
+                                            <div class="card-header">
+                                                <h4>${detalle.producto}</h4>
+                                                <span class="presentacion">${detalle.presentacion}</span>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="metric">
+                                                    <i class="fas fa-weight"></i>
+                                                    <span>${detalle.kilos} kg</span>
+                                                </div>
+                                                <div class="metric">
+                                                    <i class="fas fa-box"></i>
+                                                    <span>${detalle.cajas_enviadas} cajas</span>
+                                                </div>
+                                                <div class="metric">
+                                                    <i class="fas fa-euro-sign"></i>
+                                                    <span>${detalle.valor_caja}/caja</span>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer">
+                                                <div class="total">
+                                                    <label>Total:</label> 
+                                                    <span>${detalle.valor_total}</span>
+                                                </div>
+                                                <div class="nc ${parseFloat(detalle.valor_abono.replace('€', '')) > 0 ? 'has-nc' : ''}">
+                                                    <label>Abono (${detalle.cajas_abono}):</label> 
+                                                    <span>${detalle.valor_abono}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `;
+                        } else {
+                            detallesHTML = `
+                                <div class="empty-details">
+                                    <i class="fas fa-box-open"></i>
+                                    <p>No hay detalles para mostrar</p>
+                                </div>
+                            `;
+                        }
+                        
+                        detallesContainer.innerHTML = detallesHTML;
+                    })
+                    .catch(error => {
+                        detallesContainer.innerHTML = `
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Error al cargar los detalles: ${error.message}</p>
+                            </div>
+                        `;
+                    });
+            }
+            
+            function openBodegaModal() {
+                bodegaModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                
+                const bodegaContainer = document.getElementById('bodega-container');
+                bodegaContainer.innerHTML = `
+                    <div class="loading-spinner">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                        <p>Cargando inventario...</p>
+                    </div>
+                `;
+                
+                // Hacer petición AJAX para obtener los datos de bodega
+                fetch('/importacion/bodega/json/')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al cargar el inventario');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Guardar datos para filtrado y ordenamiento
+                        inventarioData = data.bodegas || [];
+                        
+                        // Mostrar los productos
+                        renderInventario(inventarioData);
+                        
+                        // Actualizar resumen
+                        updateInventarioSummary(inventarioData);
+                    })
+                    .catch(error => {
+                        bodegaContainer.innerHTML = `
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Error al cargar el inventario: ${error.message}</p>
+                            </div>
+                        `;
+                    });
+            }
+            
+            // Funciones de renderizado y filtrado
+            function renderInventario(items) {
+                const bodegaContainer = document.getElementById('bodega-container');
+                
+                if (items.length === 0) {
+                    bodegaContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <p>No hay elementos en el inventario de bodega.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const html = `
+                    <div class="inventory-grid">
+                        ${items.map(item => {
+                            // Determinar el estado del stock
+                            const stockLevel = getStockLevel(item.stock_actual);
+                            
+                            return `
+                                <div class="inventory-card ${stockLevel.class}" data-stock="${item.stock_actual}">
+                                    <div class="stock-indicator ${stockLevel.class}"></div>
+                                    <div class="card-content">
+                                        <h3>${item.presentacion.nombre}</h3>
+                                        <div class="stock-info">
+                                            <div class="stock-level ${stockLevel.class}">
+                                                <i class="${stockLevel.icon}"></i>
+                                                <span>${stockLevel.text}</span>
+                                            </div>
+                                            <div class="stock-amount">
+                                                <span class="value">${item.stock_actual}</span>
+                                                <span class="label">cajas</span>
+                                            </div>
+                                        </div>
+                                        <div class="inventory-details">
+                                            <div class="detail-item">
+                                                <span class="label">Última Actualización:</span>
+                                                <span class="value">${item.ultima_actualizacion || 'N/A'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                
+                bodegaContainer.innerHTML = html;
+            }
+            
+            // Determinar nivel de stock
+            function getStockLevel(stock) {
+                if (stock <= 0) {
+                    return {
+                        class: 'no-stock',
+                        text: 'Sin Stock',
+                        icon: 'fas fa-times-circle'
+                    };
+                } else if (stock <= 10) {
+                    return {
+                        class: 'low-stock',
+                        text: 'Stock Bajo',
+                        icon: 'fas fa-exclamation-triangle'
+                    };
+                } else {
+                    return {
+                        class: 'normal-stock',
+                        text: 'Disponible',
+                        icon: 'fas fa-check-circle'
+                    };
+                }
+            }
+            
+            // Actualizar resumen del inventario
+            function updateInventarioSummary(items) {
+                const totalProductos = items.length;
+                let totalCajas = 0;
+                let bajoStock = 0;
+                
+                items.forEach(item => {
+                    const stock = parseInt(item.stock_actual) || 0;
+                    totalCajas += stock;
+                    if (stock > 0 && stock <= 10) {
+                        bajoStock++;
+                    }
+                });
+                
+                document.getElementById('total-productos').textContent = totalProductos;
+                document.getElementById('total-cajas').textContent = totalCajas;
+                document.getElementById('bajo-stock').textContent = bajoStock;
+            }
+            
+            // Funcionalidad de búsqueda
+            const searchInput = document.getElementById('bodega-search');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                
+                if (searchTerm === '') {
+                    renderInventario(inventarioData);
+                    return;
+                }
+                
+                const filtered = inventarioData.filter(item => 
+                    item.presentacion.nombre.toLowerCase().includes(searchTerm)
+                );
+                
+                renderInventario(filtered);
+                updateInventarioSummary(filtered);
+            });
+            
+            // Funcionalidad de ordenamiento
+            const sortSelect = document.getElementById('sort-inventory');
+            sortSelect.addEventListener('change', function() {
+                const sortValue = this.value;
+                const sorted = [...inventarioData]; // Clonar el array
+                
+                switch(sortValue) {
+                    case 'nombre':
+                        sorted.sort((a, b) => a.presentacion.nombre.localeCompare(b.presentacion.nombre));
+                        break;
+                    case 'stock-asc':
+                        sorted.sort((a, b) => parseInt(a.stock_actual) - parseInt(b.stock_actual));
+                        break;
+                    case 'stock-desc':
+                        sorted.sort((a, b) => parseInt(b.stock_actual) - parseInt(a.stock_actual));
+                        break;
+                    case 'reciente':
+                        sorted.sort((a, b) => {
+                            if (!a.ultima_actualizacion) return 1;
+                            if (!b.ultima_actualizacion) return -1;
+                            return new Date(b.ultima_actualizacion) - new Date(a.ultima_actualizacion);
+                        });
+                        break;
+                }
+                
+                renderInventario(sorted);
+            });
+            
+            // Funcionalidad de pestañas
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Cambiar pestaña activa
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const tab = this.getAttribute('data-tab');
+                    let filtered = [...inventarioData];
+                    
+                    // Filtrar según la pestaña
+                    if (tab === 'low-stock') {
+                        filtered = inventarioData.filter(item => 
+                            parseInt(item.stock_actual) > 0 && parseInt(item.stock_actual) <= 10
+                        );
+                    } else if (tab === 'out-stock') {
+                        filtered = inventarioData.filter(item => 
+                            parseInt(item.stock_actual) <= 0
+                        );
+                    }
+                    
+                    renderInventario(filtered);
+                    updateInventarioSummary(filtered);
+                    
+                    // Si hay una búsqueda activa, aplicarla también
+                    const searchTerm = searchInput.value.toLowerCase().trim();
+                    if (searchTerm !== '') {
+                        filtered = filtered.filter(item => 
+                            item.presentacion.nombre.toLowerCase().includes(searchTerm)
+                        );
+                        renderInventario(filtered);
+                        updateInventarioSummary(filtered);
+                    }
+                });
+            
+            // Funcionalidad del modal de pago
+            const pagoModal = document.getElementById('pago-modal');
+            const pagoBtns = document.querySelectorAll('.btn-pago');
+            const formPago = document.getElementById('form-pago');
+            const btnGuardarPago = document.getElementById('btn-guardar-pago');
+            
+            // Abrir modal de pago
+            pagoBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const ventaId = this.getAttribute('data-venta-id');
+                    const cliente = this.getAttribute('data-cliente');
+                    const numeroFactura = this.getAttribute('data-numero-factura');
+                    const total = this.getAttribute('data-total');
+                    
+                    // Rellenar el formulario
+                    document.getElementById('pago-venta-id').value = ventaId;
+                    document.getElementById('pago-cliente').value = cliente;
+                    document.getElementById('pago-referencia').value = numeroFactura;
+                    document.getElementById('pago-numero-factura').textContent = numeroFactura;
+                    document.getElementById('pago-valor').value = parseFloat(total).toFixed(2);
+                    
+                    // Establecer fecha actual
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('pago-fecha').value = today;
+                    
+                    // Limpiar concepto
+                    document.getElementById('pago-concepto').value = '';
+                    
+                    // Mostrar modal
+                    pagoModal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+            
+            // Manejar envío del formulario
+            formPago.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const ventaId = document.getElementById('pago-venta-id').value;
+                const formData = new FormData(formPago);
+                
+                // Deshabilitar botón mientras se procesa
+                btnGuardarPago.disabled = true;
+                btnGuardarPago.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+                
+                // Enviar datos
+                fetch(`/comercial/ventas/${ventaId}/registrar-pago/`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mostrar mensaje de éxito
+                        alert(data.message);
+                        
+                        // Cerrar modal y recargar página
+                        pagoModal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                        btnGuardarPago.disabled = false;
+                        btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
+                    }
+                })
+                .catch(error => {
+                    alert('Error al guardar el pago: ' + error);
+                    btnGuardarPago.disabled = false;
+                    btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
+                });
+            });
+            
+            // Cerrar modal de pago con los botones de cerrar
+            document.querySelectorAll('#pago-modal .close-modal, #pago-modal .close-modal-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    pagoModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    btnGuardarPago.disabled = false;
+                    btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
+                });
+            });
+            
+            // Cerrar modal de pago al hacer clic fuera
+            window.addEventListener('click', function(event) {
+                if (event.target === pagoModal) {
+                    pagoModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    btnGuardarPago.disabled = false;
+                    btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
+                }
+            });
+            });
+        });
+    </script>
+{% endblock %}
