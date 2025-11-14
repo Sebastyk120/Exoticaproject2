@@ -476,11 +476,43 @@
             </div>
         </div>
     </div>
+
+    <div id="notification-container"></div>
 {% endblock %}
 
 {% block extra_js %}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // --- Notification System ---
+            function showNotification(message, type = 'success') {
+                const container = document.getElementById('notification-container');
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                
+                const icon = document.createElement('i');
+                icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
+                
+                const text = document.createElement('span');
+                text.textContent = message;
+                
+                const closeBtn = document.createElement('button');
+                closeBtn.innerHTML = '&times;';
+                closeBtn.onclick = () => {
+                    notification.classList.add('hide');
+                    setTimeout(() => notification.remove(), 300);
+                };
+                
+                notification.appendChild(icon);
+                notification.appendChild(text);
+                notification.appendChild(closeBtn);
+                container.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.add('hide');
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000); // Auto-dismiss after 5 seconds
+            }
+
             // Estado de filtro
             const pagadoFilter = document.getElementById('pagado-filter');
             pagadoFilter.addEventListener('change', function() {
@@ -1045,6 +1077,7 @@
                         updateInventarioSummary(filtered);
                     }
                 });
+            });
             
             // Funcionalidad del modal de pago
             const pagoModal = document.getElementById('pago-modal');
@@ -1103,20 +1136,20 @@
                 .then(data => {
                     if (data.success) {
                         // Mostrar mensaje de éxito
-                        alert(data.message);
+                        showNotification(data.message, 'success');
                         
-                        // Cerrar modal y recargar página
+                        // Cerrar modal y recargar página después de un breve retraso
                         pagoModal.style.display = 'none';
                         document.body.style.overflow = 'auto';
-                        window.location.reload();
+                        setTimeout(() => window.location.reload(), 1500);
                     } else {
-                        alert('Error: ' + data.message);
+                        showNotification(data.message, 'error');
                         btnGuardarPago.disabled = false;
                         btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
                     }
                 })
                 .catch(error => {
-                    alert('Error al guardar el pago: ' + error);
+                    showNotification('Error al guardar el pago: ' + error, 'error');
                     btnGuardarPago.disabled = false;
                     btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
                 });
@@ -1141,6 +1174,6 @@
                     btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
                 }
             });
-            });
         });
     </script>
+{% endblock %}

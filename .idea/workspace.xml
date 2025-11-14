@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Pruebas reportlab para factura." />
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Migrate table TranferenciaCliente, unique=referencia." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -299,14 +299,6 @@
       <workItem from="1761346161579" duration="159000" />
       <workItem from="1761394241750" duration="49000" />
       <workItem from="1761394316870" duration="460000" />
-    </task>
-    <task id="LOCAL-00056" summary="Total cajas y esto de cuenta.">
-      <option name="closed" value="true" />
-      <created>1744559434568</created>
-      <option name="number" value="00056" />
-      <option name="presentableId" value="LOCAL-00056" />
-      <option name="project" value="LOCAL" />
-      <updated>1744559434568</updated>
     </task>
     <task id="LOCAL-00057" summary="Calculo de dash utilidades.">
       <option name="closed" value="true" />
@@ -692,7 +684,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762032610545</updated>
     </task>
-    <option name="localTasksCounter" value="105" />
+    <task id="LOCAL-00105" summary="Migrate table TranferenciaCliente, unique=referencia.">
+      <option name="closed" value="true" />
+      <created>1763148860628</created>
+      <option name="number" value="00105" />
+      <option name="presentableId" value="LOCAL-00105" />
+      <option name="project" value="LOCAL" />
+      <updated>1763148860629</updated>
+    </task>
+    <option name="localTasksCounter" value="106" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -710,7 +710,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Mejoras de SEO" />
     <MESSAGE value="Mejoras de SEO (Eliminacion de precios Console Google)" />
     <MESSAGE value="Favicon." />
     <MESSAGE value="Cambios en direccion de alabaran, pagina y tecnologia. Cambio en modelo Fruta." />
@@ -735,6 +734,7 @@
     <MESSAGE value="Mejoras de rendimiento, mailjet." />
     <MESSAGE value="Error de guardado de Barras contrarias en guardado en disco." />
     <MESSAGE value="Pruebas reportlab para factura." />
-    <option name="LAST_COMMIT_MESSAGE" value="Pruebas reportlab para factura." />
+    <MESSAGE value="Migrate table TranferenciaCliente, unique=referencia." />
+    <option name="LAST_COMMIT_MESSAGE" value="Migrate table TranferenciaCliente, unique=referencia." />
   </component>
 </project>
