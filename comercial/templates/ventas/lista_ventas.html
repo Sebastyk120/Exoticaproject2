@@ -470,7 +470,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline close-modal-btn">Cancelar</button>
-                <button type="submit" form="form-pago" class="btn btn-primary" id="btn-guardar-pago">
+                <button type="button" class="btn btn-primary" id="btn-guardar-pago">
                     <i class="fas fa-save"></i> Guardar Pago
                 </button>
             </div>
@@ -615,7 +615,7 @@
                     columnSelector.style.display = 'none';
                 }
             });
-
+            
             // Evitar que los clics dentro del selector lo cierren
             columnSelector.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -1052,63 +1052,65 @@
             const formPago = document.getElementById('form-pago');
             const btnGuardarPago = document.getElementById('btn-guardar-pago');
             let isSubmittingPago = false; // Bandera para evitar envíos duplicados
-            
-            // Abrir modal de pago
-            pagoBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const ventaId = this.getAttribute('data-venta-id');
-                    const cliente = this.getAttribute('data-cliente');
-                    const numeroFactura = this.getAttribute('data-numero-factura');
-                    const total = this.getAttribute('data-total');
-                    
-                    // Rellenar el formulario
-                    document.getElementById('pago-venta-id').value = ventaId;
-                    document.getElementById('pago-cliente').value = cliente;
-                    document.getElementById('pago-referencia').value = numeroFactura;
-                    document.getElementById('pago-numero-factura').textContent = numeroFactura;
-                    document.getElementById('pago-valor').value = parseFloat(total).toFixed(2);
-                    
-                    // Establecer fecha actual
-                    const today = new Date().toISOString().split('T')[0];
-                    document.getElementById('pago-fecha').value = today;
-                    
-                    // Limpiar concepto y reiniciar estado del formulario
-                    document.getElementById('pago-concepto').value = '';
-                    isSubmittingPago = false;
-                    btnGuardarPago.disabled = false;
-                    btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
-                    
-                    // Mostrar modal
-                    pagoModal.style.display = 'flex';
-                    document.body.style.overflow = 'hidden';
+
+            // Inicializar estado de dataset (evita undefined)
+            if (formPago) {
+                formPago.dataset.submitted = 'false';
+            }
+
+            // Click handler para el botón: desactivar y disparar el submit una sola vez
+            if (btnGuardarPago && formPago) {
+                btnGuardarPago.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    // Evitar doble clic/submit
+                    if (isSubmittingPago || formPago.dataset.submitted === 'true') {
+                        console.warn('Acción de pago ignorada: envío en curso o duplicado.');
+                        return;
+                    }
+
+                    // Marcar como enviando y deshabilitar botón antes de disparar submit
+                    isSubmittingPago = true;
+                    formPago.dataset.submitted = 'true';
+                    btnGuardarPago.disabled = true;
+                    btnGuardarPago.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+                    // Disparar el submit, el handler de submit hace la petición fetch
+                    formPago.dispatchEvent(new Event('submit', { cancelable: true }));
                 });
-            });
-            
+            }
+
             // Manejar envío del formulario - SOLO UN LISTENER
             formPago.addEventListener('submit', function(e) {
                 e.preventDefault();
-                
-                // Evitar envíos duplicados
-                if (isSubmittingPago) {
-                    console.warn('Envío ya en proceso, ignorando clic duplicado');
+
+                // Si ya estamos enviando, ignoramos la llamada
+                if (isSubmittingPago && formPago.dataset.submitted === 'true') {
+                    console.warn('Submit duplicado bloqueado por bandera/dataset.');
                     return;
                 }
-                
+
+                // Marcar como enviado (por si viene de otro origen, por ejemplo Enter)
+                isSubmittingPago = true;
+                formPago.dataset.submitted = 'true';
+                btnGuardarPago.disabled = true;
+                btnGuardarPago.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
                 const ventaId = document.getElementById('pago-venta-id').value;
-                
+
                 // Validar que tenemos todos los datos
                 if (!ventaId) {
                     alert('Error: ID de venta no válido');
+                    // resetear estado para permitir reintento
+                    isSubmittingPago = false;
+                    formPago.dataset.submitted = 'false';
+                    btnGuardarPago.disabled = false;
+                    btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
                     return;
                 }
-                
+
                 const formData = new FormData(formPago);
-                
-                // Marcar como enviando y deshabilitar botón
-                isSubmittingPago = true;
-                btnGuardarPago.disabled = true;
-                btnGuardarPago.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-                
+
                 // Enviar datos
                 fetch(`/comercial/ventas/${ventaId}/registrar-pago/`, {
                     method: 'POST',
@@ -1118,42 +1120,40 @@
                     }
                 })
                 .then(response => {
-                    // Verificar si la respuesta es válida
                     if (!response.ok && response.status !== 400) {
                         throw new Error(`HTTP Error: ${response.status}`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    isSubmittingPago = false;
-                    
+                    // Si falla, permitir reintento; si succeed -> recargar
                     if (data.success) {
-                        // Mostrar mensaje de éxito
                         alert(data.message);
-                        
-                        // Cerrar modal y recargar página
                         pagoModal.style.display = 'none';
                         document.body.style.overflow = 'auto';
-                        
-                        // Recargar después de un pequeño delay para asegurar la actualización
+
                         setTimeout(() => {
                             window.location.reload();
                         }, 500);
                     } else {
-                        alert('Error: ' + (data.message || 'Error desconocido'));
+                        // Resetear para permitir reintento
+                        isSubmittingPago = false;
+                        formPago.dataset.submitted = 'false';
                         btnGuardarPago.disabled = false;
                         btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
+                        alert('Error: ' + (data.message || 'Error desconocido'));
                     }
                 })
                 .catch(error => {
                     isSubmittingPago = false;
+                    formPago.dataset.submitted = 'false';
                     console.error('Error al guardar pago:', error);
                     alert('Error al guardar el pago: ' + error.message);
                     btnGuardarPago.disabled = false;
                     btnGuardarPago.innerHTML = '<i class="fas fa-save"></i> Guardar Pago';
                 });
             });
-            
+
             // Cerrar modal de pago con los botones de cerrar
             document.querySelectorAll('#pago-modal .close-modal, #pago-modal .close-modal-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
