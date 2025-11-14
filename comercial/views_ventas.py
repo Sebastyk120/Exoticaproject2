@@ -640,15 +640,6 @@ def registrar_pago_venta(request, venta_id):
                 'message': 'El valor de la transferencia no es válido'
             }, status=400)
         
-        # Validar que el monto no exceda lo adeudado
-        monto_adeudado = venta.monto_pendiente or Decimal('0')
-        if valor_transferencia > monto_adeudado:
-            return JsonResponse({
-                'success': False,
-                'message': f'El monto de transferencia (€{valor_transferencia:.2f}) no puede exceder lo adeudado (€{monto_adeudado:.2f})'
-            }, status=400)
-        
-        # Buscar si ya existe una transferencia con esta referencia
         referencia = venta.numero_factura
         
         # Usar get_or_create para evitar condiciones de carrera
