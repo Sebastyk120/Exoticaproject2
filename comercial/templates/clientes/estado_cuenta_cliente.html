@@ -342,79 +342,79 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Facturas Próximas a Vencer / Pendientes de Pago</h5>
+                        <h5 class="card-title">{{ cliente.nombre }} - Facturas Próximas a Vencer / Pendientes de Pago</h5>
                         <div class="table-container">
                             <div class="table-responsive">
-                                <table class="table table-hover table-striped">
+                                <table class="table table-hover table-striped compact-table">
                                     <thead>
                                         <tr>
-                                            <th>Fecha Emisión</th>
-                                            <th>Número Factura</th>
-                                            <th>Monto Pendiente</th>
-                                            <th>Fecha Vencimiento</th>
-                                            <th>Días Restantes</th>
+                                            <th>F. Emisión</th>
+                                            <th>Nº Factura</th>
+                                            <th>Total Factura</th>
+                                            <th>Abonos</th>
+                                            <th>Pendiente</th>
+                                            <th>F. Vencimiento</th>
                                             <th>Estado</th>
-                                            <th>Descargar</th>
+                                            <th>Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for item in facturas_con_vencimiento %}
                                         <tr class="{% if item.estado == 'vencida' %}table-danger{% elif item.estado == 'proxima' %}table-warning{% elif item.estado == 'normal' %}table-success{% else %}table-secondary{% endif %}">
-                                            <td>{{ item.factura.fecha_entrega|date:"d/m/Y" }}</td>
-                                            <td>{{ item.factura.numero_factura }}</td>
-                                            <td>{{ item.factura.monto_pendiente|format_currency_eur }}</td>
-                                            <td>{% if item.fecha_vencimiento %}{{ item.fecha_vencimiento|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+                                            <td class="text-nowrap">{{ item.factura.fecha_entrega|date:"d/m/Y" }}</td>
+                                            <td class="fw-bold">{{ item.factura.numero_factura }}</td>
+                                            <td class="text-nowrap">{{ item.factura.valor_total_factura_euro|format_currency_eur }}</td>
+                                            <td class="text-nowrap">
+                                                {% if item.factura.valor_total_abono_euro and item.factura.valor_total_abono_euro > 0 %}
+                                                    <span class="text-danger fw-bold">{{ item.factura.valor_total_abono_euro|format_currency_eur }}</span>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-nowrap fw-bold">{{ item.factura.monto_pendiente|format_currency_eur }}</td>
+                                            <td class="text-nowrap">{% if item.fecha_vencimiento %}{{ item.fecha_vencimiento|date:"d/m/Y" }}{% else %}-{% endif %}</td>
                                             <td>
                                                 {% if item.dias_hasta_vencimiento is not None %}
                                                     {% if item.dias_hasta_vencimiento < 0 %}
-                                                        <span class="badge bg-danger">Vencida ({{ item.dias_hasta_vencimiento|abs }} días)</span>
+                                                        <span class="badge bg-danger">Vencida {{ item.dias_hasta_vencimiento|abs }} días</span>
                                                     {% elif item.dias_hasta_vencimiento == 0 %}
-                                                        <span class="badge bg-danger">Vence hoy</span>
+                                                        <span class="badge bg-danger">Hoy</span>
                                                     {% elif item.dias_hasta_vencimiento <= 7 %}
-                                                        <span class="badge bg-warning">{{ item.dias_hasta_vencimiento }} días</span>
+                                                        <span class="badge bg-warning">A {{ item.dias_hasta_vencimiento }} días de vencer</span>
                                                     {% else %}
-                                                        <span class="badge bg-success">{{ item.dias_hasta_vencimiento }} días</span>
+                                                        <span class="badge bg-success">A {{ item.dias_hasta_vencimiento }} días de vencer</span>
                                                     {% endif %}
                                                 {% else %}
-                                                    -
+                                                    <span class="badge bg-secondary">-</span>
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                {% if item.estado == 'vencida' %}
-                                                    <span class="badge bg-danger">Vencida</span>
-                                                {% elif item.estado == 'proxima' %}
-                                                    <span class="badge bg-warning">Próxima</span>
-                                                {% elif item.estado == 'normal' %}
-                                                    <span class="badge bg-success">Normal</span>
-                                                {% else %}
-                                                    <span class="badge bg-secondary">Desconocido</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if vista_cliente %}
-                                                    <a href="{% url 'comercial:factura_cliente_token' item.factura.id cliente.token_acceso %}" class="btn btn-xs btn-primary">
-                                                        <i class="fas fa-file-pdf"> F.C</i>
-                                                    </a>
-                                                    {% if item.factura.numero_nc %}
-                                                    <a href="{% url 'comercial:rectificativa_cliente_token' item.factura.id cliente.token_acceso %}" class="btn btn-xs btn-danger">
-                                                        <i class="fas fa-file-alt"> F.A</i>
-                                                    </a>
+                                                <div class="btn-group-compact">
+                                                    {% if vista_cliente %}
+                                                        <a href="{% url 'comercial:factura_cliente_token' item.factura.id cliente.token_acceso %}" class="btn btn-xs btn-primary">
+                                                            <i class="fas fa-file-pdf"></i> Factura
+                                                        </a>
+                                                        {% if item.factura.numero_nc %}
+                                                        <a href="{% url 'comercial:rectificativa_cliente_token' item.factura.id cliente.token_acceso %}" class="btn btn-xs btn-danger">
+                                                            <i class="fas fa-file-alt"></i> Abono
+                                                        </a>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <a href="{% url 'comercial:generar_factura' item.factura.id %}" class="btn btn-xs btn-primary">
+                                                            <i class="fas fa-file-pdf"></i> Factura
+                                                        </a>
+                                                        {% if item.factura.numero_nc %}
+                                                        <a href="{% url 'comercial:generar_rectificativa' item.factura.id %}" class="btn btn-xs btn-danger">
+                                                            <i class="fas fa-file-alt"></i> Abono
+                                                        </a>
+                                                        {% endif %}
                                                     {% endif %}
-                                                {% else %}
-                                                    <a href="{% url 'comercial:generar_factura' item.factura.id %}" class="btn btn-xs btn-primary">
-                                                        <i class="fas fa-file-pdf"> F.C</i>
-                                                    </a>
-                                                    {% if item.factura.numero_nc %}
-                                                    <a href="{% url 'comercial:generar_rectificativa' item.factura.id %}" class="btn btn-xs btn-danger">
-                                                        <i class="fas fa-file-alt"> F.A</i>
-                                                    </a>
-                                                    {% endif %}
-                                                {% endif %}
+                                                </div>
                                             </td>
                                         </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="7" class="text-center py-4">No hay facturas pendientes de pago</td>
+                                            <td colspan="8" class="text-center py-4">No hay facturas pendientes de pago</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -434,32 +434,38 @@
                         <h5 class="card-title">Detalle de Ventas</h5>
                         <div class="table-container">
                             <div class="table-responsive">
-                                <table class="table table-hover table-striped">
+                                <table class="table table-hover table-striped compact-table">
                                     <thead>
                                         <tr>
                                             <th>Fecha</th>
-                                            <th>Número Factura</th>
-                                            <th>Total Cajas</th>
+                                            <th>Nº Factura</th>
+                                            <th>Cajas</th>
                                             <th>Subtotal</th>
                                             <th>IVA</th>
                                             <th>Total</th>
                                             <th>Abonos</th>
                                             <th>Pendiente</th>
                                             <th>Estado</th>
-                                            <th>Descargar</th>
+                                            <th>Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for venta in ventas %}
                                         <tr>
-                                            <td>{{ venta.fecha_entrega|date:"d/m/Y" }}</td>
-                                            <td>{{ venta.numero_factura }}</td>
+                                            <td class="text-nowrap">{{ venta.fecha_entrega|date:"d/m/Y" }}</td>
+                                            <td class="fw-bold">{{ venta.numero_factura }}</td>
                                             <td>{{ venta.total_cajas_pedido|format_integer }}</td>
-                                            <td>{{ venta.subtotal_factura|format_currency_eur }}</td>
-                                            <td>{{ venta.iva|format_currency_eur }}</td>
-                                            <td><strong>{{ venta.valor_total_factura_euro|format_currency_eur }}</strong></td>
-                                            <td>{{ venta.valor_total_abono_euro|format_currency_eur }}</td>
-                                            <td><strong>{{ venta.monto_pendiente|format_currency_eur }}</strong></td>
+                                            <td class="text-nowrap">{{ venta.subtotal_factura|format_currency_eur }}</td>
+                                            <td class="text-nowrap">{{ venta.iva|format_currency_eur }}</td>
+                                            <td class="text-nowrap fw-bold">{{ venta.valor_total_factura_euro|format_currency_eur }}</td>
+                                            <td class="text-nowrap">
+                                                {% if venta.valor_total_abono_euro and venta.valor_total_abono_euro > 0 %}
+                                                    <span class="text-danger fw-bold">{{ venta.valor_total_abono_euro|format_currency_eur }}</span>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-nowrap fw-bold">{{ venta.monto_pendiente|format_currency_eur }}</td>
                                             <td>
                                                 {% if venta.pagado %}
                                                 <span class="badge bg-success">Pagado</span>
@@ -468,25 +474,27 @@
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                {% if vista_cliente %}
-                                                    <a href="{% url 'comercial:factura_cliente_token' venta.id cliente.token_acceso %}" class="btn btn-xs btn-primary">
-                                                        <i class="fas fa-file-pdf"> F.C</i>
-                                                    </a>
-                                                    {% if venta.numero_nc %}
-                                                    <a href="{% url 'comercial:rectificativa_cliente_token' venta.id cliente.token_acceso %}" class="btn btn-xs btn-danger">
-                                                        <i class="fas fa-file-alt"> F.A</i>
-                                                    </a>
+                                                <div class="btn-group-compact">
+                                                    {% if vista_cliente %}
+                                                        <a href="{% url 'comercial:factura_cliente_token' venta.id cliente.token_acceso %}" class="btn btn-xs btn-primary">
+                                                            <i class="fas fa-file-pdf"></i> Factura
+                                                        </a>
+                                                        {% if venta.numero_nc %}
+                                                        <a href="{% url 'comercial:rectificativa_cliente_token' venta.id cliente.token_acceso %}" class="btn btn-xs btn-danger">
+                                                            <i class="fas fa-file-alt"></i> Abono
+                                                        </a>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn btn-xs btn-primary">
+                                                            <i class="fas fa-file-pdf"></i> Factura
+                                                        </a>
+                                                        {% if venta.numero_nc %}
+                                                        <a href="{% url 'comercial:generar_rectificativa' venta.id %}" class="btn btn-xs btn-danger">
+                                                            <i class="fas fa-file-alt"></i> Abono
+                                                        </a>
+                                                        {% endif %}
                                                     {% endif %}
-                                                {% else %}
-                                                    <a href="{% url 'comercial:generar_factura' venta.id %}" class="btn btn-xs btn-primary">
-                                                        <i class="fas fa-file-pdf"> F.C</i>
-                                                    </a>
-                                                    {% if venta.numero_nc %}
-                                                    <a href="{% url 'comercial:generar_rectificativa' venta.id %}" class="btn btn-xs btn-danger">
-                                                        <i class="fas fa-file-alt"> F.A</i>
-                                                    </a>
-                                                    {% endif %}
-                                                {% endif %}
+                                                </div>
                                             </td>
                                         </tr>
                                         {% empty %}
@@ -511,12 +519,12 @@
                         <h5 class="card-title">Últimas Transferencias / Pagos Realizados</h5>
                         <div class="table-container">
                             <div class="table-responsive">
-                                <table class="table table-hover table-striped">
+                                <table class="table table-hover table-striped compact-table">
                                     <thead>
                                         <tr>
                                             <th>Fecha</th>
                                             <th>Referencia</th>
-                                            <th>Valor (€)</th>
+                                            <th>Valor</th>
                                             <th>Concepto</th>
                                         </tr>
                                     </thead>
@@ -524,9 +532,9 @@
                                         {% if transferencias %}
                                             {% for transferencia in transferencias %}
                                             <tr>
-                                                <td>{{ transferencia.fecha_transferencia|date:"d/m/Y" }}</td>
-                                                <td>{{ transferencia.referencia }}</td>
-                                                <td class="amount-success fw-bold">{{ transferencia.valor_transferencia|format_currency_eur }}</td>
+                                                <td class="text-nowrap">{{ transferencia.fecha_transferencia|date:"d/m/Y" }}</td>
+                                                <td class="fw-bold">{{ transferencia.referencia }}</td>
+                                                <td class="text-nowrap amount-success fw-bold">{{ transferencia.valor_transferencia|format_currency_eur }}</td>
                                                 <td>{{ transferencia.concepto|default:"-" }}</td>
                                             </tr>
                                             {% endfor %}
