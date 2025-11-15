@@ -5,120 +5,40 @@ from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.urls import reverse
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
-from datetime import datetime
+from django.views.generic import ListView
+from django_tables2 import SingleTableView
+from django.utils.decorators import method_decorator
 
 from .models import (
     TranferenciasExportador, TranferenciasAduana, TranferenciasCarga,
-    Exportador, AgenciaAduana, AgenciaCarga, 
+    Exportador, AgenciaAduana, AgenciaCarga,
     BalanceExportador, BalanceGastosAduana, BalanceGastosCarga
 )
 from comercial.models import Cliente, TranferenciasCliente, BalanceCliente
+from .tables_transferencias import (
+    TranferenciasExportadorTable, TranferenciasAduanaTable,
+    TranferenciasCargaTable, TranferenciasClienteTable
+)
+from .filters import (
+    TranferenciasExportadorFilter, TranferenciasAduanaFilter,
+    TranferenciasCargaFilter, TranferenciasClienteFilter
+)
 
 @login_required
 def transferencias_view(request):
-    # Obtener el tab activo
-    active_tab = request.GET.get('tab', 'exportador')
-    
-    # Obtener filtros
-    exportador_filter = request.GET.get('exportador_filter')
-    aduana_filter = request.GET.get('aduana_filter')
-    carga_filter = request.GET.get('carga_filter')
-    cliente_filter = request.GET.get('cliente_filter')
-    
-    # Obtener todas las transferencias sin filtro de fecha
-    transferencias_exportador = TranferenciasExportador.objects.all()
-    transferencias_aduana = TranferenciasAduana.objects.all()
-    transferencias_carga = TranferenciasCarga.objects.all()
-    transferencias_cliente = TranferenciasCliente.objects.all()
-    
-    # Aplicar filtros según el tab activo
-    if active_tab == 'exportador' and exportador_filter:
-        transferencias_exportador = transferencias_exportador.filter(exportador_id=exportador_filter)
-    elif active_tab == 'aduana' and aduana_filter:
-        transferencias_aduana = transferencias_aduana.filter(agencia_aduana_id=aduana_filter)
-    elif active_tab == 'carga' and carga_filter:
-        transferencias_carga = transferencias_carga.filter(agencia_carga_id=carga_filter)
-    elif active_tab == 'cliente' and cliente_filter:
-        transferencias_cliente = transferencias_cliente.filter(cliente_id=cliente_filter)
-    
-    # Ordenar por fecha descendente
-    transferencias_exportador = transferencias_exportador.order_by('-fecha_transferencia')
-    transferencias_aduana = transferencias_aduana.order_by('-fecha_transferencia')
-    transferencias_carga = transferencias_carga.order_by('-fecha_transferencia')
-    transferencias_cliente = transferencias_cliente.order_by('-fecha_transferencia')
-    
-    # Paginación
-    page_exportador = request.GET.get('page_exportador', 1)
-    page_aduana = request.GET.get('page_aduana', 1)
-    page_carga = request.GET.get('page_carga', 1)
-    page_cliente = request.GET.get('page_cliente', 1)
-    
-    paginator = Paginator(transferencias_exportador, 10)
-    try:
-        transferencias_exportador = paginator.page(page_exportador)
-    except PageNotAnInteger:
-        transferencias_exportador = paginator.page(1)
-    except EmptyPage:
-        transferencias_exportador = paginator.page(paginator.num_pages)
-    
-    paginator = Paginator(transferencias_aduana, 10)
-    try:
-        transferencias_aduana = paginator.page(page_aduana)
-    except PageNotAnInteger:
-        transferencias_aduana = paginator.page(1)
-    except EmptyPage:
-        transferencias_aduana = paginator.page(paginator.num_pages)
-    
-    paginator = Paginator(transferencias_carga, 10)
-    try:
-        transferencias_carga = paginator.page(page_carga)
-    except PageNotAnInteger:
-        transferencias_carga = paginator.page(1)
-    except EmptyPage:
-        transferencias_carga = paginator.page(paginator.num_pages)
-    
-    paginator = Paginator(transferencias_cliente, 10)
-    try:
-        transferencias_cliente = paginator.page(page_cliente)
-    except PageNotAnInteger:
-        transferencias_cliente = paginator.page(1)
-    except EmptyPage:
-        transferencias_cliente = paginator.page(paginator.num_pages)
-    
-    # Obtener datos para los dropdowns
-    exportadores = Exportador.objects.all()
-    agencias_aduana = AgenciaAduana.objects.all()
-    agencias_carga = AgenciaCarga.objects.all()
-    clientes = Cliente.objects.all()
-    
-    # Obtener balances
+    # This view now only shows the dashboard
     balances_exportador = BalanceExportador.objects.select_related('exportador').all()
     balances_aduana = BalanceGastosAduana.objects.select_related('agencia_aduana').all()
     balances_carga = BalanceGastosCarga.objects.select_related('agencia_carga').all()
     balances_cliente = BalanceCliente.objects.select_related('cliente').all()
-    
-    # Calcular totales de balances
+
     total_balance_exportadores = sum(b.saldo_disponible for b in balances_exportador)
     total_balance_aduanas = sum(b.saldo_disponible for b in balances_aduana)
     total_balance_cargas = sum(b.saldo_disponible for b in balances_carga)
     total_balance_clientes = sum(b.saldo_disponible for b in balances_cliente)
-    
+
     context = {
-        'active_tab': active_tab,
-        'transferencias_exportador': transferencias_exportador,
-        'transferencias_aduana': transferencias_aduana,
-        'transferencias_carga': transferencias_carga,
-        'transferencias_cliente': transferencias_cliente,
-        'exportadores': exportadores,
-        'agencias_aduana': agencias_aduana,
-        'agencias_carga': agencias_carga,
-        'clientes': clientes,
-        'exportador_filter': exportador_filter,
-        'aduana_filter': aduana_filter,
-        'carga_filter': carga_filter,
-        'cliente_filter': cliente_filter,
         'balances_exportador': balances_exportador,
         'balances_aduana': balances_aduana,
         'balances_carga': balances_carga,
@@ -127,14 +47,71 @@ def transferencias_view(request):
         'total_balance_aduanas': total_balance_aduanas,
         'total_balance_cargas': total_balance_cargas,
         'total_balance_clientes': total_balance_clientes,
-        'is_paginated': True,
-        'page_obj_exportador': transferencias_exportador,
-        'page_obj_aduana': transferencias_aduana,
-        'page_obj_carga': transferencias_carga,
-        'page_obj_cliente': transferencias_cliente
     }
-    
     return render(request, 'transferencias/transferencias.html', context)
+
+
+@method_decorator(login_required, name='dispatch')
+class BaseTransferenciaListView(SingleTableView):
+    template_name = None
+    table_class = None
+    model = None
+    filterset_class = None
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        self.filter = self.filterset_class(self.request.GET, queryset=queryset)
+        return self.filter.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.filter
+        return context
+
+class TransferenciasExportadorListView(BaseTransferenciaListView):
+    model = TranferenciasExportador
+    table_class = TranferenciasExportadorTable
+    template_name = 'transferencias/transferencias_exportador_list.html'
+    filterset_class = TranferenciasExportadorFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['exportadores'] = Exportador.objects.all()
+        return context
+
+class TransferenciasAduanaListView(BaseTransferenciaListView):
+    model = TranferenciasAduana
+    table_class = TranferenciasAduanaTable
+    template_name = 'transferencias/transferencias_aduana_list.html'
+    filterset_class = TranferenciasAduanaFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['agencias_aduana'] = AgenciaAduana.objects.all()
+        return context
+
+class TransferenciasCargaListView(BaseTransferenciaListView):
+    model = TranferenciasCarga
+    table_class = TranferenciasCargaTable
+    template_name = 'transferencias/transferencias_carga_list.html'
+    filterset_class = TranferenciasCargaFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['agencias_carga'] = AgenciaCarga.objects.all()
+        return context
+
+class TransferenciasClienteListView(BaseTransferenciaListView):
+    model = TranferenciasCliente
+    table_class = TranferenciasClienteTable
+    template_name = 'transferencias/transferencias_cliente_list.html'
+    filterset_class = TranferenciasClienteFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['clientes'] = Cliente.objects.all()
+        return context
+
 
 # -------------------- Transferencias Exportador --------------------
 
@@ -167,8 +144,7 @@ def crear_transferencia_exportador(request):
     except Exception as e:
         messages.error(request, f'Error al crear transferencia: {str(e)}')
     
-    # Redirect to the correct tab
-    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=exportador')
+    return redirect('importacion:transferencias_exportador_list')
 
 @login_required
 @require_POST
@@ -197,8 +173,7 @@ def editar_transferencia_exportador(request, pk):
     except Exception as e:
         messages.error(request, f'Error al actualizar transferencia: {str(e)}')
     
-    # Redirect to the correct tab
-    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=exportador')
+    return redirect('importacion:transferencias_exportador_list')
 
 @login_required
 @require_POST
@@ -210,9 +185,8 @@ def eliminar_transferencia_exportador(request, pk):
         messages.success(request, 'Transferencia a exportador eliminada exitosamente.')
     except Exception as e:
         messages.error(request, f'Error al eliminar transferencia: {str(e)}')
-    
-    # Redirect to the correct tab
-    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=exportador')
+
+    return redirect('importacion:transferencias_exportador_list')
 
 # -------------------- Transferencias Aduana --------------------
 
@@ -234,8 +208,7 @@ def crear_transferencia_aduana(request):
     except Exception as e:
         messages.error(request, f'Error al crear transferencia: {str(e)}')
     
-    # Use the explicit redirect with tab parameter instead of hash
-    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=aduana')
+    return redirect('importacion:transferencias_aduana_list')
 
 @login_required
 @require_POST
@@ -254,8 +227,7 @@ def editar_transferencia_aduana(request, pk):
     except Exception as e:
         messages.error(request, f'Error al actualizar transferencia: {str(e)}')
     
-    # Use the explicit redirect with tab parameter instead of hash
-    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=aduana')
+    return redirect('importacion:transferencias_aduana_list')
 
 @login_required
 @require_POST
@@ -268,8 +240,8 @@ def eliminar_transferencia_aduana(request, pk):
     except Exception as e:
         messages.error(request, f'Error al eliminar transferencia: {str(e)}')
     
-    # Use the explicit redirect with tab parameter instead of hash
-    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=aduana')
+    return redirect('importacion:transferencias_aduana_list')
+
 
 # -------------------- Transferencias Carga --------------------
 
@@ -302,8 +274,7 @@ def crear_transferencia_carga(request):
     except Exception as e:
         messages.error(request, f'Error al crear transferencia: {str(e)}')
     
-    # Use the explicit redirect with tab parameter instead of hash
-    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=carga')
+    return redirect('importacion:transferencias_carga_list')
 
 @login_required
 @require_POST
@@ -332,8 +303,7 @@ def editar_transferencia_carga(request, pk):
     except Exception as e:
         messages.error(request, f'Error al actualizar transferencia: {str(e)}')
     
-    # Use the explicit redirect with tab parameter instead of hash
-    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=carga')
+    return redirect('importacion:transferencias_carga_list')
 
 @login_required
 @require_POST
@@ -346,8 +316,7 @@ def eliminar_transferencia_carga(request, pk):
     except Exception as e:
         messages.error(request, f'Error al eliminar transferencia: {str(e)}')
     
-    # Use the explicit redirect with tab parameter instead of hash
-    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=carga')
+    return redirect('importacion:transferencias_carga_list')
 
 # -------------------- Transferencias Cliente --------------------
 
@@ -369,8 +338,7 @@ def crear_transferencia_cliente(request):
     except Exception as e:
         messages.error(request, f'Error al crear transferencia: {str(e)}')
     
-    # Use the explicit redirect with tab parameter
-    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=cliente')
+    return redirect('importacion:transferencias_cliente_list')
 
 @login_required
 @require_POST
@@ -389,8 +357,7 @@ def editar_transferencia_cliente(request, pk):
     except Exception as e:
         messages.error(request, f'Error al actualizar transferencia: {str(e)}')
     
-    # Use the explicit redirect with tab parameter
-    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=cliente')
+    return redirect('importacion:transferencias_cliente_list')
 
 @login_required
 @require_POST
@@ -403,8 +370,7 @@ def eliminar_transferencia_cliente(request, pk):
     except Exception as e:
         messages.error(request, f'Error al eliminar transferencia: {str(e)}')
     
-    # Use the explicit redirect with tab parameter
-    return HttpResponseRedirect(reverse('importacion:transferencias') + '?tab=cliente')
+    return redirect('importacion:transferencias_cliente_list')
 
 @login_required
 def get_balances_data(request):

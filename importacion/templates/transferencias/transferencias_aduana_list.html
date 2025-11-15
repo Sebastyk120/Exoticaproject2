@@ -1,0 +1,238 @@
+{% extends 'transferencias/transferencias_list_base.html' %}
+
+{% block page_title %}
+<div class="page-title-content">
+    <i class="bi bi-building"></i>
+    Transferencias a Aduanas
+    <span class="title-subtitle">Gestión de transferencias a agencias de aduanas</span>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Enhanced Create Modal -->
+<div class="modal fade" id="modalCrear" tabindex="-1" aria-labelledby="modalCrearLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <form action="{% url 'importacion:crear_transferencia_aduana' %}" method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCrearLabel">
+                        <i class="bi bi-building"></i>
+                        Nueva Transferencia a Agencia de Aduana
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="agencia_aduana" class="form-label">Agencia Aduana *</label>
+                            <select class="form-select" id="agencia_aduana" name="agencia_aduana" required>
+                                <option value="">Seleccione una agencia de aduana</option>
+                                {% for agencia in agencias_aduana %}
+                                <option value="{{ agencia.id }}">{{ agencia.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="referencia" class="form-label">Referencia *</label>
+                            <input type="text" class="form-control" id="referencia" name="referencia" required placeholder="Ej: ADU-2024-001">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_transferencia" class="form-label">Fecha Transferencia *</label>
+                            <input type="date" class="form-control" id="fecha_transferencia" name="fecha_transferencia" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="concepto" class="form-label">Concepto</label>
+                            <textarea class="form-control" id="concepto" name="concepto" rows="2" placeholder="Descripción de la transferencia"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="valor_transferencia" class="form-label">Valor Transferencia EUR *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" step="0.01" class="form-control" id="valor_transferencia" name="valor_transferencia" required placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-with-icon" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-with-icon">
+                        <i class="bi bi-check-circle"></i> Guardar Transferencia
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% for row in table.rows %}
+<!-- Enhanced Edit Modal -->
+<div class="modal fade" id="modalEditar{{ row.record.pk }}" tabindex="-1" aria-labelledby="modalEditarLabel{{ row.record.pk }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <form action="{% url 'importacion:editar_transferencia_aduana' row.record.pk %}" method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEditarLabel{{ row.record.pk }}">
+                        <i class="bi bi-pencil-square"></i>
+                        Editar Transferencia a Agencia de Aduana
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="agencia_aduana{{ row.record.pk }}" class="form-label">Agencia Aduana *</label>
+                            <select class="form-select" id="agencia_aduana{{ row.record.pk }}" name="agencia_aduana" required>
+                                <option value="">Seleccione una agencia de aduana</option>
+                                {% for agencia in agencias_aduana %}
+                                <option value="{{ agencia.id }}" {% if row.record.agencia_aduana.id == agencia.id %}selected{% endif %}>{{ agencia.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="referencia{{ row.record.pk }}" class="form-label">Referencia *</label>
+                            <input type="text" class="form-control" id="referencia{{ row.record.pk }}" name="referencia" value="{{ row.record.referencia }}" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_transferencia{{ row.record.pk }}" class="form-label">Fecha Transferencia *</label>
+                            <input type="date" class="form-control" id="fecha_transferencia{{ row.record.pk }}" name="fecha_transferencia" value="{{ row.record.fecha_transferencia|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="concepto{{ row.record.pk }}" class="form-label">Concepto</label>
+                            <textarea class="form-control" id="concepto{{ row.record.pk }}" name="concepto" rows="2">{{ row.record.concepto }}</textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="valor_transferencia{{ row.record.pk }}" class="form-label">Valor Transferencia EUR *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" step="0.01" class="form-control" id="valor_transferencia{{ row.record.pk }}" name="valor_transferencia" value="{{ row.record.valor_transferencia|stringformat:'s' }}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-with-icon" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-with-icon">
+                        <i class="bi bi-check-circle"></i> Actualizar Transferencia
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Delete Confirmation Modal -->
+<div class="modal fade" id="modalEliminar{{ row.record.pk }}" tabindex="-1" aria-labelledby="modalEliminarLabel{{ row.record.pk }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="{% url 'importacion:eliminar_transferencia_aduana' row.record.pk %}" method="post">
+                {% csrf_token %}
+                <div class="modal-header border-0">
+                    <div class="text-center w-100">
+                        <div class="delete-icon mb-3">
+                            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="modal-title" id="modalEliminarLabel{{ row.record.pk }}">
+                            Confirmar Eliminación
+                        </h5>
+                    </div>
+                    <button type="button" class="btn-close position-absolute end-0 me-3 mt-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-4">
+                        <p class="mb-3">¿Está seguro que desea eliminar la siguiente transferencia?</p>
+                        <div class="delete-info p-3 bg-light rounded">
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Referencia:</strong><br>
+                                    <span class="text-primary">{{ row.record.referencia }}</span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Agencia Aduana:</strong><br>
+                                    <span class="text-warning">{{ row.record.agencia_aduana.nombre }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div>
+                            <strong>¡Atención!</strong> Esta acción no se puede deshacer y eliminará permanentemente todos los datos asociados.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-secondary btn-with-icon me-3" data-bs-dismiss="modal">
+                        <i class="bi bi-arrow-left"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-danger btn-with-icon">
+                        <i class="bi bi-trash"></i> Eliminar Transferencia
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Enhanced Statistics Card -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">
+                    <i class="bi bi-graph-up"></i>
+                    Estadísticas de Transferencias
+                </h4>
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ table.rows|length }}</div>
+                            <div class="stat-label">Total Transferencias</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ agencias_aduana|length }}</div>
+                            <div class="stat-label">Agencias Activas</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-item">
+                            <div class="stat-number">
+                                {% if table.rows %}
+                                    {% with first_record=table.rows.0.record %}
+                                        {{ first_record.fecha_transferencia|date:"M Y" }}
+                                    {% endwith %}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </div>
+                            <div class="stat-label">Última Actividad</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-item">
+                            <div class="stat-number">EUR</div>
+                            <div class="stat-label">Moneda Principal</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

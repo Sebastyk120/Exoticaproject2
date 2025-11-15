@@ -44,28 +44,61 @@ urlpatterns = [
     # Add the API endpoint that matches what the JavaScript is calling
     path('api/precio/<int:presentacion_id>/<int:exportador_id>/', views_pedidos.obtener_precio_presentacion, name='api_precio_presentacion'),
 
-    # URLs for transferencias
-    path('transferencias/', views_transferencias.transferencias_view, name='transferencias'),
-    # Exportador CRUD
-    path('transferencias/exportador/crear/', views_transferencias.crear_transferencia_exportador, name='crear_transferencia_exportador'),
-    path('transferencias/exportador/<int:pk>/editar/', views_transferencias.editar_transferencia_exportador, name='editar_transferencia_exportador'),
-    path('transferencias/exportador/<int:pk>/eliminar/', views_transferencias.eliminar_transferencia_exportador, name='eliminar_transferencia_exportador'),
-    
-    # Aduana CRUD
-    path('transferencias/aduana/crear/', views_transferencias.crear_transferencia_aduana, name='crear_transferencia_aduana'),
-    path('transferencias/aduana/<int:pk>/editar/', views_transferencias.editar_transferencia_aduana, name='editar_transferencia_aduana'),
-    path('transferencias/aduana/<int:pk>/eliminar/', views_transferencias.eliminar_transferencia_aduana, name='eliminar_transferencia_aduana'),
-    
-    # Carga CRUD
-    path('transferencias/carga/crear/', views_transferencias.crear_transferencia_carga, name='crear_transferencia_carga'),
-    path('transferencias/carga/<int:pk>/editar/', views_transferencias.editar_transferencia_carga, name='editar_transferencia_carga'),
-    path('transferencias/carga/<int:pk>/eliminar/', views_transferencias.eliminar_transferencia_carga, name='eliminar_transferencia_carga'),
-    
-    # Cliente CRUD
-    path('transferencias/cliente/crear/', views_transferencias.crear_transferencia_cliente, name='crear_transferencia_cliente'),
-    path('transferencias/cliente/<int:pk>/editar/', views_transferencias.editar_transferencia_cliente, name='editar_transferencia_cliente'),
-    path('transferencias/cliente/<int:pk>/eliminar/', views_transferencias.eliminar_transferencia_cliente, name='eliminar_transferencia_cliente'),
+        # URLs for transferencias
 
-    # New path for balance data API
-    path('transferencias/get-balances-data/', views_transferencias.get_balances_data, name='get_balances_data'),
+        path('transferencias/', views_transferencias.transferencias_view, name='transferencias'),
+
+        path('transferencias/exportador/', views_transferencias.TransferenciasExportadorListView.as_view(), name='transferencias_exportador_list'),
+
+        path('transferencias/aduana/', views_transferencias.TransferenciasAduanaListView.as_view(), name='transferencias_aduana_list'),
+
+        path('transferencias/carga/', views_transferencias.TransferenciasCargaListView.as_view(), name='transferencias_carga_list'),
+
+        path('transferencias/cliente/', views_transferencias.TransferenciasClienteListView.as_view(), name='transferencias_cliente_list'),
+
+    
+
+        # Exportador CRUD
+
+        path('transferencias/exportador/crear/', views_transferencias.crear_transferencia_exportador, name='crear_transferencia_exportador'),
+
+        path('transferencias/exportador/<int:pk>/editar/', views_transferencias.editar_transferencia_exportador, name='editar_transferencia_exportador'),
+
+        path('transferencias/exportador/<int:pk>/eliminar/', views_transferencias.eliminar_transferencia_exportador, name='eliminar_transferencia_exportador'),
+
+    
+
+        # Aduana CRUD
+
+        path('transferencias/aduana/crear/', views_transferencias.crear_transferencia_aduana, name='crear_transferencia_aduana'),
+
+        path('transferencias/aduana/<int:pk>/editar/', views_transferencias.editar_transferencia_aduana, name='editar_transferencia_aduana'),
+
+        path('transferencias/aduana/<int:pk>/eliminar/', views_transferencias.eliminar_transferencia_aduana, name='eliminar_transferencia_aduana'),
+
+    
+
+        # Carga CRUD
+
+        path('transferencias/carga/crear/', views_transferencias.crear_transferencia_carga, name='crear_transferencia_carga'),
+
+        path('transferencias/carga/<int:pk>/editar/', views_transferencias.editar_transferencia_carga, name='editar_transferencia_carga'),
+
+        path('transferencias/carga/<int:pk>/eliminar/', views_transferencias.eliminar_transferencia_carga, name='eliminar_transferencia_carga'),
+
+    
+
+        # Cliente CRUD
+
+        path('transferencias/cliente/crear/', views_transferencias.crear_transferencia_cliente, name='crear_transferencia_cliente'),
+
+        path('transferencias/cliente/<int:pk>/editar/', views_transferencias.editar_transferencia_cliente, name='editar_transferencia_cliente'),
+
+        path('transferencias/cliente/<int:pk>/eliminar/', views_transferencias.eliminar_transferencia_cliente, name='eliminar_transferencia_cliente'),
+
+    
+
+        # New path for balance data API
+
+        path('transferencias/get-balances-data/', views_transferencias.get_balances_data, name='get_balances_data'),
 ]
