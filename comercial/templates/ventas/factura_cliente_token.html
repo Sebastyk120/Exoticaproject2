@@ -49,7 +49,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="invoice-page-container">
         <div class="btn-container">
             <a href="/comercial/client-statement/{{ token }}/" class="btn btn-back">
                 <i class="fas fa-arrow-left"></i> Volver al Estado de Cuenta
@@ -83,6 +83,7 @@
                         <p><strong>Fecha Emisión:</strong> {{ venta.fecha_entrega|date:"d/m/Y" }}</p>
                         <p class="fecha-vencimiento"><strong>Fecha Vencimiento:</strong> {{ venta.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</p>
                         <p><strong>Semana:</strong> {{ venta.semana|default:"-" }}</p>
+                        {% if venta.origen %}<p><strong>Origen:</strong> {{ venta.origen }}</p>{% endif %}
                     </div>
                 </div>
             </div>

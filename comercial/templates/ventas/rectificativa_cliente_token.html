@@ -46,10 +46,31 @@
             border-color: #545b62;
             color: white;
         }
+        /* Estilos especiales para factura rectificativa - compactos */
+        .invoice-container {
+            position: relative;
+        }
+        .invoice-container::after {
+            content: 'RECTIFICATIVA';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80px;
+            font-weight: 900;
+            color: rgba(230, 126, 34, 0.03);
+            z-index: 0;
+            pointer-events: none;
+            letter-spacing: 4px;
+        }
+        .invoice-container > * {
+            position: relative;
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="invoice-page-container">
         <div class="btn-container">
             <a href="/comercial/client-statement/{{ token }}/" class="btn btn-back">
                 <i class="fas fa-arrow-left"></i> Volver al Estado de Cuenta
@@ -83,6 +104,7 @@
                         <p><strong>Fecha Emisión:</strong> {{ venta.fecha_entrega }}</p>
                         <p><strong>Referencia a Factura:</strong> {% if venta.numero_factura %}{{ venta.numero_factura }}{% else %}{{ venta.id }}{% endif %}</p>
                         <p><strong>Semana:</strong> {{ venta.semana|default:"-" }}</p>
+                        {% if venta.origen %}<p><strong>Origen:</strong> {{ venta.origen }}</p>{% endif %}
                     </div>
                 </div>
             </div>
