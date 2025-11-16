@@ -1088,113 +1088,7 @@ body {
     color: var(--gray-800);
 }
 
-/* Enhanced Invoice Items */
-.invoice-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 20px;
-    border-radius: var(--border-radius);
-    margin-bottom: 15px;
-    border-left: 4px solid var(--gray-300);
-    background-color: white;
-    transition: all var(--transition-speed) ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
 
-.invoice-item:hover {
-    transform: translateX(5px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-}
-
-.invoice-main-info {
-    flex: 1;
-    margin-right: 20px;
-}
-
-.invoice-header {
-    margin-bottom: 15px;
-}
-
-.invoice-number {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-    font-size: 1rem;
-    color: var(--gray-800);
-}
-
-.rectificative-badge {
-    background-color: #fd7e14;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: 500;
-}
-
-.invoice-dates {
-    display: flex;
-    gap: 20px;
-    font-size: 0.85rem;
-    color: var(--gray-600);
-}
-
-.invoice-dates i {
-    margin-right: 5px;
-    width: 12px;
-}
-
-.invoice-amounts {
-    background-color: var(--gray-50);
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid var(--gray-200);
-}
-
-.amount-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-}
-
-.amount-row:last-child {
-    margin-bottom: 0;
-}
-
-.amount-label {
-    font-size: 0.85rem;
-    color: var(--gray-600);
-}
-
-.amount-value {
-    font-weight: 600;
-    color: var(--gray-800);
-}
-
-.rectificative-amount .amount-value {
-    color: var(--warning-color);
-}
-
-.net-amount {
-    border-top: 1px solid var(--gray-300);
-    padding-top: 8px;
-    margin-top: 8px;
-}
-
-.net-amount .amount-value {
-    color: var(--section-comercial);
-    font-size: 1.1rem;
-}
-
-.invoice-status-section {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    min-width: 120px;
-}
 
 /* Responsive adjustments */
 @media (max-width: 1199px) {
@@ -1205,34 +1099,24 @@ body {
 }
 
 @media (max-width: 991px) {
-    .invoice-item {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .invoice-main-info {
-        margin-right: 0;
-        margin-bottom: 15px;
-    }
-    
-    .invoice-status-section {
-        align-items: flex-start;
-    }
-    
-    .invoice-dates {
-        flex-direction: column;
-        gap: 5px;
-    }
-    
     .stat-item {
         text-align: center;
         flex-direction: column;
         padding: 20px 15px;
     }
-    
+
     .stat-icon {
         margin-right: 0;
         margin-bottom: 10px;
+    }
+
+    .compact-table {
+        font-size: 0.85rem;
+    }
+
+    .compact-table thead th,
+    .compact-table tbody td {
+        padding: 8px 6px;
     }
 }
 
@@ -1247,6 +1131,80 @@ body {
         align-self: stretch;
         text-align: center;
     }
+}
+
+/* Compact Table Styles for Modal */
+.compact-table {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+.compact-table thead {
+    background-color: var(--gray-100);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.compact-table thead th {
+    font-weight: 600;
+    color: var(--gray-700);
+    border-bottom: 2px solid var(--gray-300);
+    padding: 12px 10px;
+    white-space: nowrap;
+}
+
+.compact-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.compact-table tbody tr:hover {
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.compact-table tbody td {
+    padding: 10px;
+    vertical-align: middle;
+}
+
+.table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--gray-200);
+}
+
+/* Table row colors */
+.table-danger {
+    background-color: rgba(249, 65, 68, 0.1) !important;
+}
+
+.table-warning {
+    background-color: rgba(247, 37, 133, 0.1) !important;
+}
+
+.table-success {
+    background-color: rgba(40, 167, 69, 0.1) !important;
+}
+
+.table-secondary {
+    background-color: rgba(108, 117, 125, 0.1) !important;
+}
+
+/* Badge styles */
+.badge {
+    padding: 0.35em 0.65em;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Card title in modal */
+.card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 1rem;
 }
 
 /* ...existing code... */

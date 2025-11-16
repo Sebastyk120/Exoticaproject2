@@ -364,19 +364,36 @@
                                     <!-- Pending Invoices Section -->
                                     <div class="row mb-4">
                                         <div class="col-12">
-                                            <div class="pending-invoices-section">
-                                                <div class="pending-invoices-header">
-                                                    <h6 class="mb-3">
-                                                        <i class="fas fa-list-alt me-2"></i>Detalle de Facturas Pendientes
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6 class="card-title mb-3">
+                                                        <i class="fas fa-list-alt me-2"></i>Facturas Próximas a Vencer / Pendientes de Pago
                                                     </h6>
-                                                </div>
-                                                <div id="pendingInvoicesContainer" class="pending-invoices-list">
-                                                    <!-- Invoices will be populated here -->
-                                                </div>
-                                                <div id="noPendingInvoices" class="text-center text-muted py-4" style="display: none;">
-                                                    <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
-                                                    <h5 class="text-success">¡Excelente!</h5>
-                                                    <p class="mb-0">No hay facturas pendientes de pago</p>
+                                                    <div class="table-container">
+                                                        <div class="table-responsive">
+                                                            <table class="table table-hover table-striped compact-table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>F. Emisión</th>
+                                                                        <th>Nº Factura</th>
+                                                                        <th>Total Factura</th>
+                                                                        <th>Abonos</th>
+                                                                        <th>Pendiente</th>
+                                                                        <th>F. Vencimiento</th>
+                                                                        <th>Estado</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="pendingInvoicesTableBody">
+                                                                    <!-- Invoices will be populated here -->
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <div id="noPendingInvoices" class="text-center text-muted py-4" style="display: none;">
+                                                        <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
+                                                        <h5 class="text-success">¡Excelente!</h5>
+                                                        <p class="mb-0">No hay facturas pendientes de pago</p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -742,92 +759,79 @@
         }
         
         function updatePendingInvoices(facturas) {
-            const container = document.getElementById('pendingInvoicesContainer');
+            const tableBody = document.getElementById('pendingInvoicesTableBody');
             const noPendingInvoices = document.getElementById('noPendingInvoices');
-            
+            const tableContainer = tableBody.closest('.table-container');
+
             if (!facturas || facturas.length === 0) {
-                container.innerHTML = '';
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4">No hay facturas pendientes de pago</td></tr>';
+                tableContainer.style.display = 'none';
                 noPendingInvoices.style.display = 'block';
                 return;
             }
-            
+
+            tableContainer.style.display = 'block';
             noPendingInvoices.style.display = 'none';
-            
+
             let html = '';
             facturas.forEach(factura => {
-                const statusClass = getInvoiceStatusClass(factura.estado);
-                const statusIcon = getInvoiceStatusIcon(factura.estado);
-                const statusText = getInvoiceStatusText(factura.estado, factura.dias_hasta_vencimiento);
-                
+                const rowClass = getTableRowClass(factura.estado);
+                const statusBadge = getStatusBadge(factura.estado, factura.dias_hasta_vencimiento);
+                const abonoDisplay = factura.tiene_abono && factura.valor_abono > 0
+                    ? `<span class="text-danger fw-bold">${formatEuro(factura.valor_abono)}</span>`
+                    : '<span class="text-muted">-</span>';
+
                 html += `
-                    <div class="invoice-item ${statusClass}">
-                        <div class="invoice-main-info">
-                            <div class="invoice-header">
-                                <div class="invoice-number">
-                                    <strong>Factura: ${factura.numero_factura || 'N/A'}</strong>
-                                    ${factura.tiene_abono ? '<span class="rectificative-badge"><i class="fas fa-file-medical"></i> Con Rectificativa</span>' : ''}
-                                </div>
-                                <div class="invoice-dates">
-                                    <span class="invoice-date"><i class="fas fa-calendar"></i> Fecha: ${factura.fecha_entrega}</span>
-                                    <span class="invoice-due-date"><i class="fas fa-calendar-times"></i> Vence: ${factura.fecha_vencimiento}</span>
-                                </div>
-                            </div>
-                            <div class="invoice-amounts">
-                                <div class="amount-row">
-                                    <span class="amount-label">Factura:</span>
-                                    <span class="amount-value">${formatEuro(factura.valor_total)}</span>
-                                </div>
-                                ${factura.tiene_abono ? `
-                                <div class="amount-row rectificative-amount">
-                                    <span class="amount-label">Rectificativa:</span>
-                                    <span class="amount-value">-${formatEuro(factura.valor_abono)}</span>
-                                </div>
-                                <div class="amount-row net-amount">
-                                    <span class="amount-label"><strong>Neto a pagar:</strong></span>
-                                    <span class="amount-value"><strong>${formatEuro(factura.valor_neto)}</strong></span>
-                                </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                        <div class="invoice-status-section">
-                            <div class="status-badge ${statusClass}">
-                                <i class="${statusIcon}"></i>
-                                <span>${statusText}</span>
-                            </div>
-                        </div>
-                    </div>
+                    <tr class="${rowClass}">
+                        <td class="text-nowrap">${factura.fecha_entrega}</td>
+                        <td class="fw-bold">${factura.numero_factura || 'N/A'}</td>
+                        <td class="text-nowrap">${formatEuro(factura.valor_total)}</td>
+                        <td class="text-nowrap">${abonoDisplay}</td>
+                        <td class="text-nowrap fw-bold">${formatEuro(factura.valor_neto)}</td>
+                        <td class="text-nowrap">${factura.fecha_vencimiento || '-'}</td>
+                        <td>${statusBadge}</td>
+                    </tr>
                 `;
             });
-            
-            container.innerHTML = html;
+
+            tableBody.innerHTML = html;
         }
-        
-        function getInvoiceStatusClass(estado) {
+
+        function getTableRowClass(estado) {
             switch (estado) {
-                case 'vencida': return 'status-overdue';
-                case 'proxima': return 'status-due-soon';
-                case 'normal': return 'status-normal';
-                default: return 'status-unknown';
+                case 'vencida': return 'table-danger';
+                case 'proxima': return 'table-warning';
+                case 'normal': return 'table-success';
+                default: return 'table-secondary';
             }
         }
-        
-        function getInvoiceStatusIcon(estado) {
-            switch (estado) {
-                case 'vencida': return 'fas fa-exclamation-triangle';
-                case 'proxima': return 'fas fa-clock';
-                case 'normal': return 'fas fa-calendar-check';
-                default: return 'fas fa-question-circle';
+
+        function getStatusBadge(estado, dias) {
+            let badgeClass = '';
+            let badgeText = '';
+
+            if (dias !== null && dias !== undefined) {
+                if (dias < 0) {
+                    badgeClass = 'bg-danger';
+                    badgeText = `Vencida ${Math.abs(dias)} días`;
+                } else if (dias === 0) {
+                    badgeClass = 'bg-danger';
+                    badgeText = 'Hoy';
+                } else if (dias <= 7) {
+                    badgeClass = 'bg-warning';
+                    badgeText = `A ${dias} días de vencer`;
+                } else {
+                    badgeClass = 'bg-success';
+                    badgeText = `A ${dias} días de vencer`;
+                }
+            } else {
+                badgeClass = 'bg-secondary';
+                badgeText = '-';
             }
+
+            return `<span class="badge ${badgeClass}">${badgeText}</span>`;
         }
-        
-        function getInvoiceStatusText(estado, dias) {
-            switch (estado) {
-                case 'vencida': return `Vencida (${Math.abs(dias)} días)`;
-                case 'proxima': return `Vence en ${dias} días`;
-                case 'normal': return `${dias} días`;
-                default: return 'Estado desconocido';
-            }
-        }
+
         
         // Reset modal when closed
         document.getElementById('clientStatusModal').addEventListener('hidden.bs.modal', function () {
