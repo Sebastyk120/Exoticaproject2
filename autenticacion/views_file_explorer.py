@@ -1,5 +1,6 @@
 import os
 import mimetypes
+import shutil
 from datetime import datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import user_passes_test
@@ -437,4 +438,81 @@ def create_backup(request):
         messages.error(request, f"Ocurrió un error inesperado al crear el backup.")
 
     return redirect('autenticacion:file_explorer_subpath', subpath='backups')
-    
+
+
+@user_passes_test(lambda u: u.is_superuser, login_url='/app/login/')
+def delete_folder(request, folder_path):
+    """
+    Vista para eliminar una carpeta completa y todo su contenido.
+    Requiere método POST con token CSRF.
+
+    Args:
+        request: HttpRequest object
+        folder_path: Ruta relativa de la carpeta dentro de MEDIA_ROOT
+
+    Returns:
+        Redirect a la carpeta padre después de eliminar
+    """
+    # Solo permitir método POST
+    if request.method != 'POST':
+        messages.error(request, "Método no permitido")
+        return redirect('autenticacion:file_explorer')
+
+    try:
+        # Validar y obtener la ruta segura
+        full_path = get_safe_path(folder_path)
+
+        # Verificar que la carpeta existe
+        if not os.path.exists(full_path):
+            messages.error(request, "La carpeta no existe")
+            return redirect('autenticacion:file_explorer')
+
+        # Verificar que es un directorio (no un archivo)
+        if not os.path.isdir(full_path):
+            messages.error(request, "La ruta especificada no es una carpeta")
+            parent_dir = os.path.dirname(folder_path).replace('\\', '/')
+            if parent_dir:
+                return redirect('autenticacion:file_explorer_subpath', subpath=parent_dir)
+            return redirect('autenticacion:file_explorer')
+
+        # Prevenir eliminación del directorio raíz de media
+        if full_path == os.path.realpath(settings.MEDIA_ROOT):
+            messages.error(request, "No se puede eliminar el directorio raíz de media")
+            return redirect('autenticacion:file_explorer')
+
+        # Obtener el nombre de la carpeta antes de eliminarla
+        foldername = os.path.basename(full_path)
+
+        # Contar archivos y subcarpetas para informar al usuario
+        total_items = sum([len(files) + len(dirs) for _, dirs, files in os.walk(full_path)])
+
+        # Eliminar la carpeta y todo su contenido
+        shutil.rmtree(full_path)
+
+        # Log de la operación
+        logger.warning(f"Usuario {request.user.username} eliminó la carpeta: {folder_path} ({total_items} elementos)")
+
+        messages.success(request, f"La carpeta '{foldername}' y todo su contenido ({total_items} elementos) han sido eliminados correctamente")
+
+        # Redirigir a la carpeta padre
+        parent_dir = os.path.dirname(folder_path).replace('\\', '/')
+        if parent_dir:
+            return redirect('autenticacion:file_explorer_subpath', subpath=parent_dir)
+        return redirect('autenticacion:file_explorer')
+
+    except PermissionDenied as e:
+        messages.error(request, str(e))
+        return redirect('autenticacion:file_explorer')
+    except PermissionError:
+        messages.error(request, "No tienes permisos para eliminar esta carpeta")
+        parent_dir = os.path.dirname(folder_path).replace('\\', '/')
+        if parent_dir:
+            return redirect('autenticacion:file_explorer_subpath', subpath=parent_dir)
+        return redirect('autenticacion:file_explorer')
+    except Exception as e:
+        logger.error(f"Error al eliminar carpeta {folder_path}: {str(e)}")
+        messages.error(request, "Ocurrió un error al eliminar la carpeta")
+        parent_dir = os.path.dirname(folder_path).replace('\\', '/')
+        if parent_dir:
+            return redirect('autenticacion:file_explorer_subpath', subpath=parent_dir)
+        return redirect('autenticacion:file_explorer')

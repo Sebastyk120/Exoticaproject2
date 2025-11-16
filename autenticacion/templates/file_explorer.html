@@ -133,23 +133,35 @@
                         <td class="text-end">
                             <div class="action-buttons">
                                 {% if item.is_dir %}
-                                    <a href="{% url 'autenticacion:file_explorer_subpath' subpath=item.relative_path %}" 
+                                    <a href="{% url 'autenticacion:file_explorer_subpath' subpath=item.relative_path %}"
                                        class="btn btn-sm btn-primary" title="Abrir carpeta">
                                         <i class="fas fa-folder-open"></i>
                                         <span class="btn-text">Abrir</span>
                                     </a>
+                                    <button type="button"
+                                            class="btn btn-sm btn-danger delete-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal"
+                                            data-item-name="{{ item.name }}"
+                                            data-item-path="{{ item.relative_path }}"
+                                            data-item-type="folder"
+                                            title="Eliminar carpeta">
+                                        <i class="fas fa-trash"></i>
+                                        <span class="btn-text">Eliminar</span>
+                                    </button>
                                 {% else %}
-                                    <a href="{% url 'autenticacion:file_download' file_path=item.relative_path %}" 
+                                    <a href="{% url 'autenticacion:file_download' file_path=item.relative_path %}"
                                        class="btn btn-sm btn-success" title="Descargar archivo">
                                         <i class="fas fa-download"></i>
                                         <span class="btn-text">Descargar</span>
                                     </a>
-                                    <button type="button" 
-                                            class="btn btn-sm btn-danger delete-btn" 
-                                            data-bs-toggle="modal" 
+                                    <button type="button"
+                                            class="btn btn-sm btn-danger delete-btn"
+                                            data-bs-toggle="modal"
                                             data-bs-target="#deleteModal"
-                                            data-file-name="{{ item.name }}"
-                                            data-file-path="{{ item.relative_path }}"
+                                            data-item-name="{{ item.name }}"
+                                            data-item-path="{{ item.relative_path }}"
+                                            data-item-type="file"
                                             title="Eliminar archivo">
                                         <i class="fas fa-trash"></i>
                                         <span class="btn-text">Eliminar</span>
@@ -214,10 +226,14 @@
                         <strong>¡Atención!</strong> Esta acción no se puede deshacer.
                     </div>
                 </div>
-                <p class="mb-2">¿Estás seguro de que deseas eliminar el siguiente archivo?</p>
+                <p class="mb-2" id="deleteMessage">¿Estás seguro de que deseas eliminar el siguiente elemento?</p>
                 <div class="file-to-delete">
-                    <i class="fas fa-file me-2 text-danger"></i>
-                    <strong id="deleteFileName"></strong>
+                    <i id="deleteIcon" class="fas fa-file me-2 text-danger"></i>
+                    <strong id="deleteItemName"></strong>
+                </div>
+                <div id="folderWarning" class="alert alert-danger mt-3" style="display: none;">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <strong>¡Advertencia!</strong> Se eliminará la carpeta y <strong>todo su contenido</strong> de forma permanente.
                 </div>
             </div>
             <div class="modal-footer">
@@ -226,8 +242,8 @@
                 </button>
                 <form id="deleteForm" method="POST" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash me-2"></i>Eliminar Archivo
+                    <button type="submit" class="btn btn-danger" id="deleteButton">
+                        <i class="fas fa-trash me-2"></i><span id="deleteButtonText">Eliminar</span>
                     </button>
                 </form>
             </div>
@@ -246,20 +262,40 @@ document.addEventListener('DOMContentLoaded', function() {
         deleteModal.addEventListener('show.bs.modal', function(event) {
             // Button that triggered the modal
             const button = event.relatedTarget;
-            
+
             // Extract info from data-* attributes
-            const fileName = button.getAttribute('data-file-name');
-            const filePath = button.getAttribute('data-file-path');
-            
+            const itemName = button.getAttribute('data-item-name');
+            const itemPath = button.getAttribute('data-item-path');
+            const itemType = button.getAttribute('data-item-type');
+
             // Update the modal's content
-            const modalFileName = deleteModal.querySelector('#deleteFileName');
+            const modalItemName = deleteModal.querySelector('#deleteItemName');
             const deleteForm = deleteModal.querySelector('#deleteForm');
-            
-            modalFileName.textContent = fileName;
-            deleteForm.action = "{% url 'autenticacion:file_delete' file_path='PLACEHOLDER' %}".replace('PLACEHOLDER', filePath);
+            const deleteIcon = deleteModal.querySelector('#deleteIcon');
+            const deleteMessage = deleteModal.querySelector('#deleteMessage');
+            const folderWarning = deleteModal.querySelector('#folderWarning');
+            const deleteButtonText = deleteModal.querySelector('#deleteButtonText');
+
+            modalItemName.textContent = itemName;
+
+            if (itemType === 'folder') {
+                // Configure modal for folder deletion
+                deleteIcon.className = 'fas fa-folder me-2 text-danger';
+                deleteMessage.textContent = '¿Estás seguro de que deseas eliminar la siguiente carpeta?';
+                folderWarning.style.display = 'block';
+                deleteButtonText.textContent = 'Eliminar Carpeta';
+                deleteForm.action = "{% url 'autenticacion:folder_delete' folder_path='PLACEHOLDER' %}".replace('PLACEHOLDER', itemPath);
+            } else {
+                // Configure modal for file deletion
+                deleteIcon.className = 'fas fa-file me-2 text-danger';
+                deleteMessage.textContent = '¿Estás seguro de que deseas eliminar el siguiente archivo?';
+                folderWarning.style.display = 'none';
+                deleteButtonText.textContent = 'Eliminar Archivo';
+                deleteForm.action = "{% url 'autenticacion:file_delete' file_path='PLACEHOLDER' %}".replace('PLACEHOLDER', itemPath);
+            }
         });
     }
-    
+
     // Auto-hide alerts after 5 seconds
     const alerts = document.querySelectorAll('.alert:not(.alert-warning)');
     alerts.forEach(function(alert) {

@@ -516,9 +516,11 @@
                 const currentPdfInfo = document.getElementById('currentPdfInfo');
                 if (data.pdf_file) {
                     currentPdfInfo.innerHTML = `
-                        <small class="text-muted">
-                            PDF actual: <a href="${data.pdf_file}" target="_blank">Ver archivo</a>
-                        </small>
+                        <div class="mt-2">
+                            <a href="${data.pdf_file}" target="_blank" class="btn btn-sm btn-primary">
+                                <i class="fas fa-file-pdf"></i> Ver PDF
+                            </a>
+                        </div>
                     `;
                 } else {
                     currentPdfInfo.innerHTML = '<small class="text-muted">No hay PDF adjunto</small>';
