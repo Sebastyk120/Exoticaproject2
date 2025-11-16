@@ -243,14 +243,14 @@ def update_gasto(request, gasto_id):
     try:
         gasto.numero_factura = request.POST.get('numero_factura')
         gasto.valor_gastos_carga = Decimal(request.POST.get('valor_gastos_carga'))
-        
+
         # Procesar los campos de nota de crédito
         numero_nota_credito = request.POST.get('numero_nota_credito')
         if numero_nota_credito:
             gasto.numero_nota_credito = numero_nota_credito
         else:
             gasto.numero_nota_credito = None
-            
+
         valor_nota_credito = request.POST.get('valor_nota_credito')
         if valor_nota_credito and valor_nota_credito.strip():
             gasto.valor_nota_credito = Decimal(valor_nota_credito)
@@ -258,14 +258,20 @@ def update_gasto(request, gasto_id):
         else:
             gasto.valor_nota_credito = None
             gasto.monto_pendiente = gasto.valor_gastos_carga
-        
+
         # Actualizar pedidos asociados
         pedidos_ids = request.POST.getlist('pedidos')
         gasto.pedidos.clear()  # Eliminar asociaciones existentes
         for pedido_id in pedidos_ids:
             pedido = get_object_or_404(Pedido, id=pedido_id)
             gasto.pedidos.add(pedido)
-            
+
+        # Handle PDF file if provided
+        pdf_file = request.FILES.get('pdf_file')
+        if pdf_file:
+            pdf_filename = f"carga_edit_{gasto.numero_factura.replace('/', '_')}_{pdf_file.name}"
+            gasto.pdf_file.save(pdf_filename, pdf_file, save=False)
+
         gasto.save()
         return JsonResponse({'success': True})
     except Exception as e:

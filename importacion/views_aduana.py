@@ -243,22 +243,28 @@ def update_gasto(request, gasto_id):
         gasto.numero_factura = request.POST.get('numero_factura')
         gasto.valor_gastos_aduana = Decimal(request.POST.get('valor_gastos_aduana'))
         gasto.numero_nota_credito = request.POST.get('numero_nota_credito')
-        
+
         valor_nota_credito = request.POST.get('valor_nota_credito')
         if valor_nota_credito and valor_nota_credito.strip():
             gasto.valor_nota_credito = Decimal(valor_nota_credito)
         else:
             gasto.valor_nota_credito = None
-            
+
         # Add IVA fields to update process
         iva_importacion = request.POST.get('iva_importacion')
         if iva_importacion and iva_importacion.strip():
             gasto.iva_importacion = Decimal(iva_importacion)
-        
+
         iva_sobre_base = request.POST.get('iva_sobre_base')
         if iva_sobre_base and iva_sobre_base.strip():
             gasto.iva_sobre_base = Decimal(iva_sobre_base)
-            
+
+        # Handle PDF file if provided
+        pdf_file = request.FILES.get('pdf_file')
+        if pdf_file:
+            pdf_filename = f"aduana_edit_{gasto.numero_factura.replace('/', '_')}_{pdf_file.name}"
+            gasto.pdf_file.save(pdf_filename, pdf_file, save=False)
+
         gasto.save()
         return JsonResponse({'success': True})
     except Exception as e:
