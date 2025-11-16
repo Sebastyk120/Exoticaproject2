@@ -544,6 +544,12 @@
                 form.iva_importacion.value = data.iva_importacion || '0.00';
                 form.iva_sobre_base.value = data.iva_sobre_base || '0.00';
 
+                // Set selected pedidos using pedidos_ids
+                const pedidosSelect = $(form.querySelector('select[name="pedidos"]'));
+                if (data.pedidos_ids) {
+                    pedidosSelect.val(data.pedidos_ids).trigger('change');
+                }
+
                 // Mostrar información del PDF actual si existe
                 const currentPdfInfo = document.getElementById('currentPdfInfo');
                 if (data.pdf_file) {

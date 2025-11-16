@@ -508,8 +508,9 @@
 
                 // Get the select2 element and set selected values
                 const pedidosSelect = $(form.querySelector('select[name="pedidos"]'));
-                const pedidosIds = data.pedidos.map(pedido => pedido.split(' - ')[0]);
-                pedidosSelect.val(pedidosIds).trigger('change');
+                if (data.pedidos_ids) {
+                    pedidosSelect.val(data.pedidos_ids).trigger('change');
+                }
 
                 // Mostrar información del PDF actual si existe
                 const currentPdfInfo = document.getElementById('currentPdfInfo');

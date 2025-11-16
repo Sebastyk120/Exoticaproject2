@@ -12,7 +12,7 @@ import logging
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from .models import GastosCarga, AgenciaCarga, Pedido, get_upload_path_carga
+from .models import GastosCarga, AgenciaCarga, Pedido
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -153,20 +153,16 @@ def process_pdf(request):
                 gastos.save()
 
                 # Add all found pedidos to the gastos
-                primer_pedido = None
                 for pedido in matching_pedidos:
                     gastos.pedidos.add(pedido)
-                    if primer_pedido is None:
-                        primer_pedido = pedido
 
-                # Guardar el archivo PDF usando la fecha del primer pedido
-                if pdf_file and primer_pedido:
+                # Guardar el archivo PDF (upload_to will use the first pedido's fecha_entrega)
+                if pdf_file:
                     # Generar un nombre de archivo único basado en el número de factura
                     pdf_filename = f"carga_{numero_factura.replace('/', '_')}_{pdf_file.name}"
-                    pdf_path = get_upload_path_carga(primer_pedido, pdf_filename)
                     # Reiniciar el puntero del archivo antes de guardarlo
                     pdf_file.seek(0)
-                    gastos.pdf_file.save(pdf_path, pdf_file, save=True)
+                    gastos.pdf_file.save(pdf_filename, ContentFile(pdf_file.read()), save=True)
 
                 return JsonResponse({
                     'success': True,
@@ -227,6 +223,7 @@ def get_gasto(request, gasto_id):
             'id': gasto.id,
             'numero_factura': gasto.numero_factura,
             'agencia_carga': gasto.agencia_carga.nombre,
+            'agencia_carga_id': gasto.agencia_carga.id,
             'valor_gastos_carga': str(gasto.valor_gastos_carga),
             'valor_gastos_carga_eur': str(gasto.valor_gastos_carga_eur) if gasto.valor_gastos_carga_eur else None,
             'numero_nota_credito': gasto.numero_nota_credito,
@@ -234,6 +231,7 @@ def get_gasto(request, gasto_id):
             'monto_pendiente': str(gasto.monto_pendiente) if gasto.monto_pendiente else None,
             'pagado': gasto.pagado,
             'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()],
+            'pedidos_ids': [pedido.id for pedido in gasto.pedidos.all()],
             'pdf_file': gasto.pdf_file.url if gasto.pdf_file else None
         }
         logger.info(f"Datos preparados para respuesta: {data}")
@@ -278,10 +276,8 @@ def update_gasto(request, gasto_id):
         # Handle PDF file if provided
         pdf_file = request.FILES.get('pdf_file')
         if pdf_file:
-            primer_pedido = gasto.pedidos.first()
             pdf_filename = f"carga_edit_{gasto.numero_factura.replace('/', '_')}_{pdf_file.name}"
-            pdf_path = get_upload_path_carga(primer_pedido, pdf_filename)
-            gasto.pdf_file.save(pdf_path, pdf_file, save=True)
+            gasto.pdf_file.save(pdf_filename, ContentFile(pdf_file.read()), save=True)
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
@@ -336,18 +332,14 @@ def create_gasto(request):
 
         # Add pedidos
         pedidos_ids = request.POST.getlist('pedidos')
-        primer_pedido = None
         for pedido_id in pedidos_ids:
             pedido = get_object_or_404(Pedido, id=pedido_id)
             gasto.pedidos.add(pedido)
-            if primer_pedido is None:
-                primer_pedido = pedido
 
-        # Save PDF file if provided, using the first pedido's fecha_entrega
-        if pdf_file and primer_pedido:
+        # Save PDF file if provided (upload_to will use the first pedido's fecha_entrega)
+        if pdf_file:
             pdf_filename = f"carga_manual_{numero_factura.replace('/', '_')}_{pdf_file.name}"
-            pdf_path = get_upload_path_carga(primer_pedido, pdf_filename)
-            gasto.pdf_file.save(pdf_path, pdf_file, save=True)
+            gasto.pdf_file.save(pdf_filename, ContentFile(pdf_file.read()), save=True)
 
         return JsonResponse({'success': True})
     except Exception as e:
