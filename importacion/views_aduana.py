@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
 from django import forms
 from django.core.validators import MinValueValidator
+from django.core.files.base import ContentFile
 from decimal import Decimal
 from pdfminer.high_level import extract_text
 import re
@@ -143,12 +144,19 @@ def process_pdf(request):
                     iva_importacion=iva_importacion,
                     iva_sobre_base=iva_sobre_base
                 )
+
+                # Guardar el archivo PDF
+                if pdf_file:
+                    # Generar un nombre de archivo único basado en el número de factura
+                    pdf_filename = f"aduana_{numero_factura.replace('/', '_')}_{pdf_file.name}"
+                    gastos.pdf_file.save(pdf_filename, pdf_file, save=False)
+
                 gastos.save()
 
                 # Agregar todos los pedidos encontrados
                 for pedido in pedidos:
                     gastos.pedidos.add(pedido)
-                
+
                 return JsonResponse({
                     'success': True,
                     'message': 'PDF procesado correctamente'
@@ -221,7 +229,8 @@ def get_gasto(request, gasto_id):
         'iva_importacion': str(gasto.iva_importacion) if gasto.iva_importacion else "0.00",
         'iva_sobre_base': str(gasto.iva_sobre_base) if gasto.iva_sobre_base else "0.00",
         'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()],
-        'semana': semana
+        'semana': semana,
+        'pdf_file': gasto.pdf_file.url if gasto.pdf_file else None
     }
     return JsonResponse(data)
 
@@ -279,50 +288,58 @@ def create_gasto(request):
         iva_sobre_base_str = request.POST.get('iva_sobre_base', '')
         numero_nota_credito = request.POST.get('numero_nota_credito', '')
         valor_nota_credito_str = request.POST.get('valor_nota_credito', '')
-        
+
+        # Get PDF file if provided
+        pdf_file = request.FILES.get('pdf_file')
+
         # Validate numero_factura is unique
         if GastosAduana.objects.filter(numero_factura=numero_factura).exists():
             return JsonResponse({
                 'success': False,
                 'error': f'Ya existe un gasto con el número de factura {numero_factura}'
             })
-        
+
         # Get agencia
         agencia = get_object_or_404(AgenciaAduana, id=agencia_id)
-        
+
         # Create gasto with required fields
         gasto = GastosAduana(
             agencia_aduana=agencia,
             numero_factura=numero_factura,
             valor_gastos_aduana=valor_gastos_aduana,
         )
-        
+
         # Process optional fields if provided
         if iva_importacion_str and iva_importacion_str.strip():
             gasto.iva_importacion = Decimal(iva_importacion_str)
-            
+
         if iva_sobre_base_str and iva_sobre_base_str.strip():
             gasto.iva_sobre_base = Decimal(iva_sobre_base_str)
-            
+
         if numero_nota_credito and numero_nota_credito.strip():
             gasto.numero_nota_credito = numero_nota_credito
-            
+
         if valor_nota_credito_str and valor_nota_credito_str.strip():
             gasto.valor_nota_credito = Decimal(valor_nota_credito_str)
             # Calculate monto_pendiente if nota de crédito exists
             gasto.monto_pendiente = valor_gastos_aduana - Decimal(valor_nota_credito_str)
         else:
             gasto.monto_pendiente = valor_gastos_aduana
-        
+
+        # Save PDF file if provided
+        if pdf_file:
+            pdf_filename = f"aduana_manual_{numero_factura.replace('/', '_')}_{pdf_file.name}"
+            gasto.pdf_file.save(pdf_filename, pdf_file, save=False)
+
         # Save the gasto
         gasto.save()
-        
+
         # Add pedidos
         pedidos_ids = request.POST.getlist('pedidos')
         for pedido_id in pedidos_ids:
             pedido = get_object_or_404(Pedido, id=pedido_id)
             gasto.pedidos.add(pedido)
-        
+
         return JsonResponse({'success': True})
     except Exception as e:
         logger.error(f"Error al crear gasto manual: {str(e)}", exc_info=True)

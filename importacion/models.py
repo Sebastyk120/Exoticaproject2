@@ -4,8 +4,32 @@ from django.core.validators import MinValueValidator, validate_email
 from django.db import models, transaction
 from django.db.models import Sum, DecimalField, IntegerField
 from django.db.models.functions import Coalesce
+import os
+from datetime import datetime
 
 from productos.models import Presentacion
+
+
+def upload_to_aduana(instance, filename):
+    """
+    Genera la ruta para guardar PDFs de aduana organizados por año/mes.
+    Formato: media/aduana/YYYY/MM/filename
+    """
+    now = datetime.now()
+    year = now.year
+    month = now.month
+    return os.path.join('aduana', str(year), f'{month:02d}', filename)
+
+
+def upload_to_carga(instance, filename):
+    """
+    Genera la ruta para guardar PDFs de carga organizados por año/mes.
+    Formato: media/carga/YYYY/MM/filename
+    """
+    now = datetime.now()
+    year = now.year
+    month = now.month
+    return os.path.join('carga', str(year), f'{month:02d}', filename)
 
 
 def validate_multiple_emails(value):
@@ -527,6 +551,7 @@ class GastosAduana(models.Model):
     monto_pendiente = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto Pendiente EUR",
                                           null=True, blank=True, editable=False, default=0)
     conceptos = models.CharField(max_length=1000, verbose_name="Conceptos", null=True, blank=True)
+    pdf_file = models.FileField(upload_to=upload_to_aduana, verbose_name="Archivo PDF", null=True, blank=True)
 
     class Meta:
         verbose_name = "Gastos Aduana"
@@ -576,6 +601,7 @@ class GastosCarga(models.Model):
     monto_pendiente = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto Pendiente USD",
                                           null=True, blank=True, editable=False, default=0)
     conceptos = models.CharField(max_length=500, verbose_name="Conceptos", null=True, blank=True)
+    pdf_file = models.FileField(upload_to=upload_to_carga, verbose_name="Archivo PDF", null=True, blank=True)
 
     class Meta:
         verbose_name = "Gastos Carga"

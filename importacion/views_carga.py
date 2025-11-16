@@ -4,6 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
 from django import forms
 from django.core.validators import MinValueValidator
+from django.core.files.base import ContentFile
 from decimal import Decimal
 from pdfminer.high_level import extract_text
 import re
@@ -147,12 +148,19 @@ def process_pdf(request):
                     valor_gastos_carga=valor_gastos_carga,
                     conceptos=conceptos_text,
                 )
+
+                # Guardar el archivo PDF
+                if pdf_file:
+                    # Generar un nombre de archivo único basado en el número de factura
+                    pdf_filename = f"carga_{numero_factura.replace('/', '_')}_{pdf_file.name}"
+                    gastos.pdf_file.save(pdf_filename, pdf_file, save=False)
+
                 gastos.save()
-                
+
                 # Add all found pedidos to the gastos
                 for pedido in matching_pedidos:
                     gastos.pedidos.add(pedido)
-                
+
                 return JsonResponse({
                     'success': True,
                     'message': 'PDF procesado correctamente'
@@ -207,7 +215,7 @@ def get_gasto(request, gasto_id):
         logger.info(f"Intentando obtener gasto con ID: {gasto_id}")
         gasto = get_object_or_404(GastosCarga, id=gasto_id)
         logger.info(f"Gasto encontrado: {gasto}")
-        
+
         data = {
             'id': gasto.id,
             'numero_factura': gasto.numero_factura,
@@ -218,7 +226,8 @@ def get_gasto(request, gasto_id):
             'valor_nota_credito': str(gasto.valor_nota_credito) if gasto.valor_nota_credito else None,
             'monto_pendiente': str(gasto.monto_pendiente) if gasto.monto_pendiente else None,
             'pagado': gasto.pagado,
-            'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()]
+            'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()],
+            'pdf_file': gasto.pdf_file.url if gasto.pdf_file else None
         }
         logger.info(f"Datos preparados para respuesta: {data}")
         return JsonResponse(data)
@@ -284,10 +293,13 @@ def create_gasto(request):
         valor_gastos_carga = Decimal(request.POST.get('valor_gastos_carga'))
         numero_nota_credito = request.POST.get('numero_nota_credito', None)
         valor_nota_credito_str = request.POST.get('valor_nota_credito', '')
-        
+
+        # Get PDF file if provided
+        pdf_file = request.FILES.get('pdf_file')
+
         # Get agencia
         agencia = get_object_or_404(AgenciaCarga, id=agencia_id)
-        
+
         # Create gasto
         gasto = GastosCarga(
             agencia_carga=agencia,
@@ -295,7 +307,7 @@ def create_gasto(request):
             valor_gastos_carga=valor_gastos_carga,
             numero_nota_credito=numero_nota_credito if numero_nota_credito else None
         )
-        
+
         # Process nota credito if provided
         if valor_nota_credito_str and valor_nota_credito_str.strip():
             valor_nota_credito = Decimal(valor_nota_credito_str)
@@ -303,15 +315,20 @@ def create_gasto(request):
             gasto.monto_pendiente = valor_gastos_carga - valor_nota_credito
         else:
             gasto.monto_pendiente = valor_gastos_carga
-        
+
+        # Save PDF file if provided
+        if pdf_file:
+            pdf_filename = f"carga_manual_{numero_factura.replace('/', '_')}_{pdf_file.name}"
+            gasto.pdf_file.save(pdf_filename, pdf_file, save=False)
+
         gasto.save()
-        
+
         # Add pedidos
         pedidos_ids = request.POST.getlist('pedidos')
         for pedido_id in pedidos_ids:
             pedido = get_object_or_404(Pedido, id=pedido_id)
             gasto.pedidos.add(pedido)
-        
+
         return JsonResponse({'success': True})
     except Exception as e:
         logger.error(f"Error al crear gasto manual: {str(e)}", exc_info=True)

@@ -295,6 +295,11 @@
                             <label class="form-label">Valor Nota Crédito (USD)</label>
                             <input type="number" name="valor_nota_credito" class="form-control" step="0.01">
                         </div>
+                        <div class="form-group">
+                            <label class="form-label">Archivo PDF (Opcional)</label>
+                            <input type="file" name="pdf_file" class="form-control" accept=".pdf">
+                            <small class="form-text text-muted">Puede adjuntar el PDF de la factura</small>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -438,28 +443,39 @@
             })
             .then(data => {
                 const modalBody = document.getElementById('viewModalBody');
-                const viewNumeroFactura = document.getElementById('viewNumeroFactura');
-                const viewAgenciaCarga = document.getElementById('viewAgenciaCarga');
-                const viewValorUSD = document.getElementById('viewValorUSD');
-                const viewValorEUR = document.getElementById('viewValorEUR');
-                const viewEstado = document.getElementById('viewEstado');
-                const viewNumeroNotaCredito = document.getElementById('viewNumeroNotaCredito');
-                const viewValorNotaCredito = document.getElementById('viewValorNotaCredito');
-                const viewMontoPendiente = document.getElementById('viewMontoPendiente');
-                const viewPedidos = document.getElementById('viewPedidos');
 
-                viewNumeroFactura.textContent = data.numero_factura;
-                viewAgenciaCarga.textContent = data.agencia_carga;
-                viewValorUSD.textContent = data.valor_gastos_carga;
-                viewValorEUR.textContent = data.valor_gastos_carga_eur || '-';
-                viewEstado.textContent = data.pagado ? 'Pagado' : 'Pendiente';
-                viewNumeroNotaCredito.textContent = data.numero_nota_credito || '-';
-                viewValorNotaCredito.textContent = data.valor_nota_credito || '-';
-                viewMontoPendiente.textContent = data.monto_pendiente || '-';
-                viewPedidos.innerHTML = data.pedidos.map(pedido => {
+                const pdfHTML = data.pdf_file ? `
+                    <p><strong>Archivo PDF:</strong> <a href="${data.pdf_file}" target="_blank" class="btn btn-sm btn-primary">
+                        <i class="fas fa-file-pdf"></i> Ver PDF
+                    </a></p>
+                ` : '<p><strong>Archivo PDF:</strong> No disponible</p>';
+
+                const pedidosHTML = data.pedidos.map(pedido => {
                     const pedidoId = pedido.split(' - ')[0];
                     return `<li><a href="/importacion/pedidos/${pedidoId}/" class="pedido-link">${pedido}</a></li>`;
                 }).join('');
+
+                modalBody.innerHTML = `
+                    <div class="view-details">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Número Factura:</strong> ${data.numero_factura}</p>
+                                <p><strong>Agencia Carga:</strong> ${data.agencia_carga}</p>
+                                <p><strong>Valor (USD):</strong> ${data.valor_gastos_carga}</p>
+                                <p><strong>Valor (EUR):</strong> ${data.valor_gastos_carga_eur || '-'}</p>
+                                <p><strong>Estado:</strong> <span class="status-badge ${data.pagado ? 'status-paid' : 'status-unpaid'}">${data.pagado ? 'Pagado' : 'Pendiente'}</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Número Nota Crédito:</strong> ${data.numero_nota_credito || '-'}</p>
+                                <p><strong>Valor Nota Crédito:</strong> ${data.valor_nota_credito || '-'}</p>
+                                <p><strong>Monto Pendiente:</strong> ${data.monto_pendiente || '-'}</p>
+                                ${pdfHTML}
+                                <p><strong>Pedidos:</strong></p>
+                                <ul class="list-unstyled">${pedidosHTML}</ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
 
                 viewModal.show();
             })
@@ -575,17 +591,19 @@
     function saveNewGasto() {
         const form = document.getElementById('createForm');
         const formData = new FormData(form);
-        
+
         // Get all selected options from the multiple select
         const selectedPedidos = Array.from(document.querySelectorAll('select[name="pedidos"] option:checked'))
             .map(option => option.value);
-        
+
         // Remove the single pedidos entry and add each selected value separately
         formData.delete('pedidos');
         selectedPedidos.forEach(pedidoId => {
             formData.append('pedidos', pedidoId);
         });
-        
+
+        // El archivo PDF ya está incluido en FormData automáticamente
+
         fetch('/importacion/carga/gasto/create/', {
             method: 'POST',
             body: formData,
