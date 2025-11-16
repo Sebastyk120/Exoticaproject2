@@ -8,7 +8,7 @@ from decimal import Decimal
 from pdfminer.high_level import extract_text
 import re
 import logging
-from .models import GastosAduana, AgenciaAduana, Pedido
+from .models import GastosAduana, AgenciaAduana, Pedido, get_upload_path_aduana
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -145,17 +145,24 @@ def process_pdf(request):
                     iva_sobre_base=iva_sobre_base
                 )
 
-                # Guardar el archivo PDF
-                if pdf_file:
-                    # Generar un nombre de archivo único basado en el número de factura
-                    pdf_filename = f"aduana_{numero_factura.replace('/', '_')}_{pdf_file.name}"
-                    gastos.pdf_file.save(pdf_filename, pdf_file, save=False)
-
+                # Save the gasto first (without PDF)
                 gastos.save()
 
                 # Agregar todos los pedidos encontrados
+                primer_pedido = None
                 for pedido in pedidos:
                     gastos.pedidos.add(pedido)
+                    if primer_pedido is None:
+                        primer_pedido = pedido
+
+                # Guardar el archivo PDF usando la fecha del primer pedido
+                if pdf_file and primer_pedido:
+                    # Generar un nombre de archivo único basado en el número de factura
+                    pdf_filename = f"aduana_{numero_factura.replace('/', '_')}_{pdf_file.name}"
+                    pdf_path = get_upload_path_aduana(primer_pedido, pdf_filename)
+                    # Reiniciar el puntero del archivo antes de guardarlo
+                    pdf_file.seek(0)
+                    gastos.pdf_file.save(pdf_path, pdf_file, save=True)
 
                 return JsonResponse({
                     'success': True,
@@ -259,13 +266,15 @@ def update_gasto(request, gasto_id):
         if iva_sobre_base and iva_sobre_base.strip():
             gasto.iva_sobre_base = Decimal(iva_sobre_base)
 
+        gasto.save()
+
         # Handle PDF file if provided
         pdf_file = request.FILES.get('pdf_file')
         if pdf_file:
+            primer_pedido = gasto.pedidos.first()
             pdf_filename = f"aduana_edit_{gasto.numero_factura.replace('/', '_')}_{pdf_file.name}"
-            gasto.pdf_file.save(pdf_filename, pdf_file, save=False)
-
-        gasto.save()
+            pdf_path = get_upload_path_aduana(primer_pedido, pdf_filename)
+            gasto.pdf_file.save(pdf_path, pdf_file, save=True)
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
@@ -332,19 +341,23 @@ def create_gasto(request):
         else:
             gasto.monto_pendiente = valor_gastos_aduana
 
-        # Save PDF file if provided
-        if pdf_file:
-            pdf_filename = f"aduana_manual_{numero_factura.replace('/', '_')}_{pdf_file.name}"
-            gasto.pdf_file.save(pdf_filename, pdf_file, save=False)
-
-        # Save the gasto
+        # Save the gasto first (without PDF)
         gasto.save()
 
         # Add pedidos
         pedidos_ids = request.POST.getlist('pedidos')
+        primer_pedido = None
         for pedido_id in pedidos_ids:
             pedido = get_object_or_404(Pedido, id=pedido_id)
             gasto.pedidos.add(pedido)
+            if primer_pedido is None:
+                primer_pedido = pedido
+
+        # Save PDF file if provided, using the first pedido's fecha_entrega
+        if pdf_file and primer_pedido:
+            pdf_filename = f"aduana_manual_{numero_factura.replace('/', '_')}_{pdf_file.name}"
+            pdf_path = get_upload_path_aduana(primer_pedido, pdf_filename)
+            gasto.pdf_file.save(pdf_path, pdf_file, save=True)
 
         return JsonResponse({'success': True})
     except Exception as e:

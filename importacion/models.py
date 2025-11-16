@@ -10,30 +10,44 @@ from datetime import datetime
 from productos.models import Presentacion
 
 
+def get_upload_path_aduana(pedido=None, filename=''):
+    """
+    Genera la ruta para guardar PDFs de aduana organizados por año/mes.
+    Formato: media/aduana/YYYY/MM/filename
+    """
+    if pedido and pedido.fecha_entrega:
+        fecha = pedido.fecha_entrega
+    else:
+        fecha = datetime.now()
+
+    year = fecha.year
+    month = fecha.month
+    return os.path.join('aduana', str(year), f'{month:02d}', filename)
+
+
+def get_upload_path_carga(pedido=None, filename=''):
+    """
+    Genera la ruta para guardar PDFs de carga organizados por año/mes.
+    Formato: media/carga/YYYY/MM/filename
+    """
+    if pedido and pedido.fecha_entrega:
+        fecha = pedido.fecha_entrega
+    else:
+        fecha = datetime.now()
+
+    year = fecha.year
+    month = fecha.month
+    return os.path.join('carga', str(year), f'{month:02d}', filename)
+
+
 def upload_to_aduana(instance, filename):
     """
     Genera la ruta para guardar PDFs de aduana organizados por año/mes.
     Formato: media/aduana/YYYY/MM/filename
     Usa la fecha_entrega del primer pedido asociado, o la fecha actual si no hay pedidos.
     """
-    # Intentar obtener la fecha del primer pedido
-    if instance.pk:
-        primer_pedido = instance.pedidos.first()
-        if primer_pedido and primer_pedido.fecha_entrega:
-            fecha = primer_pedido.fecha_entrega
-            year = fecha.year
-            month = fecha.month
-        else:
-            now = datetime.now()
-            year = now.year
-            month = now.month
-    else:
-        # Si la instancia aún no está guardada, usar fecha actual
-        now = datetime.now()
-        year = now.year
-        month = now.month
-
-    return os.path.join('aduana', str(year), f'{month:02d}', filename)
+    primer_pedido = instance.pedidos.first() if instance.pk else None
+    return get_upload_path_aduana(primer_pedido, filename)
 
 
 def upload_to_carga(instance, filename):
@@ -42,24 +56,8 @@ def upload_to_carga(instance, filename):
     Formato: media/carga/YYYY/MM/filename
     Usa la fecha_entrega del primer pedido asociado, o la fecha actual si no hay pedidos.
     """
-    # Intentar obtener la fecha del primer pedido
-    if instance.pk:
-        primer_pedido = instance.pedidos.first()
-        if primer_pedido and primer_pedido.fecha_entrega:
-            fecha = primer_pedido.fecha_entrega
-            year = fecha.year
-            month = fecha.month
-        else:
-            now = datetime.now()
-            year = now.year
-            month = now.month
-    else:
-        # Si la instancia aún no está guardada, usar fecha actual
-        now = datetime.now()
-        year = now.year
-        month = now.month
-
-    return os.path.join('carga', str(year), f'{month:02d}', filename)
+    primer_pedido = instance.pedidos.first() if instance.pk else None
+    return get_upload_path_carga(primer_pedido, filename)
 
 
 def validate_multiple_emails(value):
