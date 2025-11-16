@@ -202,161 +202,108 @@
                     <div class="modal-dialog modal-xl">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="clientStatusModalLabel">
-                                    <i class="fas fa-user-tie me-2"></i>Estado de Cuenta de Clientes
-                                </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="row mb-4">
-                                    <div class="col-12">
-                                        <label for="clientSelect" class="form-label fw-bold">Seleccionar Cliente:</label>
-                                        <select class="form-select" id="clientSelect" onchange="loadClientSummary()">
+                                <div class="d-flex align-items-center w-100">
+                                    <h5 class="modal-title me-3" id="clientStatusModalLabel">
+                                        <i class="fas fa-user-tie me-2"></i>Estado de Cuenta
+                                    </h5>
+                                    <div class="flex-grow-1 me-3">
+                                        <select class="form-select form-select-sm" id="clientSelect" onchange="loadClientSummary()">
                                             <option value="">-- Seleccione un cliente --</option>
                                             {% for cliente in clientes %}
                                                 <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
+                                    <div id="clientPaymentTermsHeader" class="client-payment-terms-compact me-3" style="display: none;">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        <span id="clientPaymentTermsHeaderText" class="fw-bold"></span>
+                                    </div>
                                 </div>
-                                
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
                                 <div id="clientSummaryContent" style="display: none;">
-                                    <div class="client-summary-header mb-4">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <h6 class="text-muted mb-1">Cliente seleccionado:</h6>
-                                                <h4 id="selectedClientName" class="mb-0"></h4>
+
+                                    <!-- Compact Summary Row -->
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-lg-2 col-md-4 col-6">
+                                            <div class="summary-card-compact summary-card-primary">
+                                                <div class="summary-label">
+                                                    <i class="fas fa-file-invoice-dollar me-1"></i>Facturado
+                                                </div>
+                                                <div id="totalFacturado" class="summary-value">€0.00</div>
                                             </div>
-                                            <div class="client-payment-terms">
-                                                <span class="text-muted">Términos de pago:</span>
-                                                <span id="clientPaymentTerms" class="fw-bold"></span>
+                                        </div>
+                                        <div class="col-lg-2 col-md-4 col-6">
+                                            <div class="summary-card-compact summary-card-info">
+                                                <div class="summary-label">
+                                                    <i class="fas fa-boxes me-1"></i>Cajas
+                                                </div>
+                                                <div id="totalCajas" class="summary-value">0</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-4 col-6">
+                                            <div class="summary-card-compact summary-card-warning">
+                                                <div class="summary-label">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i>Abonos
+                                                </div>
+                                                <div id="totalReclamaciones" class="summary-value">€0.00</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-4 col-6">
+                                            <div class="summary-card-compact summary-card-success">
+                                                <div class="summary-label">
+                                                    <i class="fas fa-credit-card me-1"></i>Pagado
+                                                </div>
+                                                <div id="totalPagado" class="summary-value">€0.00</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-4 col-6">
+                                            <div class="summary-card-compact summary-card-balance" id="balanceCard">
+                                                <div class="summary-label">
+                                                    <i class="fas fa-balance-scale me-1"></i>Saldo
+                                                </div>
+                                                <div id="saldoActual" class="summary-value">€0.00</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-4 col-6">
+                                            <div class="summary-card-compact summary-card-pending">
+                                                <div class="summary-label">
+                                                    <i class="fas fa-clock me-1"></i>Pendientes
+                                                </div>
+                                                <div id="totalPendientes" class="summary-value">0</div>
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Summary Cards Row -->
-                                    <div class="row g-3 mb-4">
-                                        <div class="col-xl-2 col-lg-3 col-md-6">
-                                            <div class="summary-card summary-card-primary">
-                                                <div class="summary-icon">
-                                                    <i class="fas fa-file-invoice-dollar"></i>
-                                                </div>
-                                                <div class="summary-data">
-                                                    <h6>Total Facturado</h6>
-                                                    <span id="totalFacturado" class="summary-number">€0.00</span>
-                                                </div>
+
+                                    <!-- Compact Statistics -->
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-lg-3 col-6">
+                                            <div class="stat-badge stat-overdue">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                <span class="stat-badge-label">Vencidas:</span>
+                                                <span id="facturasVencidas" class="stat-badge-value">0</span>
                                             </div>
                                         </div>
-                                        <div class="col-xl-2 col-lg-3 col-md-6">
-                                            <div class="summary-card summary-card-info">
-                                                <div class="summary-icon">
-                                                    <i class="fas fa-boxes"></i>
-                                                </div>
-                                                <div class="summary-data">
-                                                    <h6>Total Cajas</h6>
-                                                    <span id="totalCajas" class="summary-number">0</span>
-                                                </div>
+                                        <div class="col-lg-3 col-6">
+                                            <div class="stat-badge stat-due-soon">
+                                                <i class="fas fa-clock me-2"></i>
+                                                <span class="stat-badge-label">Próximas (≤7d):</span>
+                                                <span id="facturasProximas" class="stat-badge-value">0</span>
                                             </div>
                                         </div>
-                                        <div class="col-xl-2 col-lg-3 col-md-6">
-                                            <div class="summary-card summary-card-warning">
-                                                <div class="summary-icon">
-                                                    <i class="fas fa-exclamation-triangle"></i>
-                                                </div>
-                                                <div class="summary-data">
-                                                    <h6>Rectificativas/Abonos</h6>
-                                                    <span id="totalReclamaciones" class="summary-number">€0.00</span>
-                                                </div>
+                                        <div class="col-lg-3 col-6">
+                                            <div class="stat-badge stat-normal">
+                                                <i class="fas fa-calendar-check me-2"></i>
+                                                <span class="stat-badge-label">Normales:</span>
+                                                <span id="facturasNormales" class="stat-badge-value">0</span>
                                             </div>
                                         </div>
-                                        <div class="col-xl-2 col-lg-3 col-md-6">
-                                            <div class="summary-card summary-card-success">
-                                                <div class="summary-icon">
-                                                    <i class="fas fa-credit-card"></i>
-                                                </div>
-                                                <div class="summary-data">
-                                                    <h6>Total Pagado</h6>
-                                                    <span id="totalPagado" class="summary-number">€0.00</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-xl-2 col-lg-3 col-md-6">
-                                            <div class="summary-card summary-card-balance" id="balanceCard">
-                                                <div class="summary-icon">
-                                                    <i class="fas fa-balance-scale"></i>
-                                                </div>
-                                                <div class="summary-data">
-                                                    <h6>Saldo Actual</h6>
-                                                    <span id="saldoActual" class="summary-number">€0.00</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-xl-2 col-lg-3 col-md-6">
-                                            <div class="summary-card summary-card-pending">
-                                                <div class="summary-icon">
-                                                    <i class="fas fa-clock"></i>
-                                                </div>
-                                                <div class="summary-data">
-                                                    <h6>Facturas Pendientes</h6>
-                                                    <span id="totalPendientes" class="summary-number">0</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Status Statistics -->
-                                    <div class="row mb-4">
-                                        <div class="col-12">
-                                            <div class="invoice-statistics">
-                                                <h6 class="mb-3">
-                                                    <i class="fas fa-chart-pie me-2"></i>Estadísticas de Facturas Pendientes
-                                                </h6>
-                                                <div class="row g-3">
-                                                    <div class="col-lg-3 col-md-6">
-                                                        <div class="stat-item stat-overdue">
-                                                            <div class="stat-icon">
-                                                                <i class="fas fa-exclamation-triangle"></i>
-                                                            </div>
-                                                            <div class="stat-content">
-                                                                <span class="stat-label">Vencidas</span>
-                                                                <span id="facturasVencidas" class="stat-value">0</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-3 col-md-6">
-                                                        <div class="stat-item stat-due-soon">
-                                                            <div class="stat-icon">
-                                                                <i class="fas fa-clock"></i>
-                                                            </div>
-                                                            <div class="stat-content">
-                                                                <span class="stat-label">Próximas (≤7 días)</span>
-                                                                <span id="facturasProximas" class="stat-value">0</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-3 col-md-6">
-                                                        <div class="stat-item stat-normal">
-                                                            <div class="stat-icon">
-                                                                <i class="fas fa-calendar-check"></i>
-                                                            </div>
-                                                            <div class="stat-content">
-                                                                <span class="stat-label">Normales</span>
-                                                                <span id="facturasNormales" class="stat-value">0</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-3 col-md-6">
-                                                        <div class="stat-item stat-with-rectificative">
-                                                            <div class="stat-icon">
-                                                                <i class="fas fa-file-medical"></i>
-                                                            </div>
-                                                            <div class="stat-content">
-                                                                <span class="stat-label">Con Rectificativas</span>
-                                                                <span id="facturasConAbono" class="stat-value">0</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                        <div class="col-lg-3 col-6">
+                                            <div class="stat-badge stat-with-rectificative">
+                                                <i class="fas fa-file-medical me-2"></i>
+                                                <span class="stat-badge-label">Con Abonos:</span>
+                                                <span id="facturasConAbono" class="stat-badge-value">0</span>
                                             </div>
                                         </div>
                                     </div>
@@ -677,6 +624,7 @@
                 clientSummaryContent.style.display = 'none';
                 noClientSelected.style.display = 'block';
                 viewFullStatusBtn.style.display = 'none';
+                document.getElementById('clientPaymentTermsHeader').style.display = 'none';
                 return;
             }
             
@@ -692,24 +640,26 @@
                     loadingSpinner.style.display = 'none';
                     
                     if (data.success) {
-                        // Update client info
-                        document.getElementById('selectedClientName').textContent = data.cliente.nombre;
-                        document.getElementById('clientPaymentTerms').textContent = `${data.cliente.dias_pago} días`;
-                        
+                        // Update payment terms in header
+                        const paymentTermsHeader = document.getElementById('clientPaymentTermsHeader');
+                        const paymentTermsHeaderText = document.getElementById('clientPaymentTermsHeaderText');
+                        paymentTermsHeaderText.textContent = `${data.cliente.dias_pago} días`;
+                        paymentTermsHeader.style.display = 'block';
+
                         // Format and update summary data using Euro formatting
                         document.getElementById('totalFacturado').textContent = formatEuro(data.resumen.total_facturado);
                         document.getElementById('totalCajas').textContent = data.resumen.total_cajas_vendidas.toLocaleString();
                         document.getElementById('totalReclamaciones').textContent = formatEuro(data.resumen.total_reclamaciones);
                         document.getElementById('totalPagado').textContent = formatEuro(data.resumen.total_pagado_transferencias);
-                        
+
                         // Update balance with color coding
                         const balanceElement = document.getElementById('saldoActual');
                         const balanceCard = document.getElementById('balanceCard');
                         const saldo = data.resumen.saldo_real;
                         balanceElement.textContent = formatEuro(saldo);
-                        
+
                         // Update balance card style based on saldo
-                        balanceCard.className = 'summary-card ';
+                        balanceCard.className = 'summary-card-compact ';
                         if (saldo > 0) {
                             balanceCard.className += 'summary-card-debt';
                         } else if (saldo < 0) {

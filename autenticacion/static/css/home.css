@@ -825,12 +825,35 @@ body {
     color: white;
     border-bottom: none;
     border-radius: var(--border-radius) var(--border-radius) 0 0;
-    padding: 20px 25px;
+    padding: 15px 20px;
+}
+
+.modal-header .form-select {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--gray-800);
+    font-size: 0.9rem;
+    max-width: 400px;
+}
+
+.modal-header .form-select:focus {
+    background-color: white;
+    border-color: white;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.3);
+}
+
+.client-payment-terms-compact {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    white-space: nowrap;
 }
 
 .modal-title {
     font-weight: 600;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
+    margin-bottom: 0;
 }
 
 .btn-close {
@@ -884,6 +907,43 @@ body {
 
 .summary-number {
     font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    line-height: 1.2;
+}
+
+/* Compact Summary Cards */
+.summary-card-compact {
+    background: white;
+    border-radius: 8px;
+    padding: 12px 15px;
+    text-align: center;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    height: 100%;
+}
+
+.summary-card-compact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.summary-card-compact .summary-label {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+    margin-bottom: 6px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.summary-card-compact .summary-label i {
+    font-size: 0.7rem;
+}
+
+.summary-card-compact .summary-value {
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--gray-800);
     line-height: 1.2;
@@ -993,6 +1053,47 @@ body {
     background-color: var(--gray-500);
 }
 
+/* Compact Summary Card Colors */
+.summary-card-compact.summary-card-primary {
+    border-color: var(--section-comercial);
+    background: linear-gradient(135deg, rgba(67, 97, 238, 0.08), rgba(67, 97, 238, 0.03));
+}
+
+.summary-card-compact.summary-card-info {
+    border-color: var(--section-productos);
+    background: linear-gradient(135deg, rgba(76, 201, 240, 0.08), rgba(76, 201, 240, 0.03));
+}
+
+.summary-card-compact.summary-card-warning {
+    border-color: var(--warning-color);
+    background: linear-gradient(135deg, rgba(247, 37, 133, 0.08), rgba(247, 37, 133, 0.03));
+}
+
+.summary-card-compact.summary-card-success {
+    border-color: #28a745;
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.08), rgba(40, 167, 69, 0.03));
+}
+
+.summary-card-compact.summary-card-pending {
+    border-color: #fd7e14;
+    background: linear-gradient(135deg, rgba(253, 126, 20, 0.08), rgba(253, 126, 20, 0.03));
+}
+
+.summary-card-compact.summary-card-debt {
+    border-color: var(--danger-color);
+    background: linear-gradient(135deg, rgba(249, 65, 68, 0.08), rgba(249, 65, 68, 0.03));
+}
+
+.summary-card-compact.summary-card-credit {
+    border-color: #28a745;
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.08), rgba(40, 167, 69, 0.03));
+}
+
+.summary-card-compact.summary-card-neutral {
+    border-color: var(--gray-500);
+    background: linear-gradient(135deg, rgba(108, 117, 125, 0.08), rgba(108, 117, 125, 0.03));
+}
+
 /* Client Payment Terms */
 .client-payment-terms {
     background-color: rgba(67, 97, 238, 0.1);
@@ -1088,6 +1189,79 @@ body {
     color: var(--gray-800);
 }
 
+/* Compact Stat Badges */
+.stat-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.stat-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-badge i {
+    font-size: 0.9rem;
+}
+
+.stat-badge-label {
+    color: var(--gray-700);
+    font-weight: 500;
+    margin-right: 6px;
+}
+
+.stat-badge-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--gray-800);
+}
+
+.stat-badge.stat-overdue {
+    background: linear-gradient(135deg, rgba(249, 65, 68, 0.12), rgba(249, 65, 68, 0.06));
+    border-color: rgba(249, 65, 68, 0.3);
+}
+
+.stat-badge.stat-overdue i,
+.stat-badge.stat-overdue .stat-badge-value {
+    color: var(--danger-color);
+}
+
+.stat-badge.stat-due-soon {
+    background: linear-gradient(135deg, rgba(247, 37, 133, 0.12), rgba(247, 37, 133, 0.06));
+    border-color: rgba(247, 37, 133, 0.3);
+}
+
+.stat-badge.stat-due-soon i,
+.stat-badge.stat-due-soon .stat-badge-value {
+    color: var(--warning-color);
+}
+
+.stat-badge.stat-normal {
+    background: linear-gradient(135deg, rgba(67, 97, 238, 0.12), rgba(67, 97, 238, 0.06));
+    border-color: rgba(67, 97, 238, 0.3);
+}
+
+.stat-badge.stat-normal i,
+.stat-badge.stat-normal .stat-badge-value {
+    color: var(--section-comercial);
+}
+
+.stat-badge.stat-with-rectificative {
+    background: linear-gradient(135deg, rgba(253, 126, 20, 0.12), rgba(253, 126, 20, 0.06));
+    border-color: rgba(253, 126, 20, 0.3);
+}
+
+.stat-badge.stat-with-rectificative i,
+.stat-badge.stat-with-rectificative .stat-badge-value {
+    color: #fd7e14;
+}
+
 
 
 /* Responsive adjustments */
@@ -1118,18 +1292,48 @@ body {
     .compact-table tbody td {
         padding: 8px 6px;
     }
+
+    .stat-badge {
+        font-size: 0.75rem;
+        padding: 8px 10px;
+    }
+
+    .stat-badge-label {
+        font-size: 0.75rem;
+    }
+
+    .stat-badge-value {
+        font-size: 0.95rem;
+    }
 }
 
 @media (max-width: 767px) {
-    .client-summary-header .d-flex {
-        flex-direction: column;
-        align-items: flex-start !important;
-        gap: 15px;
+    .modal-header .d-flex {
+        flex-wrap: wrap;
     }
-    
-    .client-payment-terms {
-        align-self: stretch;
-        text-align: center;
+
+    .modal-title {
+        font-size: 1rem;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    .modal-header .form-select {
+        max-width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .client-payment-terms-compact {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+    }
+
+    .summary-card-compact .summary-label {
+        font-size: 0.7rem;
+    }
+
+    .summary-card-compact .summary-value {
+        font-size: 1.1rem;
     }
 }
 
