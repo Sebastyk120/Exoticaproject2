@@ -222,10 +222,16 @@
                             <input type="number" name="valor_nota_credito" class="form-control" step="0.01">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Archivo PDF (Opcional)</label>
+                            <label class="form-label">Archivo PDF Factura Principal (Opcional)</label>
                             <input type="file" name="pdf_file" class="form-control" accept=".pdf">
-                            <small class="form-text text-muted">Puede adjuntar o reemplazar el PDF de la factura</small>
+                            <small class="form-text text-muted">Puede adjuntar o reemplazar el PDF de la factura principal</small>
                             <div id="currentPdfInfo" class="mt-2"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Archivo PDF Factura Rectificativa (Opcional)</label>
+                            <input type="file" name="pdf_file_rectificativa" class="form-control" accept=".pdf">
+                            <small class="form-text text-muted">Puede adjuntar o reemplazar el PDF de la factura rectificativa</small>
+                            <div id="currentPdfRectInfo" class="mt-2"></div>
                         </div>
                     </form>
                 </div>
@@ -302,9 +308,14 @@
                             <input type="number" name="valor_nota_credito" class="form-control" step="0.01">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Archivo PDF (Opcional)</label>
+                            <label class="form-label">Archivo PDF Factura Principal (Opcional)</label>
                             <input type="file" name="pdf_file" class="form-control" accept=".pdf">
-                            <small class="form-text text-muted">Puede adjuntar el PDF de la factura</small>
+                            <small class="form-text text-muted">Puede adjuntar el PDF de la factura principal</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Archivo PDF Factura Rectificativa (Opcional)</label>
+                            <input type="file" name="pdf_file_rectificativa" class="form-control" accept=".pdf">
+                            <small class="form-text text-muted">Puede adjuntar el PDF de la factura rectificativa</small>
                         </div>
                     </form>
                 </div>
@@ -451,10 +462,16 @@
                 const modalBody = document.getElementById('viewModalBody');
 
                 const pdfHTML = data.pdf_file ? `
-                    <p><strong>Archivo PDF:</strong> <a href="${data.pdf_file}" target="_blank" class="btn btn-sm btn-primary">
+                    <p><strong>Archivo PDF Factura Principal:</strong> <a href="${data.pdf_file}" target="_blank" class="btn btn-sm btn-primary">
                         <i class="fas fa-file-pdf"></i> Ver PDF
                     </a></p>
-                ` : '<p><strong>Archivo PDF:</strong> No disponible</p>';
+                ` : '<p><strong>Archivo PDF Factura Principal:</strong> No disponible</p>';
+
+                const pdfRectHTML = data.pdf_file_rectificativa ? `
+                    <p><strong>Archivo PDF Factura Rectificativa:</strong> <a href="${data.pdf_file_rectificativa}" target="_blank" class="btn btn-sm btn-success">
+                        <i class="fas fa-file-pdf"></i> Ver PDF Rectificativa
+                    </a></p>
+                ` : '<p><strong>Archivo PDF Factura Rectificativa:</strong> No disponible</p>';
 
                 const pedidosHTML = data.pedidos.map(pedido => {
                     const pedidoId = pedido.split(' - ')[0];
@@ -476,6 +493,7 @@
                                 <p><strong>Valor Nota Crédito:</strong> ${data.valor_nota_credito || '-'}</p>
                                 <p><strong>Monto Pendiente:</strong> ${data.monto_pendiente || '-'}</p>
                                 ${pdfHTML}
+                                ${pdfRectHTML}
                                 <p><strong>Pedidos:</strong></p>
                                 <ul class="list-unstyled">${pedidosHTML}</ul>
                             </div>
@@ -518,12 +536,26 @@
                     currentPdfInfo.innerHTML = `
                         <div class="mt-2">
                             <a href="${data.pdf_file}" target="_blank" class="btn btn-sm btn-primary">
-                                <i class="fas fa-file-pdf"></i> Ver PDF
+                                <i class="fas fa-file-pdf"></i> Ver PDF Principal
                             </a>
                         </div>
                     `;
                 } else {
                     currentPdfInfo.innerHTML = '<small class="text-muted">No hay PDF adjunto</small>';
+                }
+
+                // Mostrar información del PDF rectificativa si existe
+                const currentPdfRectInfo = document.getElementById('currentPdfRectInfo');
+                if (data.pdf_file_rectificativa) {
+                    currentPdfRectInfo.innerHTML = `
+                        <div class="mt-2">
+                            <a href="${data.pdf_file_rectificativa}" target="_blank" class="btn btn-sm btn-success">
+                                <i class="fas fa-file-pdf"></i> Ver PDF Rectificativa
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    currentPdfRectInfo.innerHTML = '<small class="text-muted">No hay PDF rectificativa adjunto</small>';
                 }
 
                 editModal.show();

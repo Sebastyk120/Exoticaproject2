@@ -579,7 +579,8 @@ class GastosAduana(models.Model):
     monto_pendiente = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto Pendiente EUR",
                                           null=True, blank=True, editable=False, default=0)
     conceptos = models.CharField(max_length=1000, verbose_name="Conceptos", null=True, blank=True)
-    pdf_file = models.FileField(upload_to=upload_to_aduana, verbose_name="Archivo PDF", null=True, blank=True)
+    pdf_file = models.FileField(upload_to=upload_to_aduana, verbose_name="Archivo PDF Factura Principal", null=True, blank=True)
+    pdf_file_rectificativa = models.FileField(upload_to=upload_to_aduana, verbose_name="Archivo PDF Factura Rectificativa", null=True, blank=True)
 
     class Meta:
         verbose_name = "Gastos Aduana"
@@ -629,7 +630,8 @@ class GastosCarga(models.Model):
     monto_pendiente = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto Pendiente USD",
                                           null=True, blank=True, editable=False, default=0)
     conceptos = models.CharField(max_length=500, verbose_name="Conceptos", null=True, blank=True)
-    pdf_file = models.FileField(upload_to=upload_to_carga, verbose_name="Archivo PDF", null=True, blank=True)
+    pdf_file = models.FileField(upload_to=upload_to_carga, verbose_name="Archivo PDF Factura Principal", null=True, blank=True)
+    pdf_file_rectificativa = models.FileField(upload_to=upload_to_carga, verbose_name="Archivo PDF Factura Rectificativa", null=True, blank=True)
 
     class Meta:
         verbose_name = "Gastos Carga"

@@ -235,7 +235,8 @@ def get_gasto(request, gasto_id):
         'pedidos': [f"{pedido.id} - {str(pedido)}" for pedido in gasto.pedidos.all()],
         'pedidos_ids': [pedido.id for pedido in gasto.pedidos.all()],
         'semana': semana,
-        'pdf_file': gasto.pdf_file.url if gasto.pdf_file else None
+        'pdf_file': gasto.pdf_file.url if gasto.pdf_file else None,
+        'pdf_file_rectificativa': gasto.pdf_file_rectificativa.url if gasto.pdf_file_rectificativa else None
     }
     return JsonResponse(data)
 
@@ -271,6 +272,13 @@ def update_gasto(request, gasto_id):
         if pdf_file:
             pdf_filename = f"aduana_edit_{gasto.numero_factura.replace('/', '_')}_{pdf_file.name}"
             gasto.pdf_file.save(pdf_filename, ContentFile(pdf_file.read()), save=True)
+
+        # Handle PDF rectificativa file if provided
+        pdf_file_rectificativa = request.FILES.get('pdf_file_rectificativa')
+        if pdf_file_rectificativa:
+            pdf_filename_rect = f"aduana_rect_{gasto.numero_factura.replace('/', '_')}_{pdf_file_rectificativa.name}"
+            gasto.pdf_file_rectificativa.save(pdf_filename_rect, ContentFile(pdf_file_rectificativa.read()), save=True)
+
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
@@ -350,6 +358,12 @@ def create_gasto(request):
         if pdf_file:
             pdf_filename = f"aduana_manual_{numero_factura.replace('/', '_')}_{pdf_file.name}"
             gasto.pdf_file.save(pdf_filename, ContentFile(pdf_file.read()), save=True)
+
+        # Save PDF rectificativa file if provided
+        pdf_file_rectificativa = request.FILES.get('pdf_file_rectificativa')
+        if pdf_file_rectificativa:
+            pdf_filename_rect = f"aduana_rect_manual_{numero_factura.replace('/', '_')}_{pdf_file_rectificativa.name}"
+            gasto.pdf_file_rectificativa.save(pdf_filename_rect, ContentFile(pdf_file_rectificativa.read()), save=True)
 
         return JsonResponse({'success': True})
     except Exception as e:
