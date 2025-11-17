@@ -155,14 +155,16 @@
                 {% endif %}
 
                 {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                        <li class="page-item">
-                            <a class="page-link" href="?{% if numero_factura_query %}numero_factura={{ numero_factura_query }}&{% endif %}{% if semana_query %}semana={{ semana_query }}&{% endif %}page={{ num }}">{{ num }}</a>
-                        </li>
-                    {% elif num == page_obj.paginator.page_range.0 or num == page_obj.paginator.page_range|last %}
-                         <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% if num == 1 or num == page_obj.paginator.num_pages or num == page_obj.number or num == page_obj.number|add:'-1' or num == page_obj.number|add:'-2' or num == page_obj.number|add:'1' or num == page_obj.number|add:'2' %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if numero_factura_query %}numero_factura={{ numero_factura_query }}&{% endif %}{% if semana_query %}semana={{ semana_query }}&{% endif %}page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
                     {% endif %}
                 {% endfor %}
 
