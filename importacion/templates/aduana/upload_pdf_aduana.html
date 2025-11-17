@@ -69,28 +69,26 @@
                     <thead>
                         <tr>
                             <th>Número Factura</th>
-                            <th>Agencia Aduana</th>
+                            <th>Agencia</th>
                             <th>Valor (EUR)</th>
-                            <th>IVA Importación</th>
-                            <th>IVA Sobre Base</th>
-                            <th>Número Abono</th>
-                            <th>Valor Abono</th>
-                            <th>Monto Pendiente</th>
+                            <th>IVA Import.</th>
+                            <th>IVA Base</th>
+                            <th>Abono</th>
+                            <th>Pendiente</th>
                             <th>Estado</th>
                             <th>Semana</th>
-                            <th>Fecha</th>
+                            <th>PDFs</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for gasto in page_obj %}
                         <tr>
-                            <td>{{ gasto.numero_factura }}</td>
+                            <td><strong>{{ gasto.numero_factura }}</strong></td>
                             <td>{{ gasto.agencia_aduana.nombre }}</td>
                             <td>{{ gasto.valor_gastos_aduana|format_currency_eur }}</td>
                             <td>{{ gasto.iva_importacion|format_currency_eur|default:"0,00 €" }}</td>
                             <td>{{ gasto.iva_sobre_base|format_currency_eur|default:"0,00 €" }}</td>
-                            <td>{{ gasto.numero_nota_credito|default:"-" }}</td>
                             <td>{{ gasto.valor_nota_credito|format_currency_eur|default:"-" }}</td>
                             <td>{{ gasto.monto_pendiente|format_currency_eur|default:"-" }}</td>
                             <td>
@@ -103,7 +101,22 @@
                                     {{ primer_pedido.semana|default:"-" }}
                                 {% endwith %}
                             </td>
-                            <td>{{ gasto.fecha_creacion|date:"d/m/Y" }}</td>
+                            <td>
+                                <div class="pdf-buttons" style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                    {% if gasto.pdf_file %}
+                                        <a href="{{ gasto.pdf_file.url }}" target="_blank" class="btn btn-sm btn-primary" title="Ver Factura Principal" style="padding: 4px 8px; font-size: 11px;">
+                                            <i class="fas fa-file-pdf"></i> Principal
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted" style="font-size: 11px;">-</span>
+                                    {% endif %}
+                                    {% if gasto.pdf_file_rectificativa %}
+                                        <a href="{{ gasto.pdf_file_rectificativa.url }}" target="_blank" class="btn btn-sm btn-success" title="Ver Factura Rectificativa" style="padding: 4px 8px; font-size: 11px;">
+                                            <i class="fas fa-file-pdf"></i> Rectif.
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
                             <td>
                                 <div class="action-buttons">
                                     <button class="btn-action btn-view" onclick="viewGasto({{ gasto.id }})" title="Ver detalles">
@@ -120,7 +133,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="12" class="text-center">No hay gastos registrados</td>
+                            <td colspan="11" class="text-center">No hay gastos registrados</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -186,71 +199,127 @@
 
     <!-- Edit Modal -->
     <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar Gasto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-edit"></i> Editar Gasto de Aduana</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="editForm">
                         {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Pedidos</label>
-                                    <select name="pedidos" class="form-control select2-multiple-edit" multiple="multiple" required style="min-height:100px;">
-                                        {% for pedido in pedidos_disponibles %}
-                                        <option value="{{ pedido.id }}">{{ pedido.id }} - {{ pedido }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <small class="form-text text-muted">Puede seleccionar múltiples pedidos</small>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Número Factura</label>
-                                    <input type="text" name="numero_factura" class="form-control" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Valor (EUR)</label>
-                                    <input type="number" name="valor_gastos_aduana" class="form-control" step="0.01" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">IVA Importación (EUR)</label>
-                                    <input type="number" name="iva_importacion" class="form-control" step="0.01">
+
+                        <!-- Sección: Información Básica -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-file-invoice"></i> Información Básica</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Pedidos <span class="text-danger">*</span></label>
+                                            <select name="pedidos" class="form-control select2-multiple-edit" multiple="multiple" required style="min-height:100px;">
+                                                {% for pedido in pedidos_disponibles %}
+                                                <option value="{{ pedido.id }}">{{ pedido.id }} - {{ pedido }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <small class="form-text text-muted">Puede seleccionar múltiples pedidos</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Número Factura <span class="text-danger">*</span></label>
+                                            <input type="text" name="numero_factura" class="form-control" required>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">IVA Sobre Base (EUR)</label>
-                                    <input type="number" name="iva_sobre_base" class="form-control" step="0.01">
+                        </div>
+
+                        <!-- Sección: Valores e IVA -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-euro-sign"></i> Valores e IVA</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Valor (EUR) <span class="text-danger">*</span></label>
+                                            <input type="number" name="valor_gastos_aduana" class="form-control" step="0.01" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">IVA Importación (EUR)</label>
+                                            <input type="number" name="iva_importacion" class="form-control" step="0.01">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">IVA Sobre Base (EUR)</label>
+                                            <input type="number" name="iva_sobre_base" class="form-control" step="0.01">
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Número Abono</label>
-                                    <input type="text" name="numero_nota_credito" class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- Sección: Abonos -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-receipt"></i> Información de Abonos</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Número Abono</label>
+                                            <input type="text" name="numero_nota_credito" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Valor Abono (EUR)</label>
+                                            <input type="number" name="valor_nota_credito" class="form-control" step="0.01">
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Valor Abono (EUR)</label>
-                                    <input type="number" name="valor_nota_credito" class="form-control" step="0.01">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Archivo PDF Factura Principal (Opcional)</label>
-                                    <input type="file" name="pdf_file" class="form-control" accept=".pdf">
-                                    <small class="form-text text-muted">Puede adjuntar o reemplazar el PDF de la factura principal</small>
-                                    <div id="currentPdfInfo" class="mt-2"></div>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Archivo PDF Factura Rectificativa (Opcional)</label>
-                                    <input type="file" name="pdf_file_rectificativa" class="form-control" accept=".pdf">
-                                    <small class="form-text text-muted">Puede adjuntar o reemplazar el PDF de la factura rectificativa</small>
-                                    <div id="currentPdfRectInfo" class="mt-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Documentos PDF -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-file-pdf"></i> Documentos PDF</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Factura Principal (PDF)</label>
+                                            <input type="file" name="pdf_file" class="form-control" accept=".pdf">
+                                            <small class="form-text text-muted">Puede adjuntar o reemplazar el PDF de la factura principal</small>
+                                            <div id="currentPdfInfo" class="mt-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Factura Rectificativa (PDF)</label>
+                                            <input type="file" name="pdf_file_rectificativa" class="form-control" accept=".pdf">
+                                            <small class="form-text text-muted">Puede adjuntar o reemplazar el PDF de la factura rectificativa</small>
+                                            <div id="currentPdfRectInfo" class="mt-2"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="saveGasto()">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveGasto()"><i class="fas fa-save"></i> Guardar Cambios</button>
                 </div>
             </div>
         </div>
@@ -277,78 +346,136 @@
 
     <!-- Create Manual Gasto Modal -->
     <div class="modal fade" id="createModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Crear Gasto Manual de Aduana</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-plus-circle"></i> Crear Gasto Manual de Aduana</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="createForm">
                         {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Agencia de Aduana</label>
-                                    <select name="agencia_aduana" class="form-control" required>
-                                        <option value="">Seleccionar agencia</option>
-                                        {% for agencia in agencias %}
-                                        <option value="{{ agencia.id }}">{{ agencia.nombre }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Pedidos</label>
-                                    <select name="pedidos" class="form-control select2-multiple" multiple="multiple" required style="min-height:100px;">
-                                        {% for pedido in pedidos_disponibles %}
-                                        <option value="{{ pedido.id }}">{{ pedido.id }} - {{ pedido }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <small class="form-text text-muted">Puede seleccionar múltiples pedidos</small>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Número Factura</label>
-                                    <input type="text" name="numero_factura" class="form-control" required>
+
+                        <!-- Sección: Información Básica -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-file-invoice"></i> Información Básica</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Agencia de Aduana <span class="text-danger">*</span></label>
+                                            <select name="agencia_aduana" class="form-control" required>
+                                                <option value="">Seleccionar agencia</option>
+                                                {% for agencia in agencias %}
+                                                <option value="{{ agencia.id }}">{{ agencia.nombre }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Número Factura <span class="text-danger">*</span></label>
+                                            <input type="text" name="numero_factura" class="form-control" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Pedidos <span class="text-danger">*</span></label>
+                                            <select name="pedidos" class="form-control select2-multiple" multiple="multiple" required style="min-height:100px;">
+                                                {% for pedido in pedidos_disponibles %}
+                                                <option value="{{ pedido.id }}">{{ pedido.id }} - {{ pedido }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <small class="form-text text-muted">Puede seleccionar múltiples pedidos</small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Valor Gastos Aduana (EUR)</label>
-                                    <input type="number" name="valor_gastos_aduana" class="form-control" step="0.01" required>
+                        </div>
+
+                        <!-- Sección: Valores e IVA -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-euro-sign"></i> Valores e IVA</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Valor Gastos Aduana (EUR) <span class="text-danger">*</span></label>
+                                            <input type="number" name="valor_gastos_aduana" class="form-control" step="0.01" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">IVA Importación (EUR)</label>
+                                            <input type="number" name="iva_importacion" class="form-control" step="0.01">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">IVA Sobre Base (EUR)</label>
+                                            <input type="number" name="iva_sobre_base" class="form-control" step="0.01">
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">IVA Importación (EUR)</label>
-                                    <input type="number" name="iva_importacion" class="form-control" step="0.01">
+                            </div>
+                        </div>
+
+                        <!-- Sección: Abonos -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-receipt"></i> Información de Abonos (Opcional)</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Número Abono</label>
+                                            <input type="text" name="numero_nota_credito" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Valor Abono (EUR)</label>
+                                            <input type="number" name="valor_nota_credito" class="form-control" step="0.01">
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">IVA Sobre Base (EUR)</label>
-                                    <input type="number" name="iva_sobre_base" class="form-control" step="0.01">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Número Abono</label>
-                                    <input type="text" name="numero_nota_credito" class="form-control">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Valor Abono (EUR)</label>
-                                    <input type="number" name="valor_nota_credito" class="form-control" step="0.01">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Archivo PDF Factura Principal (Opcional)</label>
-                                    <input type="file" name="pdf_file" class="form-control" accept=".pdf">
-                                    <small class="form-text text-muted">Puede adjuntar el PDF de la factura principal</small>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Archivo PDF Factura Rectificativa (Opcional)</label>
-                                    <input type="file" name="pdf_file_rectificativa" class="form-control" accept=".pdf">
-                                    <small class="form-text text-muted">Puede adjuntar el PDF de la factura rectificativa</small>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Documentos PDF -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-file-pdf"></i> Documentos PDF (Opcional)</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Factura Principal (PDF)</label>
+                                            <input type="file" name="pdf_file" class="form-control" accept=".pdf">
+                                            <small class="form-text text-muted">Puede adjuntar el PDF de la factura principal</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label fw-bold">Factura Rectificativa (PDF)</label>
+                                            <input type="file" name="pdf_file_rectificativa" class="form-control" accept=".pdf">
+                                            <small class="form-text text-muted">Puede adjuntar el PDF de la factura rectificativa</small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="saveNewGasto()">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="saveNewGasto()"><i class="fas fa-save"></i> Crear Gasto</button>
                 </div>
             </div>
         </div>
@@ -517,43 +644,111 @@
                     return `<li><a href="/importacion/pedidos/${pedidoId}/" class="pedido-link">${pedido}</a></li>`;
                 }).join('');
 
-                const pdfHTML = data.pdf_file ? `
-                    <p><strong>Archivo PDF Factura Principal:</strong> <a href="${data.pdf_file}" target="_blank" class="btn btn-sm btn-primary">
-                        <i class="fas fa-file-pdf"></i> Ver PDF
-                    </a></p>
-                ` : '<p><strong>Archivo PDF Factura Principal:</strong> No disponible</p>';
-
-                const pdfRectHTML = data.pdf_file_rectificativa ? `
-                    <p><strong>Archivo PDF Factura Rectificativa:</strong> <a href="${data.pdf_file_rectificativa}" target="_blank" class="btn btn-sm btn-success">
-                        <i class="fas fa-file-pdf"></i> Ver PDF Rectificativa
-                    </a></p>
-                ` : '<p><strong>Archivo PDF Factura Rectificativa:</strong> No disponible</p>';
-
                 modalBody.innerHTML = `
                     <div class="view-details">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <p><strong>Número Factura:</strong> ${data.numero_factura}</p>
-                                <p><strong>Agencia Aduana:</strong> ${data.agencia_aduana}</p>
-                                <p><strong>Valor Gastos Aduana:</strong> ${valorGastosFormatted}</p>
-                                <p><strong>IVA Importación:</strong> ${ivaImportacionFormatted}</p>
-                                <p><strong>IVA Sobre Base:</strong> ${ivaBasesFormatted}</p>
-                                <p><strong>Estado:</strong> <span class="status-badge ${data.pagado ? 'status-paid' : 'status-unpaid'}">${data.pagado ? 'Pagado' : 'Pendiente'}</span></p>
+                        <!-- Información General Card -->
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="fas fa-info-circle"></i> Información General</h6>
                             </div>
-                            <div class="col-md-6">
-                                <p><strong>Número Abono:</strong> ${data.numero_nota_credito || '-'}</p>
-                                <p><strong>Valor Abono:</strong> ${valorNotaCreditoFormatted}</p>
-                                <p><strong>Monto Pendiente:</strong> ${montoPendienteFormatted}</p>
-                                <p><strong>Semana:</strong> ${data.semana || '-'}</p>
-                                ${pdfHTML}
-                                ${pdfRectHTML}
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <small class="text-muted">Número Factura</small>
+                                            <div class="fw-bold">${data.numero_factura}</div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Agencia Aduana</small>
+                                            <div>${data.agencia_aduana}</div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Semana</small>
+                                            <div>${data.semana || '-'}</div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Estado</small>
+                                            <div><span class="status-badge ${data.pagado ? 'status-paid' : 'status-unpaid'}">${data.pagado ? 'Pagado' : 'Pendiente'}</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <small class="text-muted">Valor Gastos Aduana</small>
+                                            <div class="fw-bold text-primary fs-5">${valorGastosFormatted}</div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">IVA Importación</small>
+                                            <div>${ivaImportacionFormatted}</div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">IVA Sobre Base</small>
+                                            <div>${ivaBasesFormatted}</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <h6>Pedidos Asociados:</h6>
-                                <ul class="pedidos-list">
-                                    ${pedidosHTML || '<li>No hay pedidos asociados</li>'}
+
+                        <!-- Información de Abonos Card -->
+                        ${data.numero_nota_credito || data.valor_nota_credito || data.monto_pendiente ? `
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="mb-0"><i class="fas fa-receipt"></i> Información de Abonos</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Número Abono</small>
+                                        <div class="fw-bold">${data.numero_nota_credito || '-'}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Valor Abono</small>
+                                        <div class="fw-bold text-warning">${valorNotaCreditoFormatted}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Monto Pendiente</small>
+                                        <div class="fw-bold text-danger">${montoPendienteFormatted}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <!-- PDFs Card -->
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0"><i class="fas fa-file-pdf"></i> Documentos PDF</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <small class="text-muted d-block mb-1">Factura Principal</small>
+                                        ${data.pdf_file ? `
+                                            <a href="${data.pdf_file}" target="_blank" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-file-pdf"></i> Ver PDF Principal
+                                            </a>
+                                        ` : '<span class="text-muted">No disponible</span>'}
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <small class="text-muted d-block mb-1">Factura Rectificativa</small>
+                                        ${data.pdf_file_rectificativa ? `
+                                            <a href="${data.pdf_file_rectificativa}" target="_blank" class="btn btn-success btn-sm">
+                                                <i class="fas fa-file-pdf"></i> Ver PDF Rectificativa
+                                            </a>
+                                        ` : '<span class="text-muted">No disponible</span>'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pedidos Asociados Card -->
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-secondary text-white">
+                                <h6 class="mb-0"><i class="fas fa-box"></i> Pedidos Asociados</h6>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled mb-0">
+                                    ${pedidosHTML || '<li class="text-muted">No hay pedidos asociados</li>'}
                                 </ul>
                             </div>
                         </div>
