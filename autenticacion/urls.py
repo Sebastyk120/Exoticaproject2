@@ -19,5 +19,7 @@ urlpatterns = [
     path('file-download/<path:file_path>/', views_file_explorer.download_file, name='file_download'),
     path('file-delete/<path:file_path>/', views_file_explorer.delete_file, name='file_delete'),
     path('folder-delete/<path:folder_path>/', views_file_explorer.delete_folder, name='folder_delete'),
+    path('folder-create/', views_file_explorer.create_folder, name='folder_create'),
+    path('file-upload/', views_file_explorer.upload_file, name='file_upload'),
     path('create-backup/', views_file_explorer.create_backup, name='create_backup'),
 ]

@@ -200,6 +200,7 @@ def file_explorer_view(request, subpath=''):
         context = {
             'items': items,
             'current_path': subpath or 'Media',
+            'current_subpath': subpath,  # Ruta actual para los formularios
             'breadcrumbs': breadcrumbs,
             'parent_path': parent_path,
             'has_parent': bool(subpath),
@@ -515,4 +516,180 @@ def delete_folder(request, folder_path):
         parent_dir = os.path.dirname(folder_path).replace('\\', '/')
         if parent_dir:
             return redirect('autenticacion:file_explorer_subpath', subpath=parent_dir)
+        return redirect('autenticacion:file_explorer')
+
+
+@user_passes_test(lambda u: u.is_superuser, login_url='/app/login/')
+def create_folder(request):
+    """
+    Vista para crear una nueva carpeta.
+    Requiere método POST con token CSRF.
+
+    Args:
+        request: HttpRequest object con 'folder_name' y 'current_path' en POST
+
+    Returns:
+        Redirect a la carpeta actual después de crear
+    """
+    # Solo permitir método POST
+    if request.method != 'POST':
+        messages.error(request, "Método no permitido")
+        return redirect('autenticacion:file_explorer')
+
+    try:
+        folder_name = request.POST.get('folder_name', '').strip()
+        current_path = request.POST.get('current_path', '').strip()
+
+        # Validar que se proporcionó un nombre
+        if not folder_name:
+            messages.error(request, "Debes proporcionar un nombre para la carpeta")
+            if current_path:
+                return redirect('autenticacion:file_explorer_subpath', subpath=current_path)
+            return redirect('autenticacion:file_explorer')
+
+        # Validar caracteres no permitidos en el nombre
+        invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|']
+        if any(char in folder_name for char in invalid_chars):
+            messages.error(request, f"El nombre de la carpeta no puede contener los siguientes caracteres: {' '.join(invalid_chars)}")
+            if current_path:
+                return redirect('autenticacion:file_explorer_subpath', subpath=current_path)
+            return redirect('autenticacion:file_explorer')
+
+        # Construir la ruta completa de la nueva carpeta
+        if current_path:
+            new_folder_relative = os.path.join(current_path, folder_name).replace('\\', '/')
+        else:
+            new_folder_relative = folder_name
+
+        # Validar y obtener la ruta segura
+        new_folder_path = get_safe_path(new_folder_relative)
+
+        # Verificar que la carpeta no existe ya
+        if os.path.exists(new_folder_path):
+            messages.error(request, f"Ya existe una carpeta o archivo con el nombre '{folder_name}'")
+            if current_path:
+                return redirect('autenticacion:file_explorer_subpath', subpath=current_path)
+            return redirect('autenticacion:file_explorer')
+
+        # Crear la carpeta
+        os.makedirs(new_folder_path)
+
+        # Log de la operación
+        logger.info(f"Usuario {request.user.username} creó la carpeta: {new_folder_relative}")
+
+        messages.success(request, f"La carpeta '{folder_name}' ha sido creada correctamente")
+
+        # Redirigir a la carpeta actual
+        if current_path:
+            return redirect('autenticacion:file_explorer_subpath', subpath=current_path)
+        return redirect('autenticacion:file_explorer')
+
+    except PermissionDenied as e:
+        messages.error(request, str(e))
+        return redirect('autenticacion:file_explorer')
+    except PermissionError:
+        messages.error(request, "No tienes permisos para crear carpetas en esta ubicación")
+        current_path = request.POST.get('current_path', '').strip()
+        if current_path:
+            return redirect('autenticacion:file_explorer_subpath', subpath=current_path)
+        return redirect('autenticacion:file_explorer')
+    except Exception as e:
+        logger.error(f"Error al crear carpeta: {str(e)}")
+        messages.error(request, "Ocurrió un error al crear la carpeta")
+        current_path = request.POST.get('current_path', '').strip()
+        if current_path:
+            return redirect('autenticacion:file_explorer_subpath', subpath=current_path)
+        return redirect('autenticacion:file_explorer')
+
+
+@user_passes_test(lambda u: u.is_superuser, login_url='/app/login/')
+def upload_file(request):
+    """
+    Vista para subir un archivo a la carpeta actual.
+    Requiere método POST con token CSRF.
+    Acepta cualquier tipo de archivo sin limitaciones.
+
+    Args:
+        request: HttpRequest object con 'file' y 'current_path' en POST
+
+    Returns:
+        Redirect a la carpeta actual después de subir
+    """
+    # Solo permitir método POST
+    if request.method != 'POST':
+        messages.error(request, "Método no permitido")
+        return redirect('autenticacion:file_explorer')
+
+    try:
+        uploaded_file = request.FILES.get('file')
+        current_path = request.POST.get('current_path', '').strip()
+
+        # Validar que se proporcionó un archivo
+        if not uploaded_file:
+            messages.error(request, "Debes seleccionar un archivo para subir")
+            if current_path:
+                return redirect('autenticacion:file_explorer_subpath', subpath=current_path)
+            return redirect('autenticacion:file_explorer')
+
+        # Obtener el nombre del archivo
+        filename = uploaded_file.name
+
+        # Construir la ruta completa del archivo
+        if current_path:
+            file_relative_path = os.path.join(current_path, filename).replace('\\', '/')
+        else:
+            file_relative_path = filename
+
+        # Validar y obtener la ruta segura
+        file_full_path = get_safe_path(file_relative_path)
+
+        # Verificar si el archivo ya existe
+        if os.path.exists(file_full_path):
+            # Generar un nombre único agregando un número
+            base_name, extension = os.path.splitext(filename)
+            counter = 1
+            while os.path.exists(file_full_path):
+                new_filename = f"{base_name}_{counter}{extension}"
+                if current_path:
+                    file_relative_path = os.path.join(current_path, new_filename).replace('\\', '/')
+                else:
+                    file_relative_path = new_filename
+                file_full_path = get_safe_path(file_relative_path)
+                counter += 1
+            filename = new_filename
+            messages.warning(request, f"El archivo fue renombrado a '{filename}' porque ya existía un archivo con ese nombre")
+
+        # Guardar el archivo
+        with open(file_full_path, 'wb+') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+
+        # Obtener el tamaño del archivo para el mensaje
+        file_size = format_file_size(os.path.getsize(file_full_path))
+
+        # Log de la operación
+        logger.info(f"Usuario {request.user.username} subió el archivo: {file_relative_path} ({file_size})")
+
+        messages.success(request, f"El archivo '{filename}' ({file_size}) ha sido subido correctamente")
+
+        # Redirigir a la carpeta actual
+        if current_path:
+            return redirect('autenticacion:file_explorer_subpath', subpath=current_path)
+        return redirect('autenticacion:file_explorer')
+
+    except PermissionDenied as e:
+        messages.error(request, str(e))
+        return redirect('autenticacion:file_explorer')
+    except PermissionError:
+        messages.error(request, "No tienes permisos para subir archivos en esta ubicación")
+        current_path = request.POST.get('current_path', '').strip()
+        if current_path:
+            return redirect('autenticacion:file_explorer_subpath', subpath=current_path)
+        return redirect('autenticacion:file_explorer')
+    except Exception as e:
+        logger.error(f"Error al subir archivo: {str(e)}")
+        messages.error(request, "Ocurrió un error al subir el archivo")
+        current_path = request.POST.get('current_path', '').strip()
+        if current_path:
+            return redirect('autenticacion:file_explorer_subpath', subpath=current_path)
         return redirect('autenticacion:file_explorer')
