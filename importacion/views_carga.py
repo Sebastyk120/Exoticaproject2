@@ -1,17 +1,20 @@
-from io import BytesIO
-
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseRedirect, JsonResponse
-from django import forms
-from django.core.validators import MinValueValidator
-from django.core.files.base import ContentFile
-from decimal import Decimal
-from pdfminer.high_level import extract_text
+import os
 import re
 import logging
+from decimal import Decimal
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django import forms
+from django.core.files.base import ContentFile
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+
+# Google Document AI imports
+from google.cloud import documentai_v1
+from google.api_core.client_options import ClientOptions
+
 from .models import GastosCarga, AgenciaCarga, Pedido
 
 # Setup logging
@@ -21,6 +24,62 @@ class PDFUploadForm(forms.Form):
     pdf_file = forms.FileField(label='Selecciona un archivo PDF')
 
 
+def extract_invoice_data_with_docai(pdf_content):
+    """
+    Extrae datos de la factura usando Google Document AI
+    """
+    try:
+        # Obtener credenciales desde variables de entorno
+        project_id = os.getenv('GCP_PROJECT_ID')
+        location = os.getenv('GCP_LOCATION')
+        processor_id = os.getenv('GCP_INVOICE_PROCESSOR_ID')
+
+        if not all([project_id, location, processor_id]):
+            raise ValueError("Faltan variables de entorno de Google Cloud (GCP_PROJECT_ID, GCP_LOCATION, GCP_INVOICE_PROCESSOR_ID)")
+
+        # Configurar el cliente de Document AI
+        opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
+        client = documentai_v1.DocumentProcessorServiceClient(client_options=opts)
+
+        # Nombre completo del procesador
+        name = client.processor_path(project_id, location, processor_id)
+
+        # Crear el documento raw
+        raw_document = documentai_v1.RawDocument(
+            content=pdf_content,
+            mime_type="application/pdf"
+        )
+
+        # Crear la solicitud de procesamiento
+        request = documentai_v1.ProcessRequest(
+            name=name,
+            raw_document=raw_document
+        )
+
+        # Procesar el documento
+        result = client.process_document(request=request)
+        document = result.document
+
+        # Extraer datos de las entidades
+        extracted_data = {
+            'text': document.text,
+            'entities': {}
+        }
+
+        # Procesar entidades extraídas
+        for entity in document.entities:
+            entity_type = entity.type_
+            entity_value = entity.mention_text
+            extracted_data['entities'][entity_type] = entity_value
+            logger.info(f"Entidad encontrada: {entity_type} = {entity_value}")
+
+        return extracted_data
+
+    except Exception as e:
+        logger.error(f"Error al procesar documento con Document AI: {str(e)}")
+        raise
+
+
 @login_required
 def process_pdf(request):
     if request.method == 'POST':
@@ -28,91 +87,111 @@ def process_pdf(request):
         if form.is_valid():
             pdf_file = form.cleaned_data['pdf_file']
             pdf_file.seek(0)  # Reiniciar puntero
-            
-            # Convertir el contenido a un objeto de archivo binario
+
+            # Leer el contenido del PDF
             pdf_content = pdf_file.read()
-            text = extract_text(BytesIO(pdf_content))
-            
-            # Extract agencia_carga (fixed value from the PDF content)
-            agencia_carga_match = re.search(r'VIC VALCARGO INTERNACIONAL SAS', text)
-            agencia_carga_name = agencia_carga_match.group(0) if agencia_carga_match else None
 
-            # Extract numero_factura
-            numero_factura_match = re.search(r'N\.º VVL (\d+)', text)
-            numero_factura = numero_factura_match.group(1) if numero_factura_match else None
+            try:
+                # Extraer datos usando Google Document AI
+                doc_data = extract_invoice_data_with_docai(pdf_content)
+                text = doc_data['text']
+                entities = doc_data['entities']
 
-            # Extract pedidos (AWB numbers) with optional spaces after the dash
-            pedidos_matches = re.findall(r'MAWB:\s*(\d+-\s*\d+)', text)
-            # Normalize AWB values by removing spaces
-            pedidos_matches = [awb.replace(" ", "") for awb in pedidos_matches]
-            
-            # Extract valor_gastos_carga
-            valor_pattern = r'Total a Pagar USD[\s\S]*?([\d.,]+)'
-            bruto_pattern = r'Bruto total[\s\S]*?([\d.,]+)'
+                logger.info(f"Texto extraído: {text[:500]}...")
+                logger.info(f"Entidades extraídas: {entities}")
 
-            valor_match = re.search(valor_pattern, text, re.IGNORECASE)
-            if valor_match:
-                valor_str_raw = valor_match.group(1).strip()
-                if ',' in valor_str_raw:
-                    valor_str = valor_str_raw.replace('.', '').replace(',', '.')
+                # Extraer agencia_carga
+                # Buscar en entidades primero, luego en texto
+                agencia_carga_name = entities.get('supplier_name', None)
+                if not agencia_carga_name:
+                    agencia_carga_match = re.search(r'VIC VALCARGO INTERNACIONAL SAS', text, re.IGNORECASE)
+                    agencia_carga_name = agencia_carga_match.group(0) if agencia_carga_match else "VIC VALCARGO INTERNACIONAL SAS"
+
+                # Extraer numero_factura
+                numero_factura = entities.get('invoice_id', None)
+                if numero_factura:
+                    # Limpiar el número de factura (quitar prefijo VVL si existe)
+                    numero_factura_match = re.search(r'(?:VVL\s*)?(\d+)', numero_factura, re.IGNORECASE)
+                    numero_factura = numero_factura_match.group(1) if numero_factura_match else numero_factura
                 else:
-                    valor_str = valor_str_raw
-                valor_gastos_carga = Decimal(valor_str)
-            else:
-                bruto_match = re.search(bruto_pattern, text, re.IGNORECASE)
-                if bruto_match:
-                    valor_str_raw = bruto_match.group(1).strip()
-                    if ',' in valor_str_raw:
-                        valor_str = valor_str_raw.replace('.', '').replace(',', '.')
+                    # Buscar patrón VVL seguido de números
+                    numero_factura_match = re.search(r'(?:N\.º\s*)?VVL\s*(\d+)', text, re.IGNORECASE)
+                    numero_factura = numero_factura_match.group(1) if numero_factura_match else None
+
+                # Extraer AWB (pedidos)
+                pedidos_matches = []
+                # Buscar específicamente AWBs con el contexto "MAWB:" para mayor precisión
+                awb_matches = re.findall(r'MAWB:?\s*(\d{3}[-\s]*\d{8})', text, re.IGNORECASE)
+                pedidos_matches = [awb.replace(" ", "").replace("--", "-") for awb in awb_matches]
+
+                # Si no se encontraron con MAWB, buscar patrón más general pero con contexto
+                if not pedidos_matches:
+                    # Buscar líneas que contengan "MAWB" o "AWB" seguido del número
+                    for line in text.split('\n'):
+                        if 'MAWB' in line.upper() or 'AWB' in line.upper():
+                            awb_in_line = re.findall(r'(\d{3}[-\s]*\d{8})', line)
+                            pedidos_matches.extend([awb.replace(" ", "") for awb in awb_in_line])
+
+                # Eliminar duplicados manteniendo el orden
+                pedidos_matches = list(dict.fromkeys(pedidos_matches))
+
+                logger.info(f"AWBs encontrados: {pedidos_matches}")
+
+                # Extraer valor_gastos_carga
+                valor_gastos_carga = Decimal('0.0')
+
+                # Intentar obtener el total de las entidades (priorizar net_amount)
+                total_amount = entities.get('net_amount', None) or entities.get('total_amount', None)
+                if total_amount:
+                    # Limpiar el valor (quitar símbolos de moneda, espacios, etc.)
+                    valor_str = re.sub(r'[^\d.,]', '', str(total_amount))
+                    # Convertir formato europeo (1.234,56) a formato decimal (1234.56)
+                    if ',' in valor_str and '.' in valor_str:
+                        # Formato: 1.234,56 -> 1234.56
+                        valor_str = valor_str.replace('.', '').replace(',', '.')
+                    elif ',' in valor_str:
+                        # Formato: 1234,56 -> 1234.56
+                        valor_str = valor_str.replace(',', '.')
+
+                    try:
+                        valor_gastos_carga = Decimal(valor_str)
+                    except:
+                        logger.warning(f"No se pudo convertir el valor: {valor_str}")
+
+                # Si no se encontró en entidades, buscar en el texto
+                if valor_gastos_carga == Decimal('0.0'):
+                    valor_pattern = r'Total\s*a\s*Pagar\s*USD[\s\S]*?([\d.,]+)'
+                    bruto_pattern = r'Bruto\s*total[\s\S]*?([\d.,]+)'
+
+                    valor_match = re.search(valor_pattern, text, re.IGNORECASE)
+                    if valor_match:
+                        valor_str_raw = valor_match.group(1).strip()
+                        if ',' in valor_str_raw:
+                            valor_str = valor_str_raw.replace('.', '').replace(',', '.')
+                        else:
+                            valor_str = valor_str_raw
+                        valor_gastos_carga = Decimal(valor_str)
                     else:
-                        valor_str = valor_str_raw
-                    valor_gastos_carga = Decimal(valor_str)
-                else:
-                    valor_gastos_carga = Decimal('0.0')
+                        bruto_match = re.search(bruto_pattern, text, re.IGNORECASE)
+                        if bruto_match:
+                            valor_str_raw = bruto_match.group(1).strip()
+                            if ',' in valor_str_raw:
+                                valor_str = valor_str_raw.replace('.', '').replace(',', '.')
+                            else:
+                                valor_str = valor_str_raw
+                            valor_gastos_carga = Decimal(valor_str)
 
-            # Extract conceptos (tabla)
-            # Procesamiento de conceptos
-            conceptos = []
-            lines = [line.strip() for line in text.split('\n') if line.strip()]
+                logger.info(f"Valor gastos carga: {valor_gastos_carga}")
 
-            # Buscar inicio de la tabla después de los encabezados
-            table_start = None
-            for i in range(len(lines)):
-                if lines[i] == 'Artículo' and i + 4 < len(lines):
-                    if (lines[i + 1] == 'Descripción' and
-                            lines[i + 2] == 'Cantidad' and
-                            lines[i + 3] == 'Vr. Unitario' and
-                            lines[i + 4] == 'Vr. Bruto'):
-                        table_start = i + 5  # Saltar encabezados
-                        break
+                # Extraer conceptos (simplificado)
+                conceptos_text = f"Factura procesada con Document AI - Agencia: {agencia_carga_name}"
 
-            if table_start is not None:
-                i = table_start
-                while i < len(lines):
-                    if lines[i].isdigit():
-                        try:
-                            # Capturar los 5 componentes de cada fila
-                            articulo = lines[i]
-                            descripcion = lines[i + 1]
-                            cantidad = lines[i + 2]
-                            vr_unitario = lines[i + 3]
-                            vr_bruto = lines[i + 4]
-
-                            # Formatear concepto
-                            concepto = (
-                                f"{descripcion} - "
-                                f"Cant: {cantidad}, "
-                                f"Vr. Unitario: {vr_unitario}, "
-                                f"Total: {vr_bruto}"
-                            )
-                            conceptos.append(concepto)
-                            i += 5  # Saltar 5 líneas procesadas
-                        except IndexError:
-                            break  # Fin de la tabla
-                    else:
-                        i += 1
-
-            conceptos_text = "\n".join(conceptos)[:500]
+            except Exception as e:
+                logger.error(f"Error al procesar con Document AI: {str(e)}")
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Error al procesar el PDF con Document AI: {str(e)}'
+                })
 
             # Get or create AgenciaCarga instance
             agencia, created = AgenciaCarga.objects.get_or_create(nombre=agencia_carga_name)
@@ -121,19 +200,19 @@ def process_pdf(request):
             try:
                 # We'll collect all the pedidos that match our list of AWBs
                 matching_pedidos = []
-                
+
                 for awb in pedidos_matches:
                     # The AWB is already in the correct format, no need to format it
                     pedidos = Pedido.objects.filter(awb=awb)
                     if pedidos.exists():
                         matching_pedidos.extend(pedidos)
-                
+
                 if not matching_pedidos:
                     return JsonResponse({
                         'success': False,
-                        'error': f'No se encontraron pedidos con los AWBs proporcionados'
+                        'error': f'No se encontraron pedidos con los AWBs proporcionados: {pedidos_matches}'
                     })
-                    
+
             except Exception as e:
                 return JsonResponse({
                     'success': False,
