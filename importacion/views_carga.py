@@ -1,6 +1,7 @@
 import os
 import re
 import logging
+import io
 from decimal import Decimal
 
 from django.shortcuts import render, get_object_or_404
@@ -11,9 +12,7 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 
-# Google Document AI imports
-from google.cloud import documentai_v1
-from google.api_core.client_options import ClientOptions
+import pdfplumber
 
 from .models import GastosCarga, AgenciaCarga, Pedido
 
@@ -24,59 +23,124 @@ class PDFUploadForm(forms.Form):
     pdf_file = forms.FileField(label='Selecciona un archivo PDF')
 
 
-def extract_invoice_data_with_docai(pdf_content):
+def parse_amount(amount_str):
     """
-    Extrae datos de la factura usando Google Document AI
+    Convierte una cadena de número (1.234,56 o 1234,56) a Decimal.
+    Asume formato europeo (coma para decimales) si hay ambigüedad o mezcla.
+    """
+    if not amount_str:
+        return None
+
+    # Limpiar caracteres no numéricos excepto . y ,
+    clean_str = re.sub(r'[^\d.,]', '', str(amount_str))
+
+    if ',' in clean_str and '.' in clean_str:
+        # Formato 1.234,56 -> 1234.56
+        clean_str = clean_str.replace('.', '').replace(',', '.')
+    elif ',' in clean_str:
+        # Formato 1234,56 -> 1234.56
+        clean_str = clean_str.replace(',', '.')
+
+    try:
+        return Decimal(clean_str)
+    except:
+        return None
+
+
+def extract_invoice_data_with_pdfplumber(pdf_content):
+    """
+    Extrae datos de la factura usando pdfplumber (local)
     """
     try:
-        # Obtener credenciales desde variables de entorno
-        project_id = os.getenv('GCP_PROJECT_ID')
-        location = os.getenv('GCP_LOCATION')
-        processor_id = os.getenv('GCP_INVOICE_PROCESSOR_ID')
+        text_content = ""
 
-        if not all([project_id, location, processor_id]):
-            raise ValueError("Faltan variables de entorno de Google Cloud (GCP_PROJECT_ID, GCP_LOCATION, GCP_INVOICE_PROCESSOR_ID)")
+        # Abrir el PDF desde el contenido en memoria
+        with pdfplumber.open(io.BytesIO(pdf_content)) as pdf:
+            for page in pdf.pages:
+                # Usamos extract_text() simple para obtener el flujo de texto
+                page_text = page.extract_text()
+                if page_text:
+                    text_content += page_text + "\n"
 
-        # Configurar el cliente de Document AI
-        opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
-        client = documentai_v1.DocumentProcessorServiceClient(client_options=opts)
+        logger.info(f"[CARGA] Texto extraído (primeros 500 caracteres): {text_content[:500]}...")
 
-        # Nombre completo del procesador
-        name = client.processor_path(project_id, location, processor_id)
+        # 1. Agencia de Carga
+        agencia_match = re.search(r'VIC VALCARGO INTERNACIONAL SAS', text_content, re.IGNORECASE)
+        agencia_carga_name = agencia_match.group(0) if agencia_match else "No encontrado"
+        logger.info(f"[CARGA] Agencia de Carga: {agencia_carga_name}")
 
-        # Crear el documento raw
-        raw_document = documentai_v1.RawDocument(
-            content=pdf_content,
-            mime_type="application/pdf"
-        )
+        # 2. Número de Factura
+        # Busca patrones como "No. VVL 15013" o "N.º VVL 12159"
+        numero_factura = None
+        factura_match = re.search(r'(?:N\.º|No\.|No)?\s*VVL\s*(\d+)', text_content, re.IGNORECASE)
+        if factura_match:
+            numero_factura = factura_match.group(1)
+        else:
+            # Intento alternativo solo buscando VVL seguido de números
+            factura_match = re.search(r'VVL\s*(\d+)', text_content, re.IGNORECASE)
+            if factura_match:
+                numero_factura = factura_match.group(1)
+            else:
+                numero_factura = "No encontrado"
 
-        # Crear la solicitud de procesamiento
-        request = documentai_v1.ProcessRequest(
-            name=name,
-            raw_document=raw_document
-        )
+        logger.info(f"[CARGA] Número de Factura: {numero_factura}")
 
-        # Procesar el documento
-        result = client.process_document(request=request)
-        document = result.document
+        # 3. AWBs
+        # Busca MAWB o AWB seguido de patrón 123-12345678
+        pedidos_matches = []
+        # Patrón específico con prefijo
+        awb_matches_context = re.findall(r'(?:MAWB|AWB)[:\s]*(\d{3}[-\s]*\d{8})', text_content, re.IGNORECASE)
+        pedidos_matches.extend([awb.replace(" ", "").replace("--", "-") for awb in awb_matches_context])
 
-        # Extraer datos de las entidades
-        extracted_data = {
-            'text': document.text,
-            'entities': {}
+        # Si no encuentra con contexto, busca el patrón numérico estricto 729-XXXXXXX (común en estos docs)
+        # O patrón general 3 digitos - 8 digitos
+        if not pedidos_matches:
+            awb_matches_general = re.findall(r'(?<!\d)(\d{3}[-\s]\d{8})(?!\d)', text_content)
+            pedidos_matches.extend([awb.replace(" ", "").replace("--", "-") for awb in awb_matches_general])
+
+        # Eliminar duplicados manteniendo orden
+        pedidos_matches = list(dict.fromkeys(pedidos_matches))
+
+        logger.info(f"[CARGA] AWBs encontrados: {pedidos_matches}")
+        logger.info(f"[CARGA] Total de AWBs: {len(pedidos_matches)}")
+
+        # 4. Valor Gastos Carga
+        # Busca "Total a Pagar USD" o similar
+        valor_gastos_carga = None
+
+        # Patrón 1: Total a Pagar USD ... valor
+        # Ejemplo: "Total a Pagar USD 639,87"
+        valor_pattern = r'Total\s*a\s*Pagar\s*(?:USD)?[\s\S]*?([\d.,]+)'
+        valor_match = re.search(valor_pattern, text_content, re.IGNORECASE)
+
+        if valor_match:
+            valor_gastos_carga = parse_amount(valor_match.group(1))
+
+        # Patrón 2: Buscar "Total Factura" o "Total (USD)"
+        if not valor_gastos_carga:
+            valor_match = re.search(r'Total\s*(?:Factura)?\s*\(?USD\)?\s*[:\s]*([\d.,]+)', text_content, re.IGNORECASE)
+            if valor_match:
+                valor_gastos_carga = parse_amount(valor_match.group(1))
+
+        # Si no se encuentra, establecer como 0
+        if valor_gastos_carga is None:
+            valor_gastos_carga = Decimal('0.0')
+            logger.warning(f"[CARGA] No se pudo extraer el valor de gastos de carga")
+
+        logger.info(f"[CARGA] Valor Gastos Carga: {valor_gastos_carga}")
+
+        return {
+            'text': text_content,
+            'extracted': {
+                'agencia_carga': agencia_carga_name,
+                'numero_factura': numero_factura,
+                'awbs': pedidos_matches,
+                'valor_gastos_carga': valor_gastos_carga
+            }
         }
 
-        # Procesar entidades extraídas
-        for entity in document.entities:
-            entity_type = entity.type_
-            entity_value = entity.mention_text
-            extracted_data['entities'][entity_type] = entity_value
-            logger.info(f"Entidad encontrada: {entity_type} = {entity_value}")
-
-        return extracted_data
-
     except Exception as e:
-        logger.error(f"Error al procesar documento con Document AI: {str(e)}")
+        logger.error(f"[CARGA] Error al procesar documento con pdfplumber: {str(e)}")
         raise
 
 
@@ -92,105 +156,36 @@ def process_pdf(request):
             pdf_content = pdf_file.read()
 
             try:
-                # Extraer datos usando Google Document AI
-                doc_data = extract_invoice_data_with_docai(pdf_content)
-                text = doc_data['text']
-                entities = doc_data['entities']
+                # Extraer datos usando pdfplumber
+                result = extract_invoice_data_with_pdfplumber(pdf_content)
 
-                logger.info(f"Texto extraído: {text[:500]}...")
-                logger.info(f"Entidades extraídas: {entities}")
+                # Extraer valores del resultado
+                agencia_carga_name = result['extracted']['agencia_carga']
+                numero_factura = result['extracted']['numero_factura']
+                pedidos_matches = result['extracted']['awbs']
+                valor_gastos_carga = result['extracted']['valor_gastos_carga']
 
-                # Extraer agencia_carga
-                # Buscar en entidades primero, luego en texto
-                agencia_carga_name = entities.get('supplier_name', None)
-                if not agencia_carga_name:
-                    agencia_carga_match = re.search(r'VIC VALCARGO INTERNACIONAL SAS', text, re.IGNORECASE)
-                    agencia_carga_name = agencia_carga_match.group(0) if agencia_carga_match else "VIC VALCARGO INTERNACIONAL SAS"
+                # Validar que se hayan extraído los datos necesarios
+                if agencia_carga_name == "No encontrado":
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'No se pudo identificar la agencia de carga en el PDF'
+                    })
 
-                # Extraer numero_factura
-                numero_factura = entities.get('invoice_id', None)
-                if numero_factura:
-                    # Limpiar el número de factura (quitar prefijo VVL si existe)
-                    numero_factura_match = re.search(r'(?:VVL\s*)?(\d+)', numero_factura, re.IGNORECASE)
-                    numero_factura = numero_factura_match.group(1) if numero_factura_match else numero_factura
-                else:
-                    # Buscar patrón VVL seguido de números
-                    numero_factura_match = re.search(r'(?:N\.º\s*)?VVL\s*(\d+)', text, re.IGNORECASE)
-                    numero_factura = numero_factura_match.group(1) if numero_factura_match else None
-
-                # Extraer AWB (pedidos)
-                pedidos_matches = []
-                # Buscar específicamente AWBs con el contexto "MAWB:" para mayor precisión
-                awb_matches = re.findall(r'MAWB:?\s*(\d{3}[-\s]*\d{8})', text, re.IGNORECASE)
-                pedidos_matches = [awb.replace(" ", "").replace("--", "-") for awb in awb_matches]
-
-                # Si no se encontraron con MAWB, buscar patrón más general pero con contexto
-                if not pedidos_matches:
-                    # Buscar líneas que contengan "MAWB" o "AWB" seguido del número
-                    for line in text.split('\n'):
-                        if 'MAWB' in line.upper() or 'AWB' in line.upper():
-                            awb_in_line = re.findall(r'(\d{3}[-\s]*\d{8})', line)
-                            pedidos_matches.extend([awb.replace(" ", "") for awb in awb_in_line])
-
-                # Eliminar duplicados manteniendo el orden
-                pedidos_matches = list(dict.fromkeys(pedidos_matches))
-
-                logger.info(f"AWBs encontrados: {pedidos_matches}")
-
-                # Extraer valor_gastos_carga
-                valor_gastos_carga = Decimal('0.0')
-
-                # Intentar obtener el total de las entidades (priorizar net_amount)
-                total_amount = entities.get('net_amount', None) or entities.get('total_amount', None)
-                if total_amount:
-                    # Limpiar el valor (quitar símbolos de moneda, espacios, etc.)
-                    valor_str = re.sub(r'[^\d.,]', '', str(total_amount))
-                    # Convertir formato europeo (1.234,56) a formato decimal (1234.56)
-                    if ',' in valor_str and '.' in valor_str:
-                        # Formato: 1.234,56 -> 1234.56
-                        valor_str = valor_str.replace('.', '').replace(',', '.')
-                    elif ',' in valor_str:
-                        # Formato: 1234,56 -> 1234.56
-                        valor_str = valor_str.replace(',', '.')
-
-                    try:
-                        valor_gastos_carga = Decimal(valor_str)
-                    except:
-                        logger.warning(f"No se pudo convertir el valor: {valor_str}")
-
-                # Si no se encontró en entidades, buscar en el texto
-                if valor_gastos_carga == Decimal('0.0'):
-                    valor_pattern = r'Total\s*a\s*Pagar\s*USD[\s\S]*?([\d.,]+)'
-                    bruto_pattern = r'Bruto\s*total[\s\S]*?([\d.,]+)'
-
-                    valor_match = re.search(valor_pattern, text, re.IGNORECASE)
-                    if valor_match:
-                        valor_str_raw = valor_match.group(1).strip()
-                        if ',' in valor_str_raw:
-                            valor_str = valor_str_raw.replace('.', '').replace(',', '.')
-                        else:
-                            valor_str = valor_str_raw
-                        valor_gastos_carga = Decimal(valor_str)
-                    else:
-                        bruto_match = re.search(bruto_pattern, text, re.IGNORECASE)
-                        if bruto_match:
-                            valor_str_raw = bruto_match.group(1).strip()
-                            if ',' in valor_str_raw:
-                                valor_str = valor_str_raw.replace('.', '').replace(',', '.')
-                            else:
-                                valor_str = valor_str_raw
-                            valor_gastos_carga = Decimal(valor_str)
-
-                logger.info(f"Valor gastos carga: {valor_gastos_carga}")
+                if numero_factura == "No encontrado":
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'No se pudo identificar el número de factura en el PDF'
+                    })
 
                 # Extraer conceptos (simplificado)
-                conceptos_text = f"Factura procesada con Document AI - Agencia: {agencia_carga_name}"
+                conceptos_text = f"Factura procesada con pdfplumber - Agencia: {agencia_carga_name}"
 
             except Exception as e:
-                logger.error(f"Error al procesar con Document AI: {str(e)}")
+                logger.error(f"Error al procesar con pdfplumber: {str(e)}")
                 return JsonResponse({
                     'success': False,
-                    'error': f'Error al procesar el PDF con Document AI: {str(e)}'
+                    'error': f'Error al procesar el PDF: {str(e)}'
                 })
 
             # Get or create AgenciaCarga instance
