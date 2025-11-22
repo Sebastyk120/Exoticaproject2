@@ -87,10 +87,17 @@ def extract_invoice_data_with_pdfplumber(pdf_content):
             # We find all occurrences and sum them up to get the total expense.
             iva_imp_matches = re.findall(r'54IVA\s*\(Importaci[óo]n\).*?(\d{1,3}(?:\.\d{3})*,\d{2})', full_text, re.IGNORECASE)
 
+            logger.info(f"[ADUANA] IVA Importación matches encontrados: {iva_imp_matches}")
+
             total_iva_imp = Decimal('0.00')
             for val in iva_imp_matches:
                 total_iva_imp += parse_amount(val)
             data["iva_importacion"] = total_iva_imp
+
+            if total_iva_imp > Decimal('0.00'):
+                logger.info(f"[ADUANA] IVA Importación total: {total_iva_imp}")
+            else:
+                logger.warning(f"[ADUANA] No se encontró IVA Importación en el PDF")
 
             # 5. Total Gastos Aduana (Total Factura)
             # Format 2 explicit: Total Factura (EUR) 1.289,94
@@ -110,6 +117,7 @@ def extract_invoice_data_with_pdfplumber(pdf_content):
             iva_base_match_f2 = re.search(r'IVA\s+21%\s+sobre\s+Base\s+(\d{1,3}(?:\.\d{3})*,\d{2})', full_text, re.IGNORECASE)
             if iva_base_match_f2:
                 data["iva_sobre_base"] = parse_amount(iva_base_match_f2.group(1))
+                logger.info(f"[ADUANA] IVA Sobre Base encontrado (Formato 2): {iva_base_match_f2.group(1)} -> {data['iva_sobre_base']}")
             else:
                 # Format 1: Look for summary table row starting with IVA21
                 # IVA21 637,89 21 133,96 771,85
@@ -117,7 +125,11 @@ def extract_invoice_data_with_pdfplumber(pdf_content):
                 iva_row_match = re.search(r'IVA21\s+[\d.,]+\s+21\s+(\d{1,3}(?:\.\d{3})*,\d{2})', full_text)
                 if iva_row_match:
                     data["iva_sobre_base"] = parse_amount(iva_row_match.group(1))
+                    logger.info(f"[ADUANA] IVA Sobre Base encontrado (Formato 1): {iva_row_match.group(1)} -> {data['iva_sobre_base']}")
+                else:
+                    logger.warning(f"[ADUANA] No se encontró IVA Sobre Base en el PDF")
 
+        logger.info(f"[ADUANA] Datos finales extraídos: {data}")
         return data
 
     except Exception as e:

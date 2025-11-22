@@ -115,15 +115,7 @@ if __name__ == "__main__":
     # Example usage
     parser = AduanaPdfParser()
     files = [
-        "25-FV-001455.pdf",
-        "25-FV-004677.pdf",
-        "25-FV-017518.pdf",
-        "25-FV-036056.pdf",
-        "25-FV-046908.pdf",
-        "25-FV-048873.pdf",
-        "25-FV-050753.pdf",
-        "25-FV-050955.pdf",
-        "25-FV-056617.pdf"
+        "25-FV-050955.pdf"
     ]
 
     print(f"{'File':<20} | {'Factura':<15} | {'AWB':<15} | {'Gastos':<10} | {'IVA Imp':<10} | {'IVA Base':<10}")
