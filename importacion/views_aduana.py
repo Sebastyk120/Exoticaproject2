@@ -1,17 +1,19 @@
-from io import BytesIO
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseRedirect, JsonResponse
-from django import forms
-from django.core.validators import MinValueValidator
-from django.core.files.base import ContentFile
-from decimal import Decimal
-from pdfminer.high_level import extract_text
 import re
 import logging
-from .models import GastosAduana, AgenciaAduana, Pedido
+from decimal import Decimal
+import io
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django import forms
+from django.core.files.base import ContentFile
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+
+import pdfplumber
+
+from .models import GastosAduana, AgenciaAduana, Pedido
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -21,6 +23,108 @@ class PDFUploadForm(forms.Form):
     pdf_file = forms.FileField(label='Selecciona un archivo PDF')
 
 
+def parse_amount(amount_str):
+    """Converts a Spanish formatted number string (1.234,56) to Decimal."""
+    if not amount_str:
+        return Decimal('0.00')
+    # Remove thousands separator (.) and replace decimal separator (,) with .
+    clean_str = amount_str.replace('.', '').replace(',', '.')
+    try:
+        return Decimal(clean_str)
+    except:
+        return Decimal('0.00')
+
+
+def format_awb(awb_raw):
+    """Formats AWB as XXX-XXXXXXXX"""
+    if len(awb_raw) == 11:
+        return f"{awb_raw[:3]}-{awb_raw[3:]}"
+    return awb_raw
+
+
+def extract_invoice_data_with_pdfplumber(pdf_content):
+    """
+    Extrae datos de la factura de aduana usando pdfplumber
+    """
+    try:
+        data = {
+            "agencia_aduana": "No encontrado",
+            "numero_factura": "No encontrado",
+            "awbs": [],
+            "valor_gastos_aduana": Decimal('0.00'),
+            "iva_importacion": Decimal('0.00'),
+            "iva_sobre_base": Decimal('0.00')
+        }
+
+        # Abrir el PDF desde el contenido en memoria
+        with pdfplumber.open(io.BytesIO(pdf_content)) as pdf:
+            full_text = ""
+            for page in pdf.pages:
+                # layout=True preserves the visual structure, useful for tables
+                full_text += page.extract_text(layout=True) + "\n"
+
+            logger.info(f"[ADUANA] Texto extraído (primeros 500 caracteres): {full_text[:500]}...")
+
+            # 1. Agencia de Aduana
+            if "Arola Aduanas y Consignaciones" in full_text:
+                data["agencia_aduana"] = "Arola Aduanas y Consignaciones, S.L."
+
+            # 2. Número de Factura
+            # Pattern: 25-FV-XXXXXX
+            inv_match = re.search(r'(\d{2}-FV-\d{6})', full_text)
+            if inv_match:
+                data["numero_factura"] = inv_match.group(1)
+
+            # 3. AWBs
+            # Pattern: 729 followed by 8 digits (11 digits total)
+            # We use lookarounds to ensure we match the full number
+            awb_matches = re.findall(r'(?<!\d)(729\d{8})(?!\d)', full_text)
+            unique_awbs = sorted(list(set(awb_matches)))
+            data["awbs"] = [format_awb(awb) for awb in unique_awbs]
+
+            # 4. IVA Importación
+            # Pattern: 54IVA (Importación) ... value
+            # We find all occurrences and sum them up to get the total expense.
+            iva_imp_matches = re.findall(r'54IVA\s*\(Importaci[óo]n\).*?(\d{1,3}(?:\.\d{3})*,\d{2})', full_text, re.IGNORECASE)
+
+            total_iva_imp = Decimal('0.00')
+            for val in iva_imp_matches:
+                total_iva_imp += parse_amount(val)
+            data["iva_importacion"] = total_iva_imp
+
+            # 5. Total Gastos Aduana (Total Factura)
+            # Format 2 explicit: Total Factura (EUR) 1.289,94
+            total_match_f2 = re.search(r'Total\s+Factura\s*\(EUR\)\s*(\d{1,3}(?:\.\d{3})*,\d{2})', full_text, re.IGNORECASE)
+
+            if total_match_f2:
+                data["valor_gastos_aduana"] = parse_amount(total_match_f2.group(1))
+            else:
+                # Format 1: Look for the line starting with EUR (Currency) in the summary
+                # EUR 1.041,13 403,24 637,89 21 133,96 1.175,09
+                eur_line_match = re.search(r'EUR\s+.*?\s+(\d{1,3}(?:\.\d{3})*,\d{2})\s*$', full_text, re.MULTILINE)
+                if eur_line_match:
+                    data["valor_gastos_aduana"] = parse_amount(eur_line_match.group(1))
+
+            # 6. IVA Sobre Base
+            # Format 2: IVA 21% sobre Base 151,86
+            iva_base_match_f2 = re.search(r'IVA\s+21%\s+sobre\s+Base\s+(\d{1,3}(?:\.\d{3})*,\d{2})', full_text, re.IGNORECASE)
+            if iva_base_match_f2:
+                data["iva_sobre_base"] = parse_amount(iva_base_match_f2.group(1))
+            else:
+                # Format 1: Look for summary table row starting with IVA21
+                # IVA21 637,89 21 133,96 771,85
+                # We want the 3rd number (133,96)
+                iva_row_match = re.search(r'IVA21\s+[\d.,]+\s+21\s+(\d{1,3}(?:\.\d{3})*,\d{2})', full_text)
+                if iva_row_match:
+                    data["iva_sobre_base"] = parse_amount(iva_row_match.group(1))
+
+        return data
+
+    except Exception as e:
+        logger.error(f"[ADUANA] Error al procesar documento con pdfplumber: {str(e)}")
+        raise
+
+
 @login_required
 def process_pdf(request):
     if request.method == 'POST':
@@ -28,111 +132,79 @@ def process_pdf(request):
         if form.is_valid():
             pdf_file = form.cleaned_data['pdf_file']
             pdf_file.seek(0)  # Reiniciar puntero
-            
-            # Convertir el contenido a un objeto de archivo binario
+
+            # Leer el contenido del PDF
             pdf_content = pdf_file.read()
-            text = extract_text(BytesIO(pdf_content))
-            
-            # Extract agencia_aduana (fixed value from the PDF content)
-            agencia_aduana_name = "Arola Aduanas y Consignaciones, S.L."
 
-            # Extract numero_factura using regex
-            numero_factura_match = re.search(r'(\d{2}-FV-\d{6})', text)
-            numero_factura = numero_factura_match.group(1) if numero_factura_match else None
+            try:
+                # Extraer datos usando pdfplumber
+                data = extract_invoice_data_with_pdfplumber(pdf_content)
 
-            # Verificar si ya existe un gasto con el mismo número de factura
-            if numero_factura and GastosAduana.objects.filter(numero_factura=numero_factura).exists():
+                # Extraer valores del diccionario
+                agencia_aduana_name = data["agencia_aduana"]
+                numero_factura = data["numero_factura"]
+                pedidos_matches = data["awbs"]
+                valor_gastos_aduana = data["valor_gastos_aduana"]
+                iva_importacion = data["iva_importacion"]
+                iva_sobre_base = data["iva_sobre_base"]
+
+                logger.info(f"[ADUANA] Agencia: {agencia_aduana_name}")
+                logger.info(f"[ADUANA] Número de factura: {numero_factura}")
+                logger.info(f"[ADUANA] AWBs encontrados: {pedidos_matches}")
+                logger.info(f"[ADUANA] Valor gastos aduana: {valor_gastos_aduana}")
+                logger.info(f"[ADUANA] IVA Importación: {iva_importacion}")
+                logger.info(f"[ADUANA] IVA Sobre Base: {iva_sobre_base}")
+
+                # Verificar si ya existe un gasto con este número de factura
+                existing_gasto = GastosAduana.objects.filter(numero_factura=numero_factura).first()
+                if existing_gasto:
+                    pedidos_info = ", ".join([p.awb for p in existing_gasto.pedidos.all()[:3]])
+                    if existing_gasto.pedidos.count() > 3:
+                        pedidos_info += f" (y {existing_gasto.pedidos.count() - 3} más)"
+
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'Ya existe un gasto registrado con el número de factura {numero_factura}. '
+                                f'Agencia: {existing_gasto.agencia_aduana.nombre}. '
+                                f'Valor: €{existing_gasto.valor_gastos_aduana}. '
+                                f'AWBs asociados: {pedidos_info if pedidos_info else "Ninguno"}.'
+                    })
+
+                # Extraer conceptos (opcional, puede ser mejorado en el futuro)
+                conceptos_text = f"Factura procesada con pdfplumber - Agencia: {agencia_aduana_name}"
+
+            except Exception as e:
+                logger.error(f"[ADUANA] Error al procesar con pdfplumber: {str(e)}")
                 return JsonResponse({
                     'success': False,
-                    'error': f'Ya existe un gasto con el número de factura: {numero_factura}'
+                    'error': f'Error al procesar el PDF con pdfplumber: {str(e)}'
                 })
 
-            # Extraer el número de pedido (mismo regex que antes)
-            pedidos_match = re.search(r'AV\d+\/(\d+)\/\d+', text)
-            pedidos_number = pedidos_match.group(1) if pedidos_match else None
-
-            # Formatear el número con guion después de los 3 primeros dígitos
-            if pedidos_number:
-                formatted_pedido = f"{pedidos_number[:3]}-{pedidos_number[3:]}"
-            else:
-                formatted_pedido = None
-
-            # Extract valor_gastos_aduana from "Total Factura(EUR) X"
-            valor_match = re.search(r'Total Factura \(EUR\)[\s\S]*?(\d[\d.,]*)\s+Forma de Pago', text)
-            if valor_match:
-                valor_str_raw = valor_match.group(1).strip()
-                if ',' in valor_str_raw:
-                    valor_str = valor_str_raw.replace('.', '').replace(',', '.')
-                else:
-                    valor_str = valor_str_raw
-                valor_gastos_aduana = Decimal(valor_str)
-            else:
-                valor_gastos_aduana = Decimal('0.0')
-
-            # EXTRAER CONCEPTOS
-            conceptos_match = re.search(r'CONCEPTOS[\s\S]*?(?=(Forma de Pago|Total Factura))', text)
-            if conceptos_match:
-                conceptos_text = conceptos_match.group(0).strip()
-                # Limpiar el texto (quitar saltos de línea y espacios en exceso)
-                conceptos_text = ' '.join(conceptos_text.split())
-                # Truncar a 500 caracteres si es necesario
-                if len(conceptos_text) > 500:
-                    conceptos_text = conceptos_text[:497] + "..."
-            else:
-                conceptos_text = None
-
             # Get or create AgenciaAduana instance
-            agencia, created = AgenciaAduana.objects.get_or_create(nombre=agencia_aduana_name)
+            agencia, _ = AgenciaAduana.objects.get_or_create(nombre=agencia_aduana_name)
 
             # Get Pedido instances using the AWB field
             try:
-                # Buscar los pedidos usando el campo awb (pueden ser varios)
-                pedidos = Pedido.objects.filter(awb=formatted_pedido)
-                
-                if not pedidos.exists():
+                matching_pedidos = []
+
+                for awb in pedidos_matches:
+                    pedidos = Pedido.objects.filter(awb=awb)
+                    if pedidos.exists():
+                        matching_pedidos.extend(pedidos)
+
+                if not matching_pedidos:
                     return JsonResponse({
                         'success': False,
-                        'error': f'No se encontraron pedidos con AWB: {formatted_pedido}'
+                        'error': f'No se encontraron pedidos con los AWBs proporcionados: {pedidos_matches}'
                     })
-                    
-                pedidos_count = pedidos.count()
-                
+
+                logger.info(f"[ADUANA] Pedidos encontrados: {len(matching_pedidos)}")
+
             except Exception as e:
                 return JsonResponse({
                     'success': False,
                     'error': f'Error al buscar pedidos: {str(e)}'
                 })
-
-            # Extraer IVA de Importación - método dinámico
-            iva_importacion = Decimal('0.00')
-            
-            # Método 1: Buscar "IVA (Importación)" seguido por el valor
-            pattern1 = r'IVA\s*\(\s*Importación\s*\).*?(\d+[.,]\d+)'
-            iva_match1 = re.search(pattern1, text)
-            if iva_match1:
-                iva_importacion = Decimal(iva_match1.group(1).replace(',', '.'))
-            else:
-                # Método 2: Buscar "54 IVA" seguido por el valor
-                pattern2 = r'54\s+IVA.*?(\d+[.,]\d+)'
-                iva_match2 = re.search(pattern2, text)
-                if iva_match2:
-                    iva_importacion = Decimal(iva_match2.group(1).replace(',', '.'))
-                else:
-                    # Método 3: Buscar en la tabla, después de No IVA y antes de Total sujeto
-                    pattern3 = r'No IVA.*?(\d+[.,]\d+)\s+Total sujeto'
-                    iva_match3 = re.search(pattern3, text, re.DOTALL)
-                    if iva_match3:
-                        iva_importacion = Decimal(iva_match3.group(1).replace(',', '.'))
-
-                
-            # Extraer iva_sobre_base: buscar la línea que sigue a "IVA21" y comienza con "0"
-            iva_sobre_base_pattern = r'IVA21\s*.*\n0\s+(\d{1,3}(?:\.\d{3})*,\d+)'
-            iva_sobre_base_match = re.search(iva_sobre_base_pattern, text, re.DOTALL)
-            if iva_sobre_base_match:
-                iva_sobre_base_str = iva_sobre_base_match.group(1).replace('.', '').replace(',', '.')
-                iva_sobre_base = Decimal(iva_sobre_base_str)
-            else:
-                iva_sobre_base = Decimal('0.00')
 
             # Crear instancia de GastosAduana
             try:
@@ -149,7 +221,7 @@ def process_pdf(request):
                 gastos.save()
 
                 # Agregar todos los pedidos encontrados
-                for pedido in pedidos:
+                for pedido in matching_pedidos:
                     gastos.pedidos.add(pedido)
 
                 # Guardar el archivo PDF (el upload_to ya usa la fecha del primer pedido)

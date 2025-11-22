@@ -196,6 +196,22 @@ def process_pdf(request):
             # Get or create AgenciaCarga instance
             agencia, created = AgenciaCarga.objects.get_or_create(nombre=agencia_carga_name)
 
+            # Verificar si ya existe un gasto con este número de factura
+            existing_gasto = GastosCarga.objects.filter(numero_factura=numero_factura).first()
+            if existing_gasto:
+                # Obtener información de los pedidos asociados
+                pedidos_info = ", ".join([p.awb for p in existing_gasto.pedidos.all()[:3]])
+                if existing_gasto.pedidos.count() > 3:
+                    pedidos_info += f" (y {existing_gasto.pedidos.count() - 3} más)"
+
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Ya existe un gasto registrado con el número de factura {numero_factura}. '
+                            f'Agencia: {existing_gasto.agencia_carga.nombre}. '
+                            f'Valor: ${existing_gasto.valor_gastos_carga} USD. '
+                            f'AWBs asociados: {pedidos_info if pedidos_info else "Ninguno"}.'
+                })
+
             # Get Pedido instances using the AWB field
             try:
                 # We'll collect all the pedidos that match our list of AWBs
