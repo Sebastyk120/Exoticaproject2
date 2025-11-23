@@ -42,7 +42,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 mb-4">
             <div class="balance-card" data-bs-toggle="modal" data-bs-target="#modalBalanceAduana">
                 <div class="card-body">
@@ -62,7 +62,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 mb-4">
             <div class="balance-card" data-bs-toggle="modal" data-bs-target="#modalBalanceCarga">
                 <div class="card-body">
@@ -82,7 +82,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 mb-4">
             <div class="balance-card" data-bs-toggle="modal" data-bs-target="#modalBalanceCliente">
                 <div class="card-body">
@@ -115,37 +115,41 @@
                     </h4>
                     <div class="row navigation-buttons">
                         <div class="col-lg-3 col-md-6 mb-3">
-                            <a href="{% url 'importacion:transferencias_exportador_list' %}" class="btn btn-primary w-100 btn-with-icon">
+                            <a href="{% url 'importacion:transferencias_exportador_list' %}"
+                                class="btn btn-primary w-100 btn-with-icon">
                                 <i class="bi bi-truck"></i>
                                 <div class="btn-text">
-                                    <strong>Transferencias</strong>
+                                    <strong>Pago a</strong>
                                     <small>Exportadores</small>
                                 </div>
                             </a>
                         </div>
                         <div class="col-lg-3 col-md-6 mb-3">
-                            <a href="{% url 'importacion:transferencias_aduana_list' %}" class="btn btn-warning w-100 btn-with-icon">
+                            <a href="{% url 'importacion:transferencias_aduana_list' %}"
+                                class="btn btn-warning w-100 btn-with-icon">
                                 <i class="bi bi-building"></i>
                                 <div class="btn-text">
-                                    <strong>Transferencias</strong>
+                                    <strong>Pago a</strong>
                                     <small>Aduanas</small>
                                 </div>
                             </a>
                         </div>
                         <div class="col-lg-3 col-md-6 mb-3">
-                            <a href="{% url 'importacion:transferencias_carga_list' %}" class="btn btn-info w-100 btn-with-icon">
+                            <a href="{% url 'importacion:transferencias_carga_list' %}"
+                                class="btn btn-info w-100 btn-with-icon">
                                 <i class="bi bi-box-seam"></i>
                                 <div class="btn-text">
-                                    <strong>Transferencias</strong>
+                                    <strong>Pago a</strong>
                                     <small>Agencias de Carga</small>
                                 </div>
                             </a>
                         </div>
                         <div class="col-lg-3 col-md-6 mb-3">
-                            <a href="{% url 'importacion:transferencias_cliente_list' %}" class="btn btn-success w-100 btn-with-icon">
+                            <a href="{% url 'importacion:transferencias_cliente_list' %}"
+                                class="btn btn-success w-100 btn-with-icon">
                                 <i class="bi bi-people"></i>
                                 <div class="btn-text">
-                                    <strong>Transferencias</strong>
+                                    <strong>Pago de</strong>
                                     <small>Clientes</small>
                                 </div>
                             </a>
@@ -168,7 +172,9 @@
                     <div class="row text-center">
                         <div class="col-lg-3 col-md-6 mb-3">
                             <div class="stat-item">
-                                <div class="stat-number">{{ total_balance_exportadores|add:total_balance_aduanas|add:total_balance_cargas|add:total_balance_clientes|format_currency }}</div>
+                                <div class="stat-number">{{
+                                    total_balance_exportadores|add:total_balance_aduanas|add:total_balance_cargas|add:total_balance_clientes|format_currency
+                                    }}</div>
                                 <div class="stat-label">Total General</div>
                             </div>
                         </div>
@@ -180,7 +186,9 @@
                         </div>
                         <div class="col-lg-3 col-md-6 mb-3">
                             <div class="stat-item">
-                                <div class="stat-number">{{ balances_exportador|length|add:balances_aduana|length|add:balances_carga|length|add:balances_cliente|length }}</div>
+                                <div class="stat-number">{{
+                                    balances_exportador|length|add:balances_aduana|length|add:balances_carga|length|add:balances_cliente|length
+                                    }}</div>
                                 <div class="stat-label">Total Entidades</div>
                             </div>
                         </div>
@@ -199,7 +207,8 @@
 
 <!-- MODALS for balances -->
 <!-- Exportador Balance Modal -->
-<div class="modal fade" id="modalBalanceExportador" tabindex="-1" aria-labelledby="modalBalanceExportadorLabel" aria-hidden="true">
+<div class="modal fade" id="modalBalanceExportador" tabindex="-1" aria-labelledby="modalBalanceExportadorLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -249,7 +258,8 @@
 </div>
 
 <!-- Aduana Balance Modal -->
-<div class="modal fade" id="modalBalanceAduana" tabindex="-1" aria-labelledby="modalBalanceAduanaLabel" aria-hidden="true">
+<div class="modal fade" id="modalBalanceAduana" tabindex="-1" aria-labelledby="modalBalanceAduanaLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -299,7 +309,8 @@
 </div>
 
 <!-- Carga Balance Modal -->
-<div class="modal fade" id="modalBalanceCarga" tabindex="-1" aria-labelledby="modalBalanceCargaLabel" aria-hidden="true">
+<div class="modal fade" id="modalBalanceCarga" tabindex="-1" aria-labelledby="modalBalanceCargaLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -349,7 +360,8 @@
 </div>
 
 <!-- Cliente Balance Modal -->
-<div class="modal fade" id="modalBalanceCliente" tabindex="-1" aria-labelledby="modalBalanceClienteLabel" aria-hidden="true">
+<div class="modal fade" id="modalBalanceCliente" tabindex="-1" aria-labelledby="modalBalanceClienteLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
