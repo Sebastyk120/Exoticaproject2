@@ -12,80 +12,75 @@
 
 {% block content %}
 <div class="container-fluid content-wrapper">
-    <!-- Modern Header Section -->
+    <!-- Compact Page Header -->
     <div class="page-header">
-        <div class="page-header-content">
-            <div class="page-title-wrapper">
-                {% block page_title %}{% endblock %}
-            </div>
-            <div class="page-actions">
-                <a href="{% url 'importacion:transferencias' %}" class="btn btn-outline-secondary btn-with-icon">
-                    <i class="bi bi-arrow-left"></i>
-                    <span>Volver</span>
-                </a>
-                <button type="button" class="btn btn-primary btn-with-icon" data-bs-toggle="modal" data-bs-target="#modalCrear">
-                    <i class="bi bi-plus-circle"></i>
-                    <span>Nueva Transferencia</span>
-                </button>
-            </div>
+        <div class="page-title-wrapper">
+            {% block page_title %}{% endblock %}
+        </div>
+        <div class="page-actions">
+            <a href="{% url 'importacion:transferencias' %}" class="btn btn-outline-secondary btn-with-icon">
+                <i class="bi bi-arrow-left"></i>
+                <span>Volver</span>
+            </a>
+            <button type="button" class="btn btn-primary btn-with-icon" data-bs-toggle="modal"
+                data-bs-target="#modalCrear">
+                <i class="bi bi-plus-lg"></i>
+                <span>Nueva Transferencia</span>
+            </button>
         </div>
     </div>
 
     <!-- Main Content Card -->
     <div class="content-card">
-        <div class="card-body">
-            <!-- Modern Filter Section -->
-            <div class="filters-section">
-                <div class="filters-header">
-                    <h5 class="filters-title">
-                        <i class="bi bi-funnel"></i>
-                        Filtros de Búsqueda
-                    </h5>
-                    <button type="button" class="btn-toggle-filters" id="toggleFilters">
-                        <i class="bi bi-chevron-up"></i>
-                    </button>
-                </div>
-                <div class="filters-body" id="filtersBody">
-                    <form method="get" class="filter-form" id="filterForm">
-                        <div class="filter-grid">
-                            {% for field in filter.form %}
-                            <div class="filter-item">
-                                <label class="filter-label">{{ field.label }}</label>
-                                <div class="filter-input-wrapper">
-                                    {{ field }}
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <div class="filter-actions">
-                            <button type="submit" class="btn btn-primary btn-filter-apply">
-                                <i class="bi bi-search"></i>
-                                Aplicar Filtros
-                            </button>
-                            <a href="{{ request.path }}" class="btn btn-outline-secondary btn-filter-clear">
-                                <i class="bi bi-x-circle"></i>
-                                Limpiar Filtros
-                            </a>
-                        </div>
-                    </form>
-                </div>
+        <!-- Compact Filter Section -->
+        <div class="filters-section">
+            <div class="filters-header" id="toggleFilters">
+                <h5 class="filters-title">
+                    <i class="bi bi-funnel"></i>
+                    Filtros
+                    <span class="badge bg-light text-dark border ms-2">{{ table.rows|length }} registros</span>
+                </h5>
+                <i class="bi bi-chevron-up text-muted"></i>
             </div>
-
-            <!-- Enhanced Table Container -->
-            <div class="table-wrapper">
-                <div class="table-header">
-                    <div class="table-info">
-                        <span class="table-count">
-                            <i class="bi bi-list-ul"></i>
-                            <strong>{{ table.rows|length }}</strong> registro{{ table.rows|length|pluralize }}
-                        </span>
+            <div class="filters-body" id="filtersBody"> <!-- Expanded by default -->
+                <form method="get" class="filter-form" id="filterForm">
+                    <div class="filter-grid">
+                        {% for field in filter.form %}
+                        <div class="filter-item">
+                            <label class="filter-label">{{ field.label }}</label>
+                            <div class="filter-input-wrapper">
+                                {{ field }}
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
-                </div>
+                    <div class="filter-actions">
+                        <a href="{{ request.path }}" class="btn btn-outline-secondary btn-sm">
+                            Limpiar
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            Aplicar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="card-body">
+            <div class="table-wrapper">
                 <div class="table-container">
                     {% render_table table %}
                 </div>
             </div>
         </div>
+
+        <!-- Pagination Footer (if needed, usually rendered by table but we can add custom wrapper if table doesn't provide) -->
+        {% if table.page %}
+        <div class="pagination-container">
+            <!-- Pagination is usually handled by django-tables2 template, but we style the container -->
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -95,47 +90,47 @@
 
 <!-- Enhanced JavaScript -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Flatpickr for date inputs
-    const dateInputs = document.querySelectorAll('input[type="date"]');
-    dateInputs.forEach(input => {
-        flatpickr(input, {
-            locale: 'es',
-            dateFormat: 'Y-m-d',
-            altInput: true,
-            altFormat: 'd/m/Y',
-            allowInput: true,
-            disableMobile: false
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize Flatpickr for date inputs
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        dateInputs.forEach(input => {
+            flatpickr(input, {
+                locale: 'es',
+                dateFormat: 'Y-m-d',
+                altInput: true,
+                altFormat: 'd/m/Y',
+                allowInput: true,
+                disableMobile: false
+            });
+        });
+
+        // Toggle filters
+        const toggleFiltersBtn = document.getElementById('toggleFilters');
+        const filtersBody = document.getElementById('filtersBody');
+
+        if (toggleFiltersBtn && filtersBody) {
+            toggleFiltersBtn.addEventListener('click', function () {
+                filtersBody.classList.toggle('collapsed');
+                const icon = this.querySelector('i');
+                icon.classList.toggle('bi-chevron-up');
+                icon.classList.toggle('bi-chevron-down');
+            });
+        }
+
+        // Add loading states to forms
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function () {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn && !submitBtn.classList.contains('loading')) {
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
+                }
+            });
         });
     });
-
-    // Toggle filters
-    const toggleFiltersBtn = document.getElementById('toggleFilters');
-    const filtersBody = document.getElementById('filtersBody');
-
-    if (toggleFiltersBtn && filtersBody) {
-        toggleFiltersBtn.addEventListener('click', function() {
-            filtersBody.classList.toggle('collapsed');
-            const icon = this.querySelector('i');
-            icon.classList.toggle('bi-chevron-up');
-            icon.classList.toggle('bi-chevron-down');
-        });
-    }
-
-    // Add loading states to forms
-    const forms = document.querySelectorAll('form');
-    forms.forEach(form => {
-        form.addEventListener('submit', function() {
-            const submitBtn = this.querySelector('button[type="submit"]');
-            if (submitBtn && !submitBtn.classList.contains('loading')) {
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
-            }
-        });
-    });
-});
 </script>
 
 {% block modals %}{% endblock %}
