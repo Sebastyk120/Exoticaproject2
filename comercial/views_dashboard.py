@@ -106,6 +106,11 @@ def calcular_gastos_aduana_por_producto_semana(anio=None, semana=None, trimestre
     """
     Distribuye los gastos de aduana proporcionalmente a las cajas recibidas y kilos de cada producto.
     Ahora también descuenta proporcionalmente iva_importacion e iva_sobre_base.
+
+    CORRECCIÓN: Se eliminó el filtro pedido__pagado=True para incluir todos los pedidos asociados
+    al gasto, independientemente de su estado de pago al exportador. Los gastos de aduana se pagan
+    a la agencia de aduana, no al exportador, por lo que el estado de pago del pedido no debe
+    afectar la distribución de estos gastos.
     """
     if semana:
         pedidos_año = Pedido.objects.filter(semana=semana)
@@ -115,17 +120,28 @@ def calcular_gastos_aduana_por_producto_semana(anio=None, semana=None, trimestre
         pedidos_año = Pedido.objects.filter(fecha_entrega__year=anio)
     else:
         pedidos_año = Pedido.objects.all()
-    
+
     resultado = {}
-    
+
+    # Obtener IDs de pedidos del período para filtrar gastos eficientemente
+    pedidos_ids = list(pedidos_año.values_list('id', flat=True))
+
+    if not pedidos_ids:
+        return resultado
+
+    # Filtrar solo los gastos que tienen al menos un pedido en el período seleccionado
+    gastos_aduana = GastosAduana.objects.filter(
+        pedidos__id__in=pedidos_ids
+    ).distinct().prefetch_related('pedidos')
+
     # Para cada gasto de aduana
-    for gasto_aduana in GastosAduana.objects.all():
-        # Obtener los pedidos asociados a este gasto que también estén en el año filtrado
-        pedidos = gasto_aduana.pedidos.filter(id__in=pedidos_año)
-        
-        if not pedidos:
+    for gasto_aduana in gastos_aduana:
+        # Obtener los pedidos asociados a este gasto que también estén en el período filtrado
+        pedidos = gasto_aduana.pedidos.filter(id__in=pedidos_ids)
+
+        if not pedidos.exists():
             continue
-        
+
         # Calcular el gasto neto de aduana
         gasto_neto = gasto_aduana.valor_gastos_aduana
         if gasto_aduana.valor_nota_credito:
@@ -136,47 +152,58 @@ def calcular_gastos_aduana_por_producto_semana(anio=None, semana=None, trimestre
         iva_sobre_base = gasto_aduana.iva_sobre_base or 0
         gasto_neto -= iva_importacion
         gasto_neto -= iva_sobre_base
-            
+
         # Si el gasto neto es cero o negativo, continuamos con el siguiente gasto
         if gasto_neto <= 0:
             continue
-            
-        # Obtener todos los detalles de los pedidos asociados
-        detalles_pedidos = DetallePedido.objects.filter(pedido__in=pedidos, pedido__pagado=True)
-        
+
+        # CORRECCIÓN: Eliminado el filtro pedido__pagado=True
+        # Obtener todos los detalles de los pedidos asociados, sin importar su estado de pago
+        detalles_pedidos = DetallePedido.objects.filter(
+            pedido__in=pedidos
+        ).select_related('presentacion__fruta', 'pedido')
+
         # Calcular el total de kilos para distribuir proporcionalmente
         total_kilos = detalles_pedidos.aggregate(
             total=Coalesce(Sum('kilos'), Decimal('0'))
         )['total']
-        
+
         # Si no hay kilos registrados, continuamos con el siguiente gasto
         if total_kilos == 0:
             continue
-        
+
         # Distribuir el gasto proporcionalmente por cada detalle
         for detalle in detalles_pedidos:
             producto = detalle.presentacion.fruta.nombre
-            semana = detalle.pedido.semana
-            
+            semana_pedido = detalle.pedido.semana
+
             # Calcular la proporción para este producto basada en kilos
             proporcion = Decimal(detalle.kilos) / total_kilos
             gasto_producto = float(proporcion * gasto_neto)
-            
+
             # Agregar al diccionario de resultado
             if producto not in resultado:
                 resultado[producto] = {}
-                
-            if semana in resultado[producto]:
-                resultado[producto][semana] += gasto_producto
+
+            if semana_pedido in resultado[producto]:
+                resultado[producto][semana_pedido] += gasto_producto
             else:
-                resultado[producto][semana] = gasto_producto
-    
+                resultado[producto][semana_pedido] = gasto_producto
+
     return resultado
 
 def calcular_gastos_carga_por_producto_semana(anio=None, semana=None, trimestre=None):
     """
     Distribuye los gastos de carga proporcionalmente a las cajas recibidas y kilos de cada producto.
     Actualizada para usar el formato completo de semana.
+
+    CORRECCIÓN: Se eliminó el filtro pedido__pagado=True para incluir todos los pedidos asociados
+    al gasto, independientemente de su estado de pago al exportador. Los gastos de carga se pagan
+    a la agencia de carga, no al exportador, por lo que el estado de pago del pedido no debe
+    afectar la distribución de estos gastos.
+
+    CORRECCIÓN 2: Se considera el valor_gastos_carga_eur incluso si el gasto no está completamente
+    pagado (pagado=False), ya que este campo se calcula proporcionalmente para pagos parciales.
     """
     if semana:
         pedidos_año = Pedido.objects.filter(semana=semana)
@@ -186,54 +213,69 @@ def calcular_gastos_carga_por_producto_semana(anio=None, semana=None, trimestre=
         pedidos_año = Pedido.objects.filter(fecha_entrega__year=anio)
     else:
         pedidos_año = Pedido.objects.all()
-    
+
     resultado = {}
-    
+
+    # Obtener IDs de pedidos del período para filtrar gastos eficientemente
+    pedidos_ids = list(pedidos_año.values_list('id', flat=True))
+
+    if not pedidos_ids:
+        return resultado
+
+    # Filtrar solo los gastos que tienen al menos un pedido en el período seleccionado
+    gastos_carga = GastosCarga.objects.filter(
+        pedidos__id__in=pedidos_ids
+    ).distinct().prefetch_related('pedidos')
+
     # Para cada gasto de carga
-    for gasto_carga in GastosCarga.objects.all():
-        # Obtener los pedidos asociados a este gasto que también estén en el año filtrado
-        pedidos = gasto_carga.pedidos.filter(id__in=pedidos_año)
-        
-        if not pedidos:
+    for gasto_carga in gastos_carga:
+        # Obtener los pedidos asociados a este gasto que también estén en el período filtrado
+        pedidos = gasto_carga.pedidos.filter(id__in=pedidos_ids)
+
+        if not pedidos.exists():
             continue
-        
-        # El valor de gasto_carga.valor_gastos_carga_eur ya incluye el ajuste por NC
+
+        # CORRECCIÓN: Usar valor_gastos_carga_eur que se calcula incluso para pagos parciales
+        # Este campo se actualiza en signals.py mediante reevaluar_pagos_carga()
         gasto_neto = gasto_carga.valor_gastos_carga_eur
-            
-        # Si el gasto neto es cero o negativo, continuamos con el siguiente gasto
-        if gasto_neto <= 0:
+
+        # Si el gasto neto es None, cero o negativo, continuamos con el siguiente gasto
+        if not gasto_neto or gasto_neto <= 0:
             continue
-            
-        # Obtener todos los detalles de los pedidos asociados
-        detalles_pedidos = DetallePedido.objects.filter(pedido__in=pedidos, pedido__pagado=True)
-        
+
+        # CORRECCIÓN: Eliminado el filtro pedido__pagado=True
+        # Obtener todos los detalles de los pedidos asociados, sin importar su estado de pago
+        detalles_pedidos = DetallePedido.objects.filter(
+            pedido__in=pedidos
+        ).select_related('presentacion__fruta', 'pedido')
+
         # Calcular el total de kilos para distribuir proporcionalmente
         total_kilos = detalles_pedidos.aggregate(
             total=Coalesce(Sum('kilos'), Decimal('0'))
         )['total']
-        
+
         # Si no hay kilos registrados, continuamos con el siguiente gasto
         if total_kilos == 0:
             continue
-        
+
         # Distribuir el gasto proporcionalmente por cada detalle
         for detalle in detalles_pedidos:
             producto = detalle.presentacion.fruta.nombre
-            semana = detalle.pedido.semana
-            
+            semana_pedido = detalle.pedido.semana
+
             # Calcular la proporción para este producto basada en kilos
             proporcion = Decimal(detalle.kilos) / total_kilos
             gasto_producto = float(proporcion * gasto_neto)
-            
+
             # Agregar al diccionario de resultado
             if producto not in resultado:
                 resultado[producto] = {}
-                
-            if semana in resultado[producto]:
-                resultado[producto][semana] += gasto_producto
+
+            if semana_pedido in resultado[producto]:
+                resultado[producto][semana_pedido] += gasto_producto
             else:
-                resultado[producto][semana] = gasto_producto
-    
+                resultado[producto][semana_pedido] = gasto_producto
+
     return resultado
 
 def calcular_utilidad_por_producto_semana(anio=None, semana=None, trimestre=None):

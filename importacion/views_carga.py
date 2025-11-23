@@ -275,7 +275,7 @@ def process_pdf(request):
     # --- Inicio: filtros y paginación de gastos ---
     numero_factura_query = request.GET.get('numero_factura', '').strip()
     semana_query = request.GET.get('semana', '').strip()
-    gastos_list = GastosCarga.objects.all().order_by('-id')
+    gastos_list = GastosCarga.objects.all().order_by('-pedidos__fecha_entrega', '-id').distinct()
     if numero_factura_query:
         gastos_list = gastos_list.filter(numero_factura__icontains=numero_factura_query)
     if semana_query:

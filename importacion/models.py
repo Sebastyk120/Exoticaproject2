@@ -585,6 +585,7 @@ class GastosAduana(models.Model):
     class Meta:
         verbose_name = "Gastos Aduana"
         verbose_name_plural = "Gastos Aduana"
+        ordering = ['-pedidos__fecha_entrega', 'id']
 
 
 class TranferenciasAduana(models.Model):
@@ -636,6 +637,7 @@ class GastosCarga(models.Model):
     class Meta:
         verbose_name = "Gastos Carga"
         verbose_name_plural = "Gastos Carga"
+        ordering = ['-pedidos__fecha_entrega', 'id']
 
 
 class TranferenciasCarga(models.Model):
