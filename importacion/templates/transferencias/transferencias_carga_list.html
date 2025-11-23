@@ -103,13 +103,14 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="agencia_carga{{ row.record.pk }}" class="form-label">Agencia Carga *</label>
+                            <label for="agencia_carga{{ row.record.pk }}" class="form-label">Agencia de Carga *</label>
                             <select class="form-select" id="agencia_carga{{ row.record.pk }}" name="agencia_carga"
                                 required>
                                 <option value="">Seleccione una agencia de carga</option>
                                 {% for agencia in agencias_carga %}
-                                <option value="{{ agencia.id }}" {% if row.record.agencia_carga.id==agencia.id
-                                    %}selected{% endif %}>{{ agencia.nombre }}</option>
+                                <option value="{{ agencia.id }}" {% if row.record.agencia_carga.id == agencia.id %}selected{% endif %}>
+                                    {{ agencia.nombre }}
+                                </option>
                                 {% endfor %}
                             </select>
                         </div>

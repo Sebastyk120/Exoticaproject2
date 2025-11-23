@@ -160,49 +160,7 @@
         </div>
     </div>
 
-    <!-- Statistics Summary -->
-    <div class="row">
-        <div class="col-12">
-            <div class="content-card">
-                <div class="card-body">
-                    <h4 class="card-title mb-4">
-                        <i class="bi bi-graph-up"></i>
-                        Resumen Estadístico
-                    </h4>
-                    <div class="row text-center">
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="stat-item">
-                                <div class="stat-number">{{
-                                    total_balance_exportadores|add:total_balance_aduanas|add:total_balance_cargas|add:total_balance_clientes|format_currency
-                                    }}</div>
-                                <div class="stat-label">Total General</div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="stat-item">
-                                <div class="stat-number">4</div>
-                                <div class="stat-label">Tipos de Transferencias</div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="stat-item">
-                                <div class="stat-number">{{
-                                    balances_exportador|length|add:balances_aduana|length|add:balances_carga|length|add:balances_cliente|length
-                                    }}</div>
-                                <div class="stat-label">Total Entidades</div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="stat-item">
-                                <div class="stat-number">100%</div>
-                                <div class="stat-label">Sistema Activo</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 </div>
 
 <!-- MODALS for balances -->

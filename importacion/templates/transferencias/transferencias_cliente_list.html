@@ -99,8 +99,9 @@
                             <select class="form-select" id="cliente{{ row.record.pk }}" name="cliente" required>
                                 <option value="">Seleccione un cliente</option>
                                 {% for cliente in clientes %}
-                                <option value="{{ cliente.id }}" {% if row.record.cliente.id==cliente.id %}selected{%
-                                    endif %}>{{ cliente.nombre }}</option>
+                                <option value="{{ cliente.id }}" {% if row.record.cliente.id == cliente.id %}selected{% endif %}>
+                                    {{ cliente.nombre }}
+                                </option>
                                 {% endfor %}
                             </select>
                         </div>

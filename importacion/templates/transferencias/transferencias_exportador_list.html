@@ -108,8 +108,9 @@
                             <select class="form-select" id="exportador{{ row.record.pk }}" name="exportador" required>
                                 <option value="">Seleccione un exportador</option>
                                 {% for exportador in exportadores %}
-                                <option value="{{ exportador.id }}" {% if row.record.exportador.id==exportador.id
-                                    %}selected{% endif %}>{{ exportador.nombre }}</option>
+                                <option value="{{ exportador.id }}" {% if row.record.exportador.id == exportador.id %}selected{% endif %}>
+                                    {{ exportador.nombre }}
+                                </option>
                                 {% endfor %}
                             </select>
                         </div>
