@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,8 +13,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
+        rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{% static 'css/base.css' %}" rel="stylesheet">
     <link rel="icon" href="{% static 'img/favicon_dos.ico' %}" type="image/x-icon">
@@ -21,46 +25,69 @@
     <style>
         /* Floating Button Animation */
         @keyframes colorChange {
-            0% { background-color: var(--primary-color); }
-            50% { background-color: var(--section-comercial); }
-            100% { background-color: var(--primary-color); }
+            0% {
+                background-color: var(--primary-color);
+            }
+
+            50% {
+                background-color: var(--section-comercial);
+            }
+
+            100% {
+                background-color: var(--primary-color);
+            }
         }
+
         @keyframes move {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-            100% { transform: translateY(0); }
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
         }
+
         .floating-menu-button {
             position: fixed;
-            top: 20px; /* Changed from bottom to top */
-            left: 20px; /* Changed from right to left */
+            top: 20px;
+            /* Changed from bottom to top */
+            left: 20px;
+            /* Changed from right to left */
             z-index: 999;
             padding: 10px 15px;
             border-radius: 50px;
             color: white;
             border: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             animation: colorChange 3s infinite, move 1s infinite;
         }
     </style>
 </head>
+
 <body>
     <!-- Floating Menu Button -->
     <button class="btn btn-primary floating-menu-button" type="button" data-bs-toggle="offcanvas"
-            data-bs-target="#exoticaSidebar" aria-controls="exoticaSidebar">
+        data-bs-target="#exoticaSidebar" aria-controls="exoticaSidebar">
         <i class="fas fa-bars"></i> Menú
     </button>
-    
+
     <div class="app-container">
         <!-- Sidebar as Offcanvas -->
         <div class="offcanvas offcanvas-start" tabindex="-1" id="exoticaSidebar" aria-labelledby="exoticaSidebarLabel">
             <!-- Logo and Toggle -->
             <div class="sidebar-header">
                 <div class="logo-container">
-                    <img src="{% static 'img/login.png' %}" alt="Exotica Logo" class="sidebar-logo" onerror="this.src='https://via.placeholder.com/50x50?text=E'">
+                    <img src="{% static 'img/login.png' %}" alt="Exotica Logo" class="sidebar-logo"
+                        onerror="this.src='https://via.placeholder.com/50x50?text=E'">
                     <h1 class="sidebar-brand">L&M Exotic Fruits</h1>
                 </div>
-                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                    aria-label="Close"></button>
             </div>
 
             <!-- User Profile Mini -->
@@ -87,7 +114,7 @@
                                 <span class="nav-text">Dashboard</span>
                             </a>
                         </li>
-                        
+
                         <!-- Products Category -->
                         <li class="nav-category">
                             <div class="category-label productos-category">
@@ -95,35 +122,35 @@
                                 <span>Gestión de Productos</span>
                             </div>
                         </li>
-                        
+
                         <li class="nav-item {% if 'frutas_view' in request.path %}active{% endif %}">
-                            <a href="{% url 'frutas_view' %}" class="nav-link">
+                            <a href="{% url 'productos:frutas_view' %}" class="nav-link">
                                 <div class="nav-icon productos-bg"><i class="fas fa-lemon"></i></div>
                                 <span class="nav-text">Frutas</span>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item {% if 'presentaciones_view' in request.path %}active{% endif %}">
-                            <a href="{% url 'presentaciones_view' %}" class="nav-link">
+                            <a href="{% url 'productos:presentaciones_view' %}" class="nav-link">
                                 <div class="nav-icon productos-bg"><i class="fas fa-box"></i></div>
                                 <span class="nav-text">Presentaciones</span>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item {% if 'lista_precios_importacion' in request.path %}active{% endif %}">
-                            <a href="{% url 'lista_precios_importacion' %}" class="nav-link">
+                            <a href="{% url 'productos:lista_precios_importacion' %}" class="nav-link">
                                 <div class="nav-icon productos-bg"><i class="fas fa-ship"></i></div>
                                 <span class="nav-text">Precios de Importación</span>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item {% if 'lista_precios_ventas' in request.path %}active{% endif %}">
-                            <a href="{% url 'lista_precios_ventas' %}" class="nav-link">
+                            <a href="{% url 'productos:lista_precios_ventas' %}" class="nav-link">
                                 <div class="nav-icon productos-bg"><i class="fas fa-tags"></i></div>
                                 <span class="nav-text">Precios de Venta</span>
                             </a>
                         </li>
-                        
+
                         <!-- Import Category -->
                         <li class="nav-category">
                             <div class="category-label importacion-category">
@@ -131,42 +158,42 @@
                                 <span>Gestión de Importaciones</span>
                             </div>
                         </li>
-                        
+
                         <li class="nav-item {% if 'importacion/aduana_pdf' in request.path %}active{% endif %}">
                             <a href="{% url 'importacion:aduana_pdf' %}" class="nav-link">
                                 <div class="nav-icon importacion-bg"><i class="fas fa-passport"></i></div>
                                 <span class="nav-text">Aduana PDF</span>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item {% if 'importacion/carga_pdf' in request.path %}active{% endif %}">
                             <a href="{% url 'importacion:carga_pdf' %}" class="nav-link">
                                 <div class="nav-icon importacion-bg"><i class="fas fa-truck-loading"></i></div>
                                 <span class="nav-text">Carga PDF</span>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item {% if 'importacion/bodega' in request.path %}active{% endif %}">
                             <a href="{% url 'importacion:bodega' %}" class="nav-link">
                                 <div class="nav-icon importacion-bg"><i class="fas fa-warehouse"></i></div>
                                 <span class="nav-text">Bodega</span>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item {% if 'importacion/lista_pedidos' in request.path %}active{% endif %}">
                             <a href="{% url 'importacion:lista_pedidos' %}" class="nav-link">
                                 <div class="nav-icon importacion-bg"><i class="fas fa-clipboard-list"></i></div>
                                 <span class="nav-text">Pedidos</span>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item {% if 'importacion/transferencias' in request.path %}active{% endif %}">
                             <a href="{% url 'importacion:transferencias' %}" class="nav-link">
                                 <div class="nav-icon importacion-bg"><i class="fas fa-exchange-alt"></i></div>
                                 <span class="nav-text">Transferencias</span>
                             </a>
                         </li>
-                        
+
                         <!-- Commercial Category -->
                         <li class="nav-category">
                             <div class="category-label comercial-category">
@@ -174,42 +201,42 @@
                                 <span>Gestión Comercial</span>
                             </div>
                         </li>
-                        
+
                         <li class="nav-item {% if 'comercial/clientes' in request.path %}active{% endif %}">
                             <a href="{% url 'comercial:clientes' %}" class="nav-link">
                                 <div class="nav-icon comercial-bg"><i class="fas fa-users"></i></div>
                                 <span class="nav-text">Clientes</span>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item {% if 'comercial/lista_ventas' in request.path %}active{% endif %}">
                             <a href="{% url 'comercial:lista_ventas' %}" class="nav-link">
                                 <div class="nav-icon comercial-bg"><i class="fas fa-list"></i></div>
                                 <span class="nav-text">Lista de Ventas</span>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item {% if 'comercial/nueva_venta' in request.path %}active{% endif %}">
                             <a href="{% url 'comercial:nueva_venta' %}" class="nav-link">
                                 <div class="nav-icon comercial-bg"><i class="fas fa-cash-register"></i></div>
                                 <span class="nav-text">Nueva Venta</span>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item {% if 'comercial/dashboard_utilidades' in request.path %}active{% endif %}">
                             <a href="{% url 'comercial:dashboard_utilidades' %}" class="nav-link">
                                 <div class="nav-icon comercial-bg"><i class="fas fa-chart-line"></i></div>
                                 <span class="nav-text">Análisis de Utilidades</span>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item {% if 'comercial/correos' in request.path %}active{% endif %}">
                             <a href="{% url 'comercial:lista_correos' %}" class="nav-link">
                                 <div class="nav-icon comercial-bg"><i class="fas fa-envelope"></i></div>
                                 <span class="nav-text">Registro de Correos</span>
                             </a>
                         </li>
-                        
+
                         <!-- Admin Category -->
                         <li class="nav-category">
                             <div class="category-label admin-category">
@@ -217,21 +244,21 @@
                                 <span>Administración</span>
                             </div>
                         </li>
-                        
+
                         <li class="nav-item {% if '/admin/' in request.path %}active{% endif %}">
                             <a href="/admin/" class="nav-link">
                                 <div class="nav-icon admin-bg"><i class="fas fa-tools"></i></div>
                                 <span class="nav-text">Panel de Admin</span>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item {% if 'file-explorer' in request.path %}active{% endif %}">
                             <a href="{% url 'autenticacion:file_explorer' %}" class="nav-link">
                                 <div class="nav-icon admin-bg"><i class="fas fa-folder-open"></i></div>
                                 <span class="nav-text">Explorador de Archivos</span>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item">
                             <a href="{% url 'autenticacion:logout' %}" class="nav-link">
                                 <div class="nav-icon admin-bg"><i class="fas fa-sign-out-alt"></i></div>
@@ -242,7 +269,7 @@
                 </nav>
             </div>
         </div>
-        
+
         <!-- Main Content Wrapper -->
         <div class="content-container full-width">
             <!-- Page Content -->
@@ -259,25 +286,26 @@
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    
+
     <!-- Menu Button Script -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const menuButton = document.querySelector('.floating-menu-button');
             const offcanvasElement = document.getElementById('exoticaSidebar');
-            
+
             // Hide button when offcanvas is shown
             offcanvasElement.addEventListener('show.bs.offcanvas', function () {
                 menuButton.style.display = 'none';
             });
-            
+
             // Show button when offcanvas is hidden
             offcanvasElement.addEventListener('hide.bs.offcanvas', function () {
                 menuButton.style.display = 'block';
             });
         });
     </script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>

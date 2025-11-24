@@ -4,8 +4,8 @@
 {% block title %}Oferta Comercial de Precios{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/cotizacion_precios_ventas.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/cotizacion_precios_ventas.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 {% endblock %}
 
 {% block content %}
@@ -18,7 +18,7 @@
         <button id="sendEmailBtn" class="btn btn-success">
             <i class="fas fa-envelope"></i> Enviar por Correo
         </button>
-        <a href="{% url 'lista_cotizaciones' %}" class="btn btn-secondary">
+        <a href="{% url 'productos:lista_cotizaciones' %}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Volver
         </a>
     </div>
@@ -45,9 +45,9 @@
                 <div class="quotation-number">
                     <h2>Oferta Comercial #
                         {% if cotizacion %}
-                            {{ cotizacion.numero }}
+                        {{ cotizacion.numero }}
                         {% else %}
-                            {{ quotation_number }}
+                        {{ quotation_number }}
                         {% endif %}
                     </h2>
                     <p>Fecha: {{ quotation_date }}</p>
@@ -61,65 +61,69 @@
             <h3>INFORMACIÓN DEL CLIENTE</h3>
             <div class="client-info-columns">
                 {% if customer %}
-                    <!-- Existing customer - Left column -->
-                    <div class="client-column">
-                        <div class="info-group">
-                            <span class="info-label">Nombre:</span>
-                            <span class="info-value">{{ customer.nombre }}</span>
-                        </div>
-                        <div class="info-group">
-                            <span class="info-label">Dirección:</span>
-                            <span class="info-value">{{ customer.domicilio }}</span>
-                        </div>
-                        {% if customer.ciudad %}
-                        <div class="info-group">
-                            <span class="info-label">Ciudad:</span>
-                            <span class="info-value">{{ customer.ciudad }}</span>
-                        </div>
-                        {% endif %}
+                <!-- Existing customer - Left column -->
+                <div class="client-column">
+                    <div class="info-group">
+                        <span class="info-label">Nombre:</span>
+                        <span class="info-value">{{ customer.nombre }}</span>
                     </div>
-                    
-                    <!-- Existing customer - Right column -->
-                    <div class="client-column">
-                        {% if customer.cif %}
-                        <div class="info-group">
-                            <span class="info-label">CIF:</span>
-                            <span class="info-value">{{ customer.cif }}</span>
-                        </div>
-                        {% endif %}
-                        <div class="info-group">
-                            <span class="info-label">Email:</span>
-                            <span class="info-value">{{ customer.email }}</span>
-                        </div>
-                        {% if customer.telefono %}
-                        <div class="info-group">
-                            <span class="info-label">Teléfono:</span>
-                            <span class="info-value">{{ customer.telefono }}</span>
-                        </div>
-                        {% endif %}
+                    <div class="info-group">
+                        <span class="info-label">Dirección:</span>
+                        <span class="info-value">{{ customer.domicilio }}</span>
                     </div>
+                    {% if customer.ciudad %}
+                    <div class="info-group">
+                        <span class="info-label">Ciudad:</span>
+                        <span class="info-value">{{ customer.ciudad }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Existing customer - Right column -->
+                <div class="client-column">
+                    {% if customer.cif %}
+                    <div class="info-group">
+                        <span class="info-label">CIF:</span>
+                        <span class="info-value">{{ customer.cif }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="info-group">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">{{ customer.email }}</span>
+                    </div>
+                    {% if customer.telefono %}
+                    <div class="info-group">
+                        <span class="info-label">Teléfono:</span>
+                        <span class="info-value">{{ customer.telefono }}</span>
+                    </div>
+                    {% endif %}
+                </div>
                 {% else %}
-                    <!-- New prospect - editable fields in two columns -->
-                    <div class="client-column">
-                        <div class="editable-field">
-                            <label for="prospect-name">Nombre:</label>
-                            <input type="text" id="prospect-name" class="soft-input" value="{{ prospect_name|default:"" }}" placeholder="Nombre del Prospecto">
-                        </div>
-                        <div class="editable-field">
-                            <label for="prospect-address">Dirección:</label>
-                            <input type="text" id="prospect-address" class="soft-input" value="{{ prospect_address|default:"" }}" placeholder="Dirección del Prospecto">
-                        </div>
+                <!-- New prospect - editable fields in two columns -->
+                <div class="client-column">
+                    <div class="editable-field">
+                        <label for="prospect-name">Nombre:</label>
+                        <input type="text" id="prospect-name" class="soft-input" value="{{ prospect_name|default:"" }}"
+                            placeholder="Nombre del Prospecto">
                     </div>
-                    <div class="client-column">
-                        <div class="editable-field">
-                            <label for="prospect-email">Email:</label>
-                            <input type="email" id="prospect-email" class="soft-input" value="{{ prospect_email|default:"" }}" placeholder="Email del Prospecto">
-                        </div>
-                        <div class="editable-field">
-                            <label for="prospect-phone">Teléfono:</label>
-                            <input type="text" id="prospect-phone" class="soft-input" value="{{ prospect_phone|default:"" }}" placeholder="Teléfono del Prospecto">
-                        </div>
+                    <div class="editable-field">
+                        <label for="prospect-address">Dirección:</label>
+                        <input type="text" id="prospect-address" class="soft-input"
+                            value="{{ prospect_address|default:"" }}" placeholder="Dirección del Prospecto">
                     </div>
+                </div>
+                <div class="client-column">
+                    <div class="editable-field">
+                        <label for="prospect-email">Email:</label>
+                        <input type="email" id="prospect-email" class="soft-input"
+                            value="{{ prospect_email|default:"" }}" placeholder="Email del Prospecto">
+                    </div>
+                    <div class="editable-field">
+                        <label for="prospect-phone">Teléfono:</label>
+                        <input type="text" id="prospect-phone" class="soft-input"
+                            value="{{ prospect_phone|default:"" }}" placeholder="Teléfono del Prospecto">
+                    </div>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -138,61 +142,64 @@
                 </thead>
                 <tbody>
                     {% if cotizacion %}
-                        <!-- Para cotizaciones existentes -->
-                        {% for detalle in detalles %}
-                        <tr class="product-row" data-id="{{ detalle.presentacion.id }}">
-                            <td>{{ detalle.presentacion.fruta.nombre }}</td>
-                            <td>{{ detalle.presentacion.kilos }} kg</td>
-                            <td>
-                                <input type="number" class="price-input soft-input" min="0.01" step="0.01" value="{{ detalle.precio_unitario }}" {% if is_new_customer %}readonly{% endif %}>
-                            </td>
-                            <td class="action-column">
-                                <button type="button" class="btn btn-sm btn-danger remove-row-btn">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="no-products">No hay productos en esta oferta comercial.</td>
-                        </tr>
-                        {% endfor %}
+                    <!-- Para cotizaciones existentes -->
+                    {% for detalle in detalles %}
+                    <tr class="product-row" data-id="{{ detalle.presentacion.id }}">
+                        <td>{{ detalle.presentacion.fruta.nombre }}</td>
+                        <td>{{ detalle.presentacion.kilos }} kg</td>
+                        <td>
+                            <input type="number" class="price-input soft-input" min="0.01" step="0.01"
+                                value="{{ detalle.precio_unitario }}" {% if is_new_customer %}readonly{% endif %}>
+                        </td>
+                        <td class="action-column">
+                            <button type="button" class="btn btn-sm btn-danger remove-row-btn">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="no-products">No hay productos en esta oferta comercial.</td>
+                    </tr>
+                    {% endfor %}
                     {% elif is_new_customer %}
-                        <!-- For new prospects, show all presentations with editable prices -->
-                        {% for presentacion in presentaciones %}
-                        <tr class="product-row" data-id="{{ presentacion.id }}">
-                            <td>{{ presentacion.fruta.nombre }}</td>
-                            <td>{{ presentacion.kilos }} kg</td>
-                            <td>
-                                <input type="number" class="price-input soft-input" min="0.01" step="0.01" placeholder="0.00" value="">
-                            </td>
-                            <td class="action-column">
-                                <button type="button" class="btn btn-sm btn-danger remove-row-btn">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
+                    <!-- For new prospects, show all presentations with editable prices -->
+                    {% for presentacion in presentaciones %}
+                    <tr class="product-row" data-id="{{ presentacion.id }}">
+                        <td>{{ presentacion.fruta.nombre }}</td>
+                        <td>{{ presentacion.kilos }} kg</td>
+                        <td>
+                            <input type="number" class="price-input soft-input" min="0.01" step="0.01"
+                                placeholder="0.00" value="">
+                        </td>
+                        <td class="action-column">
+                            <button type="button" class="btn btn-sm btn-danger remove-row-btn">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
                     {% else %}
-                        <!-- For existing customers, show presentations with their actual prices but make them editable -->
-                        {% for precio in precios %}
-                        <tr class="product-row" data-id="{{ precio.presentacion.id }}">
-                            <td>{{ precio.presentacion.fruta.nombre }}</td>
-                            <td>{{ precio.presentacion.kilos }} kg</td>
-                            <td>
-                                <input type="number" class="price-input soft-input" min="0.01" step="0.01" value="{{ precio.precio_euro }}">
-                            </td>
-                            <td class="action-column">
-                                <button type="button" class="btn btn-sm btn-danger remove-row-btn">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="no-products">No hay precios establecidos para este cliente.</td>
-                        </tr>
-                        {% endfor %}
+                    <!-- For existing customers, show presentations with their actual prices but make them editable -->
+                    {% for precio in precios %}
+                    <tr class="product-row" data-id="{{ precio.presentacion.id }}">
+                        <td>{{ precio.presentacion.fruta.nombre }}</td>
+                        <td>{{ precio.presentacion.kilos }} kg</td>
+                        <td>
+                            <input type="number" class="price-input soft-input" min="0.01" step="0.01"
+                                value="{{ precio.precio_euro }}">
+                        </td>
+                        <td class="action-column">
+                            <button type="button" class="btn btn-sm btn-danger remove-row-btn">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="no-products">No hay precios establecidos para este cliente.</td>
+                    </tr>
+                    {% endfor %}
                     {% endif %}
                 </tbody>
             </table>
@@ -203,19 +210,20 @@
             <h3>TÉRMINOS Y CONDICIONES</h3>
             <div class="editable-terms" contenteditable="true">
                 {% if cotizacion and cotizacion.terminos %}
-                    {{ cotizacion.terminos|safe }}
+                {{ cotizacion.terminos|safe }}
                 {% else %}
                 <p>1. Después de 3 días de recepción de la mercancía no se aceptan reclamaciones.</p>
                 <p>2. Forma de pago: Transferencia bancaria.</p>
                 {% endif %}
             </div>
-            
+
             <h3>NOTAS ADICIONALES</h3>
             <div class="editable-notes" contenteditable="true">
                 {% if cotizacion and cotizacion.notas %}
-                    {{ cotizacion.notas|safe }}
+                {{ cotizacion.notas|safe }}
                 {% else %}
-                <p>Gracias por su interés en nuestros productos. Para cualquier consulta adicional, no dude en contactarnos.</p>
+                <p>Gracias por su interés en nuestros productos. Para cualquier consulta adicional, no dude en
+                    contactarnos.</p>
                 {% endif %}
             </div>
         </div>
@@ -234,9 +242,9 @@
             <h3 class="modal-title">Enviar Oferta Comercial por Correo</h3>
             <button class="close-modal">&times;</button>
         </div>
-        <form id="emailForm" method="post" action="{% url 'enviar_cotizacion' %}">
+        <form id="emailForm" method="post" action="{% url 'productos:enviar_cotizacion' %}">
             {% csrf_token %}
-            
+
             {% if customer %}
             <div class="form-group recipient-checkboxes">
                 <label>Destinatarios Principales:</label>
@@ -244,31 +252,33 @@
                     <input type="checkbox" id="main_email" name="recipients" value="{{ customer.email }}" checked>
                     <label for="main_email">{{ customer.email }} (Principal)</label>
                 </div>
-                
+
                 {% if correos_adicionales_list %}
-                    {% for email in correos_adicionales_list %}
-                    <div class="checkbox-container">
-                        <input type="checkbox" id="additional_email_{{ forloop.counter }}" name="recipients" value="{{ email }}">
-                        <label for="additional_email_{{ forloop.counter }}">{{ email }}</label>
-                    </div>
-                    {% endfor %}
+                {% for email in correos_adicionales_list %}
+                <div class="checkbox-container">
+                    <input type="checkbox" id="additional_email_{{ forloop.counter }}" name="recipients"
+                        value="{{ email }}">
+                    <label for="additional_email_{{ forloop.counter }}">{{ email }}</label>
+                </div>
+                {% endfor %}
                 {% endif %}
             </div>
-            
+
             <div class="form-group recipient-checkboxes">
                 <label>Con Copia (CC):</label>
                 <div class="checkbox-container">
                     <input type="checkbox" id="main_email_cc" name="cc_recipients" value="{{ customer.email }}">
                     <label for="main_email_cc">{{ customer.email }} (Principal)</label>
                 </div>
-                
+
                 {% if correos_adicionales_list %}
-                    {% for email in correos_adicionales_list %}
-                    <div class="checkbox-container">
-                        <input type="checkbox" id="additional_email_cc_{{ forloop.counter }}" name="cc_recipients" value="{{ email }}">
-                        <label for="additional_email_cc_{{ forloop.counter }}">{{ email }}</label>
-                    </div>
-                    {% endfor %}
+                {% for email in correos_adicionales_list %}
+                <div class="checkbox-container">
+                    <input type="checkbox" id="additional_email_cc_{{ forloop.counter }}" name="cc_recipients"
+                        value="{{ email }}">
+                    <label for="additional_email_cc_{{ forloop.counter }}">{{ email }}</label>
+                </div>
+                {% endfor %}
                 {% endif %}
             </div>
             {% else %}
@@ -277,12 +287,13 @@
                 <input type="email" id="recipient_email" name="recipient_email" required>
             </div>
             {% endif %}
-            
+
             <div class="form-group">
                 <label for="email_subject">Asunto:</label>
-                <input type="text" id="email_subject" name="email_subject" value="Oferta Comercial de Precios - L&M Exotic Fruits" required>
+                <input type="text" id="email_subject" name="email_subject"
+                    value="Oferta Comercial de Precios - L&M Exotic Fruits" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="email_message">Mensaje:</label>
                 <textarea id="email_message" name="email_message" rows="6" required>Estimado/a {% if customer %}{{ customer.nombre }}{% else %}cliente{% endif %},
@@ -293,11 +304,11 @@ Saludos cordiales,
 Luz Mery Melo Mejia
 </textarea>
             </div>
-            
+
             <input type="hidden" id="quotation_data" name="quotation_data">
             <input type="hidden" id="pdf_data" name="pdf_data">
             <input type="hidden" id="save_quotation" name="save_quotation" value="false">
-            
+
             <div class="form-actions">
                 <button type="button" class="btn btn-secondary close-modal-btn">Cancelar</button>
                 <button type="submit" class="btn btn-success">Enviar</button>
@@ -313,189 +324,190 @@ Luz Mery Melo Mejia
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Formatear todos los inputs numéricos para reemplazar comas por puntos
-    document.querySelectorAll('.price-input').forEach(function(input) {
-        if (input.value) {
-            // Reemplazar todas las comas por puntos
-            const formattedValue = input.value.replace(/,/g, '.');
-            input.value = formattedValue;
+    document.addEventListener('DOMContentLoaded', function () {
+        // Formatear todos los inputs numéricos para reemplazar comas por puntos
+        document.querySelectorAll('.price-input').forEach(function (input) {
+            if (input.value) {
+                // Reemplazar todas las comas por puntos
+                const formattedValue = input.value.replace(/,/g, '.');
+                input.value = formattedValue;
+            }
+        });
+
+        // Helper functions for PDF export
+        function prepareForPdfExport(element) {
+            // Hide action columns
+            const actionColumns = element.querySelectorAll('.action-column');
+            actionColumns.forEach(column => {
+                column.setAttribute('data-original-display', column.style.display);
+                column.style.display = 'none';
+            });
+
+            // Add PDF export class if needed
+            element.classList.add('pdf-export');
+
+            // For price inputs: insert a temporary overlay span with formatted value and hide the input
+            const priceInputs = element.querySelectorAll('.price-input');
+            priceInputs.forEach(input => {
+                const value = input.value;
+                let displayValue = '';
+                if (value && !isNaN(parseFloat(value))) {
+                    displayValue = parseFloat(value).toFixed(2) + ' €';
+                }
+                const overlay = document.createElement('span');
+                overlay.className = 'price-overlay';
+                overlay.textContent = displayValue;
+                // Append overlay without reemplazar el input para que este último se restaure luego
+                input.parentElement.appendChild(overlay);
+                // Hide the input
+                input.style.display = 'none';
+            });
+
+            // For other inputs
+            const otherInputs = element.querySelectorAll('input:not(.price-input)');
+            otherInputs.forEach(input => {
+                input.setAttribute('data-original-value', input.value);
+                input.removeAttribute('min');
+                input.removeAttribute('step');
+                input.removeAttribute('placeholder');
+            });
         }
-    });
-    
-    // Helper functions for PDF export
-    function prepareForPdfExport(element) {
-        // Hide action columns
-        const actionColumns = element.querySelectorAll('.action-column');
-        actionColumns.forEach(column => {
-            column.setAttribute('data-original-display', column.style.display);
-            column.style.display = 'none';
-        });
-        
-        // Add PDF export class if needed
-        element.classList.add('pdf-export');
-        
-        // For price inputs: insert a temporary overlay span with formatted value and hide the input
-        const priceInputs = element.querySelectorAll('.price-input');
-        priceInputs.forEach(input => {
-            const value = input.value;
-            let displayValue = '';
-            if (value && !isNaN(parseFloat(value))) {
-                displayValue = parseFloat(value).toFixed(2) + ' €';
-            }
-            const overlay = document.createElement('span');
-            overlay.className = 'price-overlay';
-            overlay.textContent = displayValue;
-            // Append overlay without reemplazar el input para que este último se restaure luego
-            input.parentElement.appendChild(overlay);
-            // Hide the input
-            input.style.display = 'none';
-        });
-        
-        // For other inputs
-        const otherInputs = element.querySelectorAll('input:not(.price-input)');
-        otherInputs.forEach(input => {
-            input.setAttribute('data-original-value', input.value);
-            input.removeAttribute('min');
-            input.removeAttribute('step');
-            input.removeAttribute('placeholder');
-        });
-    }
-    
-    function restoreFromPdfExport(element) {
-        // Restore action columns
-        const actionColumns = element.querySelectorAll('.action-column');
-        actionColumns.forEach(column => {
-            const originalDisplay = column.getAttribute('data-original-display') || '';
-            column.style.display = originalDisplay;
-            column.removeAttribute('data-original-display');
-        });
-        
-        // Remove PDF export class
-        element.classList.remove('pdf-export');
-        
-        // For price inputs: remove the overlay spans and re-display inputs
-        const priceInputs = element.querySelectorAll('.price-input');
-        priceInputs.forEach(input => {
-            input.style.display = '';
-            const overlay = input.parentElement.querySelector('.price-overlay');
-            if (overlay) {
-                overlay.remove();
-            }
-        });
-        
-        // For other inputs
-        const inputs = element.querySelectorAll('input[data-original-value]');
-        inputs.forEach(input => {
-            input.removeAttribute('data-original-value');
-        });
-    }
-    
-    // Download PDF functionality - now saves quotation first
-    document.getElementById('downloadPdfBtn').addEventListener('click', async function() {
-        const element = document.getElementById('quotationDocument');
-        
-        // Prepare quotation data
-        const quotationData = {
-            quotation_number: quotationNumber,
-            client: {% if customer %}{
-                id: {{ customer.id }},
-                name: "{{ customer.nombre }}",
-                email: "{{ customer.email }}"
+
+        function restoreFromPdfExport(element) {
+            // Restore action columns
+            const actionColumns = element.querySelectorAll('.action-column');
+            actionColumns.forEach(column => {
+                const originalDisplay = column.getAttribute('data-original-display') || '';
+                column.style.display = originalDisplay;
+                column.removeAttribute('data-original-display');
+            });
+
+            // Remove PDF export class
+            element.classList.remove('pdf-export');
+
+            // For price inputs: remove the overlay spans and re-display inputs
+            const priceInputs = element.querySelectorAll('.price-input');
+            priceInputs.forEach(input => {
+                input.style.display = '';
+                const overlay = input.parentElement.querySelector('.price-overlay');
+                if (overlay) {
+                    overlay.remove();
+                }
+            });
+
+            // For other inputs
+            const inputs = element.querySelectorAll('input[data-original-value]');
+            inputs.forEach(input => {
+                input.removeAttribute('data-original-value');
+            });
+        }
+
+        // Download PDF functionality - now saves quotation first
+        document.getElementById('downloadPdfBtn').addEventListener('click', async function () {
+            const element = document.getElementById('quotationDocument');
+
+            // Prepare quotation data
+            const quotationData = {
+                quotation_number: quotationNumber,
+                client: {% if customer %}{
+                    id: {{ customer.id }
+        },
+            name: "{{ customer.nombre }}",
+            email: "{{ customer.email }}"
             }{% else %}null{% endif %},
-            prospect: {% if is_new_customer %}{
-                name: document.getElementById('prospect-name') ? document.getElementById('prospect-name').value : '',
-                email: document.getElementById('prospect-email') ? document.getElementById('prospect-email').value : '',
+        prospect: {% if is_new_customer %}{
+        name: document.getElementById('prospect-name') ? document.getElementById('prospect-name').value : '',
+            email: document.getElementById('prospect-email') ? document.getElementById('prospect-email').value : '',
                 address: document.getElementById('prospect-address') ? document.getElementById('prospect-address').value : '',
-                phone: document.getElementById('prospect-phone') ? document.getElementById('prospect-phone').value : ''
-            }{% else %}null{% endif %},
-            items: [],
-            terms: document.querySelector('.editable-terms').innerHTML,
+                    phone: document.getElementById('prospect-phone') ? document.getElementById('prospect-phone').value : ''
+    } {% else %} null{% endif %},
+    items: [],
+        terms: document.querySelector('.editable-terms').innerHTML,
             notes: document.querySelector('.editable-notes').innerHTML
         };
-        
-        // Collect items data
-        document.querySelectorAll('.product-row').forEach(row => {
-            const presentationId = row.getAttribute('data-id');
-            const priceInput = row.querySelector('.price-input');
-            const unitPrice = parseFloat(priceInput.value) || 0;
-            
-            if (unitPrice > 0) {
-                quotationData.items.push({
-                    presentation_id: presentationId,
-                    unit_price: unitPrice
-                });
-            }
-        });
-        
-        // Save quotation first via AJAX
-        try {
-            const formData = new FormData();
-            formData.append('quotation_data', JSON.stringify(quotationData));
-            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-            
-            const response = await fetch('{% url "guardar_cotizacion_pdf" %}', {
-                method: 'POST',
-                body: formData
+
+    // Collect items data
+    document.querySelectorAll('.product-row').forEach(row => {
+        const presentationId = row.getAttribute('data-id');
+        const priceInput = row.querySelector('.price-input');
+        const unitPrice = parseFloat(priceInput.value) || 0;
+
+        if (unitPrice > 0) {
+            quotationData.items.push({
+                presentation_id: presentationId,
+                unit_price: unitPrice
             });
-            
-            const result = await response.json();
-            
-            if (!result.success) {
-                alert('Error al guardar la cotización: ' + result.error);
-                return;
-            }
-            
-            // Show success message
-            console.log(result.message);
-            
-        } catch (error) {
-            console.error('Error al guardar la cotización:', error);
-            alert('Error al guardar la cotización. El PDF se descargará pero no se guardó la cotización.');
         }
-        
-        // Now generate and download PDF
-        prepareForPdfExport(element);
-        
-        const opt = {
-            margin: 0,
-            filename: `Cotizacion_${quotationNumber}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        
-        html2pdf().from(element).set(opt).save().then(() => {
-            // Restore document after PDF is generated
-            restoreFromPdfExport(element);
-            // Show success message
-            alert('Cotización guardada y PDF descargado correctamente');
-        });
     });
-    
+
+    // Save quotation first via AJAX
+    try {
+        const formData = new FormData();
+        formData.append('quotation_data', JSON.stringify(quotationData));
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        const response = await fetch('{% url "productos:guardar_cotizacion_pdf" %}', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+            alert('Error al guardar la cotización: ' + result.error);
+            return;
+        }
+
+        // Show success message
+        console.log(result.message);
+
+    } catch (error) {
+        console.error('Error al guardar la cotización:', error);
+        alert('Error al guardar la cotización. El PDF se descargará pero no se guardó la cotización.');
+    }
+
+    // Now generate and download PDF
+    prepareForPdfExport(element);
+
+    const opt = {
+        margin: 0,
+        filename: `Cotizacion_${quotationNumber}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().from(element).set(opt).save().then(() => {
+        // Restore document after PDF is generated
+        restoreFromPdfExport(element);
+        // Show success message
+        alert('Cotización guardada y PDF descargado correctamente');
+    });
+    });
+
     // Variables
     const quotationNumber = "{{ quotation_number }}";
-    
+
     // Remove row functionality
     document.querySelectorAll('.remove-row-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const row = this.closest('tr');
             row.remove();
         });
     });
-    
+
     // Email Modal functionality
     const emailModal = document.getElementById('emailModal');
     const sendEmailBtn = document.getElementById('sendEmailBtn');
     const closeBtns = document.querySelectorAll('.close-modal, .close-modal-btn');
-    
-    sendEmailBtn.addEventListener('click', async function() {
+
+    sendEmailBtn.addEventListener('click', async function () {
         // First, generate the PDF
         const element = document.getElementById('quotationDocument');
-        
+
         // Temporarily hide action columns and prepare for PDF export
         prepareForPdfExport(element);
-        
+
         const opt = {
             margin: 0,
             filename: `Cotizacion_${quotationNumber}.pdf`,
@@ -503,104 +515,105 @@ document.addEventListener('DOMContentLoaded', function() {
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-        
+
         try {
             // Generate PDF and get it as data URL
             const pdfBlob = await html2pdf().from(element).set(opt).outputPdf('blob');
-            
+
             // Restore document after PDF is generated
             restoreFromPdfExport(element);
-            
+
             // Convert blob to base64 data URL
             const reader = new FileReader();
             reader.readAsDataURL(pdfBlob);
-            reader.onloadend = function() {
+            reader.onloadend = function () {
                 // Set the PDF data in the hidden input
                 const base64data = reader.result;
                 document.getElementById('pdf_data').value = base64data;
-                
+
                 // Prepare the quotation data to be sent in the form
                 const quotationData = {
                     quotation_number: quotationNumber,
                     client: {% if customer %}{
-                        id: {{ customer.id }},
-                        name: "{{ customer.nombre }}",
-                        email: "{{ customer.email }}"
-                    }{% else %}null{% endif %},
-                    prospect: {% if is_new_customer %}{
-                        name: document.getElementById('prospect-name').value,
-                        email: document.getElementById('prospect-email').value,
-                        address: document.getElementById('prospect-address').value,
+                        id: {{ customer.id }
+            },
+                name: "{{ customer.nombre }}",
+                    email: "{{ customer.email }}"
+        }{% else %} null{% endif %},
+        prospect: {% if is_new_customer %} {
+            name: document.getElementById('prospect-name').value,
+                email: document.getElementById('prospect-email').value,
+                    address: document.getElementById('prospect-address').value,
                         phone: document.getElementById('prospect-phone').value
-                    }{% else %}null{% endif %},
-                    items: [],
-                    // Add terms and notes from the editable fields
-                    terms: document.querySelector('.editable-terms').innerHTML,
-                    notes: document.querySelector('.editable-notes').innerHTML
-                };
-                
-                // Collect items data - only those that remain in the table
-                document.querySelectorAll('.product-row').forEach(row => {
-                    const presentationId = row.getAttribute('data-id');
-                    const priceInput = row.querySelector('.price-input');
-                    const unitPrice = parseFloat(priceInput.value) || 0;
-                    
-                    if (unitPrice > 0) {
-                        quotationData.items.push({
-                            presentation_id: presentationId,
-                            unit_price: unitPrice
-                        });
-                    }
-                });
-                
-                // Set the data in the hidden input
-                document.getElementById('quotation_data').value = JSON.stringify(quotationData);
-                
-                // Reset save_quotation to false for email sending
-                document.getElementById('save_quotation').value = 'false';
-                
-                // If prospect, set the email from the form
-                if ({% if is_new_customer %}true{% else %}false{% endif %}) {
-                    const prospectEmail = document.getElementById('prospect-email').value;
-                    if (prospectEmail) {
-                        document.getElementById('recipient_email').value = prospectEmail;
-                    }
-                }
-                
-                // Show the modal
-                emailModal.classList.add('show');
-            };
-        } catch (error) {
-            // Restore document in case of error
-            restoreFromPdfExport(element);
-            
-            console.error('Error generating PDF:', error);
-            alert('Error al generar el PDF. Por favor, inténtelo de nuevo.');
+        } {% else %} null{% endif %},
+        items: [],
+            // Add terms and notes from the editable fields
+            terms: document.querySelector('.editable-terms').innerHTML,
+                notes: document.querySelector('.editable-notes').innerHTML
+    };
+
+    // Collect items data - only those that remain in the table
+    document.querySelectorAll('.product-row').forEach(row => {
+        const presentationId = row.getAttribute('data-id');
+        const priceInput = row.querySelector('.price-input');
+        const unitPrice = parseFloat(priceInput.value) || 0;
+
+        if (unitPrice > 0) {
+            quotationData.items.push({
+                presentation_id: presentationId,
+                unit_price: unitPrice
+            });
         }
     });
-    
+
+    // Set the data in the hidden input
+    document.getElementById('quotation_data').value = JSON.stringify(quotationData);
+
+    // Reset save_quotation to false for email sending
+    document.getElementById('save_quotation').value = 'false';
+
+    // If prospect, set the email from the form
+    if ({% if is_new_customer %}true{% else %} false{% endif %}) {
+        const prospectEmail = document.getElementById('prospect-email').value;
+        if (prospectEmail) {
+            document.getElementById('recipient_email').value = prospectEmail;
+        }
+    }
+
+    // Show the modal
+    emailModal.classList.add('show');
+            };
+        } catch (error) {
+        // Restore document in case of error
+        restoreFromPdfExport(element);
+
+        console.error('Error generating PDF:', error);
+        alert('Error al generar el PDF. Por favor, inténtelo de nuevo.');
+    }
+    });
+
     // Close the modal
     closeBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             emailModal.classList.remove('show');
         });
     });
-    
+
     // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
+    window.addEventListener('click', function (event) {
         if (event.target === emailModal) {
             emailModal.classList.remove('show');
         }
     });
-    
+
     // Handle email selection logic to prevent same email in both To and CC
     {% if customer %}
     const recipientCheckboxes = document.querySelectorAll('input[name="recipients"]');
     const ccCheckboxes = document.querySelectorAll('input[name="cc_recipients"]');
-    
+
     // Function to handle recipient checkbox changes
     recipientCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
+        checkbox.addEventListener('change', function () {
             if (this.checked) {
                 // Find corresponding CC checkbox and uncheck it
                 const email = this.value;
@@ -611,10 +624,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Function to handle CC checkbox changes
     ccCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
+        checkbox.addEventListener('change', function () {
             if (this.checked) {
                 // Find corresponding recipient checkbox and uncheck it
                 const email = this.value;

@@ -3,359 +3,360 @@
 {% block title %}Cotizaciones{% endblock %}
 
 {% block extra_css %}
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/lista_cotizaciones.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/lista_cotizaciones.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <!-- Header Section -->
-        <header>
-            <h1>Gestión de Cotizaciones</h1>
-            <div>
-                <a href="#" class="btn btn-primary" id="showCustomerSelectionModal">
-                    <i class="fas fa-user"></i> Oferta Cliente
-                </a>
-                <a href="{% url 'cotizacion_prospecto' %}" class="btn btn-success">
-                    <i class="fas fa-user-plus"></i> Oferta Cliente Nuevo
+<div class="container">
+    <!-- Header Section -->
+    <header>
+        <h1>Gestión de Cotizaciones</h1>
+        <div>
+            <a href="#" class="btn btn-primary" id="showCustomerSelectionModal">
+                <i class="fas fa-user"></i> Oferta Cliente
+            </a>
+            <a href="{% url 'productos:cotizacion_prospecto' %}" class="btn btn-success">
+                <i class="fas fa-user-plus"></i> Oferta Cliente Nuevo
+            </a>
+        </div>
+    </header>
+
+    <!-- Alerts Section -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+        {% if message.tags == 'success' %}
+        <i class="fas fa-check-circle"></i>
+        {% elif message.tags == 'error' %}
+        <i class="fas fa-exclamation-circle"></i>
+        {% endif %}
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Filters Section -->
+    <div class="filters">
+        <form method="get" action="{% url 'productos:lista_cotizaciones' %}">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label for="cliente"><i class="fas fa-user"></i> Cliente:</label>
+                    <select name="cliente" id="cliente">
+                        <option value="">Todos los clientes</option>
+                        {% for cliente in clientes %}
+                        <option value="{{ cliente.id }}" {% if request.GET.cliente==cliente.id|stringformat:"i"
+                            %}selected{% endif %}>
+                            {{ cliente.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="estado"><i class="fas fa-flag"></i> Estado:</label>
+                    <select name="estado" id="estado">
+                        <option value="">Todos los estados</option>
+                        {% for estado_key, estado_value in estados %}
+                        <option value="{{ estado_key }}" {% if request.GET.estado==estado_key %}selected{% endif %}>
+                            {{ estado_value }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="fecha_desde"><i class="fas fa-calendar-alt"></i> Fecha desde:</label>
+                    <input type="date" name="fecha_desde" id="fecha_desde"
+                        value="{{ request.GET.fecha_desde|default:'' }}">
+                </div>
+                <div class="filter-item">
+                    <label for="fecha_hasta"><i class="fas fa-calendar-alt"></i> Fecha hasta:</label>
+                    <input type="date" name="fecha_hasta" id="fecha_hasta"
+                        value="{{ request.GET.fecha_hasta|default:'' }}">
+                </div>
+            </div>
+            <div class="button-row">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+                <a href="{% url 'productos:lista_cotizaciones' %}" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i> Limpiar filtros
                 </a>
             </div>
-        </header>
+        </form>
+    </div>
 
-        <!-- Alerts Section -->
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-                    {% if message.tags == 'success' %}
-                        <i class="fas fa-check-circle"></i>
-                    {% elif message.tags == 'error' %}
-                        <i class="fas fa-exclamation-circle"></i>
+    <!-- Table Section -->
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th><i class="fas fa-hashtag"></i> Número</th>
+                <th><i class="fas fa-user"></i> Cliente/Prospecto</th>
+                <th><i class="fas fa-calendar-day"></i> Fecha Emisión</th>
+                <th><i class="fas fa-calendar-check"></i> Validez</th>
+                <th><i class="fas fa-flag"></i> Estado</th>
+                <th><i class="fas fa-cog"></i> Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cotizacion in cotizaciones %}
+            <tr>
+                <td>{{ cotizacion.numero }}</td>
+                <td>
+                    {% if cotizacion.cliente %}
+                    {{ cotizacion.cliente.nombre }}
+                    {% else %}
+                    {{ cotizacion.prospect_nombre }}
                     {% endif %}
-                    {{ message }}
-                </div>
+                </td>
+                <td>{{ cotizacion.fecha_emision|date:"d/m/Y" }}</td>
+                <td>{{ cotizacion.fecha_validez|date:"d/m/Y" }}</td>
+                <td>{{ cotizacion.get_estado_display }}</td>
+                <td class="action-buttons">
+                    <a href="{% url 'productos:ver_cotizacion' cotizacion.id %}" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i> Ver
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 20px;">No hay cotizaciones registradas que coincidan
+                    con los criterios de búsqueda.</td>
+            </tr>
             {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination if needed -->
+    {% if cotizaciones.has_other_pages %}
+    <div class="pagination">
+        {% if cotizaciones.has_previous %}
+        <a href="?{{ request.GET.urlencode }}&page={{ cotizaciones.previous_page_number }}">Anterior</a>
         {% endif %}
 
-        <!-- Filters Section -->
-        <div class="filters">
-            <form method="get" action="{% url 'lista_cotizaciones' %}">
-                <div class="filter-row">
-                    <div class="filter-item">
-                        <label for="cliente"><i class="fas fa-user"></i> Cliente:</label>
-                        <select name="cliente" id="cliente">
-                            <option value="">Todos los clientes</option>
-                            {% for cliente in clientes %}
-                                <option value="{{ cliente.id }}" {% if request.GET.cliente == cliente.id|stringformat:"i" %}selected{% endif %}>
-                                    {{ cliente.nombre }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="filter-item">
-                        <label for="estado"><i class="fas fa-flag"></i> Estado:</label>
-                        <select name="estado" id="estado">
-                            <option value="">Todos los estados</option>
-                            {% for estado_key, estado_value in estados %}
-                                <option value="{{ estado_key }}" {% if request.GET.estado == estado_key %}selected{% endif %}>
-                                    {{ estado_value }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="filter-item">
-                        <label for="fecha_desde"><i class="fas fa-calendar-alt"></i> Fecha desde:</label>
-                        <input type="date" name="fecha_desde" id="fecha_desde" value="{{ request.GET.fecha_desde|default:'' }}">
-                    </div>
-                    <div class="filter-item">
-                        <label for="fecha_hasta"><i class="fas fa-calendar-alt"></i> Fecha hasta:</label>
-                        <input type="date" name="fecha_hasta" id="fecha_hasta" value="{{ request.GET.fecha_hasta|default:'' }}">
-                    </div>
-                </div>
-                <div class="button-row">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search"></i> Buscar
-                    </button>
-                    <a href="{% url 'lista_cotizaciones' %}" class="btn btn-secondary">
-                        <i class="fas fa-undo"></i> Limpiar filtros
-                    </a>
-                </div>
-            </form>
-        </div>
+        {% for i in cotizaciones.paginator.page_range %}
+        {% if cotizaciones.number == i %}
+        <span class="active">{{ i }}</span>
+        {% else %}
+        <a href="?{{ request.GET.urlencode }}&page={{ i }}">{{ i }}</a>
+        {% endif %}
+        {% endfor %}
 
-        <!-- Table Section -->
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th><i class="fas fa-hashtag"></i> Número</th>
-                    <th><i class="fas fa-user"></i> Cliente/Prospecto</th>
-                    <th><i class="fas fa-calendar-day"></i> Fecha Emisión</th>
-                    <th><i class="fas fa-calendar-check"></i> Validez</th>
-                    <th><i class="fas fa-flag"></i> Estado</th>
-                    <th><i class="fas fa-cog"></i> Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for cotizacion in cotizaciones %}
-                <tr>
-                    <td>{{ cotizacion.numero }}</td>
-                    <td>
-                        {% if cotizacion.cliente %}
-                        {{ cotizacion.cliente.nombre }}
-                        {% else %}
-                        {{ cotizacion.prospect_nombre }}
-                        {% endif %}
-                    </td>
-                    <td>{{ cotizacion.fecha_emision|date:"d/m/Y" }}</td>
-                    <td>{{ cotizacion.fecha_validez|date:"d/m/Y" }}</td>
-                    <td>{{ cotizacion.get_estado_display }}</td>
-                    <td class="action-buttons">
-                        <a href="{% url 'ver_cotizacion' cotizacion.id %}" class="btn btn-sm btn-info">
-                            <i class="fas fa-eye"></i> Ver
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 20px;">No hay cotizaciones registradas que coincidan con los criterios de búsqueda.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <!-- Pagination if needed -->
-        {% if cotizaciones.has_other_pages %}
-        <div class="pagination">
-            {% if cotizaciones.has_previous %}
-                <a href="?{{ request.GET.urlencode }}&page={{ cotizaciones.previous_page_number }}">Anterior</a>
-            {% endif %}
-            
-            {% for i in cotizaciones.paginator.page_range %}
-                {% if cotizaciones.number == i %}
-                    <span class="active">{{ i }}</span>
-                {% else %}
-                    <a href="?{{ request.GET.urlencode }}&page={{ i }}">{{ i }}</a>
-                {% endif %}
-            {% endfor %}
-            
-            {% if cotizaciones.has_next %}
-                <a href="?{{ request.GET.urlencode }}&page={{ cotizaciones.next_page_number }}">Siguiente</a>
-            {% endif %}
-        </div>
-        {% endif %}        <!-- Customer Selection Modal -->
-        <div class="modal" id="customerSelectionModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title">
-                        <i class="fas fa-user-check"></i>
-                        Seleccionar Cliente para Cotización
-                    </h3>
-                    <button class="close-modal" aria-label="Cerrar">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="search-container">
-                        <div class="search-input-wrapper">
-                            <i class="fas fa-search"></i>
-                            <input type="text" 
-                                   id="customerSearch" 
-                                   placeholder="Buscar por nombre o email..." 
-                                   autocomplete="off"
-                                   aria-label="Buscar cliente">
-                        </div>
-                    </div>
-                    <div class="customer-list">
-                        {% for cliente in clientes %}
-                        <div class="customer-item" data-id="{{ cliente.id }}" tabindex="0">
-                            <div class="customer-info">
-                                <strong>
-                                    <i class="fas fa-building"></i>
-                                    {{ cliente.nombre }}
-                                </strong>
-                                <p>
-                                    <i class="fas fa-envelope"></i>
-                                    {{ cliente.email }}
-                                </p>
-                                {% if cliente.telefono %}
-                                <p>
-                                    <i class="fas fa-phone"></i>
-                                    {{ cliente.telefono }}
-                                </p>
-                                {% endif %}
-                            </div>
-                            <div class="customer-action">
-                                <span class="select-icon">
-                                    <i class="fas fa-chevron-right"></i>
-                                </span>
-                            </div>
-                        </div>
-                        {% empty %}
-                        <div class="no-customers">
-                            <i class="fas fa-users-slash"></i>
-                            <p>No hay clientes registrados</p>
-                        </div>
-                        {% endfor %}
+        {% if cotizaciones.has_next %}
+        <a href="?{{ request.GET.urlencode }}&page={{ cotizaciones.next_page_number }}">Siguiente</a>
+        {% endif %}
+    </div>
+    {% endif %} <!-- Customer Selection Modal -->
+    <div class="modal" id="customerSelectionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-user-check"></i>
+                    Seleccionar Cliente para Cotización
+                </h3>
+                <button class="close-modal" aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-container">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="customerSearch" placeholder="Buscar por nombre o email..."
+                            autocomplete="off" aria-label="Buscar cliente">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary close-modal-btn">
-                        <i class="fas fa-times"></i>
-                        Cancelar
-                    </button>
+                <div class="customer-list">
+                    {% for cliente in clientes %}
+                    <div class="customer-item" data-id="{{ cliente.id }}" tabindex="0">
+                        <div class="customer-info">
+                            <strong>
+                                <i class="fas fa-building"></i>
+                                {{ cliente.nombre }}
+                            </strong>
+                            <p>
+                                <i class="fas fa-envelope"></i>
+                                {{ cliente.email }}
+                            </p>
+                            {% if cliente.telefono %}
+                            <p>
+                                <i class="fas fa-phone"></i>
+                                {{ cliente.telefono }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="customer-action">
+                            <span class="select-icon">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="no-customers">
+                        <i class="fas fa-users-slash"></i>
+                        <p>No hay clientes registrados</p>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary close-modal-btn">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+            </div>
         </div>
-    </div>    <!-- JavaScript -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Automatically hide alerts after 5 seconds
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
+    </div>
+</div> <!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Automatically hide alerts after 5 seconds
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.5s';
                 setTimeout(() => {
-                    alert.style.opacity = '0';
-                    alert.style.transition = 'opacity 0.5s';
-                    setTimeout(() => {
-                        alert.remove();
-                    }, 500);
-                }, 5000);
+                    alert.remove();
+                }, 500);
+            }, 5000);
+        });
+
+        // Customer selection modal functionality
+        const customerSelectionBtn = document.getElementById('showCustomerSelectionModal');
+        const customerSelectionModal = document.getElementById('customerSelectionModal');
+        const closeModalBtns = document.querySelectorAll('.close-modal, .close-modal-btn');
+        const customerSearch = document.getElementById('customerSearch');
+        const customerItems = document.querySelectorAll('.customer-item');
+        let lastFocusedElement = null;
+
+        function openModal() {
+            lastFocusedElement = document.activeElement;
+            customerSelectionModal.classList.add('show');
+            customerSearch.focus();
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            customerSelectionModal.classList.remove('show');
+            document.body.style.overflow = '';
+            if (lastFocusedElement) {
+                lastFocusedElement.focus();
+            }
+        }
+
+        function handleEscapeKey(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        }
+
+        if (customerSelectionBtn && customerSelectionModal) {
+            // Open modal
+            customerSelectionBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                openModal();
             });
 
-            // Customer selection modal functionality
-            const customerSelectionBtn = document.getElementById('showCustomerSelectionModal');
-            const customerSelectionModal = document.getElementById('customerSelectionModal');
-            const closeModalBtns = document.querySelectorAll('.close-modal, .close-modal-btn');
-            const customerSearch = document.getElementById('customerSearch');
-            const customerItems = document.querySelectorAll('.customer-item');
-            let lastFocusedElement = null;
+            // Close modal with buttons
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', closeModal);
+            });
 
-            function openModal() {
-                lastFocusedElement = document.activeElement;
-                customerSelectionModal.classList.add('show');
-                customerSearch.focus();
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeModal() {
-                customerSelectionModal.classList.remove('show');
-                document.body.style.overflow = '';
-                if (lastFocusedElement) {
-                    lastFocusedElement.focus();
-                }
-            }
-
-            function handleEscapeKey(event) {
-                if (event.key === 'Escape') {
+            // Close modal when clicking outside
+            customerSelectionModal.addEventListener('click', function (event) {
+                if (event.target === customerSelectionModal) {
                     closeModal();
                 }
-            }
+            });
 
-            if (customerSelectionBtn && customerSelectionModal) {
-                // Open modal
-                customerSelectionBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    openModal();
-                });
-                
-                // Close modal with buttons
-                closeModalBtns.forEach(btn => {
-                    btn.addEventListener('click', closeModal);
-                });
-                
-                // Close modal when clicking outside
-                customerSelectionModal.addEventListener('click', function(event) {
-                    if (event.target === customerSelectionModal) {
-                        closeModal();
-                    }
-                });
+            // Keyboard navigation
+            document.addEventListener('keydown', handleEscapeKey);
 
-                // Keyboard navigation
-                document.addEventListener('keydown', handleEscapeKey);
+            // Enhanced search functionality
+            if (customerSearch) {
+                let searchTimeout;
+                customerSearch.addEventListener('input', function () {
+                    clearTimeout(searchTimeout);
 
-                // Enhanced search functionality
-                if (customerSearch) {
-                    let searchTimeout;
-                    customerSearch.addEventListener('input', function() {
-                        clearTimeout(searchTimeout);
-                        
-                        searchTimeout = setTimeout(() => {
-                            const searchTerm = this.value.toLowerCase().trim();
-                            let hasResults = false;
-                            
-                            customerItems.forEach(item => {
-                                const customerInfo = item.textContent.toLowerCase();
-                                
-                                if (customerInfo.includes(searchTerm)) {
-                                    item.style.display = 'flex';
-                                    hasResults = true;
-                                    
-                                    // Highlight matching text
-                                    if (searchTerm) {
-                                        const regex = new RegExp(`(${searchTerm})`, 'gi');
-                                        item.querySelectorAll('strong, p').forEach(element => {
-                                            const originalText = element.textContent;
-                                            element.innerHTML = originalText.replace(
-                                                regex, 
-                                                '<span class="highlight">$1</span>'
-                                            );
-                                        });
-                                    }
-                                } else {
-                                    item.style.display = 'none';
+                    searchTimeout = setTimeout(() => {
+                        const searchTerm = this.value.toLowerCase().trim();
+                        let hasResults = false;
+
+                        customerItems.forEach(item => {
+                            const customerInfo = item.textContent.toLowerCase();
+
+                            if (customerInfo.includes(searchTerm)) {
+                                item.style.display = 'flex';
+                                hasResults = true;
+
+                                // Highlight matching text
+                                if (searchTerm) {
+                                    const regex = new RegExp(`(${searchTerm})`, 'gi');
+                                    item.querySelectorAll('strong, p').forEach(element => {
+                                        const originalText = element.textContent;
+                                        element.innerHTML = originalText.replace(
+                                            regex,
+                                            '<span class="highlight">$1</span>'
+                                        );
+                                    });
                                 }
-                            });
+                            } else {
+                                item.style.display = 'none';
+                            }
+                        });
 
-                            // Show/hide no results message
-                            const noResults = customerSelectionModal.querySelector('.no-results');
-                            if (!hasResults) {
-                                if (!noResults) {
-                                    const message = document.createElement('div');
-                                    message.className = 'no-results';
-                                    message.innerHTML = `
+                        // Show/hide no results message
+                        const noResults = customerSelectionModal.querySelector('.no-results');
+                        if (!hasResults) {
+                            if (!noResults) {
+                                const message = document.createElement('div');
+                                message.className = 'no-results';
+                                message.innerHTML = `
                                         <i class="fas fa-search"></i>
                                         <p>No se encontraron clientes que coincidan con "${this.value}"</p>
                                     `;
-                                    customerSelectionModal.querySelector('.customer-list').appendChild(message);
-                                }
-                            } else if (noResults) {
-                                noResults.remove();
+                                customerSelectionModal.querySelector('.customer-list').appendChild(message);
                             }
-                        }, 300);
-                    });
-                }
-                
-                // Enhanced customer selection functionality
-                customerItems.forEach(item => {
-                    // Click handler
-                    item.addEventListener('click', function() {
-                        selectCustomer(this);
-                    });
-
-                    // Keyboard handler
-                    item.addEventListener('keydown', function(event) {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault();
-                            selectCustomer(this);
+                        } else if (noResults) {
+                            noResults.remove();
                         }
-                    });
+                    }, 300);
+                });
+            }
+
+            // Enhanced customer selection functionality
+            customerItems.forEach(item => {
+                // Click handler
+                item.addEventListener('click', function () {
+                    selectCustomer(this);
                 });
 
-                function selectCustomer(item) {
-                    const clienteId = item.getAttribute('data-id');
-                    
-                    // Añadir efecto visual de selección
-                    item.classList.add('selected');
-                    
-                    // Animación de carga
-                    const loadingOverlay = document.createElement('div');
-                    loadingOverlay.className = 'loading-overlay';
-                    loadingOverlay.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                    item.appendChild(loadingOverlay);
-                    
-                    // Redireccionar después de una breve animación
-                    setTimeout(() => {
-                        window.location.href = `/productos/cotizaciones/cliente/${clienteId}/`;
-                    }, 500);
-                }
+                // Keyboard handler
+                item.addEventListener('keydown', function (event) {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        selectCustomer(this);
+                    }
+                });
+            });
+
+            function selectCustomer(item) {
+                const clienteId = item.getAttribute('data-id');
+
+                // Añadir efecto visual de selección
+                item.classList.add('selected');
+
+                // Animación de carga
+                const loadingOverlay = document.createElement('div');
+                loadingOverlay.className = 'loading-overlay';
+                loadingOverlay.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                item.appendChild(loadingOverlay);
+
+                // Redireccionar después de una breve animación
+                setTimeout(() => {
+                    window.location.href = `/productos/cotizaciones/cliente/${clienteId}/`;
+                }, 500);
             }
-        });
-    </script>
+        }
+    });
+</script>
 {% endblock %}
