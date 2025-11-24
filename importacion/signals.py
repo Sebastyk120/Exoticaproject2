@@ -525,7 +525,7 @@ def reevaluar_pagos_aduana(agencia_aduana):
             # Obtener todos los gastos en una sola consulta, ordenados por fecha de entrega de pedidos (más reciente primero)
             gastos = list(GastosAduana.objects.filter(
                 agencia_aduana=agencia_aduana
-            ).prefetch_related('pedidos').distinct().order_by('-pedidos__fecha_entrega', '-id'))
+            ).prefetch_related('pedidos').distinct().order_by('pedidos__fecha_entrega', '-id'))
 
             # Variables para rastrear
             saldo_disponible = total_transferencias
@@ -630,7 +630,7 @@ def reevaluar_pagos_carga(agencia_carga):
             # Obtener todos los gastos en una sola consulta, ordenados por fecha de entrega de pedidos (más reciente primero)
             gastos = list(GastosCarga.objects.filter(
                 agencia_carga=agencia_carga
-            ).prefetch_related('pedidos').distinct().order_by('-pedidos__fecha_entrega', '-id'))
+            ).prefetch_related('pedidos').distinct().order_by('pedidos__fecha_entrega', '-id'))
 
             # Copia de las transferencias para rastrear saldos
             transferencias_saldos = {t.id: t.valor_transferencia for t in transferencias}
