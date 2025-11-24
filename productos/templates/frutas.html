@@ -51,7 +51,7 @@
                 <h2>Agregar Nueva Fruta</h2>
                 <span class="close">&times;</span>
             </div>
-            <form action="{% url 'create_fruta' %}" method="POST">
+            <form action="{% url 'productos:create_fruta' %}" method="POST">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="nombre">Nombre de la Fruta</label>

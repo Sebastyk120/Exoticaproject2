@@ -46,8 +46,7 @@
                     <select name="cliente" id="cliente">
                         <option value="">Todos los clientes</option>
                         {% for cliente in clientes %}
-                        <option value="{{ cliente.id }}" {% if request.GET.cliente==cliente.id|stringformat:"i"
-                            %}selected{% endif %}>
+                        <option value="{{ cliente.id }}" {% if request.GET.cliente == cliente.id|stringformat:"i" %}selected{% endif %}>
                             {{ cliente.nombre }}
                         </option>
                         {% endfor %}
@@ -58,7 +57,7 @@
                     <select name="estado" id="estado">
                         <option value="">Todos los estados</option>
                         {% for estado_key, estado_value in estados %}
-                        <option value="{{ estado_key }}" {% if request.GET.estado==estado_key %}selected{% endif %}>
+                        <option value="{{ estado_key }}" {% if request.GET.estado == estado_key %}selected{% endif %}>
                             {{ estado_value }}
                         </option>
                         {% endfor %}

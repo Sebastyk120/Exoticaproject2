@@ -40,8 +40,7 @@
                     <select name="fruta" id="fruta">
                         <option value="">Todas las frutas</option>
                         {% for fruta in frutas %}
-                        <option value="{{ fruta.id }}" {% if request.GET.fruta==fruta.id|stringformat:"i" %}selected{%
-                            endif %}>
+                        <option value="{{ fruta.id }}" {% if request.GET.fruta == fruta.id|stringformat:"i" %}selected{% endif %}>
                             {{ fruta.nombre }}
                         </option>
                         {% endfor %}
@@ -52,8 +51,7 @@
                     <select name="cliente" id="cliente">
                         <option value="">Todos los clientes</option>
                         {% for cliente in clientes %}
-                        <option value="{{ cliente.id }}" {% if request.GET.cliente==cliente.id|stringformat:"i"
-                            %}selected{% endif %}>
+                        <option value="{{ cliente.id }}" {% if request.GET.cliente == cliente.id|stringformat:"i" %}selected{% endif %}>
                             {{ cliente.nombre }}
                         </option>
                         {% endfor %}

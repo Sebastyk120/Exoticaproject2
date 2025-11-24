@@ -5,9 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Migrate table TranferenciaCliente, unique=referencia.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Exoticaproject/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Exoticaproject/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importacion/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/importacion/signals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/productos/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/productos/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
