@@ -1,0 +1,407 @@
+/* Django Tables2 Custom Styles for Transferencias */
+/* Override and enhance django-tables2 default styles */
+
+/* Import Google Fonts - Space Grotesk */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* Reset and Base Styles for Tables */
+table.table {
+    font-family: 'Space Grotesk', sans-serif !important;
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 0 !important;
+    text-align: left !important; /* Alineación a la izquierda */
+}
+
+/* Enhanced Table Header */
+table.table thead th {
+    background: var(--gray-50) !important;
+    color: #374151 !important;
+    font-weight: 700 !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 16px 20px !important;
+    border-bottom: 2px solid #1e40af !important;
+    border-right: 1px solid #e5e7eb !important;
+    position: relative !important;
+    white-space: normal !important; /* Permitir salto de línea */
+    line-height: 1.2 !important;
+    text-align: left !important; /* Alineación a la izquierda */
+    word-wrap: break-word !important;
+    hyphens: auto !important;
+}
+
+/* Table Header Hover Effect */
+table.table thead th:hover {
+    background: #f3f4f6 !important;
+    cursor: pointer !important;
+}
+
+/* Remove borders from first and last header cells */
+table.table thead th:first-child {
+    border-top-left-radius: 12px !important;
+}
+
+table.table thead th:last-child {
+    border-top-right-radius: 12px !important;
+    border-right: none !important;
+}
+
+/* Enhanced Table Body */
+table.table tbody td {
+    padding: 16px 20px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    border-right: 1px solid #f8fafc !important;
+    color: #475569 !important;
+    vertical-align: middle !important;
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+    transition: all 0.2s ease !important;
+    text-align: left !important; /* Alineación a la izquierda */
+}
+
+table.table tbody td:last-child {
+    border-right: none !important;
+}
+
+/* Enhanced Row Hover Effects */
+table.table tbody tr {
+    transition: all 0.3s ease !important;
+    position: relative !important;
+}
+
+table.table tbody tr:hover {
+    background: #f0f9ff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15) !important;
+    z-index: 1 !important;
+}
+
+table.table tbody tr:hover td {
+    border-bottom-color: #bae6fd !important;
+}
+
+/* Special styling for first and last cells in hover state */
+table.table tbody tr:hover td:first-child {
+    border-top-left-radius: 8px !important;
+    border-bottom-left-radius: 8px !important;
+}
+
+table.table tbody tr:hover td:last-child {
+    border-top-right-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+}
+
+/* ID Column Styling */
+table.table td:first-child {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-weight: 600 !important;
+    color: #1e40af !important;
+    background: #f0f9ff !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    border: 1px solid #bae6fd !important;
+    font-size: 0.75rem !important;
+    display: inline-block !important;
+    min-width: 60px !important;
+    text-align: center !important;
+}
+
+/* Currency Column Styling */
+table.table td:nth-child(3),
+table.table td:nth-child(4),
+table.table td:nth-child(5) {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-weight: 600 !important;
+    text-align: right !important;
+    color: #1e293b !important;
+}
+
+table.table td:nth-child(3).positive,
+table.table td:nth-child(4).positive,
+table.table td:nth-child(5).positive {
+    color: #047857 !important;
+}
+
+table.table td:nth-child(3).negative,
+table.table td:nth-child(4).negative,
+table.table td:nth-child(5).negative {
+    color: #b91c1c !important;
+}
+
+table.table td:nth-child(3).total,
+table.table td:nth-child(4).total,
+table.table td:nth-child(5).total {
+    color: #1e40af !important;
+    background: #f0f9ff !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    font-weight: 700 !important;
+    border: 1px solid #bae6fd !important;
+}
+
+/* Date Column Styling */
+table.table td:nth-child(2) {
+    color: #64748b !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+}
+
+/* Action Buttons Column */
+table.table td:last-child {
+    text-align: right !important;
+    padding-right: 20px !important;
+}
+
+.action-buttons {
+    display: flex !important;
+    gap: 8px !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+}
+
+/* Action Button Styling */
+.action-buttons a {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+    border: 1px solid transparent !important;
+}
+
+/* Edit Button */
+.action-buttons a.btn-edit {
+    color: #1e40af !important;
+    background: #f0f9ff !important;
+    border-color: #bae6fd !important;
+}
+
+.action-buttons a.btn-edit:hover {
+    background: #1e40af !important;
+    color: white !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 4px 8px rgba(30, 64, 175, 0.3) !important;
+}
+
+/* Delete Button */
+.action-buttons a.btn-delete {
+    color: #b91c1c !important;
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+}
+
+.action-buttons a.btn-delete:hover {
+    background: #b91c1c !important;
+    color: white !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 4px 8px rgba(185, 28, 28, 0.3) !important;
+}
+
+/* Icon styling for action buttons */
+.action-buttons a i {
+    font-size: 14px !important;
+}
+
+/* Table Footer */
+table.table tfoot td,
+table.table tfoot th {
+    background: #f8fafc !important;
+    font-weight: 700 !important;
+    padding: 16px 20px !important;
+    border-top: 2px solid #e2e8f0 !important;
+    border-bottom: none !important;
+    color: #1e293b !important;
+    text-align: left !important; /* Alineación a la izquierda */
+}
+
+/* Empty Table State */
+table.table tbody tr.empty {
+    background: #f8fafc !important;
+    text-align: center !important;
+    color: #64748b !important;
+    font-style: italic !important;
+}
+
+/* Loading State */
+.table-wrapper.loading {
+    opacity: 0.7 !important;
+    pointer-events: none !important;
+    position: relative !important;
+}
+
+.table-wrapper.loading::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 32px !important;
+    height: 32px !important;
+    margin: -16px 0 0 -16px !important;
+    border: 3px solid #e2e8f0 !important;
+    border-top: 3px solid #1e40af !important;
+    border-radius: 50% !important;
+    animation: spin 1s linear infinite !important;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Pagination Styling */
+.pagination {
+    display: flex !important;
+    gap: 8px !important;
+    align-items: center !important;
+    justify-content: flex-start !important; /* Alineación a la izquierda */
+    flex-wrap: wrap !important;
+    margin: 24px 0 !important;
+}
+
+.pagination a,
+.pagination span {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    border: 1px solid #e2e8f0 !important;
+    background: white !important;
+    color: #475569 !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.pagination a:hover {
+    background: #f0f9ff !important;
+    border-color: #1e40af !important;
+    color: #1e40af !important;
+    transform: scale(1.05) !important;
+}
+
+.pagination .current {
+    background: #1e40af !important;
+    color: white !important;
+    border-color: #1e40af !important;
+    box-shadow: 0 2px 4px rgba(30, 64, 175, 0.3) !important;
+}
+
+.pagination .disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+/* Table Container Alignment */
+.table-container {
+    text-align: left !important; /* Alineación a la izquierda */
+}
+
+.table-wrapper {
+    text-align: left !important; /* Alineación a la izquierda */
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+    table.table {
+        font-size: 0.75rem !important;
+    }
+    
+    table.table thead th {
+        padding: 12px 16px !important;
+        font-size: 0.6875rem !important;
+        line-height: 1.1 !important;
+    }
+    
+    table.table tbody td {
+        padding: 12px 16px !important;
+    }
+    
+    .action-buttons {
+        flex-direction: column !important;
+        gap: 4px !important;
+    }
+    
+    .action-buttons a {
+        width: 32px !important;
+        height: 32px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-wrapper {
+        overflow-x: scroll !important;
+    }
+    
+    table.table {
+        min-width: 600px !important;
+    }
+    
+    /* Títulos de tabla más compactos en móvil */
+    table.table thead th {
+        font-size: 0.625rem !important;
+        padding: 8px 12px !important;
+    }
+}
+
+/* Print Styles */
+@media print {
+    table.table thead th {
+        background: #f1f5f9 !important;
+        color: #1e293b !important;
+    }
+    
+    table.table tbody tr:hover {
+        background: white !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    .action-buttons {
+        display: none !important;
+    }
+    
+    .pagination {
+        display: none !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    table.table {
+        border: 2px solid #000 !important;
+    }
+    
+    table.table thead th {
+        background: #000 !important;
+        color: #fff !important;
+        border-bottom: 2px solid #fff !important;
+    }
+    
+    table.table tbody tr:hover {
+        background: #f0f0f0 !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    table.table tbody tr,
+    .action-buttons a,
+    .pagination a {
+        transition: none !important;
+    }
+    
+    .table-wrapper.loading::after {
+        animation: none !important;
+    }
+}
