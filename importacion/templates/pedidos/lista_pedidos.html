@@ -60,15 +60,15 @@
                             <label><input type="checkbox" data-column="fecha_vencimiento" checked> Fecha Vencimiento</label>
                             <label><input type="checkbox" data-column="semana" checked> Semana</label>
                             <label><input type="checkbox" data-column="awb" checked> AWB</label>
+                            <label><input type="checkbox" data-column="numero_factura" checked> Nº Factura</label>
+                            <label><input type="checkbox" data-column="numero_nc" checked> Nº NC</label>
                             <label><input type="checkbox" data-column="cajas" checked> Cajas Recibidas</label>
                             <label><input type="checkbox" data-column="factura_usd" checked> Total USD</label>
-                            <label><input type="checkbox" data-column="factura_eur"> Total EUR</label>
-                            <label><input type="checkbox" data-column="nc_usd"> NC USD</label>
-                            <label><input type="checkbox" data-column="numero_factura"> Nº Factura</label>
-                            <label><input type="checkbox" data-column="numero_nc"> Nº NC</label>
+                            <label><input type="checkbox" data-column="nc_usd" checked> NC USD</label>
                             <label><input type="checkbox" data-column="monto_pendiente" checked> Monto Pendiente USD</label>
                             <label><input type="checkbox" data-column="estado" checked> Estado</label>
                             <label><input type="checkbox" data-column="pagado" checked> Pagado</label>
+                            <label><input type="checkbox" data-column="factura_eur" checked> Total EUR</label>
                             <!-- Acciones siempre visibles -->
                             <label><input type="checkbox" data-column="acciones" checked disabled> Acciones</label>
                         </div>
@@ -89,15 +89,15 @@
                                 <th class="column-fecha_vencimiento">Fecha Vencimiento</th>
                                 <th class="column-semana">Semana</th>
                                 <th class="column-awb">AWB</th>
-                                <th class="column-cajas">Cajas</th>
-                                <th class="column-factura_usd">Total USD</th>
-                                <th class="column-factura_eur">Total EUR</th>
-                                <th class="column-nc_usd">NC USD</th>
                                 <th class="column-numero_factura">Nº Factura</th>
                                 <th class="column-numero_nc">Nº NC</th>
+                                <th class="column-cajas">Cajas</th>
+                                <th class="column-factura_usd">Total USD</th>
+                                <th class="column-nc_usd">NC USD</th>
                                 <th class="column-monto_pendiente">Pendiente USD</th>
                                 <th class="column-estado">Estado</th>
                                 <th class="column-pagado">Pagado</th>
+                                <th class="column-factura_eur">Total EUR</th>
                                 <th class="column-acciones">Acciones</th>
                             </tr>
                         </thead>
@@ -110,12 +110,11 @@
                                 <td class="column-fecha_vencimiento">{{ pedido.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</td>
                                 <td class="column-semana">{{ pedido.semana|default:"-" }}</td>
                                 <td class="column-awb">{{ pedido.awb|default:"-" }}</td>
-                                <td class="column-cajas">{{ pedido.total_cajas_recibidas|default:0 }}/{{ pedido.total_cajas_solicitadas|default:0 }}</td>
-                                <td class="column-factura_usd">{{ pedido.valor_total_factura_usd|format_currency }}</td>
-                                <td class="column-factura_eur">{{ pedido.valor_factura_eur|format_currency_eur }}</td>
-                                <td class="column-nc_usd">{{ pedido.valor_total_nc_usd|format_currency }}</td>
                                 <td class="column-numero_factura">{{ pedido.numero_factura|default:"-" }}</td>
                                 <td class="column-numero_nc">{{ pedido.numero_nc|default:"-" }}</td>
+                                <td class="column-cajas">{{ pedido.total_cajas_recibidas|default:0 }}/{{ pedido.total_cajas_solicitadas|default:0 }}</td>
+                                <td class="column-factura_usd">{{ pedido.valor_total_factura_usd|format_currency }}</td>
+                                <td class="column-nc_usd">{{ pedido.valor_total_nc_usd|format_currency }}</td>
                                 <td class="column-monto_pendiente">{{ pedido.monto_pendiente|format_currency }}</td>
                                 <td class="column-estado">
                                     <span class="status-badge status-{{ pedido.estado_pedido|slugify }}">
@@ -129,6 +128,7 @@
                                     <span class="pagado-icon">❌</span>
                                     {% endif %}
                                 </td>
+                                <td class="column-factura_eur">{{ pedido.valor_factura_eur|format_currency_eur }}</td>
                                 <td class="column-acciones actions">
                                     <a href="{% url 'importacion:detalle_pedido' pedido.id %}" class="btn btn-icon" title="Ver/Editar">
                                         <i class="fas fa-edit"></i>
@@ -189,6 +189,14 @@
                                     <span class="label">Semana:</span>
                                     <span class="value">{{ pedido.semana|default:"-" }}</span>
                                 </div>
+                                <div class="card-row column-numero_factura">
+                                    <span class="label">Nº Factura:</span>
+                                    <span class="value">{{ pedido.numero_factura|default:"-" }}</span>
+                                </div>
+                                <div class="card-row column-numero_nc">
+                                    <span class="label">Nº NC:</span>
+                                    <span class="value">{{ pedido.numero_nc|default:"-" }}</span>
+                                </div>
                                 <div class="card-row column-cajas">
                                     <span class="label">Cajas:</span>
                                     <span class="value">{{ pedido.total_cajas_recibidas|default:0 }}/{{ pedido.total_cajas_solicitadas|default:0 }}</span>
@@ -196,6 +204,10 @@
                                 <div class="card-row column-factura_usd">
                                     <span class="label">Total USD:</span>
                                     <span class="value">{{ pedido.valor_total_factura_usd|format_currency }}</span>
+                                </div>
+                                <div class="card-row column-nc_usd">
+                                    <span class="label">NC USD:</span>
+                                    <span class="value">{{ pedido.valor_total_nc_usd|format_currency }}</span>
                                 </div>
                                 <div class="card-row column-monto_pendiente">
                                     <span class="label">Pendiente USD:</span>
@@ -211,18 +223,6 @@
                                 <div class="card-row column-factura_eur">
                                     <span class="label">Total EUR:</span>
                                     <span class="value">{{ pedido.valor_factura_eur|format_currency_eur }}</span>
-                                </div>
-                                <div class="card-row column-nc_usd">
-                                    <span class="label">NC USD:</span>
-                                    <span class="value">{{ pedido.valor_total_nc_usd|format_currency }}</span>
-                                </div>
-                                <div class="card-row column-numero_factura">
-                                    <span class="label">Nº Factura:</span>
-                                    <span class="value">{{ pedido.numero_factura|default:"-" }}</span>
-                                </div>
-                                <div class="card-row column-numero_nc">
-                                    <span class="label">Nº NC:</span>
-                                    <span class="value">{{ pedido.numero_nc|default:"-" }}</span>
                                 </div>
                             </div>
                             
@@ -474,8 +474,9 @@
                         }
                     });
                 } else {
-                    // Configuración inicial - ocultar algunas columnas por defecto
-                    const defaultHiddenColumns = ['factura_eur', 'nc_usd', 'numero_factura', 'numero_nc'];
+                    // Configuración inicial - todas las columnas visibles por defecto
+                    // El usuario puede personalizar después
+                    const defaultHiddenColumns = []; // Vacío para mostrar todo por defecto
                     defaultHiddenColumns.forEach(column => {
                         const checkbox = document.querySelector(`input[data-column="${column}"]`);
                         if (checkbox && !checkbox.disabled) {
