@@ -63,7 +63,7 @@ def save_attachment_to_disk(email_log_id, filename, content_bytes):
         raise
 
 def send_email_with_mailjet(subject, body, from_email, to_emails, cc_emails=None, attachments=None,
-                           proceso=None, usuario=None, venta=None, cotizacion=None, cliente=None):
+                           proceso=None, usuario=None, venta=None, cotizacion=None, cliente=None, body_html=None):
     """
     Función auxiliar para enviar emails directamente con Mailjet API
     Especialmente útil para emails con adjuntos grandes
@@ -119,6 +119,8 @@ def send_email_with_mailjet(subject, body, from_email, to_emails, cc_emails=None
             "Subject": subject,
             "TextPart": body
         }
+        if body_html:
+            mailjet_message["HTMLPart"] = body_html
         
         # Agregar correos CC si existen
         if cc_emails and len(cc_emails) > 0:

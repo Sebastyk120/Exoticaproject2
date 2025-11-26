@@ -631,3 +631,45 @@ def api_cliente_resumen(request, cliente_id):
             'success': False,
             'error': 'Error al obtener el resumen del cliente'
         }, status=500)
+
+@login_required
+def get_client_emails(request, cliente_id):
+    """
+    Vista para obtener los correos electrónicos de un cliente.
+    """
+    try:
+        cliente = get_object_or_404(Cliente, pk=cliente_id)
+        emails = []
+        
+        # Agregar email principal si existe
+        if cliente.email:
+            emails.append(cliente.email)
+        
+        # Agregar correos adicionales si existen
+        if cliente.correos_adicionales:
+            additional_emails = [email.strip() for email in cliente.correos_adicionales.split(',') if email.strip()]
+            emails.extend(additional_emails)
+        
+        # Eliminar duplicados y validar
+        unique_emails = list(set(emails))
+        valid_emails = []
+        
+        for email in unique_emails:
+            try:
+                validate_email(email)
+                valid_emails.append(email)
+            except ValidationError:
+                # Si el email no es válido, lo saltamos
+                continue
+        
+        return JsonResponse({
+            'success': True,
+            'emails': valid_emails
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting client emails for client {cliente_id}: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Error al obtener los correos del cliente'
+        }, status=500)

@@ -13,6 +13,9 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', views.CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('password_reset/complete/', views.CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
     
+    # Email functionality for account status
+    path('enviar-estado-cuenta/', views.enviar_estado_cuenta_email, name='enviar_estado_cuenta'),
+    
     # File Explorer URLs
     path('file-explorer/', views_file_explorer.file_explorer_view, name='file_explorer'),
     path('file-explorer/<path:subpath>/', views_file_explorer.file_explorer_view, name='file_explorer_subpath'),

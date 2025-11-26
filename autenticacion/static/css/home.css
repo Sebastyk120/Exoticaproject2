@@ -1412,3 +1412,92 @@ body {
 }
 
 /* ...existing code... */
+
+/* Email functionality styles */
+.email-form-section {
+    background-color: var(--gray-100);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.email-list-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.email-list-item:hover {
+    background-color: var(--gray-200);
+}
+
+.email-checkbox {
+    margin-right: 0.75rem;
+}
+
+.email-additional-input {
+    border-radius: 6px;
+    border: 1px solid var(--gray-300);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+.email-additional-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+}
+
+.btn-email-send {
+    background: linear-gradient(45deg, var(--success-color), #3bc0f0);
+    border: none;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-email-send:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(76, 201, 240, 0.4);
+}
+
+.btn-email-cancel {
+    background-color: var(--gray-500);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-email-cancel:hover {
+    background-color: var(--gray-600);
+    transform: translateY(-2px);
+}
+
+.email-loading {
+    display: none;
+    text-align: center;
+    padding: 1rem;
+}
+
+.email-loading .spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-width: 0.15rem;
+}
+
+.email-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.email-error {
+    background-color: rgba(249, 65, 68, 0.1);
+    border: 1px solid rgba(249, 65, 68, 0.3);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-top: 1rem;
+}

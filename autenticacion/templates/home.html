@@ -20,6 +20,7 @@
 </head>
 
 <body>
+    {% csrf_token %}
     <div class="app-container">
         <!-- Main Content Area -->
         <div class="main-content">
@@ -381,10 +382,100 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                <button type="button" id="sendEmailBtn" class="btn btn-success" style="display: none;" onclick="showEmailForm()">
+                                    <i class="fas fa-envelope me-1"></i>Enviar por Email
+                                </button>
                                 <a id="viewFullStatusBtn" href="#" class="btn btn-primary" style="display: none;">
                                     <i class="fas fa-external-link-alt me-1"></i>Ver Estado Completo
                                 </a>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Form Modal -->
+                <div class="modal fade" id="emailFormModal" tabindex="-1" aria-labelledby="emailFormModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="emailFormModalLabel">
+                                    <i class="fas fa-envelope me-2"></i>Enviar Estado de Cuenta por Email
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form id="emailForm" onsubmit="sendAccountStatusEmail(event)">
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="clienteEmailInfo" class="form-label">Cliente</label>
+                                                <input type="text" class="form-control" id="clienteEmailInfo" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="emailSubject" class="form-label">Asunto</label>
+                                                <input type="text" class="form-control" id="emailSubject" name="email_subject" 
+                                                       value="Estado de Cuenta - L&M Exotic Fruit" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="email-form-section">
+                                        <label class="form-label">Correos Electrónicos</label>
+                                        <div id="emailSelectionContainer">
+                                            <!-- Email options will be populated here -->
+                                        </div>
+                                        <div class="mt-2">
+                                            <input type="email" class="form-control email-additional-input" id="additionalEmail" 
+                                                   placeholder="Agregar correo adicional (opcional)">
+                                            <button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="addAdditionalEmail()">
+                                                <i class="fas fa-plus me-1"></i>Agregar
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="emailMessage" class="form-label">Mensaje Adicional (opcional)</label>
+                                        <textarea class="form-control" id="emailMessage" name="email_message" 
+                                                  rows="4" placeholder="Puede agregar un mensaje personalizado aquí..."></textarea>
+                                    </div>
+
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Nota:</strong> El email incluirá automáticamente el resumen del estado de cuenta con las facturas pendientes de pago.
+                                    </div>
+                                    
+                                    <!-- Loading message -->
+                                    <div id="emailLoading" class="email-loading">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Enviando...</span>
+                                        </div>
+                                        <p class="mt-2 mb-0">Enviando email, por favor espere...</p>
+                                    </div>
+                                    
+                                    <!-- Success message -->
+                                    <div id="emailSuccess" class="email-success" style="display: none;">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <strong>¡Éxito!</strong> El email ha sido enviado correctamente.
+                                    </div>
+                                    
+                                    <!-- Error message -->
+                                    <div id="emailError" class="email-error" style="display: none;">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        <strong>Error:</strong> <span id="emailErrorText"></span>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-email-cancel" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-email-send">
+                                        <i class="fas fa-paper-plane me-1"></i>Enviar Email
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                         </div>
                     </div>
                 </div>
@@ -810,7 +901,198 @@
             document.getElementById('clientSummaryContent').style.display = 'none';
             document.getElementById('noClientSelected').style.display = 'block';
             document.getElementById('viewFullStatusBtn').style.display = 'none';
+            document.getElementById('sendEmailBtn').style.display = 'none';
         });
+
+        // Email functionality variables
+        let currentClientData = null;
+        let selectedEmails = [];
+
+        // Show email form modal
+        function showEmailForm() {
+            const clientSelect = document.getElementById('clientSelect');
+            const clienteId = clientSelect.value;
+            const clienteText = clientSelect.options[clientSelect.selectedIndex].text;
+            
+            if (!clienteId) {
+                alert('Por favor seleccione un cliente primero');
+                return;
+            }
+
+            // Set cliente info
+            document.getElementById('clienteEmailInfo').value = clienteText;
+            
+            // Reset email form
+            document.getElementById('emailForm').reset();
+            selectedEmails = [];
+            
+            // Load client emails
+            loadClientEmails(clienteId);
+            
+            // Show email modal
+            const emailModal = new bootstrap.Modal(document.getElementById('emailFormModal'));
+            emailModal.show();
+        }
+
+        // Load client emails for selection
+        function loadClientEmails(clienteId) {
+            const container = document.getElementById('emailSelectionContainer');
+            container.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div></div>';
+            
+            fetch(`/comercial/get-client-emails/${clienteId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                            let html = '';
+                            data.emails.forEach(email => {
+                                html += `
+                                    <div class="email-list-item">
+                                        <input class="form-check-input email-checkbox" type="checkbox" 
+                                               id="email_${email}" value="${email}" 
+                                               onchange="toggleEmailSelection('${email}')" checked>
+                                        <label class="form-check-label" for="email_${email}">
+                                            ${email}
+                                        </label>
+                                    </div>
+                            `;
+                                selectedEmails.push(email);
+                            });
+                            container.innerHTML = html;
+                        } else {
+                            container.innerHTML = '<div class="alert alert-warning">No se pudieron cargar los correos del cliente</div>';
+                        }
+                })
+                .catch(error => {
+                    console.error('Error loading client emails:', error);
+                    container.innerHTML = '<div class="alert alert-danger">Error al cargar correos</div>';
+                });
+        }
+
+        // Toggle email selection
+        function toggleEmailSelection(email) {
+            const index = selectedEmails.indexOf(email);
+            if (index > -1) {
+                selectedEmails.splice(index, 1);
+            } else {
+                selectedEmails.push(email);
+            }
+        }
+
+        // Add additional email
+        function addAdditionalEmail() {
+            const input = document.getElementById('additionalEmail');
+            const email = input.value.trim();
+            
+            if (email && !selectedEmails.includes(email)) {
+                selectedEmails.push(email);
+                
+                // Add to UI
+                const container = document.getElementById('emailSelectionContainer');
+                const div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML = `
+                    <input class="form-check-input" type="checkbox" 
+                           id="email_${email}" value="${email}" 
+                           onchange="toggleEmailSelection('${email}')" checked>
+                    <label class="form-check-label" for="email_${email}">
+                        ${email} (adicional)
+                    </label>
+                `;
+                container.appendChild(div);
+                
+                // Clear input
+                input.value = '';
+            }
+        }
+
+        // Send account status email
+        function sendAccountStatusEmail(event) {
+            event.preventDefault();
+            
+            if (selectedEmails.length === 0) {
+                alert('Por favor seleccione al menos un correo electrónico');
+                return;
+            }
+            
+            // Show loading state
+            document.getElementById('emailLoading').style.display = 'block';
+            document.getElementById('emailSuccess').style.display = 'none';
+            document.getElementById('emailError').style.display = 'none';
+            
+            // Disable submit button
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Enviando...';
+            submitBtn.disabled = true;
+            
+            const clienteId = document.getElementById('clientSelect').value;
+            const subject = document.getElementById('emailSubject').value;
+            const message = document.getElementById('emailMessage').value;
+            
+            const formData = new FormData();
+            formData.append('cliente_id', clienteId);
+            formData.append('selected_emails', JSON.stringify(selectedEmails));
+            formData.append('email_subject', subject);
+            formData.append('email_message', message);
+            
+            fetch("{% url 'autenticacion:enviar_estado_cuenta' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('emailLoading').style.display = 'none';
+                
+                if (data.success) {
+                    // Show success message
+                    document.getElementById('emailSuccess').style.display = 'block';
+                    
+                    // Wait 2 seconds then close modals
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('emailFormModal')).hide();
+                        bootstrap.Modal.getInstance(document.getElementById('clientStatusModal')).hide();
+                        
+                        // Reset form
+                        document.getElementById('emailForm').reset();
+                        selectedEmails = [];
+                        document.getElementById('emailSelectionContainer').innerHTML = '';
+                    }, 2000);
+                } else {
+                    // Show error message
+                    document.getElementById('emailError').style.display = 'block';
+                    document.getElementById('emailErrorText').textContent = data.error;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('emailLoading').style.display = 'none';
+                document.getElementById('emailError').style.display = 'block';
+                document.getElementById('emailErrorText').textContent = 'Error al enviar el email. Por favor intente nuevamente.';
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        // Update the loadClientSummary function to show/hide email button
+        const originalLoadClientSummary = loadClientSummary;
+        loadClientSummary = function() {
+            originalLoadClientSummary();
+            
+            // Show/hide email button based on client selection
+            const clientId = document.getElementById('clientSelect').value;
+            const sendEmailBtn = document.getElementById('sendEmailBtn');
+            
+            if (clientId) {
+                sendEmailBtn.style.display = 'inline-block';
+            } else {
+                sendEmailBtn.style.display = 'none';
+            }
+        };
     </script>
 </body>
 

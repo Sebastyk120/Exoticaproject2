@@ -31,6 +31,9 @@ urlpatterns = [
     path('client-statement/<str:token>/', views_clientes.estado_cuenta_cliente_token, name='estado_cuenta_cliente_token'),
     path('estado-cuenta/cliente/<int:cliente_id>/', views_clientes.estado_cuenta_cliente, name='estado_cuenta_cliente'),
     
+    # API endpoint for client emails
+    path('get-client-emails/<int:cliente_id>/', views_clientes.get_client_emails, name='get_client_emails'),
+    
     # Nueva ruta directa para acceder a los albaranes (más fácil para JavaScript)
     path('generar_albaran_directo/<int:venta_id>/', views_ventas.generar_albaran, name='generar_albaran_directo'),
     
