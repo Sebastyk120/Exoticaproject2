@@ -25,25 +25,34 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="cliente" class="form-label">Cliente *</label>
+                            <label for="cliente" class="form-label required">Cliente</label>
                             <select class="form-select" id="cliente" name="cliente" required>
                                 <option value="">Seleccione un cliente</option>
                                 {% for cliente in clientes %}
                                 <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
                                 {% endfor %}
                             </select>
+                            <div class="invalid-feedback">
+                                Por favor seleccione un cliente.
+                            </div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="referencia" class="form-label">Referencia *</label>
+                            <label for="referencia" class="form-label required">Referencia</label>
                             <input type="text" class="form-control" id="referencia" name="referencia" required
                                 placeholder="Ej: CLI-2024-001">
+                            <div class="invalid-feedback">
+                                Por favor ingrese una referencia.
+                            </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="fecha_transferencia" class="form-label">Fecha Transferencia *</label>
+                            <label for="fecha_transferencia" class="form-label required">Fecha Transferencia</label>
                             <input type="date" class="form-control" id="fecha_transferencia" name="fecha_transferencia"
                                 required>
+                            <div class="invalid-feedback">
+                                Por favor seleccione una fecha de transferencia.
+                            </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="concepto" class="form-label">Concepto</label>
@@ -53,11 +62,14 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label for="valor_transferencia" class="form-label">Valor Transferencia EUR *</label>
+                            <label for="valor_transferencia" class="form-label required">Valor Transferencia EUR</label>
                             <div class="input-group">
                                 <span class="input-group-text">€</span>
                                 <input type="number" step="0.01" class="form-control" id="valor_transferencia"
                                     name="valor_transferencia" required placeholder="0.00">
+                                <div class="invalid-feedback">
+                                    Por favor ingrese un valor de transferencia.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -103,20 +115,28 @@
                                 </option>
                                 {% endfor %}
                             </select>
+                            <div class="invalid-feedback">
+                                Por favor seleccione un cliente.
+                            </div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="referencia{{ row.record.pk }}" class="form-label">Referencia *</label>
+                            <label for="referencia{{ row.record.pk }}" class="form-label required">Referencia</label>
                             <input type="text" class="form-control" id="referencia{{ row.record.pk }}" name="referencia"
                                 value="{{ row.record.referencia }}" required>
+                            <div class="invalid-feedback">
+                                Por favor ingrese una referencia.
+                            </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="fecha_transferencia{{ row.record.pk }}" class="form-label">Fecha Transferencia
-                                *</label>
+                            <label for="fecha_transferencia{{ row.record.pk }}" class="form-label required">Fecha Transferencia</label>
                             <input type="date" class="form-control" id="fecha_transferencia{{ row.record.pk }}"
                                 name="fecha_transferencia" value="{{ row.record.fecha_transferencia|date:'Y-m-d' }}"
                                 required>
+                            <div class="invalid-feedback">
+                                Por favor seleccione una fecha de transferencia.
+                            </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="concepto{{ row.record.pk }}" class="form-label">Concepto</label>
@@ -126,13 +146,16 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label for="valor_transferencia{{ row.record.pk }}" class="form-label">Valor Transferencia
-                                EUR *</label>
+                            <label for="valor_transferencia{{ row.record.pk }}" class="form-label required">Valor Transferencia
+                                EUR</label>
                             <div class="input-group">
                                 <span class="input-group-text">€</span>
                                 <input type="number" step="0.01" class="form-control"
                                     id="valor_transferencia{{ row.record.pk }}" name="valor_transferencia"
                                     value="{{ row.record.valor_transferencia|stringformat:'s' }}" required>
+                                <div class="invalid-feedback">
+                                    Por favor ingrese un valor de transferencia.
+                                </div>
                             </div>
                         </div>
                     </div>
