@@ -72,4 +72,5 @@ urlpatterns = [
     path('correos/', views.lista_correos, name='lista_correos'),
     path('correos/detalle/<int:correo_id>/', views.detalle_correo, name='detalle_correo'),
     path('correos/descargar/<int:email_log_id>/<str:filename>/', views.descargar_adjunto_correo, name='descargar_adjunto_correo'),
+    path('correos/visualizar/<int:email_log_id>/<str:filename>/', views.visualizar_adjunto_correo, name='visualizar_adjunto_correo'),
 ]

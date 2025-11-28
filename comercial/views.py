@@ -157,6 +157,18 @@ def lista_correos(request):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     
+    # Obtener adjuntos PDF para cada correo en la página actual
+    for correo in page_obj:
+        adjuntos = correo.get_adjuntos_list()
+        pdf_adjuntos = []
+        for adjunto in adjuntos:
+            if adjunto['nombre'].lower().endswith('.pdf'):
+                pdf_adjuntos.append({
+                    'nombre': adjunto['nombre'],
+                    'url_visualizar': f'/comercial/correos/visualizar/{correo.id}/{adjunto["nombre"]}/'
+                })
+        correo.pdf_adjuntos = pdf_adjuntos
+    
     # Calcular estadísticas
     total_correos = EmailLog.objects.count()
     correos_exitosos = EmailLog.objects.filter(estado_envio='exitoso').count()
@@ -195,6 +207,91 @@ def lista_correos(request):
 
 
 @login_required
+@require_http_methods(["GET"])
+def visualizar_adjunto_correo(request, email_log_id, filename):
+    """
+    Vista para visualizar archivos adjuntos de correos (especialmente PDFs) en el navegador.
+    Valida que el usuario tenga permisos para ver el archivo.
+    """
+    try:
+        # Obtener el registro de EmailLog
+        email_log = EmailLog.objects.get(id=email_log_id)
+        
+        # Validar que el usuario sea staff o el propietario del correo
+        if not request.user.is_staff and email_log.usuario != request.user:
+            return JsonResponse({
+                'success': False,
+                'error': 'No tiene permisos para visualizar este archivo'
+            }, status=403)
+        
+        # Buscar el archivo en los campos adjunto_1 a adjunto_5
+        adjunto_field = None
+        for i in range(1, 6):
+            field = getattr(email_log, f'adjunto_{i}', None)
+            if field and field.name:
+                # Comparar el nombre del archivo
+                if field.name.endswith(filename) or field.name.split('/')[-1] == filename:
+                    adjunto_field = field
+                    break
+        
+        # Si no se encontró el archivo
+        if not adjunto_field:
+            return JsonResponse({
+                'success': False,
+                'error': 'Archivo no encontrado'
+            }, status=404)
+        
+        # Validar que el archivo existe físicamente
+        if not adjunto_field.storage.exists(adjunto_field.name):
+            return JsonResponse({
+                'success': False,
+                'error': 'El archivo no existe en el servidor'
+            }, status=404)
+        
+        # Obtener la ruta absoluta del archivo
+        file_path = adjunto_field.path
+        
+        # Validar que el archivo está dentro de MEDIA_ROOT (prevenir directory traversal)
+        media_root = os.path.abspath(settings.MEDIA_ROOT)
+        if not os.path.abspath(file_path).startswith(media_root):
+            return JsonResponse({
+                'success': False,
+                'error': 'Acceso denegado'
+            }, status=403)
+        
+        # Determinar el tipo MIME
+        content_type, _ = mimetypes.guess_type(file_path)
+        if not content_type:
+            content_type = 'application/octet-stream'
+        
+        # Para PDFs, mostrar en el navegador en lugar de descargar
+        if content_type == 'application/pdf':
+            # Abrir y retornar el archivo para visualización
+            file_handle = open(file_path, 'rb')
+            response = FileResponse(file_handle, content_type=content_type)
+            response['Content-Disposition'] = f'inline; filename="{filename}"'
+            return response
+        else:
+            # Para otros tipos de archivo, ofrecer descarga
+            file_handle = open(file_path, 'rb')
+            response = FileResponse(file_handle, content_type=content_type)
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        
+    except EmailLog.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'El registro de correo no existe'
+        }, status=404)
+    except Exception as e:
+        logger.error(f"Error visualizando adjunto: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Error al visualizar el archivo: {str(e)}'
+        }, status=500)
+
+
+@login_required
 def detalle_correo(request, correo_id):
     """
     Vista AJAX para obtener detalles de un correo específico
@@ -205,12 +302,16 @@ def detalle_correo(request, correo_id):
         # Obtener lista de adjuntos
         adjuntos = correo.get_adjuntos_list()
         
-        # Construir URLs de descarga para cada adjunto
+        # Construir URLs de visualización y descarga para cada adjunto
         adjuntos_con_url = []
         for adjunto in adjuntos:
+            # Determinar si es PDF para mostrar botón de visualización
+            es_pdf = adjunto['nombre'].lower().endswith('.pdf')
             adjuntos_con_url.append({
                 'nombre': adjunto['nombre'],
-                'url': f'/comercial/correos/descargar/{correo_id}/{adjunto["nombre"]}/'
+                'es_pdf': es_pdf,
+                'url_visualizar': f'/comercial/correos/visualizar/{correo_id}/{adjunto["nombre"]}/' if es_pdf else None,
+                'url_descargar': f'/comercial/correos/descargar/{correo_id}/{adjunto["nombre"]}/'
             })
         
         data = {

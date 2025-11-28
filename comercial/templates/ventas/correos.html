@@ -149,7 +149,7 @@
                             <th>Proceso</th>
                             <th>Asunto</th>
                             <th>Destinatarios</th>
-                            <th>Usuario</th>
+                            <th>Adjuntos PDF</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
@@ -177,13 +177,20 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="text-muted">
-                                    {% if correo.usuario %}
-                                        {{ correo.usuario.username }}
-                                    {% else %}
-                                        Sistema
-                                    {% endif %}
-                                </span>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for pdf_adjunto in correo.pdf_adjuntos %}
+                                        <a href="{{ pdf_adjunto.url_visualizar }}" 
+                                           target="_blank"
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="Visualizar {{ pdf_adjunto.nombre }}"
+                                           style="font-size: 0.75rem;">
+                                            <i class="fas fa-file-pdf"></i>
+                                            PDF {{ forloop.counter }}
+                                        </a>
+                                    {% empty %}
+                                        <span class="text-muted small">Sin PDFs</span>
+                                    {% endfor %}
+                                </div>
                             </td>
                             <td>
                                 {% if correo.estado_envio == 'exitoso' %}
@@ -214,7 +221,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center py-4">
+                            <td colspan="6" class="text-center py-4">
                                 <div class="empty-state">
                                     <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
                                     <h5 class="text-muted">No se encontraron correos</h5>
@@ -368,6 +375,31 @@ function verDetalle(correoId) {
                             <div class="attachments-list">
                     `;
                     correo.adjuntos.forEach((adjunto, index) => {
+                        let botonesAccion = '';
+                        
+                        // Si es PDF, mostrar botón de visualización
+                        if (adjunto.es_pdf) {
+                            botonesAccion += `
+                                <a href="${adjunto.url_visualizar}"
+                                   target="_blank"
+                                   class="btn btn-sm btn-outline-primary me-1"
+                                   title="Visualizar ${adjunto.nombre}">
+                                    <i class="fas fa-eye"></i>
+                                    Ver
+                                </a>
+                            `;
+                        }
+                        
+                        // Siempre mostrar botón de descarga
+                        botonesAccion += `
+                            <a href="${adjunto.url_descargar}"
+                               class="btn btn-sm btn-outline-secondary"
+                               title="Descargar ${adjunto.nombre}">
+                                <i class="fas fa-download"></i>
+                                Descargar
+                            </a>
+                        `;
+                        
                         adjuntosHTML += `
                             <div class="attachment-item-enhanced">
                                 <div class="attachment-main">
@@ -380,12 +412,7 @@ function verDetalle(correoId) {
                                     </div>
                                 </div>
                                 <div class="attachment-action-enhanced">
-                                    <a href="/comercial/correos/descargar/${correo.id}/${adjunto.nombre}/"
-                                       class="btn-download-enhanced"
-                                       title="Descargar ${adjunto.nombre}">
-                                        <i class="fas fa-download"></i>
-                                        Descargar
-                                    </a>
+                                    ${botonesAccion}
                                 </div>
                             </div>
                         `;
