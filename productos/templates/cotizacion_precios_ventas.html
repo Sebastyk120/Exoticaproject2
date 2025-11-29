@@ -410,21 +410,20 @@ Luz Mery Melo Mejia
             const quotationData = {
                 quotation_number: quotationNumber,
                 client: {% if customer %}{
-                    id: {{ customer.id }
-        },
-            name: "{{ customer.nombre }}",
-            email: "{{ customer.email }}"
-            }{% else %}null{% endif %},
-        prospect: {% if is_new_customer %}{
-        name: document.getElementById('prospect-name') ? document.getElementById('prospect-name').value : '',
-            email: document.getElementById('prospect-email') ? document.getElementById('prospect-email').value : '',
-                address: document.getElementById('prospect-address') ? document.getElementById('prospect-address').value : '',
+                    id: {{ customer.id }},
+                    name: "{{ customer.nombre|escapejs }}",
+                    email: "{{ customer.email|escapejs }}"
+                }{% else %}null{% endif %},
+                prospect: {% if is_new_customer %}{
+                    name: document.getElementById('prospect-name') ? document.getElementById('prospect-name').value : '',
+                    email: document.getElementById('prospect-email') ? document.getElementById('prospect-email').value : '',
+                    address: document.getElementById('prospect-address') ? document.getElementById('prospect-address').value : '',
                     phone: document.getElementById('prospect-phone') ? document.getElementById('prospect-phone').value : ''
-    } {% else %} null{% endif %},
-    items: [],
-        terms: document.querySelector('.editable-terms').innerHTML,
-            notes: document.querySelector('.editable-notes').innerHTML
-        };
+                }{% else %}null{% endif %},
+                items: [],
+                terms: document.querySelector('.editable-terms').innerHTML,
+                notes: document.querySelector('.editable-notes').innerHTML
+            };
 
     // Collect items data
     document.querySelectorAll('.product-row').forEach(row => {
@@ -535,22 +534,20 @@ Luz Mery Melo Mejia
                 const quotationData = {
                     quotation_number: quotationNumber,
                     client: {% if customer %}{
-                        id: {{ customer.id }
-            },
-                name: "{{ customer.nombre }}",
-                    email: "{{ customer.email }}"
-        }{% else %} null{% endif %},
-        prospect: {% if is_new_customer %} {
-            name: document.getElementById('prospect-name').value,
-                email: document.getElementById('prospect-email').value,
-                    address: document.getElementById('prospect-address').value,
+                        id: {{ customer.id }},
+                        name: "{{ customer.nombre|escapejs }}",
+                        email: "{{ customer.email|escapejs }}"
+                    }{% else %}null{% endif %},
+                    prospect: {% if is_new_customer %}{
+                        name: document.getElementById('prospect-name').value,
+                        email: document.getElementById('prospect-email').value,
+                        address: document.getElementById('prospect-address').value,
                         phone: document.getElementById('prospect-phone').value
-        } {% else %} null{% endif %},
-        items: [],
-            // Add terms and notes from the editable fields
-            terms: document.querySelector('.editable-terms').innerHTML,
-                notes: document.querySelector('.editable-notes').innerHTML
-    };
+                    }{% else %}null{% endif %},
+                    items: [],
+                    terms: document.querySelector('.editable-terms').innerHTML,
+                    notes: document.querySelector('.editable-notes').innerHTML
+                };
 
     // Collect items data - only those that remain in the table
     document.querySelectorAll('.product-row').forEach(row => {
