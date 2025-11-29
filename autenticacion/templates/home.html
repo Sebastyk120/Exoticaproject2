@@ -476,34 +476,32 @@
                         </div>
                     </div>
                 </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- App Categories -->
                 <div class="app-categories">
-                    <!-- Productos Category -->
-                    <div class="category-section">
-                        <div class="category-header productos-category">
-                            <div class="category-icon">
-                                <i class="fas fa-apple-alt"></i>
+                    <div class="row">
+                        <!-- Productos Category -->
+                        <div class="col-12">
+                            <div class="category-section">
+                            <div class="category-header productos-category">
+                                <div class="category-icon">
+                                    <i class="fas fa-apple-alt"></i>
+                                </div>
+                                <h3>Gestión de Productos</h3>
                             </div>
-                            <h3>Gestión de Productos</h3>
-                        </div>
 
-                        <div class="app-grid">
-                            <a href="{% url 'productos:frutas_view' %}" class="app-card">
-                                <div class="app-icon productos-bg">
-                                    <i class="fas fa-lemon"></i>
-                                </div>
-                                <div class="app-info">
-                                    <h4>Frutas</h4>
-                                    <p>Administre el catálogo de frutas</p>
-                                </div>
-                                <div class="app-action">
-                                    <i class="fas fa-chevron-right"></i>
-                                </div>
-                            </a>
+                            <div class="app-grid">
+                                <a href="{% url 'productos:frutas_view' %}" class="app-card">
+                                    <div class="app-icon productos-bg">
+                                        <i class="fas fa-lemon"></i>
+                                    </div>
+                                    <div class="app-info">
+                                        <h4>Frutas</h4>
+                                        <p>Administre el catálogo de frutas</p>
+                                    </div>
+                                    <div class="app-action">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+                                </a>
 
                             <a href="{% url 'productos:presentaciones_view' %}" class="app-card">
                                 <div class="app-icon productos-bg">
@@ -547,27 +545,28 @@
                     </div>
 
                     <!-- Importación Category -->
-                    <div class="category-section">
-                        <div class="category-header importacion-category">
-                            <div class="category-icon">
-                                <i class="fas fa-ship"></i>
+                    <div class="col-12">
+                        <div class="category-section">
+                            <div class="category-header importacion-category">
+                                <div class="category-icon">
+                                    <i class="fas fa-ship"></i>
+                                </div>
+                                <h3>Gestión de Importaciones</h3>
                             </div>
-                            <h3>Gestión de Importaciones</h3>
-                        </div>
 
-                        <div class="app-grid">
-                            <a href="{% url 'importacion:aduana_pdf' %}" class="app-card">
-                                <div class="app-icon importacion-bg">
-                                    <i class="fas fa-passport"></i>
-                                </div>
-                                <div class="app-info">
-                                    <h4>Aduana PDF</h4>
-                                    <p>Procese documentos de aduana</p>
-                                </div>
-                                <div class="app-action">
-                                    <i class="fas fa-chevron-right"></i>
-                                </div>
-                            </a>
+                            <div class="app-grid">
+                                <a href="{% url 'importacion:aduana_pdf' %}" class="app-card">
+                                    <div class="app-icon importacion-bg">
+                                        <i class="fas fa-passport"></i>
+                                    </div>
+                                    <div class="app-info">
+                                        <h4>Aduana PDF</h4>
+                                        <p>Procese documentos de aduana</p>
+                                    </div>
+                                    <div class="app-action">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+                                </a>
 
                             <a href="{% url 'importacion:carga_pdf' %}" class="app-card">
                                 <div class="app-icon importacion-bg">
@@ -611,27 +610,28 @@
                     </div>
 
                     <!-- Comercial Category -->
-                    <div class="category-section">
-                        <div class="category-header comercial-category">
-                            <div class="category-icon">
-                                <i class="fas fa-store"></i>
+                    <div class="col-12">
+                        <div class="category-section">
+                            <div class="category-header comercial-category">
+                                <div class="category-icon">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                <h3>Gestión Comercial</h3>
                             </div>
-                            <h3>Gestión Comercial</h3>
-                        </div>
 
-                        <div class="app-grid">
-                            <a href="{% url 'comercial:clientes' %}" class="app-card">
-                                <div class="app-icon comercial-bg">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div class="app-info">
-                                    <h4>Clientes</h4>
-                                    <p>Administre la base de clientes</p>
-                                </div>
-                                <div class="app-action">
-                                    <i class="fas fa-chevron-right"></i>
-                                </div>
-                            </a>
+                            <div class="app-grid">
+                                <a href="{% url 'comercial:clientes' %}" class="app-card">
+                                    <div class="app-icon comercial-bg">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="app-info">
+                                        <h4>Clientes</h4>
+                                        <p>Administre la base de clientes</p>
+                                    </div>
+                                    <div class="app-action">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+                                </a>
 
                             <a href="{% url 'comercial:lista_ventas' %}" class="app-card">
                                 <div class="app-icon comercial-bg">
@@ -675,27 +675,28 @@
                     </div>
 
                     <!-- Administración Category -->
-                    <div class="category-section">
-                        <div class="category-header admin-category">
-                            <div class="category-icon">
-                                <i class="fas fa-cogs"></i>
+                    <div class="col-12">
+                        <div class="category-section">
+                            <div class="category-header admin-category">
+                                <div class="category-icon">
+                                    <i class="fas fa-cogs"></i>
+                                </div>
+                                <h3>Administración del Sistema</h3>
                             </div>
-                            <h3>Administración del Sistema</h3>
-                        </div>
 
-                        <div class="app-grid">
-                            <a href="/admin/" class="app-card">
-                                <div class="app-icon admin-bg">
-                                    <i class="fas fa-tools"></i>
-                                </div>
-                                <div class="app-info">
-                                    <h4>Panel de Admin</h4>
-                                    <p>Acceda al panel de administración del sistema</p>
-                                </div>
-                                <div class="app-action">
-                                    <i class="fas fa-chevron-right"></i>
-                                </div>
-                            </a>
+                            <div class="app-grid">
+                                <a href="/admin/" class="app-card">
+                                    <div class="app-icon admin-bg">
+                                        <i class="fas fa-tools"></i>
+                                    </div>
+                                    <div class="app-info">
+                                        <h4>Panel de Admin</h4>
+                                        <p>Acceda al panel de administración del sistema</p>
+                                    </div>
+                                    <div class="app-action">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+                                </a>
 
                             <a href="{% url 'autenticacion:logout' %}" class="app-card">
                                 <div class="app-icon admin-bg">
@@ -710,6 +711,7 @@
                                 </div>
                             </a>
                         </div>
+                    </div>
                     </div>
                 </div>
 
