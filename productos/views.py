@@ -750,4 +750,4 @@ def enviar_cotizacion(request):
     except Exception as e:
         messages.warning(request, f'Cotización #{cotizacion.numero} guardada pero hubo un error al preparar el envío: {str(e)}')
 
-    return redirect('lista_cotizaciones')
+    return redirect('productos:lista_cotizaciones')
