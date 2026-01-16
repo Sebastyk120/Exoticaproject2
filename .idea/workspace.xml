@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="Migrate table TranferenciaCliente, unique=referencia.">
+    <list default="true" id="94695d57-5c9b-4b4b-b1ff-48e0374e4f0e" name="Changes" comment="chore(dependencies): update package versions in requirements.txt and fix view redirect 2">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/productos/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/productos/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,6 +42,10 @@
     &quot;accountId&quot;: &quot;ba77ec36-c992-4f7f-828f-e052b1ee1556&quot;
   }
 }</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -62,6 +64,7 @@
     "Django Server.Exoticaproject.executor": "Run",
     "Python.settings.executor": "Run",
     "Python.views_transferencias.executor": "Run",
+    "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
@@ -69,6 +72,7 @@
     "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ai.playground.ignore.import.keys.banner.in.settings": "true",
     "django.template.preview.state": "SHOW_EDITOR_AND_PREVIEW",
     "git-widget-placeholder": "master",
     "ignore.virus.scanning.warn.message": "true",
@@ -128,8 +132,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-c7e53b3be11b-JavaScript-PY-253.28294.336" />
-        <option value="bundled-python-sdk-0978a7220b69-9867c7d4c0a4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.28294.336" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PY-253.29346.142" />
+        <option value="bundled-python-sdk-f2b7a9f6281b-6e1f45a539f7-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.29346.142" />
       </set>
     </attachedChunks>
   </component>
@@ -316,23 +320,9 @@
       <workItem from="1764612337250" duration="157000" />
       <workItem from="1764626498788" duration="726000" />
       <workItem from="1765228573026" duration="62000" />
-      <workItem from="1766005524762" duration="956000" />
-    </task>
-    <task id="LOCAL-00057" summary="Calculo de dash utilidades.">
-      <option name="closed" value="true" />
-      <created>1744840642018</created>
-      <option name="number" value="00057" />
-      <option name="presentableId" value="LOCAL-00057" />
-      <option name="project" value="LOCAL" />
-      <updated>1744840642018</updated>
-    </task>
-    <task id="LOCAL-00058" summary="Calculo de dash utilidades 2, para semanas 1">
-      <option name="closed" value="true" />
-      <created>1744841828171</created>
-      <option name="number" value="00058" />
-      <option name="presentableId" value="LOCAL-00058" />
-      <option name="project" value="LOCAL" />
-      <updated>1744841828171</updated>
+      <workItem from="1766005524762" duration="1473000" />
+      <workItem from="1766261658605" duration="152000" />
+      <workItem from="1766261867326" duration="279000" />
     </task>
     <task id="LOCAL-00059" summary="Utlimo cambio del dashboard.">
       <option name="closed" value="true" />
@@ -710,7 +700,23 @@
       <option name="project" value="LOCAL" />
       <updated>1763148860629</updated>
     </task>
-    <option name="localTasksCounter" value="106" />
+    <task id="LOCAL-00106" summary="chore(dependencies): update package versions in requirements.txt and fix view redirect">
+      <option name="closed" value="true" />
+      <created>1766006543561</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1766006543561</updated>
+    </task>
+    <task id="LOCAL-00107" summary="chore(dependencies): update package versions in requirements.txt and fix view redirect 2">
+      <option name="closed" value="true" />
+      <created>1766006639669</created>
+      <option name="number" value="00107" />
+      <option name="presentableId" value="LOCAL-00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1766006639669</updated>
+    </task>
+    <option name="localTasksCounter" value="108" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -728,8 +734,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Mejoras de SEO (Eliminacion de precios Console Google)" />
-    <MESSAGE value="Favicon." />
     <MESSAGE value="Cambios en direccion de alabaran, pagina y tecnologia. Cambio en modelo Fruta." />
     <MESSAGE value="Correcion Whitnoise." />
     <MESSAGE value="Correccion Formulario." />
@@ -753,7 +757,9 @@
     <MESSAGE value="Error de guardado de Barras contrarias en guardado en disco." />
     <MESSAGE value="Pruebas reportlab para factura." />
     <MESSAGE value="Migrate table TranferenciaCliente, unique=referencia." />
-    <option name="LAST_COMMIT_MESSAGE" value="Migrate table TranferenciaCliente, unique=referencia." />
+    <MESSAGE value="chore(dependencies): update package versions in requirements.txt and fix view redirect" />
+    <MESSAGE value="chore(dependencies): update package versions in requirements.txt and fix view redirect 2" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore(dependencies): update package versions in requirements.txt and fix view redirect 2" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>

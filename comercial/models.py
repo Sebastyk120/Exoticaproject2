@@ -84,18 +84,19 @@ class Venta(models.Model):
     def generar_numero_nc(self):
         """
         Genera el número consecutivo para nota de crédito/abono
-        Formato: YY/NNN (ej: 25/101)
-        Busca el consecutivo más alto del año actual para evitar duplicados
+        Formato: YY/NNN (ej: 26/103)
+        Busca el consecutivo más alto de TODOS los años y usa el año actual como prefijo.
+        Ejemplo: si el último fue 25/102, el siguiente será 26/103
         """
         if not self.numero_nc:
             current_year = datetime.datetime.now().year % 100
             
-            # Obtener todas las ventas del año actual que tengan numero_nc
-            ventas_con_nc = Venta.objects.filter(
-                numero_nc__startswith=f'{current_year}/'
-            ).exclude(numero_nc__isnull=True).exclude(numero_nc='')
+            # Obtener TODAS las ventas que tengan numero_nc (de cualquier año)
+            ventas_con_nc = Venta.objects.exclude(
+                numero_nc__isnull=True
+            ).exclude(numero_nc='')
             
-            # Encontrar el consecutivo más alto
+            # Encontrar el consecutivo más alto de todos los registros
             max_consecutive = 100  # Valor por defecto (el siguiente será 101)
             for venta in ventas_con_nc:
                 try:
@@ -105,7 +106,7 @@ class Venta(models.Model):
                 except (ValueError, IndexError):
                     continue
             
-            # El nuevo consecutivo es el máximo + 1
+            # El nuevo consecutivo es el máximo + 1, con el año actual como prefijo
             new_consecutive = max_consecutive + 1
             self.numero_nc = f'{current_year}/{new_consecutive}'
             
@@ -123,14 +124,28 @@ class Venta(models.Model):
             self.fecha_vencimiento = self.fecha_entrega + datetime.timedelta(days=self.cliente.dias_pago)
 
         # Generar número de factura solo para nuevas ventas
+        # Busca el consecutivo más alto de TODOS los años y usa el año actual como prefijo
+        # Ejemplo: si el último fue 25/1227, el siguiente será 26/1228
         if not self.numero_factura and not self.pk:
             current_year = datetime.datetime.now().year % 100
-            last_venta = Venta.objects.filter(numero_factura__startswith=f'{current_year}/').order_by('id').last()
-            if last_venta:
-                last_consecutive = int(last_venta.numero_factura.split('/')[-1])
-                new_consecutive = last_consecutive + 1
-            else:
-                new_consecutive = 1088
+            
+            # Obtener TODAS las ventas que tengan numero_factura (de cualquier año)
+            ventas_con_factura = Venta.objects.exclude(
+                numero_factura__isnull=True
+            ).exclude(numero_factura='')
+            
+            # Encontrar el consecutivo más alto de todos los registros
+            max_consecutive = 1087  # Valor por defecto (el siguiente será 1088)
+            for venta in ventas_con_factura:
+                try:
+                    consecutive = int(venta.numero_factura.split('/')[-1])
+                    if consecutive > max_consecutive:
+                        max_consecutive = consecutive
+                except (ValueError, IndexError):
+                    continue
+            
+            # El nuevo consecutivo es el máximo + 1, con el año actual como prefijo
+            new_consecutive = max_consecutive + 1
             self.numero_factura = f'{current_year}/{new_consecutive}'
         
         # Guardar el objeto para obtener un ID
